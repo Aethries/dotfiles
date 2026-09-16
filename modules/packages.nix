@@ -112,6 +112,7 @@ in
     trash-cli
     cloudflared
     lsof # Required by 9router MITM proxy (also symlinked to /usr/bin/lsof by init-9router.sh)
+    nssTools # Provides certutil for 9router browser trust store registration
 
     # ----------------------------------------------------------
     # Node.js, Package Managers & Version Management (NVM)

@@ -253,6 +253,11 @@ function doctor() {
   fi
 }
 
+# 9router MITM Root CA SSL Trust for Node.js / CLI tools
+if [ -f "$HOME/.9router/mitm/rootCA.crt" ]; then
+  export NODE_EXTRA_CA_CERTS="$HOME/.9router/mitm/rootCA.crt"
+fi
+
 function init-9router() {
   if [ -f "${DOTFILES_DIR:-}/scripts/init-9router.sh" ]; then
     "${DOTFILES_DIR}/scripts/init-9router.sh" "$@"
@@ -280,10 +285,14 @@ function 9router() {
       journalctl --user -u 9router -f
       ;;
     update)
-      echo "==> Updating 9router to latest version via npm..."
-      npm i -g 9router@latest
-      systemctl --user restart 9router
-      echo "✓ 9router updated to latest and service restarted"
+      echo "==> Updating 9router via init-9router script..."
+      if [ -f "${DOTFILES_DIR:-}/scripts/init-9router.sh" ]; then
+        "${DOTFILES_DIR}/scripts/init-9router.sh"
+      else
+        npm i -g 9router@latest
+        systemctl --user restart 9router
+        echo "✓ 9router updated to latest and service restarted"
+      fi
       ;;
     "")
       if systemctl --user is-active --quiet 9router.service; then
