@@ -145,3 +145,9 @@ once and encrypt it again to migrate; the scripts retain read-only compatibility
 
 `vault clean` deletes local credentials and sessions. Create and verify a backup
 before using it.
+
+Run `vault` and `init-9router` as the desktop user, without prefixing the whole
+command with `sudo`. Both scripts request `sudo` only for the ownership or
+system files they need to change. During `vault restore`, applications that keep
+credential databases open are closed, and GNOME Keyring plus 9router are
+restarted after the restored files are in place.

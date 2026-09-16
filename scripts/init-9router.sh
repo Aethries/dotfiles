@@ -32,6 +32,30 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CERTS_DIR="$REPO_ROOT/resources/certs"
 SECRETS_DIR="$REPO_ROOT/secrets"
 
+if [ "$EUID" -eq 0 ]; then
+    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+        warn "init-9router must own user files as '$SUDO_USER'; dropping root privileges."
+        exec sudo -u "$SUDO_USER" -H "$SCRIPT_DIR/init-9router.sh" "$@"
+    fi
+    error "Do not run init-9router as root. It will request sudo only for system changes."
+fi
+
+TARGET_USER="$(id -un)"
+TARGET_GROUP="$(id -gn)"
+
+ensure_user_owned() {
+    local path="$1"
+
+    [ -e "$path" ] || return 0
+    if [ ! -w "$path" ] || find "$path" -xdev ! -user "$TARGET_USER" -print -quit 2>/dev/null | grep -q .; then
+        warn "$path contains root-owned files; repairing ownership (sudo may prompt)..."
+        sudo chown -R "$TARGET_USER:$TARGET_GROUP" "$path"
+    fi
+}
+
+ensure_user_owned "$HOME/.local"
+ensure_user_owned "$HOME/.9router"
+
 echo -e "${BOLD}=========================================${NC}"
 echo -e "${BOLD}       9router Initializer for NixOS     ${NC}"
 echo -e "${BOLD}=========================================${NC}"
@@ -40,10 +64,8 @@ echo -e "${BOLD}=========================================${NC}"
 # 1. Ensure fnm & Node.js environment
 # ------------------------------------------------------------------------------
 info "Checking Node.js & npm environment..."
-FNM_NODE_BIN=""
 if command -v fnm >/dev/null 2>&1; then
     eval "$(fnm env --shell bash)"
-    FNM_NODE_BIN="$(dirname "$(command -v node 2>/dev/null || true)")"
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
@@ -52,9 +74,11 @@ fi
 
 # NixOS compatibility: Ensure npm global prefix points to user home ($HOME/.local) rather than read-only /nix/store
 NPM_PREFIX="$(npm config get prefix 2>/dev/null || echo '')"
-if [[ -z "$NPM_PREFIX" || "$NPM_PREFIX" == /nix/store/* ]]; then
+if [ "$NPM_PREFIX" != "$HOME/.local" ]; then
     npm config set prefix "$HOME/.local"
+    NPM_PREFIX="$HOME/.local"
 fi
+export PATH="$HOME/.local/bin:$PATH"
 
 success "Node.js ($(node -v 2>/dev/null || echo 'unknown')) & npm ($(npm -v 2>/dev/null || echo 'unknown')) are available."
 
@@ -218,11 +242,14 @@ fi
 # ------------------------------------------------------------------------------
 info "Updating 9router to latest version via npm..."
 npm i -g 9router@latest
-success "9router is updated: $(9router -v 2>/dev/null || echo 'installed')"
+ROUTER_BIN="$NPM_PREFIX/bin/9router"
+[ -x "$ROUTER_BIN" ] || error "npm completed, but $ROUTER_BIN was not created."
+success "9router is updated: $("$ROUTER_BIN" -v 2>/dev/null || echo 'installed')"
 
 # Upstream Bugfix: 9router v0.5.75 throws 'tool and action required' when clicking
 # 'Trust Cert' because 'tool' parameter is only sent for DNS toggles, not cert trust.
-ROUTER_ROUTE="$HOME/.local/lib/node_modules/9router/app/.next-cli-build/server/app/api/cli-tools/antigravity-mitm/route.js"
+NPM_ROOT="$(npm root -g)"
+ROUTER_ROUTE="$NPM_ROOT/9router/app/.next-cli-build/server/app/api/cli-tools/antigravity-mitm/route.js"
 if [ -f "$ROUTER_ROUTE" ]; then
     if grep -q 'if(!b||!c)' "$ROUTER_ROUTE"; then
         sed -i 's/if(!b||!c)/if((!b\&\&c!=="trust-cert")||!c)/g' "$ROUTER_ROUTE"
@@ -243,40 +270,17 @@ mkdir -p "$SYSTEMD_USER_DIR"
 SERVICE_SRC="$REPO_ROOT/resources/systemd/user/9router.service"
 SERVICE_DEST="$SYSTEMD_USER_DIR/9router.service"
 
-if [ -f "$SERVICE_SRC" ]; then
-    cp -f "$SERVICE_SRC" "$SERVICE_DEST"
-else
-    cat << 'EOF' > "$SERVICE_DEST"
-[Unit]
-Description=9router Local AI Gateway & Proxy Service
-After=default.target
+[ -f "$SERVICE_SRC" ] || error "Missing service template: $SERVICE_SRC"
 
-[Service]
-Type=simple
-Environment="PATH=%h/.local/bin:%h/.local/share/fnm/aliases/default/bin:%h/.nix-profile/bin:/etc/profiles/per-user/%u/bin:/run/wrappers/bin:/run/current-system/sw/bin"
-Environment="NODE_EXTRA_CA_CERTS=%h/.9router/mitm/rootCA.crt"
-Environment="NODE_PATH=%h/.local/lib/node_modules"
-ExecStartPre=/bin/sh -c 'test -x "${HOME}/.local/bin/9router" || (echo "9router binary not found. Run init-9router first." >&2; exit 1)'
-ExecStart=%h/.local/bin/9router --skip-update
-Restart=on-failure
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=default.target
-EOF
+# bootstrap.sh deliberately links user units to the repository. Keep that model
+# here instead of copying a file through a symlink back onto itself.
+if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then
+    if [ -e "$SERVICE_DEST" ] && [ ! -L "$SERVICE_DEST" ]; then
+        mv "$SERVICE_DEST" "$SERVICE_DEST.pre-init-9router.$(date +%Y%m%d%H%M%S)"
+    fi
+    ln -sfn "$SERVICE_SRC" "$SERVICE_DEST"
 fi
-
-# CRITICAL NIXOS FIX:
-# Ensure /run/wrappers/bin precedes /run/current-system/sw/bin so sudo uses the setuid wrapper!
-sed -i 's|/run/current-system/sw/bin:/run/wrappers/bin|/run/wrappers/bin:/run/current-system/sw/bin|g' "$SERVICE_DEST"
-
-# Patch service PATH with actual fnm node dir if detected
-if [ -n "$FNM_NODE_BIN" ] && [ "$FNM_NODE_BIN" != "." ]; then
-    sed -i "s|%h/.local/share/fnm/aliases/default/bin|${FNM_NODE_BIN}|g" "$SERVICE_DEST"
-    success "Patched 9router.service PATH with fnm node dir: $FNM_NODE_BIN"
-fi
+success "9router.service is linked to the repository template."
 
 # Reload and enable systemd user service
 systemctl --user daemon-reload
@@ -292,11 +296,13 @@ if command -v loginctl >/dev/null 2>&1; then
     fi
 fi
 
-# Stop any orphan manual process before restarting service
-RUNNING_PIDS=$(pgrep -f "9router/cli.js" 2>/dev/null || true)
-if [ -n "$RUNNING_PIDS" ]; then
-    info "Stopping running manual 9router process (PID: $RUNNING_PIDS)..."
-    kill "$RUNNING_PIDS" 2>/dev/null || sudo kill "$RUNNING_PIDS" 2>/dev/null || true
+# Stop the managed service first so Restart=on-failure cannot race the cleanup,
+# then terminate only leftover 9router processes owned by this user.
+systemctl --user stop 9router.service 2>/dev/null || true
+mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[9]router/cli.js' 2>/dev/null || true)
+if [ "${#RUNNING_PIDS[@]}" -gt 0 ]; then
+    info "Stopping running manual 9router process (PID: ${RUNNING_PIDS[*]})..."
+    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true
     sleep 1
 fi
 

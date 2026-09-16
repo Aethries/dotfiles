@@ -39,9 +39,24 @@ error() {
     exit 1
 }
 
-TARGET_USER="${SUDO_USER:-$USER}"
+if [ "$EUID" -eq 0 ]; then
+    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+        warn "vault manages user-session data; continuing as '$SUDO_USER' instead of root."
+        exec sudo -u "$SUDO_USER" -H env \
+            RCLONE_REMOTE="${RCLONE_REMOTE:-gdrive:dotfiles-backup}" \
+            "$SCRIPT_DIR/vault.sh" "$@"
+    fi
+    error "Do not run vault as root. Run it from the desktop user account."
+fi
+
+TARGET_USER="$(id -un)"
+TARGET_GROUP="$(id -gn)"
 USER_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
 RCLONE_REMOTE="${RCLONE_REMOTE:-gdrive:dotfiles-backup}"
+
+if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
+    error "Could not determine the home directory for '$TARGET_USER'."
+fi
 
 rclone_exec() {
     if command -v rclone >/dev/null 2>&1; then
@@ -134,7 +149,60 @@ EXCLUDE_PATTERNS=(
     "*/.9router/logs/*"
     "*/.9router/runtime/*"
     "*/.9router/model-catalog-raw.json"
+    "*/.9router/**/*.pid"
 )
+
+ensure_user_owned() {
+    local path="$1"
+
+    [ -e "$path" ] || return 0
+    if [ ! -w "$path" ] || find "$path" -xdev ! -user "$TARGET_USER" -print -quit 2>/dev/null | grep -q .; then
+        warn "$path contains files not owned by $TARGET_USER; repairing ownership (sudo may prompt)..."
+        sudo chown -R "$TARGET_USER:$TARGET_GROUP" "$path"
+    fi
+}
+
+prepare_restore_permissions() {
+    local path
+
+    # These are user-owned trees. Repair them before dropping restored files into
+    # place, including parent directories that are not themselves vault entries.
+    for path in "$USER_HOME/.config" "$USER_HOME/.local"; do
+        ensure_user_owned "$path"
+    done
+
+    for path in "${CANDIDATE_PATHS[@]}"; do
+        ensure_user_owned "$USER_HOME/$path"
+    done
+}
+
+RESTORE_TMP=""
+RESTORE_RESTART_KEYRING=false
+RESTORE_RESTART_9ROUTER=false
+
+finish_restore_runtime() {
+    local status="$1"
+
+    if [ -n "$RESTORE_TMP" ] && [ -d "$RESTORE_TMP" ]; then
+        rm -rf "$RESTORE_TMP"
+    fi
+
+    if [ "$RESTORE_RESTART_KEYRING" = true ] && command -v gnome-keyring-daemon >/dev/null 2>&1; then
+        info "Restarting GNOME Keyring with the restored database..."
+        if ! gnome-keyring-daemon --replace --daemonize --components=pkcs11,secrets,ssh >/dev/null; then
+            warn "GNOME Keyring could not be restarted automatically. Log out and back in once."
+        fi
+    fi
+
+    if [ "$RESTORE_RESTART_9ROUTER" = true ] && command -v systemctl >/dev/null 2>&1; then
+        info "Restarting 9router service..."
+        if ! systemctl --user start 9router.service; then
+            warn "9router could not be restarted. Run 'init-9router' after this restore."
+        fi
+    fi
+
+    return "$status"
+}
 
 cmd_backup() {
     local out_file="${1:-$REPO_ROOT/secrets.vault}"
@@ -185,7 +253,6 @@ cmd_backup() {
     # Clean in-place overwrite
     mv -f "$tmp_out" "$out_file"
     chmod 600 "$out_file"
-    [ -n "${SUDO_USER:-}" ] && chown "$SUDO_USER:" "$out_file" 2>/dev/null || true
 
     local size
     size="$(du -h "$out_file" | cut -f1)"
@@ -231,34 +298,61 @@ cmd_restore() {
     echo "Target home: $USER_HOME"
     echo
 
+    prepare_restore_permissions
+
+    # Preserve whether user-session services need to come back after the copy.
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet 9router.service; then
+        RESTORE_RESTART_9ROUTER=true
+        systemctl --user stop 9router.service
+    elif pgrep -u "$UID" -f '[9]router/cli.js' >/dev/null 2>&1; then
+        RESTORE_RESTART_9ROUTER=true
+    fi
+
+    if pgrep -u "$UID" -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
+        RESTORE_RESTART_KEYRING=true
+    fi
+
+    trap 'finish_restore_runtime $?' EXIT
+
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity-ide" "9router/cli.js")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
-        if pgrep -f "$proc" >/dev/null 2>&1; then
+        if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
             info "Terminating running process before restore: $proc..."
-            pkill -TERM -f "$proc" 2>/dev/null || true
+            pkill -TERM -u "$UID" -f "$proc" 2>/dev/null || true
             closed_any=true
         fi
     done
+
+    if pgrep -u "$UID" -x codex >/dev/null 2>&1; then
+        info "Terminating running Codex process before restoring ~/.codex..."
+        pkill -TERM -u "$UID" -x codex 2>/dev/null || true
+        closed_any=true
+    fi
     if [ "$closed_any" = true ]; then
         sleep 2
-        pkill -9 -f "chrome" 2>/dev/null || true
+        pkill -9 -u "$UID" -f "chrome" 2>/dev/null || true
     fi
 
-    local tmp_extract
-    tmp_extract="$(mktemp -d)"
+    if [ "$RESTORE_RESTART_KEYRING" = true ]; then
+        info "Stopping GNOME Keyring before replacing its database..."
+        pkill -TERM -u "$UID" -f '[g]nome-keyring-daemon' 2>/dev/null || true
+        sleep 1
+    fi
+
+    RESTORE_TMP="$(mktemp -d)"
 
     if ! decrypt_vault "$in_file" \
         | zstd -d \
-        | tar -C "$tmp_extract" -xf -; then
-        rm -rf "$tmp_extract"
+        | tar --no-same-owner --no-same-permissions -C "$RESTORE_TMP" -xf -; then
         echo
         error "Failed to decrypt or extract vault! Please check your Master Password or vault integrity."
     fi
 
-    cp -a "$tmp_extract"/. "$USER_HOME"/
-    rm -rf "$tmp_extract"
+    cp -a --no-preserve=ownership "$RESTORE_TMP"/. "$USER_HOME"/
+    rm -rf "$RESTORE_TMP"
+    RESTORE_TMP=""
 
     info "Securing restored permissions and cleaning lockfiles..."
 
@@ -286,20 +380,13 @@ cmd_restore() {
     rm -f "$USER_HOME/.gemini/antigravity-cli/knowledge/knowledge.lock" 2>/dev/null || true
     rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true
 
-    # Fix ownership if run with sudo
-    if [ -n "${SUDO_USER:-}" ]; then
-        for rel_path in "${CANDIDATE_PATHS[@]}"; do
-            if [ -e "$USER_HOME/$rel_path" ]; then
-                chown -R "$SUDO_USER:" "$USER_HOME/$rel_path" 2>/dev/null || true
-            fi
-        done
-        chown -R "$SUDO_USER:" "$USER_HOME/.local/share/TelegramDesktop" 2>/dev/null || true
-    fi
-
     echo
     success "Secret Vault restored successfully!"
     echo "  All Chrome profiles, Keyrings, Telegram, Slack, Antigravity CLI/IDE, and SSH keys are ready."
-    echo "  Log in to your desktop and launch your apps — all sessions remain authenticated."
+    echo "  Session services are being restarted; launch your apps again when this command finishes."
+
+    finish_restore_runtime 0
+    trap - EXIT
 }
 
 cmd_clean() {
