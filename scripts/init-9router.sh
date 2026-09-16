@@ -171,6 +171,27 @@ else
     success "/etc/hosts is mutable."
 fi
 
+# Ensure required 9router MITM DNS endpoints exist in /etc/hosts
+REQUIRED_HOSTS=(
+    "127.0.0.1 daily-cloudcode-pa.googleapis.com"
+    "127.0.0.1 cloudcode-pa.googleapis.com"
+)
+
+info "Checking 9router MITM DNS entries in /etc/hosts..."
+for entry in "${REQUIRED_HOSTS[@]}"; do
+    domain=$(echo "$entry" | awk '{print $2}')
+    if awk -v target="$domain" '$1 !~ /^#/ { for (i=2; i<=NF; i++) if ($i == target) { found=1; exit 0 } } END { if (!found) exit 1 }' /etc/hosts 2>/dev/null; then
+        success "DNS entry already present in /etc/hosts: $domain"
+    else
+        echo "Adding '$entry' to /etc/hosts (may prompt for sudo)..."
+        if [ -s /etc/hosts ] && [ -n "$(tail -c 1 /etc/hosts 2>/dev/null)" ]; then
+            echo "" | sudo tee -a /etc/hosts >/dev/null
+        fi
+        echo "$entry" | sudo tee -a /etc/hosts >/dev/null
+        success "Added DNS entry to /etc/hosts: $entry"
+    fi
+done
+
 # 9router searches for lsof in /usr/bin/lsof or via PATH
 if ! command -v lsof >/dev/null 2>&1; then
     warn "lsof is missing! Installing lsof via nix profile..."

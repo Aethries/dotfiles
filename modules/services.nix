@@ -67,10 +67,10 @@
   # Add 9router-managed hostnames here so they survive nixos-rebuild.
   # DO NOT manually edit /etc/hosts — it is a read-only Nix store symlink
   # that gets reset on every rebuild. Use networking.extraHosts instead.
-  # Example: networking.extraHosts = "127.0.0.1 api.openai.com";
-  # The actual entries are managed by 9router at runtime via its config.
+  # The actual entries are also synced at runtime via init-9router.sh.
   # ----------------------------------------------------------
-  # networking.extraHosts = ''
-  #   # 9router intercepted endpoints (add entries here if needed)
-  # '';
+  networking.extraHosts = ''
+    127.0.0.1 daily-cloudcode-pa.googleapis.com
+    127.0.0.1 cloudcode-pa.googleapis.com
+  '';
 }
