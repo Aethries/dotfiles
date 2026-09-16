@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "generated_at": "2026-09-13T00:00:00Z",
+  "description": "Pinned Antigravity user extensions and verification checksums",
+  "extensions": [
+    {
+      "id": "asvetliakov.vscode-neovim",
+      "version": "1.19.0",
+      "publisher": "asvetliakov",
+      "name": "vscode-neovim",
+      "description": "Vim emulation for Visual Studio Code powered by Neovim",
+      "sha256": "3d3b8ea9bbe137696eb5284c9fbeaec6e9defe0779b137392927c0db12e1987f",
+      "download_url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/asvetliakov/vsextensions/vscode-neovim/1.19.0/vspackage",
+      "required": true
+    },
+    {
+      "id": "geequlim.godot-tools",
+      "version": "2.7.1",
+      "publisher": "geequlim",
+      "name": "godot-tools",
+      "description": "Godot 4 and GDScript language, LSP, scene and debugger integration",
+      "sha256": "4cd08c4a665d057c401e47052e94c3902cda5cd3b8caf9027d0f17adbf60aaea",
+      "download_url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/geequlim/vsextensions/godot-tools/2.7.1/vspackage",
+      "required": true
+    }
+  ],
+  "banned_extensions": [
+    "vscodevim.vim",
+    "amiralizadeh9480.cpp-helper"
+  ]
+}

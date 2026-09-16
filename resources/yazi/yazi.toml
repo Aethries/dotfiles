@@ -1,0 +1,16 @@
+# ==============================================================================
+# Yazi Configuration (yazi.toml)
+# ==============================================================================
+
+[manager]
+ratio          = [ 1, 3, 4 ]
+sort_by        = "natural"
+sort_sensitive = false
+sort_reverse   = false
+sort_dir_first = true
+show_hidden    = false
+
+[opener]
+edit = [
+	{ run = 'nvim "$@"', block = true, desc = "Edit with Neovim" },
+]

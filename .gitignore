@@ -1,0 +1,36 @@
+# Machine-specific generated hardware and configuration
+.machine/
+
+# Editor temporary, backup, and swap files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.orig
+
+# OS generated artifacts
+.DS_Store
+Thumbs.db
+
+# Sensitive credentials & environment files (prevent accidental plaintext commit)
+.env
+.env.*
+!.envrc
+*.pem
+*.key
+id_rsa
+id_ed25519
+id_ecdsa
+*.vault
+*.vault.*
+secrets.enc
+
+# Plaintext secrets directory (only .gitkeep is tracked)
+secrets/*
+!secrets/.gitkeep
+
+# Build or test temporary scratch folders
+scratch/
+result
+result-*

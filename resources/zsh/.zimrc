@@ -1,0 +1,29 @@
+# ==============================================================================
+# Zim Configuration File (.zimrc)
+# High performance, modular Zsh configuration framework
+# ==============================================================================
+
+# Core environment & input
+zmodule environment
+zmodule input
+zmodule termtitle
+zmodule utility
+
+# Advanced Vi/Vim mode
+zmodule jeffreytse/zsh-vi-mode
+
+# Advanced completions (with cache)
+zmodule zsh-users/zsh-completions --fpath src
+zmodule completion
+
+# Official Oh-My-Zsh Git plugin with 150+ standard dynamic aliases and functions
+zmodule ohmyzsh/ohmyzsh --root plugins/git
+
+# Official Oh-My-Zsh Docker and Docker-Compose plugins (completions & 80+ professional aliases)
+zmodule ohmyzsh/ohmyzsh --root plugins/docker
+zmodule ohmyzsh/ohmyzsh --root plugins/docker-compose
+
+# Syntax highlighting & autosuggestions (loaded after completion)
+zmodule zsh-users/zsh-syntax-highlighting
+zmodule zsh-users/zsh-history-substring-search
+zmodule zsh-users/zsh-autosuggestions

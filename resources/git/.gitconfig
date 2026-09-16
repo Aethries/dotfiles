@@ -1,0 +1,68 @@
+# ============================================================
+# Git Configuration (.gitconfig)
+# Managed by dotfiles: resources/git/.gitconfig
+# ============================================================
+
+[user]
+	name = locbh
+	email = locbh3010@gmail.com
+
+[core]
+	editor = nvim
+	pager = delta
+	autocrlf = input
+	whitespace = trailing-space,space-before-tab
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	light = false
+	line-numbers = true
+	side-by-side = false
+	syntax-theme = "Dracula"
+	plus-style = "syntax #003800"
+	minus-style = "syntax #3f0001"
+
+[merge]
+	conflictstyle = zdiff3
+
+[diff]
+	colorMoved = default
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[fetch]
+	prune = true
+
+[alias]
+	st = status -sb
+	co = checkout
+	br = branch
+	ci = commit
+	cm = commit -m
+	ca = commit --amend
+	cp = cherry-pick
+	df = diff
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+# Tự động định tuyến SSH cho tổ chức 1bitlab sử dụng ssh key công ty
+[url "git@github-1bitlab:1bitlab/"]
+	insteadOf = git@github.com:1bitlab/
+	insteadOf = https://github.com/1bitlab/
+
+# Cấu hình danh tính riêng khi làm việc trong thư mục dự án công ty
+[includeIf "gitdir:~/Workspaces/line/"]
+	path = ~/.gitconfig-1bitlab
+
+[includeIf "gitdir:~/Workspaces/1bitlab/"]
+	path = ~/.gitconfig-1bitlab
+

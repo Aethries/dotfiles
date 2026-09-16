@@ -1,0 +1,34 @@
+# ==============================================================================
+# Yazi Custom Keybindings (keymap.toml)
+# Supercharged recursive search across all subdirectories
+# ==============================================================================
+
+[mgr]
+prepend_keymap = [
+	# --------------------------------------------------------------------------
+	# Recursive Search via fd (Duyệt toàn bộ cây thư mục con đệ quy - phím '/')
+	# --------------------------------------------------------------------------
+	{ on = [ "/" ],     run = "search --via=fd",     desc = "Search files recursively using fd" },
+	{ on = [ "s" ],     run = "search --via=fd",     desc = "Search files recursively using fd" },
+	{ on = [ "F" ],     run = "search --via=fd",     desc = "Search files recursively using fd" },
+
+	# --------------------------------------------------------------------------
+	# Interactive Fuzzy Finder via fzf (Nhảy trực tiếp tới file bất kỳ)
+	# --------------------------------------------------------------------------
+	{ on = [ "<C-f>" ], run = "plugin fzf",          desc = "Search files recursively using fzf" },
+
+	# --------------------------------------------------------------------------
+	# Recursive Content Search via ripgrep (Tìm text bên trong toàn bộ file con)
+	# --------------------------------------------------------------------------
+	{ on = [ "S" ],     run = "search --via=rg",     desc = "Search file content recursively using ripgrep" },
+
+	# --------------------------------------------------------------------------
+	# Search Cancel
+	# --------------------------------------------------------------------------
+	{ on = [ "<C-s>" ], run = "escape --search",     desc = "Cancel active search" },
+
+	# --------------------------------------------------------------------------
+	# Shallow Filter (Chỉ lọc các file trực tiếp trong thư mục hiện tại)
+	# --------------------------------------------------------------------------
+	{ on = [ "f" ],     run = "filter --smart",      desc = "Filter items in current directory" },
+]

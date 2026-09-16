@@ -1,0 +1,87 @@
+themes {
+  noctalia {
+    fg "#f2f2f3"
+    bg "#091134"
+    black "#0c1745"
+    red "#fd4663"
+    green "#677ee4"
+    yellow "#8f61f1"
+    blue "#c552e0"
+    magenta "#93a3ec"
+    cyan "#b093ec"
+    white "#f2f2f3"
+    orange "#fd8446"
+
+    text_unselected {
+      base "#f2f2f3"
+      background "#091134"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    text_selected {
+      base "#ffffff"
+      background "#4d3f74"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    list_unselected {
+      base "#f2f2f3"
+      background "#091134"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    list_selected {
+      base "#ffffff"
+      background "#4d3f74"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    table_cell_unselected {
+      base "#f2f2f3"
+      background "#091134"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    table_cell_selected {
+      base "#ffffff"
+      background "#4d3f74"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    ribbon_unselected {
+      base "#f2f2f3"
+      background "#0c1745"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+
+    ribbon_selected {
+      base "#ffffff"
+      background "#677ee4"
+      emphasis_0 "#fd8446"
+      emphasis_1 "#b093ec"
+      emphasis_2 "#677ee4"
+      emphasis_3 "#fd4663"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Jira
+Comment=Atlassian Jira Project Management
+Exec=bash -c 'if command -v jira-app >/dev/null 2>&1; then exec jira-app "$@"; elif [ -x "$HOME/.local/bin/jira-app" ]; then exec "$HOME/.local/bin/jira-app" "$@"; else exec google-chrome --user-data-dir="$HOME/.config/jira-app" --class="jira-app" --app="${1:-https://id.atlassian.com}" --password-store=gnome-libsecret "$@"; fi' -- %U
+Icon=jira
+Terminal=false
+Categories=Office;Development;ProjectManagement;
+StartupWMClass=jira-app
+MimeType=x-scheme-handler/jira;

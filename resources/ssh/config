@@ -1,0 +1,24 @@
+# ==============================================================================
+# SSH Client Configuration
+# Managed by dotfiles: resources/ssh/config -> ~/.ssh/config
+# ==============================================================================
+
+# Personal GitHub (Default) - locbh3010@gmail.com
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+
+# 1bitlab Company GitHub - locbh@dev.1bitlab.io
+Host github-1bitlab
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_1bitlab
+    IdentitiesOnly yes
+
+# 1bitlab Internal Servers & Domain
+Host *.1bitlab.io 1bitlab.io
+    User git
+    IdentityFile ~/.ssh/id_ed25519_1bitlab
+    IdentitiesOnly yes

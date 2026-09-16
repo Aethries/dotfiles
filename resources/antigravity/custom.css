@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Antigravity IDE - Custom CSS & Keyframe Animations
+   Live hot-reloaded: lưu file này và bấm Ctrl+Shift+P -> "Reload Window"
+   ========================================================================== */
+
+/* 1. Mượt mà chuyển động cho các panel và sidebar */
+.monaco-workbench .part.sidebar,
+.monaco-workbench .part.panel,
+.monaco-workbench .part.activitybar {
+	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 2. Bo góc và đổ bóng nhẹ cho các Tab biên tập */
+.monaco-workbench
+	.part.editor
+	> .content
+	.editor-group-container
+	> .title
+	.tabs-container
+	> .tab {
+	border-radius: 8px 8px 0 0 !important;
+	margin-right: 4px !important;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease !important;
+}
+
+.monaco-workbench
+	.part.editor
+	> .content
+	.editor-group-container
+	> .title
+	.tabs-container
+	> .tab.active {
+	font-weight: 600 !important;
+}
+
+/* 3. Hiệu ứng Command Palette / Quick Input nổi bật dạng floating card */
+.quick-input-widget {
+	border-radius: 12px !important;
+	box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4) !important;
+	border: 1px solid rgba(230, 180, 80, 0.25) !important;
+	overflow: hidden !important;
+	animation: quickInputFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes quickInputFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* 4. Dòng đang trỏ chuột (Active line) mượt mà */
+.monaco-editor .current-line {
+	border-radius: 4px !important;
+	transition: background-color 0.15s ease !important;
+}
+
+/* 5. Tinh chỉnh Status Bar gọn gàng */
+.monaco-workbench .part.statusbar {
+	font-family: "JetBrainsMono Nerd Font", monospace !important;
+	font-size: 11px !important;
+}
+
+/* 6. Tinh chỉnh đường cuộn Scrollbar mỏng và thanh thoát */
+.monaco-scrollable-element > .scrollbar > .slider {
+	border-radius: 6px !important;
+	transition:
+		opacity 0.2s ease,
+		width 0.2s ease !important;
+}

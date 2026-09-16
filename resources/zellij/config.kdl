@@ -1,0 +1,334 @@
+// =============================================================================
+// Zellij: Kitty is the renderer, Zellij owns every session/tab/pane/split.
+// Ctrl+Shift owns management chords; Ctrl+h/j/k/l uses the Neovim-aware router.
+// =============================================================================
+
+keybinds clear-defaults=true {
+    locked {
+        bind "Ctrl Shift g" { SwitchToMode "normal"; }
+    }
+
+    normal {
+        // Safety / tmux-like prefix layer
+        bind "Ctrl Shift g" { SwitchToMode "locked"; }
+        bind "Ctrl Shift Space" { SwitchToMode "tmux"; }
+
+        // Tabs
+        bind "Ctrl Shift t" { NewTab; }
+        bind "Ctrl Shift q" { CloseTab; }
+        bind "Ctrl Shift [" { GoToPreviousTab; }
+        bind "Ctrl Shift ]" { GoToNextTab; }
+        bind "Ctrl Shift 1" { GoToTab 1; }
+        bind "Ctrl Shift 2" { GoToTab 2; }
+        bind "Ctrl Shift 3" { GoToTab 3; }
+        bind "Ctrl Shift 4" { GoToTab 4; }
+        bind "Ctrl Shift 5" { GoToTab 5; }
+        bind "Ctrl Shift 6" { GoToTab 6; }
+        bind "Ctrl Shift 7" { GoToTab 7; }
+        bind "Ctrl Shift 8" { GoToTab 8; }
+        bind "Ctrl Shift 9" { GoToTab 9; }
+        bind "Ctrl Shift i" { MoveTab "left"; }
+        bind "Ctrl Shift o" { MoveTab "right"; }
+        bind "Ctrl Shift r" "Ctrl Shift ." "Ctrl Shift F2" { SwitchToMode "renametab"; TabNameInput 0; }
+
+        // Panes and splits
+        bind "Ctrl Shift n" { NewPane; }
+        bind "Ctrl Shift d" { NewPane "down"; }
+        bind "Ctrl Shift w" { CloseFocus; }
+        bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
+        bind "Ctrl Shift p" { ToggleFloatingPanes; }
+        bind "Ctrl Shift f" { ToggleFocusFullscreen; }
+        bind "Ctrl Shift ," "Ctrl Shift F3" { SwitchToMode "renamepane"; PaneNameInput 0; }
+
+        // vim-zellij-navigator behaves like vim-tmux-navigator: Zellij handles
+        // Ctrl+h/j/k/l in shell panes, but forwards the same chord to Neovim
+        // and lets smart-splits cross the boundary at an editor edge.
+        bind "Ctrl h" {
+            MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
+                name "move_focus_or_tab"
+                payload "left"
+                move_mod "ctrl"
+                use_arrow_keys "false"
+            }
+        }
+        bind "Ctrl j" {
+            MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
+                name "move_focus"
+                payload "down"
+                move_mod "ctrl"
+                use_arrow_keys "false"
+            }
+        }
+        bind "Ctrl k" {
+            MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
+                name "move_focus"
+                payload "up"
+                move_mod "ctrl"
+                use_arrow_keys "false"
+            }
+        }
+        bind "Ctrl l" {
+            MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
+                name "move_focus_or_tab"
+                payload "right"
+                move_mod "ctrl"
+                use_arrow_keys "false"
+            }
+        }
+        bind "Ctrl Shift Left" { MoveFocusOrTab "left"; }
+        bind "Ctrl Shift Down" { MoveFocus "down"; }
+        bind "Ctrl Shift Up" { MoveFocus "up"; }
+        bind "Ctrl Shift Right" { MoveFocusOrTab "right"; }
+
+        // Resize and rearrange
+        bind "Ctrl +" "Ctrl Shift =" { Resize "Increase"; }
+        bind "Ctrl Shift -" { Resize "Decrease"; }
+        bind "Ctrl Shift m" { SwitchToMode "move"; }
+
+        // Scroll/search/session
+        bind "Ctrl Shift b" { SwitchToMode "scroll"; }
+        bind "Ctrl Shift /" { SwitchToMode "entersearch"; SearchInput 0; }
+        bind "Ctrl Shift s" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+
+        // Keep the built-in session-manager controls working with
+        // clear-defaults=true. In regular panes these preserve the usual raw
+        // Ctrl+r/Ctrl+x/Ctrl+d terminal input (history, editor prefix and EOF).
+        bind "Ctrl r" { WriteChars "\u{0012}"; }
+        bind "Ctrl x" { WriteChars "\u{0018}"; }
+        bind "Ctrl d" { WriteChars "\u{0004}"; }
+
+        // Optional plugin tools. They live in their own Ctrl+Shift chords so
+        // normal application shortcuts remain predictable.
+        bind "Ctrl Shift a" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/room.wasm" {
+                floating true
+                move_to_focused_tab true
+                ignore_case true
+                quick_jump false
+            }
+        }
+        bind "Ctrl Shift u" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/monocle.wasm" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+        bind "Ctrl Shift z" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/zellij-forgot.wasm" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+    }
+
+    // Ctrl+Shift+Space followed by one key: a fallback inspired by tmux.
+    // It is useful for less frequent operations and keeps application keys free.
+    tmux {
+        bind "Esc" "Ctrl c" { SwitchToMode "normal"; }
+        bind "t" { NewTab; SwitchToMode "normal"; }
+        bind "q" { Quit; }
+        bind "d" { Detach; }
+        bind "s" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
+        bind "h" "Left" { MoveFocusOrTab "left"; SwitchToMode "normal"; }
+        bind "j" "Down" { MoveFocus "down"; SwitchToMode "normal"; }
+        bind "k" "Up" { MoveFocus "up"; SwitchToMode "normal"; }
+        bind "l" "Right" { MoveFocusOrTab "right"; SwitchToMode "normal"; }
+        bind "r" { NewPane "right"; SwitchToMode "normal"; }
+        bind "v" { NewPane "down"; SwitchToMode "normal"; }
+        bind "n" { NewPane; SwitchToMode "normal"; }
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "a" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/room.wasm" {
+                floating true
+                move_to_focused_tab true
+                ignore_case true
+                quick_jump false
+            }
+            SwitchToMode "normal"
+        }
+        bind "u" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/monocle.wasm" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
+        bind "z" {
+            LaunchOrFocusPlugin "file:/etc/zellij/plugins/zellij-forgot.wasm" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
+        bind "[" { SwitchToMode "scroll"; }
+        bind "+" "=" { Resize "Increase"; SwitchToMode "normal"; }
+        bind "-" { Resize "Decrease"; SwitchToMode "normal"; }
+    }
+
+    move {
+        bind "Esc" "Enter" "Ctrl c" "Ctrl Shift m" { SwitchToMode "normal"; }
+        bind "h" "Left" { MovePane "left"; }
+        bind "j" "Down" { MovePane "down"; }
+        bind "k" "Up" { MovePane "up"; }
+        bind "l" "Right" { MovePane "right"; }
+        bind "n" { MovePane; }
+        bind "p" { MovePaneBackwards; }
+    }
+
+    scroll {
+        bind "Esc" "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "h" "Left" "PageUp" { PageScrollUp; }
+        bind "l" "Right" "PageDown" { PageScrollDown; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "g" { ScrollToTop; }
+        bind "G" { ScrollToBottom; }
+        bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+    }
+
+    entersearch {
+        bind "Esc" "Ctrl c" { SwitchToMode "scroll"; }
+        bind "Enter" { SwitchToMode "search"; }
+    }
+
+    search {
+        bind "Esc" "Ctrl c" { SwitchToMode "normal"; }
+        bind "n" { Search "down"; }
+        bind "p" { Search "up"; }
+        bind "c" { SearchToggleOption "CaseSensitivity"; }
+        bind "w" { SearchToggleOption "Wrap"; }
+        bind "o" { SearchToggleOption "WholeWord"; }
+    }
+
+    renametab {
+        bind "Esc" { UndoRenameTab; SwitchToMode "normal"; }
+        bind "Enter" "Ctrl c" { SwitchToMode "normal"; }
+    }
+
+    renamepane {
+        bind "Esc" { UndoRenamePane; SwitchToMode "normal"; }
+        bind "Enter" "Ctrl c" { SwitchToMode "normal"; }
+    }
+
+    // Emergency escape for an accidentally active Zellij input mode. This is
+    // especially useful before returning to Codex/Neovim Vim mode: once the
+    // status says NORMAL, plain i/a/o are passed through to the application.
+    shared_except "normal" {
+        bind "Ctrl Shift Esc" { SwitchToMode "normal"; }
+    }
+}
+
+plugins {
+    about location="zellij:about"
+    compact-bar location="zellij:compact-bar"
+    configuration location="zellij:configuration"
+    filepicker location="zellij:strider" {
+        cwd "/"
+    }
+    plugin-manager location="zellij:plugin-manager"
+    session-manager location="zellij:session-manager"
+    strider location="zellij:strider"
+    tab-bar location="zellij:tab-bar"
+    welcome-screen location="zellij:session-manager" {
+        welcome_screen true
+    }
+
+    // Installed reproducibly by modules/zellij.nix. All colors are symbolic
+    // terminal colors, so the Noctalia-generated palette remains authoritative.
+    status-bar location="file:/etc/zellij/plugins/zjstatus.wasm" {
+        // Noctalia's generated Zellij template maps its primary accent to the
+        // semantic `green` slot. Keep status colors semantic so theme refreshes
+        // continue to propagate without hard-coded hex values.
+        format_left   "#[bg=black]{mode}  #[fg=green,bold,bg=black] {session}  #[bg=black]{tabs}"
+        format_center ""
+        format_right  "#[bg=black]{command_system}"
+        format_space  "#[bg=black]"
+        format_hide_on_overlength "true"
+        format_precedence "lrc"
+
+        border_enabled "false"
+        hide_frame_for_single_pane "true"
+
+        mode_normal "#[fg=green,bg=black]#[fg=black,bg=green,bold] NORMAL #[fg=green,bg=black]"
+        mode_locked "#[fg=red,bg=black]#[fg=black,bg=red,bold] LOCKED #[fg=red,bg=black]"
+        mode_tmux   "#[fg=yellow,bg=black]#[fg=black,bg=yellow,bold] PREFIX #[fg=yellow,bg=black]"
+        mode_move   "#[fg=magenta,bg=black]#[fg=black,bg=magenta,bold] MOVE #[fg=magenta,bg=black]"
+        mode_scroll "#[fg=cyan,bg=black]#[fg=black,bg=cyan,bold] SCROLL #[fg=cyan,bg=black]"
+        mode_search "#[fg=cyan,bg=black]#[fg=black,bg=cyan,bold] SEARCH #[fg=cyan,bg=black]"
+        mode_enter_search "#[fg=cyan,bg=black]#[fg=black,bg=cyan,bold] SEARCH #[fg=cyan,bg=black]"
+        mode_rename_tab "#[fg=yellow,bg=black]#[fg=black,bg=yellow,bold] RENAME TAB #[fg=yellow,bg=black]"
+        mode_rename_pane "#[fg=yellow,bg=black]#[fg=black,bg=yellow,bold] RENAME PANE #[fg=yellow,bg=black]"
+
+        tab_normal "#[fg=white,bg=black] ○ {index}:{name} "
+        tab_active "#[fg=green,bg=black]#[fg=black,bg=green,bold]  ● {index}:{name}  #[fg=green,bg=black] "
+        tab_sync_indicator " "
+        tab_fullscreen_indicator " 󰊓"
+        tab_floating_indicator " 󰹙"
+
+        command_system_command "sh -c \"$HOME/.config/zellij/scripts/system-status.sh\""
+        command_system_format "#[fg=white] {stdout} "
+        command_system_interval "3"
+        command_system_rendermode "static"
+
+    }
+    monocle location="file:/etc/zellij/plugins/monocle.wasm"
+    room location="file:/etc/zellij/plugins/room.wasm"
+    vim-zellij-navigator location="file:/etc/zellij/plugins/vim-zellij-navigator.wasm"
+    zellij-forgot location="file:/etc/zellij/plugins/zellij-forgot.wasm"
+}
+
+load_plugins {
+    zellij:link
+}
+
+web_client {
+    font "monospace"
+}
+
+// Appearance: geometry only. Palette is generated by Noctalia.
+theme "noctalia"
+simplified_ui false
+pane_frames false
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name true
+    }
+}
+
+default_shell "zsh"
+default_layout "default"
+mouse_mode true
+copy_on_select true
+scroll_buffer_size 10000
+show_startup_tips false
+show_release_notes false
+auto_layout true
+
+// Kitty and Zellij both support the enhanced protocol, making Ctrl+Shift
+// distinct from Ctrl inside terminal applications such as Neovim.
+support_kitty_keyboard_protocol true
+support_kitty_graphics_protocol true
+
+// Workspaces survive closing Kitty, crashes and reboot. Commands discovered
+// during resurrection still require Enter before they run again.
+on_force_close "detach"
+session_serialization true
+serialize_pane_viewport true
+scrollback_lines_to_serialize 2000
+serialization_interval 10
