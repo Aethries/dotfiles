@@ -56,7 +56,7 @@ for service in resources/systemd/user/*.service; do
         -e 's|^ExecStart=.*|ExecStart=/run/current-system/sw/bin/true|' \
         "$service" > "$service_check_dir/$(basename "$service")"
 done
-systemd-analyze verify "$service_check_dir"/*.service
+SYSTEMD_UNIT_PATH="$service_check_dir:/nix/var/nix/profiles/system/etc/systemd/system:/run/current-system/sw/lib/systemd/system" systemd-analyze verify "$service_check_dir"/*.service
 
 if command -v noctalia >/dev/null; then
     noctalia config validate resources/noctalia/config.toml
