@@ -65,7 +65,6 @@
     ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="fef9|880c", TAG+="seat", TAG+="seat0", TAG+="uaccess", MODE="0660", GROUP="input"
   '';
 
-
   # ----------------------------------------------------------
   # Phone Connect (KDE Connect)
   # Enables device pairing, notification sync, shared clipboard,

@@ -4,9 +4,28 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh
-bash -n resources/zellij/scripts/*.sh
-shellcheck scripts/*.sh resources/zellij/scripts/*.sh
+bash -n scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
+shellcheck scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
+
+# Assert Kitty does not launch welcome layout directly
+if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
+    echo "Error: Kitty must not start zellij -l welcome directly" >&2
+    exit 1
+fi
+
+# Assert launcher branches never invoke unnamed zellij
+if grep -E 'exec zellij[[:space:]]*$' resources/zellij/scripts/launcher.sh; then
+    echo "Error: launcher.sh contains unnamed zellij invocation" >&2
+    exit 1
+fi
+
+# Assert equivalent layouts stay strictly synchronized
+cmp resources/zellij/layouts/default.kdl resources/zellij/layouts/compact.kdl
+cmp resources/zellij/layouts/default.kdl resources/zellij/layouts/dotfiles.kdl
+
+# Run isolated unit test suites
+bash tests/vault/vault_test.sh >/dev/null
+bash tests/zellij/launcher_test.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)
 nixfmt --check "${nix_files[@]}"

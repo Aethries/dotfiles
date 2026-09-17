@@ -278,6 +278,7 @@ export FAKE_ZELLIJ_LIST_EXIT=1
 export FAKE_FZF_OUTPUT=$'work; rm -rf /; $(whoami)\nctrl-n\n'
 "$LAUNCHER"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
+# shellcheck disable=SC2016
 [ "${args[1]}" = 'work; rm -rf /; $(whoami)' ] || log_fail "Case 17: argument was expanded or corrupted"
 log_ok "Case 17 passed"
 

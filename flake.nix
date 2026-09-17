@@ -42,6 +42,11 @@
               device = "none";
               fsType = "tmpfs";
             };
+            users.users.loc = {
+              isNormalUser = true;
+              group = "loc";
+            };
+            users.groups.loc = { };
           })
         ];
       };
