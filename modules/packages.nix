@@ -81,6 +81,8 @@ in
     openssl
     age
     zstd
+    unzip
+    p7zip
     lsof
     rclone
 
