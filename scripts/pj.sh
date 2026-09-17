@@ -39,7 +39,7 @@ SELECTION=$(echo "$PROJECTS" | fzf \
     --layout=reverse \
     --prompt="🚀 Jump to Project: " \
     --border=rounded \
-    --header="[Enter] Zellij Session | [Ctrl+O / Ctrl+A] Antigravity IDE | [Ctrl+N] Neovim | [Ctrl+W] Worktree | [Ctrl+G] Lazygit | [Ctrl+Y] Yazi" \
+    --header="[Enter] Zellij Session (or Tab inside Zellij) | [Ctrl+O / Ctrl+A] Antigravity IDE | [Ctrl+N] Neovim | [Ctrl+W] Worktree | [Ctrl+G] Lazygit | [Ctrl+Y] Yazi" \
     --expect="ctrl-o,ctrl-a,ctrl-n,ctrl-g,ctrl-y,ctrl-w" \
     --preview='
         dir={}
@@ -104,15 +104,23 @@ case "$KEY" in
         exec yazi
         ;;
     *)
-        # Default (Enter): Attach or launch dedicated Zellij session
+        # Default (Enter): Open tab if inside Zellij; create or confirm-attach if outside
         cd "$TARGET_DIR"
         if [ -n "${ZELLIJ:-}" ]; then
-            # Already inside a Zellij session: open as a new tab or switch
+            # Inside an existing Zellij session: open a project tab in the current session
             zellij action new-tab --name "$PROJECT_NAME" --cwd "$TARGET_DIR"
         else
-            # Outside Zellij: attach active or resurrectable project workspace.
-            if zellij list-sessions --short --no-formatting 2>/dev/null | grep -Fxq "$PROJECT_NAME"; then
-                exec zellij attach "$PROJECT_NAME"
+            # Outside Zellij: check if session already exists to avoid accidental multi-client attach
+            if zellij list-sessions --short --no-formatting 2>/dev/null | grep -Fxq -- "$PROJECT_NAME"; then
+                echo "Notice: Session '$PROJECT_NAME' is already active or saved."
+                echo "Connecting a second client enforces the smallest terminal geometry across clients."
+                read -r -p "Attach to '$PROJECT_NAME'? [Y/n] " confirm
+                if [[ "${confirm:-y}" =~ ^[Yy]$ ]]; then
+                    exec zellij attach -- "$PROJECT_NAME"
+                else
+                    echo "Attach aborted."
+                    exit 0
+                fi
             else
                 # A repository can own its workspace declaratively. Fall back to
                 # the generic work layout for projects without .zellij.kdl.
