@@ -143,8 +143,13 @@ authenticated `age` passphrase encryption:
 The committed `secrets.enc` may still use the legacy OpenSSL format. Decrypt it
 once and encrypt it again to migrate; the scripts retain read-only compatibility.
 
-`vault clean` deletes local credentials and sessions. Create and verify a backup
-before using it.
+`vault` creates a local-only encrypted archive (default: repository-local `secrets.vault`).
+The `backup`, `restore`, `list`, and destructive `clean` commands operate purely locally.
+There is no automatic remote copy or cloud synchronization; the user is responsible
+for maintaining an off-machine copy if disaster recovery is required.
+`vault restore` never fetches a missing file and fails immediately if the target archive is absent.
+Pre-existing `$HOME/.config/rclone` files are not removed automatically, but new backups omit
+rclone configuration and legacy archive restores block `.config/rclone`.
 
 Run `vault` and `init-9router` as the desktop user, without prefixing the whole
 command with `sudo`. Both scripts request `sudo` only for the ownership or

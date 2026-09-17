@@ -32,5 +32,6 @@ secrets/*
 
 # Build or test temporary scratch folders
 scratch/
+.sandbox/
 result
 result-*

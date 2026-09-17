@@ -84,7 +84,6 @@ in
     unzip
     p7zip
     lsof
-    rclone
 
     # ----------------------------------------------------------
     # Modern Terminal & Fullstack/DevOps Utilities

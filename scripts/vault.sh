@@ -42,36 +42,18 @@ error() {
 if [ "$EUID" -eq 0 ]; then
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
         warn "vault manages user-session data; continuing as '$SUDO_USER' instead of root."
-        exec sudo -u "$SUDO_USER" -H env \
-            RCLONE_REMOTE="${RCLONE_REMOTE:-gdrive:dotfiles-backup}" \
-            "$SCRIPT_DIR/vault.sh" "$@"
+        exec sudo -u "$SUDO_USER" -H "$SCRIPT_DIR/vault.sh" "$@"
     fi
     error "Do not run vault as root. Run it from the desktop user account."
 fi
 
 TARGET_USER="$(id -un)"
 TARGET_GROUP="$(id -gn)"
-USER_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
-RCLONE_REMOTE="${RCLONE_REMOTE:-gdrive:dotfiles-backup}"
+USER_HOME="${HOME:-$(getent passwd "$TARGET_USER" | cut -d: -f6)}"
 
 if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
     error "Could not determine the home directory for '$TARGET_USER'."
 fi
-
-rclone_exec() {
-    if command -v rclone >/dev/null 2>&1; then
-        rclone "$@"
-    elif command -v nix >/dev/null 2>&1; then
-        nix run nixpkgs#rclone -- "$@"
-    else
-        return 1
-    fi
-}
-
-rclone_is_configured() {
-    local remote_name="${RCLONE_REMOTE%%:*}"
-    rclone_exec listremotes 2>/dev/null | grep -q "^${remote_name}:"
-}
 
 decrypt_vault() {
     local in_file="$1"
@@ -107,7 +89,6 @@ CANDIDATE_PATHS=(
     ".npmrc"
     ".gitconfig"
     ".zsh_history"
-    ".config/rclone"
     ".gemini"
     ".antigravity-ide"
     ".antigravity"
@@ -259,39 +240,13 @@ cmd_backup() {
 
     echo
     success "Vault created successfully: $out_file ($size)"
-
-    local remote_name="${RCLONE_REMOTE%%:*}"
-    if rclone_is_configured; then
-        info "Uploading vault to Google Drive ($RCLONE_REMOTE/secrets.vault)..."
-        if rclone_exec copyto "$out_file" "$RCLONE_REMOTE/secrets.vault" --progress; then
-            success "Uploaded vault to Google Drive: $RCLONE_REMOTE/secrets.vault"
-        else
-            warn "Failed to upload to Google Drive. Check internet or credentials."
-        fi
-    else
-        echo
-        info "Google Drive remote '$remote_name' not configured. Skipped cloud sync."
-        echo "  To auto-upload: run 'rclone config' (create remote named '$remote_name')."
-    fi
 }
 
 cmd_restore() {
     local in_file="${1:-$REPO_ROOT/secrets.vault}"
 
     if [ ! -f "$in_file" ]; then
-        local remote_name="${RCLONE_REMOTE%%:*}"
-        if rclone_is_configured; then
-            info "Local vault file not found ($in_file)."
-            info "Attempting to download latest vault from Google Drive ($RCLONE_REMOTE/secrets.vault)..."
-            mkdir -p "$(dirname "$in_file")"
-            if rclone_exec copyto "$RCLONE_REMOTE/secrets.vault" "$in_file" --progress; then
-                success "Downloaded latest vault from Google Drive to $in_file"
-            else
-                error "Failed to download $RCLONE_REMOTE/secrets.vault from Google Drive."
-            fi
-        else
-            error "Vault file not found: $in_file (and Google Drive remote '$remote_name' not configured)."
-        fi
+        error "Vault file not found: $in_file"
     fi
 
     info "Restoring Secret Vault from: $in_file..."
@@ -345,7 +300,7 @@ cmd_restore() {
 
     if ! decrypt_vault "$in_file" \
         | zstd -d \
-        | tar --no-same-owner --no-same-permissions -C "$RESTORE_TMP" -xf -; then
+        | tar --no-same-owner --no-same-permissions --exclude='.config/rclone' --exclude='.config/rclone/*' -C "$RESTORE_TMP" -xf -; then
         echo
         error "Failed to decrypt or extract vault! Please check your Master Password or vault integrity."
     fi
@@ -528,43 +483,12 @@ cmd_list() {
     fi
 }
 
-cmd_upload() {
-    local in_file="${1:-$REPO_ROOT/secrets.vault}"
-    [ -f "$in_file" ] || error "Vault file not found: $in_file"
-    local remote_name="${RCLONE_REMOTE%%:*}"
-    if ! rclone_is_configured; then
-        error "Google Drive remote '$remote_name' not configured. Run 'rclone config' first."
-    fi
-    local vault_basename
-    vault_basename="$(basename "$in_file")"
-    info "Uploading $in_file to $RCLONE_REMOTE/$vault_basename..."
-    rclone_exec copyto "$in_file" "$RCLONE_REMOTE/$vault_basename" --progress
-    if [ "$vault_basename" != "secrets.vault" ]; then
-        rclone_exec copyto "$RCLONE_REMOTE/$vault_basename" "$RCLONE_REMOTE/secrets.vault" 2>/dev/null || true
-    fi
-    success "Upload completed successfully."
-}
-
-cmd_download() {
-    local out_file="${1:-$REPO_ROOT/secrets.vault}"
-    local remote_name="${RCLONE_REMOTE%%:*}"
-    if ! rclone_is_configured; then
-        error "Google Drive remote '$remote_name' not configured. Run 'rclone config' first."
-    fi
-    info "Downloading latest vault from $RCLONE_REMOTE/secrets.vault to $out_file..."
-    mkdir -p "$(dirname "$out_file")"
-    rclone_exec copyto "$RCLONE_REMOTE/secrets.vault" "$out_file" --progress
-    success "Downloaded latest vault to: $out_file"
-}
-
 usage() {
-    echo "Usage: $0 {backup|restore|clean|upload|download|list} [args]"
+    echo "Usage: $0 {backup|restore|clean|list} [args]"
     echo
     echo "Commands:"
-    echo "  backup   [file]   Encrypt and bundle (default: secrets.vault) & upload to Drive"
-    echo "  restore  [file]   Decrypt and unpack vault (auto-download from Drive if not found locally)"
-    echo "  upload   [file]   Explicitly upload a local vault file to Google Drive"
-    echo "  download [file]   Download the latest vault from Google Drive to local file"
+    echo "  backup   [file]   Encrypt and bundle to local vault file (default: secrets.vault)"
+    echo "  restore  [file]   Decrypt and unpack local vault file"
     echo "  list     [file]   List contents of encrypted vault"
     echo "  clean    [args]   Wipe local auth sessions to test vault restore"
     echo
@@ -579,14 +503,6 @@ case "${1:-}" in
     restore|import|load)
         shift
         cmd_restore "${1:-}"
-        ;;
-    upload|push)
-        shift
-        cmd_upload "${1:-}"
-        ;;
-    download|pull)
-        shift
-        cmd_download "${1:-}"
         ;;
     list|ls)
         shift
