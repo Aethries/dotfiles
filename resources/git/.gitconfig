@@ -66,3 +66,5 @@
 [includeIf "gitdir:~/Workspaces/1bitlab/"]
 	path = ~/.gitconfig-1bitlab
 
+[safe]
+	directory = /home/loc/Workspaces/dotfiles

@@ -26,6 +26,47 @@
   services.blueman.enable = true;
 
   # ----------------------------------------------------------
+  # Seat Management (seatd) & Hardware Permissions
+  # ----------------------------------------------------------
+  # Bàn phím WEIKAV NUT75 có chuỗi UNIQ/serial chứa ký tự điều khiển (0x0c / form feed).
+  # systemd 259.4+/260 kiểm tra thuộc tính thất bại (Refusing invalid property: UNIQ),
+  # khiến systemd-logind từ chối bàn giao thiết bị cho Wayland compositors (TakeDevice trả về ENODEV).
+  # Sử dụng seatd làm seat manager cho libseat thay cho logind để compositor trực tiếp nhận bàn phím.
+  services.seatd = {
+    enable = true;
+    group = "seat";
+  };
+
+  environment.sessionVariables = {
+    LIBSEAT_BACKEND = "seatd";
+  };
+
+  users.users.greeter.extraGroups = [
+    "seat"
+    "input"
+    "video"
+  ];
+
+  users.users.loc.extraGroups = [
+    "seat"
+    "input"
+    "video"
+  ];
+
+  # ----------------------------------------------------------
+  # Udev Rules & Hardware Quirks
+  # ----------------------------------------------------------
+  # Bàn phím WEIKAV NUT75:
+  # - Dongle 2.4G không dây: 0c45:fef9
+  # - Cáp cắm dây trực tiếp: 0c45:880c
+  # Cấp quyền cho group input và đánh dấu đầy đủ seat/seat0/uaccess
+  services.udev.extraRules = ''
+    ACTION=="add|change", SUBSYSTEM=="input", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="fef9|880c", ENV{ID_INPUT_KEY}="1", ENV{ID_INPUT_KEYBOARD}="1"
+    ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="fef9|880c", TAG+="seat", TAG+="seat0", TAG+="uaccess", MODE="0660", GROUP="input"
+  '';
+
+
+  # ----------------------------------------------------------
   # Phone Connect (KDE Connect)
   # Enables device pairing, notification sync, shared clipboard,
   # wireless file transfer, and remote multimedia control.

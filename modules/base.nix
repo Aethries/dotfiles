@@ -3,6 +3,10 @@
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelParams = [
+	"usbcore.autosuspend=-1"
+	"hid_apple.fnmode=0"
+  ];
 
   nixpkgs.config.allowUnfree = true;
   networking.networkmanager.enable = true;
