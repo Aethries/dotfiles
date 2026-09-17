@@ -244,7 +244,7 @@ source = "wallpaper"
 wallpaper_scheme = "faithful"
 
     [theme.templates]
-    builtin_ids = [ "kitty", "niri", "starship" ]
+    builtin_ids = [ "gtk3", "gtk4", "kitty", "niri", "starship" ]
     community_ids = [
         "antigravity",
         "bat",

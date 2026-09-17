@@ -160,6 +160,8 @@ in
     lark
     obsidian
     postman
+    nautilus
+    adw-gtk3
     # beekeeper-studio — EOL/insecure; dùng Flatpak thay thế: flatpak install flathub io.beekeeperstudio.Studio
 
     # ----------------------------------------------------------

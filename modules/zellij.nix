@@ -7,10 +7,9 @@ let
     url = "https://github.com/dj95/zjstatus/releases/download/v0.24.0/zjstatus.wasm";
     hash = "sha256-HM7ezh3tYs8+IJvmkM3TnKb7noIo7XGpUfZQf5lWZps=";
   };
-  vim-zellij-navigator = pkgs.fetchurl {
-    url = "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm";
-    hash = "sha256-d+Wi9i98GmmMryV0ST1ddVh+D9h3z7o0xIyvcxwkxY0=";
-  };
+  # Uses patched binary incorporating PR #35 (guards against duplicate
+  # actions from orphaned plugin instances after client detach).
+  vim-zellij-navigator = ../resources/zellij/plugins/vim-zellij-navigator.wasm;
   monocle = pkgs.fetchurl {
     url = "https://github.com/imsnif/monocle/releases/download/v0.100.2/monocle.wasm";
     hash = "sha256-TLfizJEtl1tOdVyT5E5/DeYu+SQKCaibc1SQz0cTeSw=";

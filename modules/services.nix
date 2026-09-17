@@ -96,6 +96,7 @@
   # ----------------------------------------------------------
   services.udisks2.enable = true;
   services.gvfs.enable = true;
+  services.gnome.sushi.enable = true;
 
   # ----------------------------------------------------------
   # Cloudflare WARP (warp-cli & warp-svc daemon)

@@ -248,6 +248,13 @@ window-rule {
     match app-id="seahorse"
     open-floating true
 }
+// Nautilus File Manager
+window-rule {
+    match app-id="org.gnome.Nautilus"
+    default-column-width {
+        fixed 1100
+    }
+}
 // Bluetooth Device Manager floating window
 window-rule {
     match app-id="blueman-manager"
@@ -492,13 +499,16 @@ binds {
     Mod+Return hotkey-overlay-title="Open Terminal: Kitty + Zellij" {
         spawn "kitty"
     }
-    Mod+Ctrl+P hotkey-overlay-title="Projects Launcher: fzf & zellij" {
+    Mod+P hotkey-overlay-title="Projects Launcher: fzf & zellij" {
         spawn-sh "PATH=\"$HOME/.local/bin:$PATH\" kitty --class kitty-pj -e pj"
     }
     Mod+G hotkey-overlay-title="Git Client: lazygit" {
         spawn "kitty" "--class" "kitty-lazygit" "-e" "lazygit"
     }
-    Mod+E hotkey-overlay-title="File Manager: yazi" {
+    Mod+E hotkey-overlay-title="File Manager: Nautilus" {
+        spawn "nautilus"
+    }
+    Mod+Shift+E hotkey-overlay-title="File Manager: yazi" {
         spawn "kitty" "--class" "kitty-yazi" "-e" "yazi"
     }
     Mod+A hotkey-overlay-title="Open Editor: Antigravity IDE" {
@@ -535,9 +545,6 @@ binds {
         spawn-sh "noctalia msg session lock"
     }
     // Noctalia Shell keybinds
-    Mod+S hotkey-overlay-title="Control Center: Noctalia" {
-        spawn-sh "noctalia msg panel-toggle control-center"
-    }
     Mod+Comma hotkey-overlay-title="Settings: Noctalia" {
         spawn-sh "noctalia msg settings-toggle"
     }
@@ -972,7 +979,7 @@ binds {
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
     // Screenshot keybinds with annotation tool (Satty)
-    Mod+P hotkey-overlay-title="Screenshot Area (Satty)" {
+    Mod+S hotkey-overlay-title="Screenshot Area (Satty)" {
         spawn-sh "\"$HOME/.local/bin/screenshot\" area"
     }
     Print hotkey-overlay-title="Screenshot Area (Satty)" {
@@ -999,9 +1006,6 @@ binds {
         toggle-keyboard-shortcuts-inhibit
     }
     // The quit action will show a confirmation dialog to avoid accidental exits.
-    Mod+Shift+E {
-        quit
-    }
     Ctrl+Alt+Delete {
         quit
     }
