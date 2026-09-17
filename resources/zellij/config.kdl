@@ -43,10 +43,9 @@ keybinds clear-defaults=true {
         // vim-zellij-navigator behaves like vim-tmux-navigator: Zellij handles
         // Ctrl+h/j/k/l in shell panes, but forwards the same chord to Neovim
         // and lets smart-splits cross the boundary at an editor edge.
-        // Navigation is strictly pane/split scoped; tab navigation uses native chords.
         bind "Ctrl h" {
             MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
-                name "move_focus"
+                name "move_focus_or_tab"
                 payload "left"
                 move_mod "ctrl"
                 use_arrow_keys "false"
@@ -70,20 +69,20 @@ keybinds clear-defaults=true {
         }
         bind "Ctrl l" {
             MessagePlugin "file:/etc/zellij/plugins/vim-zellij-navigator.wasm" {
-                name "move_focus"
+                name "move_focus_or_tab"
                 payload "right"
                 move_mod "ctrl"
                 use_arrow_keys "false"
             }
         }
-        bind "Ctrl Shift Left" { MoveFocus "left"; }
+        bind "Ctrl Shift Left" { MoveFocusOrTab "left"; }
         bind "Ctrl Shift Down" { MoveFocus "down"; }
         bind "Ctrl Shift Up" { MoveFocus "up"; }
-        bind "Ctrl Shift Right" { MoveFocus "right"; }
+        bind "Ctrl Shift Right" { MoveFocusOrTab "right"; }
 
         // Resize and rearrange
-        bind "Ctrl +" "Ctrl Shift =" { Resize "Increase"; }
-        bind "Ctrl Shift -" { Resize "Decrease"; }
+        bind "Ctrl +" "Ctrl =" "Ctrl Shift =" { Resize "Increase"; }
+        bind "Ctrl -" "Ctrl _" "Ctrl Shift -" { Resize "Decrease"; }
         bind "Ctrl Shift m" { SwitchToMode "move"; }
 
         // Scroll/search/session
@@ -141,10 +140,10 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "normal"
         }
-        bind "h" "Left" { MoveFocus "left"; SwitchToMode "normal"; }
+        bind "h" "Left" { MoveFocusOrTab "left"; SwitchToMode "normal"; }
         bind "j" "Down" { MoveFocus "down"; SwitchToMode "normal"; }
         bind "k" "Up" { MoveFocus "up"; SwitchToMode "normal"; }
-        bind "l" "Right" { MoveFocus "right"; SwitchToMode "normal"; }
+        bind "l" "Right" { MoveFocusOrTab "right"; SwitchToMode "normal"; }
         bind "r" { NewPane "right"; SwitchToMode "normal"; }
         bind "v" { NewPane "down"; SwitchToMode "normal"; }
         bind "n" { NewPane; SwitchToMode "normal"; }

@@ -108,8 +108,8 @@ Connecting a smaller terminal window constrains the larger terminal view.
   (next tab), plus `Ctrl+Shift+1..9` (direct tab index). These bindings execute client-local
   native Zellij actions and work reliably without WASM plugins.
 - **Pane and Neovim split navigation**: `Ctrl+h/j/k/l` moves seamlessly between Neovim splits
-  and Zellij panes. This chord is strictly pane-scoped and never crosses tabs, ensuring that
-  one keypress produces exactly one navigation action even in multi-client sessions.
+  and Zellij panes. `Ctrl+h` and `Ctrl+l` automatically cross into adjacent tabs when reaching
+  the pane boundaries.
 
 ### Troubleshooting
 

@@ -13,7 +13,7 @@ return {
     cond = not vim.g.vscode,
     opts = {
       at_edge = "stop",
-      zellij_move_focus_or_tab = false,
+      zellij_move_focus_or_tab = true,
     },
     keys = {
       { "<C-h>", function() require("smart-splits").move_cursor_left() end, mode = { "n", "t" }, desc = "Move left across Neovim/Zellij" },
