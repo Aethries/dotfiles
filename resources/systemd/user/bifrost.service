@@ -1,0 +1,14 @@
+[Unit]
+Description=Optional Bifrost AI sidecar for OmniRoute
+After=default.target docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=%h/.local/bin/bifrost-container start
+ExecStop=%h/.local/bin/bifrost-container stop
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

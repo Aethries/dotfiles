@@ -85,6 +85,9 @@ let
       });
 
   lark = pkgs.callPackage ../pkgs/lark.nix { };
+  omniroute = pkgs.callPackage ../pkgs/omniroute.nix { };
+  rtk = pkgs.callPackage ../pkgs/rtk.nix { };
+  codegraph = pkgs.callPackage ../pkgs/codegraph.nix { };
 
 in
 {
@@ -139,8 +142,6 @@ in
     yq-go
     trash-cli
     cloudflared
-    lsof # Required by 9router MITM proxy (also symlinked to /usr/bin/lsof by init-9router.sh)
-    nssTools # Provides certutil for 9router browser trust store registration
 
     # ----------------------------------------------------------
     # Node.js, Package Managers & Version Management (NVM)
@@ -200,6 +201,9 @@ in
     antigravityCli
     codex
     codexDesktop
+    omniroute
+    rtk
+    codegraph
     fuzzel
   ];
 }

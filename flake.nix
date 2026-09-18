@@ -52,6 +52,11 @@
       };
 
       formatter.x86_64-linux = pkgs.nixfmt;
+      packages.x86_64-linux = {
+        omniroute = pkgs.callPackage ./pkgs/omniroute.nix { };
+        rtk = pkgs.callPackage ./pkgs/rtk.nix { };
+        codegraph = pkgs.callPackage ./pkgs/codegraph.nix { };
+      };
       devShells.x86_64-linux.default = pkgs.mkShellNoCC {
         packages = [
           pkgs.nixfmt

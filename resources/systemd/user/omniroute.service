@@ -1,0 +1,22 @@
+[Unit]
+Description=OmniRoute Local AI Gateway
+After=default.target
+
+[Service]
+Type=simple
+Environment="PATH=%h/.local/bin:/run/current-system/sw/bin:/run/wrappers/bin"
+Environment="PORT=20128"
+Environment="API_PORT=20128"
+Environment="DASHBOARD_PORT=20128"
+Environment="OMNIROUTE_SERVER_HOST=127.0.0.1"
+Environment="DATA_DIR=%h/.local/state/omniroute"
+Environment="OMNIROUTE_NO_UPDATE_NOTIFIER=1"
+EnvironmentFile=-%h/.local/state/dotfiles/ai/omniroute.env
+ExecStart=/run/current-system/sw/bin/omniroute serve --no-open --no-tray
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
