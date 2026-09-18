@@ -1,0 +1,18 @@
+.git
+node_modules
+.nix*
+.env
+.env.*
+secrets
+*.key
+*.pem
+.ssh
+.gnupg
+.aws
+.kube
+docker credentials
+dist
+build
+target
+vendor
+.cache

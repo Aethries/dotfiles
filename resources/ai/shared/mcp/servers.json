@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "godot": {
+      "command": "godot-mcp",
+      "args": [],
+      "env": {
+        "GODOT_PATH": "godot"
+      }
+    },
+    "codegraph": {
+      "command": "codegraph-mcp",
+      "args": []
+    }
+  }
+}

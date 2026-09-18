@@ -1,0 +1,14 @@
+{
+  "version": "2.2.0",
+  "image": "docker.io/maximhq/bifrost:v2.2.0",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "enabledByDefault": false,
+  "omniroute": {
+    "enabledVariable": "BIFROST_ENABLED",
+    "baseUrlVariable": "BIFROST_BASE_URL",
+    "routingVariable": "OMNIROUTE_RELAY_BACKEND",
+    "baseUrl": "http://127.0.0.1:8080",
+    "routing": "auto"
+  }
+}

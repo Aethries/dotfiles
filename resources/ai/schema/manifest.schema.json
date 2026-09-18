@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aethries.github.io/dotfiles/ai-manifest.schema.json",
+  "type": "object",
+  "required": ["schemaVersion", "gateway", "endpoint", "apiEndpoint", "tools", "clients", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "gateway": { "type": "string", "const": "omniroute" },
+    "endpoint": { "type": "string", "format": "uri", "pattern": "^http://127\\.0\\.0\\.1:20128$" },
+    "apiEndpoint": { "type": "string", "format": "uri", "pattern": "^http://127\\.0\\.0\\.1:20128/v1$" },
+    "clients": { "type": "array", "const": ["codex", "gemini", "antigravity"] },
+    "tools": {
+      "type": "object",
+      "required": ["omniroute", "rtk", "caveman", "codegraph", "bifrost"],
+      "additionalProperties": false,
+      "properties": {
+        "omniroute": {
+          "type": "object",
+          "required": ["version", "source", "release", "npmIntegrity", "npmSha256", "autostart", "host", "port", "dataDir"],
+          "additionalProperties": false,
+          "properties": {
+            "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "source": { "type": "string", "format": "uri" },
+            "release": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "npmIntegrity": { "type": "string", "pattern": "^sha512-[A-Za-z0-9+/]+=*$" },
+            "npmSha256": { "type": "string", "pattern": "^sha256-[A-Za-z0-9+/]+=*$" },
+            "autostart": { "type": "boolean", "const": true },
+            "host": { "type": "string", "const": "127.0.0.1" },
+            "port": { "type": "integer", "minimum": 1024, "maximum": 65535, "const": 20128 },
+            "dataDir": { "type": "string", "const": "~/.local/state/omniroute" }
+          }
+        },
+        "rtk": {
+          "allOf": [
+            { "$ref": "#/$defs/pinnedTool" },
+            { "type": "object", "required": ["sha256"], "properties": { "sha256": { "$ref": "#/$defs/platformChecksums" } } }
+          ]
+        },
+        "caveman": {
+          "allOf": [
+            { "$ref": "#/$defs/pinnedTool" },
+            { "type": "object", "required": ["revision", "skillSha256"] }
+          ]
+        },
+        "codegraph": {
+          "allOf": [
+            { "$ref": "#/$defs/pinnedTool" },
+            { "type": "object", "required": ["sha256", "mcpProfile"] }
+          ]
+        },
+        "bifrost": {
+          "type": "object",
+          "required": ["version", "source", "image", "port", "enabled", "imageDigest"],
+          "additionalProperties": false,
+          "properties": {
+            "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "source": { "type": "string", "format": "uri" },
+            "image": { "type": "string", "pattern": "^docker\\.io/maximhq/bifrost:v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+            "port": { "type": "integer", "minimum": 1024, "maximum": 65535, "const": 8080 },
+            "enabled": { "type": "boolean", "const": false },
+            "imageDigest": {
+              "type": "object",
+              "required": ["x86_64-linux", "aarch64-linux"],
+              "additionalProperties": false,
+              "properties": {
+                "x86_64-linux": { "$ref": "#/$defs/digest" },
+                "aarch64-linux": { "$ref": "#/$defs/digest" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "required": ["runtime", "cache", "workspace"],
+      "additionalProperties": false,
+      "properties": {
+        "runtime": { "type": "string" },
+        "cache": { "type": "string" },
+        "workspace": { "type": "string", "const": "workspace-local" }
+      }
+    }
+  },
+  "$defs": {
+    "pinnedTool": {
+      "type": "object",
+      "required": ["version", "source", "release"],
+      "additionalProperties": true,
+      "properties": {
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "source": { "type": "string", "format": "uri" },
+        "release": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "platformChecksums": {
+      "type": "object",
+      "required": ["x86_64-linux", "aarch64-linux"],
+      "additionalProperties": false,
+      "properties": {
+        "x86_64-linux": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "aarch64-linux": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

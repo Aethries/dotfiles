@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "gateway": "omniroute",
+  "endpoint": "http://127.0.0.1:20128",
+  "apiEndpoint": "http://127.0.0.1:20128/v1",
+  "tools": {
+    "omniroute": {
+      "version": "3.8.50",
+      "source": "https://github.com/diegosouzapw/OmniRoute",
+      "release": "v3.8.50",
+      "npmIntegrity": "sha512-qK6REDWQYGh8lwGwDgFMsBqAMXnxIePudr8cSuSYeB9iIlywNhDJxHKt6Cwa31lPci8jXE5bbvl+az0lvyt0Mg==",
+      "npmSha256": "sha256-c4xYrx+q6MV+tkOpOdEZH41+CD2Sle9haH0r/wSHjCk=",
+      "autostart": true,
+      "host": "127.0.0.1",
+      "port": 20128,
+      "dataDir": "~/.local/state/omniroute"
+    },
+    "rtk": {
+      "version": "0.48.0",
+      "source": "https://github.com/rtk-ai/rtk",
+      "release": "v0.48.0",
+      "sha256": {
+        "x86_64-linux": "e4e650fa1677c0de2f6839a6040d7b17f312d32f163c402b75af70e9e5af1a91",
+        "aarch64-linux": "5ed65486a96077bd6bba7c87fdc9d0e4a1918d19619be3c87380888389a30c7c"
+      }
+    },
+    "caveman": {
+      "version": "2.7.0",
+      "source": "https://github.com/JuliusBrussee/caveman",
+      "release": "v2.7.0",
+      "revision": "e6c5e68b0064758b8106b83df41cf3829dde3216",
+      "skillSha256": "0a3fe1abc7a26081c2565848edd81af744872a8860df4becadbd3b5ac7b51aa4"
+    },
+    "codegraph": {
+      "version": "0.20.1",
+      "source": "https://github.com/codegraph-ai/CodeGraph",
+      "release": "v0.20.1",
+      "sha256": {
+        "x86_64-linux": "32b26422fa5ffe0a130955b7f7df771f722b2d427d67f53f104d9907bdfb24a6",
+        "aarch64-linux": "e549f2378f7911680b88ff4a86a66e783c7911d66b1d6ec09743d7afff53c1cf"
+      },
+      "mcpProfile": "core"
+    },
+    "bifrost": {
+      "version": "2.2.0",
+      "source": "https://github.com/maximhq/bifrost",
+      "release": "v2.2.0",
+      "image": "docker.io/maximhq/bifrost:v2.2.0",
+      "port": 8080,
+      "enabled": false,
+      "imageDigest": {
+        "x86_64-linux": "sha256:5857d3a4061b16f47fdeeb060920f6cb0399bed1b320d408b94e41578ad667b0",
+        "aarch64-linux": "sha256:d2c81d1dbfb11e0e0deea4a7bc6eea3b49503f05b76b4d18d7b34dcb9a24369b"
+      }
+    }
+  },
+  "clients": ["codex", "gemini", "antigravity"],
+  "state": {
+    "runtime": "~/.local/state/dotfiles/ai",
+    "cache": "~/.cache/dotfiles/ai",
+    "workspace": "workspace-local"
+  }
+}
