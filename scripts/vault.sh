@@ -270,7 +270,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity-ide" "9router/cli.js")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "9router/cli.js")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -334,10 +334,12 @@ cmd_restore() {
     rm -f "$USER_HOME/.antigravity-ide/code.lock" 2>/dev/null || true
     rm -f "$USER_HOME/.gemini/antigravity-cli/knowledge/knowledge.lock" 2>/dev/null || true
     rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true
+    rm -f "$USER_HOME/.gemini/antigravity/knowledge/knowledge.lock" 2>/dev/null || true
+    rm -f "$USER_HOME/.gemini/antigravity/presence"/*.lock 2>/dev/null || true
 
     echo
     success "Secret Vault restored successfully!"
-    echo "  All Chrome profiles, Keyrings, Telegram, Slack, Antigravity CLI/IDE, and SSH keys are ready."
+    echo "  All Chrome profiles, Keyrings, Telegram, Slack, Antigravity 2.0 / CLI / IDE, and SSH keys are ready."
     echo "  Session services are being restarted; launch your apps again when this command finishes."
 
     finish_restore_runtime 0

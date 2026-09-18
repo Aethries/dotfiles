@@ -320,7 +320,7 @@ window-rule {
     }
 }
 window-rule {
-    match app-id="^antigravity-ide$"
+    match app-id=r#"^(antigravity|Antigravity|antigravity-ide)$"#
     default-column-width {
         proportion 0.8
     }
@@ -460,16 +460,16 @@ window-rule {
         }
     }
 }
-// Cấu hình độ trong suốt (opacity) cho Kitty và Antigravity IDE khi đang active (focus)
+// Cấu hình độ trong suốt (opacity) cho Kitty và Antigravity khi đang active (focus)
 window-rule {
     match app-id="^kitty$"
-    match app-id="^antigravity-ide$"
+    match app-id=r#"^(antigravity|Antigravity|antigravity-ide)$"#
     opacity 0.86
 }
 // Khi không active (unfocused), làm mờ hơn để tách biệt rõ ràng
 window-rule {
     match app-id="^kitty$" is-active=false
-    match app-id="^antigravity-ide$" is-active=false
+    match app-id=r#"^(antigravity|Antigravity|antigravity-ide)$"# is-active=false
     opacity 0.8
 }
 // Các cửa sổ thông thường khác khi không active
@@ -513,6 +513,9 @@ binds {
     }
     Mod+A hotkey-overlay-title="Open Editor: Antigravity IDE" {
         spawn-sh "win_id=$(niri msg -j windows 2>/dev/null | jq -r '.[] | select(.app_id == \"antigravity-ide\") | .id' | head -n1); if [ -n \"$win_id\" ]; then niri msg action focus-window --id \"$win_id\"; else antigravity-ide; fi"
+    }
+    Mod+Ctrl+A hotkey-overlay-title="Open Agent: Google Antigravity 2.0" {
+        spawn-sh "win_id=$(niri msg -j windows 2>/dev/null | jq -r '.[] | select((.app_id // \"\" | test(\"^antigravity$\"; \"i\")) and .app_id != \"antigravity-ide\") | .id' | head -n1); if [ -n \"$win_id\" ]; then niri msg action focus-window --id \"$win_id\"; else antigravity; fi"
     }
     Mod+B hotkey-overlay-title="Open Browser: Google Chrome" {
         spawn "google-chrome"

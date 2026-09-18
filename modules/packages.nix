@@ -55,6 +55,7 @@ let
                 fi
         '';
       });
+  antigravity = antigravityFlake.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity;
   antigravityCli = llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli;
 
   lark = pkgs.callPackage ../pkgs/lark.nix { };
@@ -168,6 +169,7 @@ in
     # Editors & AI Tools
     # ----------------------------------------------------------
     neovide
+    antigravity
     antigravityIde
     antigravityCli
     codex

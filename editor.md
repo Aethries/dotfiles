@@ -113,6 +113,14 @@ resources/antigravity/
 - `extensions.lock.json`: Chỉ áp dụng cho third-party extensions (như `asvetliakov.vscode-neovim`), chứa id, version, source và checksum. Không can thiệp vào built-in core extensions của Antigravity/JetSki.
 - Live theme reload: Antigravity không bắt POSIX signal; áp dụng theme qua File Watcher của local theme extension đọc `generated/noctalia-theme.json` và inject CSS variables vào `custom.css` để Monaco tự động hot-reload mà không cần restart window.
 
+### 3.2.1 Google Antigravity 2.0 (Desktop Orchestration App)
+
+- **Package**: `antigravity` (từ `antigravityFlake.packages.${system}.google-antigravity`, binary `antigravity`, desktop entry `antigravity.desktop`).
+- **Phân biệt với Antigravity IDE**: Antigravity 2.0 là desktop app độc lập (Electron) quản lý và điều phối Agent, Chat Canvas, Scheduled Tasks, Auxiliary Pane (Subagents, Artifacts, Terminals), độc lập khỏi editor.
+- **MCP Configuration**: Tự động liên kết `resources/gemini/mcp_config.json` sang cả `~/.gemini/config/mcp_config.json` và `~/.gemini/antigravity/mcp_config.json`.
+- **Runtime State & Conversations Sync**: Dữ liệu phiên làm việc (`~/.gemini/antigravity/conversations/`, `brain/`, `html_artifacts/`) được đồng bộ bảo mật qua `scripts/vault.sh` (mã hóa Zero-Knowledge `secrets.vault`).
+- **Niri Window Management**: `Mod+Ctrl+A` mở hoặc focus nhanh Antigravity 2.0; tỉ lệ cột 0.8 và opacity thống nhất theo Noctalia.
+
 ### 3.3 User activation
 
 Chuyển quản lý user files sang cấu hình Nix/Home Manager tích hợp trong flake:
