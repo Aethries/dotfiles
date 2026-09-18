@@ -94,6 +94,7 @@ CANDIDATE_PATHS=(
     ".antigravity"
     ".9router"
     ".codex"
+    ".config/ChatGPT"
 )
 
 EXCLUDE_PATTERNS=(
@@ -270,7 +271,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "9router/cli.js")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -280,9 +281,11 @@ cmd_restore() {
         fi
     done
 
-    if pgrep -u "$UID" -x codex >/dev/null 2>&1; then
-        info "Terminating running Codex process before restoring ~/.codex..."
+    if pgrep -u "$UID" -x codex >/dev/null 2>&1 || pgrep -u "$UID" -f '[c]hatgpt' >/dev/null 2>&1 || pgrep -u "$UID" -f '[C]hatGPT' >/dev/null 2>&1; then
+        info "Terminating running Codex / ChatGPT process before restoring vault..."
         pkill -TERM -u "$UID" -x codex 2>/dev/null || true
+        pkill -TERM -u "$UID" -f '[c]hatgpt' 2>/dev/null || true
+        pkill -TERM -u "$UID" -f '[C]hatGPT' 2>/dev/null || true
         closed_any=true
     fi
     if [ "$closed_any" = true ]; then
@@ -336,6 +339,7 @@ cmd_restore() {
     rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true
     rm -f "$USER_HOME/.gemini/antigravity/knowledge/knowledge.lock" 2>/dev/null || true
     rm -f "$USER_HOME/.gemini/antigravity/presence"/*.lock 2>/dev/null || true
+    rm -f "$USER_HOME/.codex/thread-writer-locks"/* 2>/dev/null || true
 
     echo
     success "Secret Vault restored successfully!"
@@ -373,7 +377,7 @@ cmd_clean() {
         ["chat"]=".config/Slack .config/discord .config/feishu .local/share/feishu .config/LarkShell"
         ["ssh"]=".ssh"
         ["gnupg"]=".gnupg"
-        ["dev"]=".config/.jira .jira .config/jira-app .docker/config.json .npmrc .codex"
+        ["dev"]=".config/.jira .jira .config/jira-app .docker/config.json .npmrc .codex .config/ChatGPT"
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
         ["router"]=".9router"

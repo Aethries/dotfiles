@@ -63,6 +63,11 @@ let
       (old: {
         postInstall = (old.postInstall or "") + ''
           ln -s chatgpt $out/bin/codex-desktop
+          rm $out/share
+          mkdir -p $out/share
+          cp -r --no-preserve=mode ${
+            llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt.unwrapped
+          }/share/* $out/share/
           cat << 'EOF' > $out/share/applications/codex-desktop.desktop
           [Desktop Entry]
           Name=Codex Desktop
