@@ -103,15 +103,4 @@
   # ----------------------------------------------------------
   services.cloudflare-warp.enable = true; # Lần đầu dùng: 1111 register && 1111 connect
 
-  # ----------------------------------------------------------
-  # 9router DNS Routing (MITM Proxy)
-  # Add 9router-managed hostnames here so they survive nixos-rebuild.
-  # DO NOT manually edit /etc/hosts — it is a read-only Nix store symlink
-  # that gets reset on every rebuild. Use networking.extraHosts instead.
-  # The actual entries are also synced at runtime via init-9router.sh.
-  # ----------------------------------------------------------
-  networking.extraHosts = ''
-    127.0.0.1 daily-cloudcode-pa.googleapis.com
-    127.0.0.1 cloudcode-pa.googleapis.com
-  '';
 }

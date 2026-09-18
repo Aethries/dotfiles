@@ -118,7 +118,7 @@ Godot 4, the graphical editor, export templates, `godotpcktool`, and the Godot M
 ```
 
 - **Neovim GDScript integration**: Open the project in Godot first, then edit `.gd` files in Neovim. Neovim connects to Godot's LSP on port `6005`. Debug via `<leader>dc` on DAP port `6006`.
-- **Editor settings sync**: `scripts/sync-editors.sh` links Neovim and Antigravity configs, locks extension checksums, and loads Godot MCP (`resources/gemini/mcp_config.json`).
+- **Editor settings sync**: `scripts/sync-editors.sh` links Neovim and Antigravity configs and locks extension checksums. AI client MCP configuration is generated and linked by `scripts/ai.sh` from `resources/ai/shared/mcp/servers.json`.
 
 ---
 

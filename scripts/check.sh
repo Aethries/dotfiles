@@ -4,8 +4,11 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
-shellcheck scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
+bash -n scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+shellcheck scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+
+bash tests/ai/manifest_test.sh >/dev/null
+bash tests/ai/security_test.sh >/dev/null
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
@@ -36,6 +39,13 @@ jq empty \
     resources/antigravity/product.json \
     resources/antigravity/extensions.lock.json \
     resources/gemini/mcp_config.json \
+    resources/ai/manifest.json \
+    resources/ai/schema/manifest.schema.json \
+    resources/ai/omniroute/config.template.json \
+    resources/ai/bifrost/config.template.json \
+    resources/ai/shared/mcp/servers.json \
+    resources/ai/generated/gemini/mcp_config.json \
+    resources/ai/generated/antigravity/mcp_config.json \
     resources/static/default.code-profile
 jq -e '
     .extensions
@@ -47,13 +57,14 @@ jq -e '
     )
 ' resources/antigravity/extensions.lock.json >/dev/null
 # Validate unit structure without requiring optional per-user runtime binaries
-# (for example ~/.local/bin/9router) to exist on the checking machine.
+# (for example a local provider credential) to exist on the checking machine.
 service_check_dir="$(mktemp -d -t dotfiles-systemd-check-XXXXXX)"
 trap 'rm -rf "$service_check_dir"' EXIT
 for service in resources/systemd/user/*.service; do
     sed \
         -e 's|^ExecStartPre=.*|ExecStartPre=/run/current-system/sw/bin/true|' \
         -e 's|^ExecStart=.*|ExecStart=/run/current-system/sw/bin/true|' \
+        -e 's|^ExecStop=.*|ExecStop=/run/current-system/sw/bin/true|' \
         "$service" > "$service_check_dir/$(basename "$service")"
 done
 SYSTEMD_UNIT_PATH="$service_check_dir:/nix/var/nix/profiles/system/etc/systemd/system:/run/current-system/sw/lib/systemd/system" systemd-analyze verify "$service_check_dir"/*.service
@@ -74,5 +85,10 @@ if command -v zellij >/dev/null; then
     ZELLIJ_CONFIG_DIR="$PWD/resources/zellij" zellij setup --dump-layout compact >/dev/null
     ZELLIJ_CONFIG_DIR="$PWD/resources/zellij" zellij setup --dump-layout work >/dev/null
 fi
+
+bash tests/ai/sync_test.sh >/dev/null
+bash tests/ai/service_test.sh >/dev/null
+bash tests/ai/migration_test.sh >/dev/null
+bash tests/ai/codegraph_test.sh >/dev/null
 
 echo "All checks passed."

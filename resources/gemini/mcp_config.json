@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "codegraph": {
+      "command": "codegraph-mcp",
+      "args": []
+    },
     "godot": {
       "command": "godot-mcp",
       "args": [],

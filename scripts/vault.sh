@@ -14,7 +14,7 @@
 # - GitHub CLI auth & Jira tokens
 # - Docker authentication
 # - Antigravity CLI & Antigravity IDE (sessions, credentials, conversation history)
-# - 9router credentials, sessions, and MITM Root CA
+# - OmniRoute provider credentials, encrypted database, and persistent settings
 # ============================================================
 
 set -euo pipefail
@@ -92,7 +92,7 @@ CANDIDATE_PATHS=(
     ".gemini"
     ".antigravity-ide"
     ".antigravity"
-    ".9router"
+    ".local/state/omniroute"
     ".codex"
     ".config/ChatGPT"
 )
@@ -128,10 +128,10 @@ EXCLUDE_PATTERNS=(
     "*/presence/*"
     "*/crashes/*"
     "*/webm_encoder"
-    "*/.9router/logs/*"
-    "*/.9router/runtime/*"
-    "*/.9router/model-catalog-raw.json"
-    "*/.9router/**/*.pid"
+    "*/.local/state/omniroute/logs/*"
+    "*/.local/state/omniroute/runtime/*"
+    "*/.local/state/omniroute/cache/*"
+    "*/.local/state/omniroute/**/*.pid"
 )
 
 ensure_user_owned() {
@@ -163,7 +163,7 @@ prepare_restore_permissions() {
 
 RESTORE_TMP=""
 RESTORE_RESTART_KEYRING=false
-RESTORE_RESTART_9ROUTER=false
+RESTORE_RESTART_OMNIROUTE=false
 
 finish_restore_runtime() {
     local status="$1"
@@ -179,10 +179,13 @@ finish_restore_runtime() {
         fi
     fi
 
-    if [ "$RESTORE_RESTART_9ROUTER" = true ] && command -v systemctl >/dev/null 2>&1; then
-        info "Restarting 9router service..."
-        if ! systemctl --user start 9router.service; then
-            warn "9router could not be restarted. Run 'init-9router' after this restore."
+    if [ "$RESTORE_RESTART_OMNIROUTE" = true ] && command -v systemctl >/dev/null 2>&1; then
+        info "Restarting OmniRoute service..."
+        if ! systemctl --user start omniroute.service; then
+            warn "OmniRoute could not be restarted. Run './scripts/ai.sh restart' after this restore."
+        elif command -v curl >/dev/null 2>&1; then
+            curl --fail --silent --max-time 5 http://127.0.0.1:20128/api/health/ping >/dev/null \
+                || warn "OmniRoute restarted but health probe failed."
         fi
     fi
 
@@ -260,11 +263,13 @@ cmd_restore() {
     prepare_restore_permissions
 
     # Preserve whether user-session services need to come back after the copy.
-    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet 9router.service; then
-        RESTORE_RESTART_9ROUTER=true
-        systemctl --user stop 9router.service
-    elif pgrep -u "$UID" -f '[9]router/cli.js' >/dev/null 2>&1; then
-        RESTORE_RESTART_9ROUTER=true
+    # Chỉ restore lại service nếu nó active trước khi restore. Không tự bật
+    # OmniRoute trên máy vốn đang để service inactive.
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service; then
+        RESTORE_RESTART_OMNIROUTE=true
+        systemctl --user stop omniroute.service
+    elif pgrep -u "$UID" -f '[o]mniroute' >/dev/null 2>&1; then
+        RESTORE_RESTART_OMNIROUTE=true
     fi
 
     if pgrep -u "$UID" -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
@@ -274,7 +279,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "omniroute")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -383,7 +388,7 @@ cmd_clean() {
         ["dev"]=".config/.jira .jira .config/jira-app .docker/config.json .npmrc .codex .config/ChatGPT"
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
-        ["router"]=".9router"
+        ["router"]=".local/state/omniroute"
         ["phone"]=".config/kdeconnect"
     )
 

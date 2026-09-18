@@ -321,12 +321,15 @@ if [ -f "$REPO_ROOT/resources/static/jira.svg" ]; then
     safe_link "$REPO_ROOT/resources/static/jira.svg" "$USER_HOME/.local/share/icons/hicolor/scalable/apps/jira.svg"
 fi
 
-# Systemd user services (e.g. 9router autostart)
+# Non-AI systemd user services. AI services use strict ownership checks in ai.sh.
 if [ -d "$REPO_ROOT/resources/systemd/user" ]; then
     mkdir -p "$USER_HOME/.config/systemd/user"
     for srv in "$REPO_ROOT/resources/systemd/user/"*.service; do
         if [ -f "$srv" ]; then
-            safe_link "$srv" "$USER_HOME/.config/systemd/user/$(basename "$srv")"
+            case "$(basename "$srv")" in
+                omniroute.service|bifrost.service) ;;
+                *) safe_link "$srv" "$USER_HOME/.config/systemd/user/$(basename "$srv")" ;;
+            esac
         fi
     done
 fi
@@ -345,8 +348,9 @@ safe_link "$REPO_ROOT/scripts/doctor.sh" "$USER_HOME/.local/bin/doctor"
 safe_link "$REPO_ROOT/scripts/check.sh" "$USER_HOME/.local/bin/dotfiles-check"
 safe_link "$REPO_ROOT/scripts/tunnel.sh" "$USER_HOME/.local/bin/tunnel"
 safe_link "$REPO_ROOT/scripts/cleanup.sh" "$USER_HOME/.local/bin/cleanup"
-safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9router"
-safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
+safe_link "$REPO_ROOT/scripts/ai.sh" "$USER_HOME/.local/bin/ai"
+safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
+safe_link "$REPO_ROOT/scripts/sync-ai.sh" "$USER_HOME/.local/bin/sync-ai"
 
 # Configure user-level npm global prefix to prevent writing into read-only /nix/store
 if command -v npm >/dev/null 2>&1; then
@@ -391,8 +395,16 @@ sudo nixos-rebuild switch \
 
 success "NixOS configuration applied successfully!"
 
+info "Generating AI client configuration..."
+"$REPO_ROOT/scripts/ai.sh" generate
+
 info "Synchronizing editor configuration and extensions..."
 "$REPO_ROOT/scripts/sync-editors.sh"
+
+info "Bootstrapping AI Assistant stack..."
+if ! "$REPO_ROOT/scripts/ai.sh" bootstrap; then
+    error "AI Assistant bootstrap failed; NixOS bootstrap is incomplete. Run ./scripts/ai.sh doctor for remediation."
+fi
 
 
 # ------------------------------------------------------------

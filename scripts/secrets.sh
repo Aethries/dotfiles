@@ -4,7 +4,7 @@
 # Dotfiles Secrets Encryptor / Decryptor
 #
 # Authenticated passphrase encryption (age + Zstd)
-# Used to store sensitive project configurations (.env, 9router.json, etc.)
+# Used to store sensitive project configurations (.env, provider settings, etc.)
 # ============================================================
 
 set -euo pipefail

@@ -75,12 +75,6 @@ safe_link \
 safe_link \
     "$REPO_ROOT/resources/antigravity/User/keybindings.generated.jsonc" \
     "$TARGET_HOME/.antigravity-ide/User/keybindings.json"
-safe_link \
-    "$REPO_ROOT/resources/gemini/mcp_config.json" \
-    "$TARGET_HOME/.gemini/config/mcp_config.json"
-safe_link \
-    "$REPO_ROOT/resources/gemini/mcp_config.json" \
-    "$TARGET_HOME/.gemini/antigravity/mcp_config.json"
 
 TEMPLATE_SOURCE="${GODOT_EXPORT_TEMPLATES_SOURCE:-/run/current-system/sw/share/godot/export_templates}"
 if [ -d "$TEMPLATE_SOURCE" ]; then
@@ -94,14 +88,10 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.config/nvim" \
         "$TARGET_HOME/.config/antigravity" \
         "$TARGET_HOME/.antigravity-ide/User/settings.json" \
-        "$TARGET_HOME/.antigravity-ide/User/keybindings.json" \
-        "$TARGET_HOME/.gemini/config/mcp_config.json" \
-        "$TARGET_HOME/.gemini/antigravity/mcp_config.json" 2>/dev/null || true
+        "$TARGET_HOME/.antigravity-ide/User/keybindings.json"
     chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
 fi
-success "Neovim, Antigravity, Godot MCP and template links are synchronized"
+success "Neovim, Antigravity, and template links are synchronized"
 
 if [ "$SYNC_EXTENSIONS" = false ]; then
     exit 0

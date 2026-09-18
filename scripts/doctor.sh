@@ -102,7 +102,7 @@ check_link "$HOME/.config/nvim" "Neovim Configuration"
 check_link "$HOME/.config/antigravity" "Antigravity Overlay Configuration"
 check_link "$HOME/.antigravity-ide/User/settings.json" "Antigravity User Settings"
 check_link "$HOME/.antigravity-ide/User/keybindings.json" "Antigravity Keybindings"
-check_link "$HOME/.gemini/config/mcp_config.json" "Antigravity Godot MCP Configuration"
+check_link "$HOME/.gemini/config/mcp_config.json" "AI MCP Configuration"
 check_link "$HOME/.local/share/godot/export_templates" "Godot Export Templates"
 check_link "$HOME/.config/zellij" "Zellij Multiplexer"
 check_link "$HOME/.config/starship.toml" "Starship Prompt"
@@ -121,8 +121,9 @@ check_link "$HOME/.local/bin/doctor" "CLI: doctor"
 check_link "$HOME/.local/bin/dotfiles-check" "CLI: dotfiles-check"
 check_link "$HOME/.local/bin/tunnel" "CLI: tunnel"
 check_link "$HOME/.local/bin/cleanup" "CLI: cleanup"
-check_link "$HOME/.local/bin/init-9router" "CLI: init-9router"
-check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
+check_link "$HOME/.local/bin/ai" "CLI: ai"
+check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
+check_link "$HOME/.local/bin/sync-ai" "CLI: sync-ai"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
 else
@@ -218,7 +219,11 @@ check_service "docker" "Docker Daemon"
 check_service "bluetooth" "Bluetooth Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
-check_user_service "9router" "9router Local AI Gateway"
+if "$REPO_ROOT/scripts/ai.sh" doctor; then
+    ok "AI Assistant stack"
+else
+    fail "AI Assistant stack has failures (run ./scripts/ai.sh doctor for remediation)"
+fi
 
 # ------------------------------------------------------------------------------
 # 5. Disk Space & Store Health

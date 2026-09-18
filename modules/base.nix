@@ -14,11 +14,6 @@
   documentation.nixos.enable = false;
   environment.localBinInPath = true;
 
-  # Trusted Root CA Certificates (9router MITM Proxy)
-  security.pki.certificateFiles = [
-    ../resources/certs/9router-rootCA.crt
-  ];
-
   # (Lưu ý: SSH Agent được cung cấp và tự động mở khóa qua services.gnome.gcr-ssh-agent từ modules/desktop.nix)
 
   # ----------------------------------------------------------
