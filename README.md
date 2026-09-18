@@ -1,24 +1,102 @@
-# NixOS dotfiles
+<div align="center">
 
-Personal x86_64 NixOS configuration for an Intel-graphics workstation running
-Niri and Noctalia. Machine hardware and user settings are generated under
-`.machine/` and intentionally stay out of Git.
+# ❄️ NixOS Dotfiles
 
-## Install
+**Declarative, aesthetic, and reproducible workstation powered by Nix Flakes, Niri, Zellij, and Noctalia.**
 
-From an existing NixOS system:
+[![NixOS](https://img.shields.io/badge/NixOS-Unstable-blue?logo=nixos&logoColor=white&style=for-the-badge)](https://nixos.org)
+[![Wayland](https://img.shields.io/badge/Wayland-Niri-orange?logo=wayland&logoColor=white&style=for-the-badge)](https://github.com/YaLTeR/niri)
+[![Terminal](https://img.shields.io/badge/Multiplexer-Zellij-green?logo=gnubash&logoColor=white&style=for-the-badge)](https://zellij.dev)
+[![Editor](https://img.shields.io/badge/Editor-Neovim%20%26%20Godot-lightblue?logo=neovim&logoColor=white&style=for-the-badge)](https://neovim.io)
+[![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)](LICENSE)
+
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#key-features">Key Features</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#quickstart">Quickstart</a> •
+  <a href="#keybindings">Keybindings</a> •
+  <a href="#secrets--security">Security</a> •
+  <a href="#testing--qa">QA</a>
+</p>
+
+</div>
+
+---
+
+## Overview
+
+Personal `x86_64` NixOS configuration for a workstation driving **Niri** (scrollable-tiling Wayland compositor) and **Noctalia** (integrated design system). Machine hardware configurations and private user secrets stay separated under `.machine/` and `secrets/`, keeping the core repository clean, modular, and fully reproducible.
+
+---
+
+## Key Features
+
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Compositor** | [Niri](https://github.com/YaLTeR/niri) | Dynamic infinite-horizontal scrollable tiling Wayland compositor. |
+| **Theme & UI** | Noctalia + Matugen | Unified dynamic theme across GTK, Kitty, Zellij, and desktop widgets. |
+| **Multiplexer** | [Zellij](https://zellij.dev) | Headless session persistence, custom `zjstatus` bar, cross-pane navigation. |
+| **Terminal** | [Kitty](https://sw.kovidgoyal.net/kitty/) | GPU-accelerated terminal renderer linked directly to Zellij session launcher. |
+| **Editor** | [Neovim](https://neovim.io) | Tailored Lua setup with LSP, DAP, and seamless split-to-pane navigation. |
+| **Game Dev** | [Godot 4](https://godotengine.org) | Pinned engine, headless LSP daemon, DAP debugging, and Godot MCP server. |
+| **Shell & CLI** | Zsh + Starship | Blazing fast prompt, fastfetch, and Yazi terminal file manager. |
+| **Security** | Age & Vault | Local authenticated encrypted archives; zero plain-text leaks to git. |
+
+---
+
+## Architecture
+
+The flake separates declarative Nix configurations from user-specific dotfiles and machine targets:
+
+```text
+.
+├── configuration.nix       # Top-level NixOS system entry point
+├── flake.nix               # Flake inputs, outputs, checks, and devShells
+├── modules/                # Composable NixOS system modules
+│   ├── base.nix            # Core boot, kernel, locale, nix settings
+│   ├── desktop.nix         # Wayland, Niri, portals, audio, display
+│   ├── godot.nix           # Godot 4 package, tooling, and editor sync
+│   ├── packages.nix        # System-wide CLI & GUI package definitions
+│   ├── services.nix        # Systemd user services, daemons, background tasks
+│   └── zellij.nix          # Multiplexer configuration module
+├── resources/              # User configuration files linked to $HOME
+│   ├── kitty/              # Kitty terminal configuration & themes
+│   ├── niri/               # Niri compositor config (config.kdl)
+│   ├── noctalia/           # Noctalia theme definitions & palettes
+│   ├── nvim/               # Neovim lua configuration & plugins
+│   ├── starship/           # Starship prompt configuration
+│   ├── systemd/            # Validated systemd user unit templates
+│   └── zellij/             # Layouts, status bar, and launcher scripts
+├── scripts/                # Bootstrapping, installer, checking & test scripts
+└── tests/                  # Automated test suites (vault, zellij launcher)
+```
+
+---
+
+## Quickstart
+
+### 1. Existing NixOS Installation
+
+Bootstrap configuration onto an existing NixOS system:
 
 ```sh
+git clone https://github.com/Aethries/dotfiles.git ~/Workspaces/dotfiles
+cd ~/Workspaces/dotfiles
 ./scripts/bootstrap.sh
 ```
 
-From a NixOS live ISO, review the selected disk carefully before confirming:
+### 2. Fresh Installation (Live ISO)
+
+Review target storage disks carefully before running:
 
 ```sh
 sudo ./scripts/nixos-installer.sh
 ```
 
-Rebuild and validate:
+### 3. Rebuild & Health Check
+
+Rebuild system generations and run the doctor diagnostics suite:
 
 ```sh
 ./scripts/build.sh switch
@@ -26,126 +104,72 @@ Rebuild and validate:
 ./scripts/doctor.sh
 ```
 
-`system.stateVersion` must remain the NixOS version used for the machine's first
-installation. Do not bump it during normal upgrades.
+> [!NOTE]
+> `system.stateVersion` must remain the NixOS version used for the machine's initial installation. Do not bump it during regular updates.
 
-## Godot development
+---
 
-Godot 4, its editor UI, matching export templates, `godotpcktool` and the Godot
-MCP server are pinned through `flake.lock`. Apply them and synchronize the
-repo-owned editor settings with:
+## Godot Development
+
+Godot 4, the graphical editor, export templates, `godotpcktool`, and the Godot MCP server are pinned in `flake.lock`.
 
 ```sh
 ./scripts/build.sh switch
 ```
 
-The build calls `scripts/sync-editors.sh` after a successful activation. It
-links Neovim and Antigravity settings from `resources/`, links Godot export
-templates from the active NixOS profile, and installs checksum-verified versions
-of the Antigravity extensions declared in
-`resources/antigravity/extensions.lock.json`. Existing regular files are moved
-to timestamped `.pre-dotfiles.*` backups before a managed link replaces them.
-Antigravity also receives the repo-owned Godot MCP configuration from
-`resources/gemini/mcp_config.json`, allowing its agent to launch and inspect
-Godot projects through the packaged `godot-mcp` command.
+- **Neovim GDScript integration**: Open the project in Godot first, then edit `.gd` files in Neovim. Neovim connects to Godot's LSP on port `6005`. Debug via `<leader>dc` on DAP port `6006`.
+- **Editor settings sync**: `scripts/sync-editors.sh` links Neovim and Antigravity configs, locks extension checksums, and loads Godot MCP (`resources/gemini/mcp_config.json`).
 
-For GDScript in Neovim, open the project in Godot first and then edit a `.gd`
-file; Neovim connects to Godot's LSP on port 6005. Start debugging with
-`<leader>dc` while Godot's DAP server is available on port 6006. Antigravity's
-Godot Tools integration starts a headless language server automatically and can
-open the graphical editor with `Godot Tools: Open workspace with Godot editor`.
+---
 
-This setup targets GDScript. C#/.NET, Android and console export toolchains are
-intentionally not installed because each adds a much larger, target-specific
-SDK and should be enabled only when a project needs it.
+## Keybindings
 
-## Desktop and terminal behavior
+### Niri (Compositor)
 
-Niri uses workspaces, not vertical window stacks, for Vim-like vertical
-navigation:
+| Binding | Action |
+| :--- | :--- |
+| `Super + h` / `l` | Focus left / right column |
+| `Super + Ctrl + h` / `l` | Move column left / right |
+| `Super + j` / `k` | Focus workspace below / above |
+| `Super + Ctrl + j` / `k` | Move column to workspace below / above |
+| `Super + Tab` | Toggle Overview mode |
 
-- `Super+j/k`: focus the workspace below/above;
-- `Super+Ctrl+j/k`: move the current column to the workspace below/above;
-- `Super+h/l`: focus the column to the left/right;
-- `Super+Ctrl+h/l`: move the column to the left/right;
-- `Super+Tab`: toggle Overview using Niri's native controls.
+### Zellij (Multiplexer)
 
-Do not add runtime-generated plain `h/j/k/l` Overview bindings. The previous IPC
-listener could leave application keys captured outside Overview, so both the
-listener and its dynamic include have been removed. `Super+u/i` and
-`Super+Ctrl+u/i` are intentionally unbound.
+| Binding | Action |
+| :--- | :--- |
+| `Ctrl + h` / `j` / `k` / `l` | Seamless navigation between Neovim splits & Zellij panes |
+| `Ctrl + Shift + [` / `]` | Previous / Next tab (guaranteed native action) |
+| `Ctrl + Shift + 1..9` | Switch directly to tab index |
+| `Ctrl + Shift + s` | Open in-session session manager |
+| `Ctrl + Shift + Esc` | Emergency recover to `NORMAL` mode |
 
-Kitty is only the terminal renderer; Zellij owns tabs, panes and persistent
-sessions. Kitty starts a repo-managed launcher (`~/.config/zellij/scripts/launcher.sh`),
-which queries existing sessions before starting Zellij. Cancelling or closing the picker
-creates zero temporary Zellij processes or randomly named sessions. Select a running
-session to attach, an exited session to resurrect, or enter an explicit name to create a
-new workspace. Pressing `Ctrl+Z` opens a plain Zsh shell without Zellij.
+---
 
-The zjstatus bar uses Noctalia's generated primary accent and
-highlights the active tab as a rounded pill with a `●` marker. Its right side
-shows hostname, CPU %, memory %, network receive/transmit rate and root-disk
-usage %. System
-metrics come from `resources/zellij/scripts/system-status.sh` and refresh every
-three seconds.
+## Secrets & Security
 
-### Multi-client geometry and shared sessions
+Plaintext credentials stay strictly isolated in the uncommitted `secrets/` directory.
 
-In Zellij, when multiple clients attach to the same session, viewing the same tab
-enforces the smallest connected client geometry across all attached windows.
-Connecting a smaller terminal window constrains the larger terminal view.
+- **Vault encryption**: Archives use authenticated `age` passphrase encryption:
+  ```sh
+  ./scripts/secrets.sh encrypt
+  ./scripts/secrets.sh decrypt
+  ```
+- **Local-only Vault**: The `vault` utility maintains a local-only encrypted backup (`secrets.vault`). There is no automated cloud sync—users control their backup destinations safely.
 
-- **Disconnecting another client**: Press `Ctrl+Shift+s` to open the in-session manager,
-  then press `Ctrl+x` to disconnect other clients. After disconnecting the smaller client,
-  resize the Kitty window or switch tabs once to restore full window dimensions.
-- **Single-client recommendation**: For normal interactive work, attach only one
-  terminal client per session. The `pj` project switcher warns before attaching to an
-  already active session from outside Zellij.
+---
 
-### Navigation bindings
+## Testing & QA
 
-- **Tab navigation (Guaranteed native)**: `Ctrl+Shift+[` (previous tab) and `Ctrl+Shift+]`
-  (next tab), plus `Ctrl+Shift+1..9` (direct tab index). These bindings execute client-local
-  native Zellij actions and work reliably without WASM plugins.
-- **Pane and Neovim split navigation**: `Ctrl+h/j/k/l` moves seamlessly between Neovim splits
-  and Zellij panes. `Ctrl+h` and `Ctrl+l` automatically cross into adjacent tabs when reaching
-  the pane boundaries.
-
-### Troubleshooting
-
-- **Checking Zellij version**: Run `zellij --version` in any shell.
-- **UI Name distinctions**:
-  - `3:Tab #3` (rounded pill) is the **tab name** (`Ctrl+Shift+r` to rename).
-  - Title on pane border is the **pane name** (`Ctrl+Shift+,` to rename).
-  - An identifier like `project-api` is the **session name** (`zellij action rename-session <name>`).
-- **Opening the session manager**: In an active session, press `Ctrl+Shift+s`.
-- **Mode recovery**: If alphanumeric keys appear swallowed, check the left status pill.
-  If it displays `PREFIX`, `MOVE`, `SCROLL`, `SEARCH`, or a rename mode, press
-  `Ctrl+Shift+Esc` to return to `NORMAL`.
-
-## Secrets
-
-Plaintext belongs only in the ignored `secrets/` directory. New archives use
-authenticated `age` passphrase encryption:
+Every commit must satisfy rigorous local QA before deployment:
 
 ```sh
-./scripts/secrets.sh decrypt
-./scripts/secrets.sh encrypt
+./scripts/check.sh
 ```
 
-The committed `secrets.enc` may still use the legacy OpenSSL format. Decrypt it
-once and encrypt it again to migrate; the scripts retain read-only compatibility.
-
-`vault` creates a local-only encrypted archive (default: repository-local `secrets.vault`).
-The `backup`, `restore`, `list`, and destructive `clean` commands operate purely locally.
-There is no automatic remote copy or cloud synchronization; the user is responsible
-for maintaining an off-machine copy if disaster recovery is required.
-`vault restore` never fetches a missing file and fails immediately if the target archive is absent.
-Pre-existing `$HOME/.config/rclone` files are not removed automatically, but new backups omit
-rclone configuration and legacy archive restores block `.config/rclone`.
-
-Run `vault` and `init-9router` as the desktop user, without prefixing the whole
-command with `sudo`. Both scripts request `sudo` only for the ownership or
-system files they need to change. During `vault restore`, applications that keep
-credential databases open are closed, and GNOME Keyring plus 9router are
-restarted after the restored files are in place.
+The validation pipeline enforces:
+- `shellcheck` across all bash scripts and launcher hooks.
+- `nixfmt` check on all Nix expressions.
+- `nix flake check` verifying full derivation evaluation.
+- `systemd-analyze verify` on user service units.
+- Dedicated unit tests for vault encryption and Zellij launcher idempotency.
