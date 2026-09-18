@@ -265,7 +265,6 @@ function init-9router() {
     echo "init-9router script not found in ${DOTFILES_DIR:-}/scripts"
   fi
 }
-alias 9router-init="init-9router"
 
 function 9router() {
   case "${1:-}" in
