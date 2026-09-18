@@ -141,6 +141,10 @@ in
         "antigravity-ide-url-handler.desktop"
         "antigravity-ide.desktop"
       ];
+      "x-scheme-handler/codex" = [
+        "codex-desktop.desktop"
+        "chatgpt.desktop"
+      ];
     };
   };
 }

@@ -133,6 +133,11 @@ if [ -e "$HOME/.local/bin/codex" ] || command -v codex >/dev/null 2>&1; then
 else
     warn "CLI: codex not found in PATH"
 fi
+if command -v codex-desktop >/dev/null 2>&1 || command -v chatgpt >/dev/null 2>&1; then
+    ok "Desktop: codex ($(command -v codex-desktop 2>/dev/null || command -v chatgpt))"
+else
+    warn "Desktop: codex not found in PATH"
+fi
 if command -v godot >/dev/null 2>&1; then
     ok "Godot editor ($(godot --version 2>/dev/null || echo installed))"
 else

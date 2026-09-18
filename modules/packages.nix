@@ -58,6 +58,27 @@ let
   antigravity = antigravityFlake.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity;
   antigravityCli = llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli;
 
+  codexDesktop =
+    (llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt).overrideAttrs
+      (old: {
+        postInstall = (old.postInstall or "") + ''
+          ln -s chatgpt $out/bin/codex-desktop
+          cat << 'EOF' > $out/share/applications/codex-desktop.desktop
+          [Desktop Entry]
+          Name=Codex Desktop
+          Comment=OpenAI Codex & ChatGPT Desktop Application
+          GenericName=AI Coding Agent
+          Exec=chatgpt %U
+          Icon=chatgpt
+          Type=Application
+          StartupNotify=true
+          Categories=Development;IDE;Utility;
+          MimeType=x-scheme-handler/codex;
+          Keywords=codex;openai;agent;ai;chatgpt;
+          EOF
+        '';
+      });
+
   lark = pkgs.callPackage ../pkgs/lark.nix { };
 
 in
@@ -173,6 +194,7 @@ in
     antigravityIde
     antigravityCli
     codex
+    codexDesktop
     fuzzel
   ];
 }
