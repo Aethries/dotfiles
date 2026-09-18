@@ -155,6 +155,9 @@ prepare_restore_permissions() {
 
     for path in "${CANDIDATE_PATHS[@]}"; do
         ensure_user_owned "$USER_HOME/$path"
+        if [ -d "$USER_HOME/$path" ]; then
+            find "$USER_HOME/$path" -type d ! -perm -u=w -exec chmod u+w {} + 2>/dev/null || true
+        fi
     done
 }
 
@@ -308,7 +311,7 @@ cmd_restore() {
         error "Failed to decrypt or extract vault! Please check your Master Password or vault integrity."
     fi
 
-    cp -a --no-preserve=ownership "$RESTORE_TMP"/. "$USER_HOME"/
+    cp -a --remove-destination --no-preserve=ownership "$RESTORE_TMP"/. "$USER_HOME"/
     rm -rf "$RESTORE_TMP"
     RESTORE_TMP=""
 

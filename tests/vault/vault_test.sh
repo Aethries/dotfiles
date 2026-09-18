@@ -186,5 +186,25 @@ if grep -q "rclone" "$REPO_ROOT/modules/packages.nix"; then
 fi
 log_ok "rclone is absent from modules/packages.nix"
 
+log_info "14. Testing restore overwrites pre-existing read-only files (0444/0555) without Permission denied..."
+mkdir -p "$HOME/.codex/memories/.git/objects/4f" "$HOME/.codex/plugins/.plugin-appserver"
+echo "vault-git-content" > "$HOME/.codex/memories/.git/objects/4f/obj1"
+echo "vault-bin-content" > "$HOME/.codex/plugins/.plugin-appserver/codex"
+chmod 444 "$HOME/.codex/memories/.git/objects/4f/obj1"
+chmod 555 "$HOME/.codex/plugins/.plugin-appserver/codex"
+RO_VAULT="$SANDBOX_DIR/ro.vault"
+"$REPO_ROOT/scripts/vault.sh" backup "$RO_VAULT" >/dev/null
+
+rm -f "$HOME/.codex/memories/.git/objects/4f/obj1" "$HOME/.codex/plugins/.plugin-appserver/codex"
+echo "stale-git-content" > "$HOME/.codex/memories/.git/objects/4f/obj1"
+echo "stale-bin-content" > "$HOME/.codex/plugins/.plugin-appserver/codex"
+chmod 444 "$HOME/.codex/memories/.git/objects/4f/obj1"
+chmod 555 "$HOME/.codex/plugins/.plugin-appserver/codex"
+
+"$REPO_ROOT/scripts/vault.sh" restore "$RO_VAULT" >/dev/null
+[ "$(cat "$HOME/.codex/memories/.git/objects/4f/obj1")" = "vault-git-content" ] || log_fail "Read-only file was not overwritten"
+[ "$(cat "$HOME/.codex/plugins/.plugin-appserver/codex")" = "vault-bin-content" ] || log_fail "Read-only executable was not overwritten"
+log_ok "Restore overwrites read-only files cleanly"
+
 echo
-log_ok "ALL 13 VAULT TEST CASES PASSED SUCCESSFULLY."
+log_ok "ALL 14 VAULT TEST CASES PASSED SUCCESSFULLY."

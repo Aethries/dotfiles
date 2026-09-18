@@ -123,7 +123,7 @@ cmd_decrypt() {
         chmod 700 "$SECRETS_DIR"
 
         # Copy decrypted files into destination
-        cp -a "$tmp_extract"/. "$SECRETS_DIR"/
+        cp -a --remove-destination "$tmp_extract"/. "$SECRETS_DIR"/
 
         # Secure file permissions (directories 700, files 600)
         find "$SECRETS_DIR" -type d -exec chmod 700 {} +
