@@ -144,12 +144,11 @@ run_picker() {
         --header="$HEADER" \
         --border=rounded \
         --print-query \
-        --expect=ctrl-n,ctrl-z,ctrl-l \
-        --exit-0)"
+        --expect=ctrl-n,ctrl-z,ctrl-l)"
     local fzf_rc=$?
     set -e
 
-    # Exit cleanly if cancelled (Esc / Ctrl+C / exit code 130 or 1 when empty)
+    # Exit cleanly if cancelled (Esc / Ctrl+C / exit code 130)
     if [ $fzf_rc -eq 130 ]; then
         exit 0
     fi
@@ -160,7 +159,7 @@ run_picker() {
     selection="$(echo "$fzf_out" | sed -n '3p')"
 
     if [ $fzf_rc -ne 0 ] && [ -z "$key" ] && [ -z "$query" ]; then
-        exit 0
+        exec zsh
     fi
 
     case "$key" in
@@ -206,8 +205,8 @@ run_picker() {
                 fi
                 exit 1
             else
-                # Empty enter on empty list -> exit cleanly
-                exit 0
+                # Empty enter on empty list -> start default "main" session
+                exec zellij --session "main"
             fi
             ;;
     esac
