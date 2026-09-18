@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "${CODEGRAPH_TEST_LOG:?}"
