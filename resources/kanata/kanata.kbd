@@ -66,20 +66,21 @@
   norm_preserve (multi (one-shot-pause-processing 100) @to_norm)
 
   ;; Normal mode triggers:
-  ;; CapsLock: double-tap or hold (200ms) enters navigate layer.
-  ;; Quick single tap does nothing (XX), avoiding caret loss or uppercase.
+  ;; CapsLock: double-tap enters navigate layer; hold acts as chord modifier (Space/1/2).
+  ;; Quick single tap or release without chord does nothing (XX).
   ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
+  caps_lwh    (layer-while-held caps_mode)
   caps_td     (tap-dance 200 (XX @nav_preserve))
-  caps_held   (tap-hold-press 200 200 @caps_td @nav_preserve)
+  caps_held   (tap-hold-press 200 200 @caps_td @caps_lwh)
   caps_to_nav (fork @caps_held caps (lsft rsft))
 
-  ;; Navigation from locked modes: double-tap or hold CapsLock 200ms to navigate
+  ;; Navigation from locked modes: double-tap CapsLock to navigate
   caps_td_slk   (tap-dance 200 (XX @to_nav_slk))
-  caps_held_slk (tap-hold-press 200 200 @caps_td_slk @to_nav_slk)
+  caps_held_slk (tap-hold-press 200 200 @caps_td_slk @caps_lwh)
   caps_to_nav_slk (fork @caps_held_slk caps (lsft rsft))
 
   caps_td_clk   (tap-dance 200 (XX @to_nav_clk))
-  caps_held_clk (tap-hold-press 200 200 @caps_td_clk @to_nav_clk)
+  caps_held_clk (tap-hold-press 200 200 @caps_td_clk @caps_lwh)
   caps_to_nav_clk (fork @caps_held_clk caps (lsft rsft))
 
   i_to_slk (fork @to_slk A-rght (lctl rctl))
@@ -184,15 +185,29 @@
 ;; Direct Sequential Key Sequences (Tap CapsLock + <key>)
 ;; ----------------------------------------------------------------------------
 (defvirtualkeys
+  v_sup   (layer-switch super)
   v_nav   (multi (one-shot-pause-processing 100) (layer-switch navigate))
   v_niri  (layer-switch niri)
   v_chrom (layer-switch chromium)
 )
 
 (defseq
+  v_sup   (caps spc)
   v_nav   (caps grv)
   v_niri  (caps 1)
   v_chrom (caps 2)
+)
+
+;; ----------------------------------------------------------------------------
+;; CapsLock Chord Layer (Active strictly while holding CapsLock)
+;; ----------------------------------------------------------------------------
+(deflayer caps_mode
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  @to_nav @to_niri @to_chrom _ _ _ _ _ _ _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              @to_sup        _    _    _
 )
 
 ;; ----------------------------------------------------------------------------

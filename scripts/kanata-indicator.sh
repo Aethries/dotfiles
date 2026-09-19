@@ -69,6 +69,9 @@ stdbuf -oL journalctl -u kanata-internal -f -n 0 -o cat | while IFS= read -r lin
                 echo "BYPASS" > "$MODE_FILE"
                 send_osd "⚠️ BYPASS" "Hardware 1:1 Passthrough · Dual Shift to toggle" 2000
                 ;;
+            caps_mode)
+                # Transient chord layer for CapsLock; ignore
+                ;;
             *)
                 echo "$layer" > "$MODE_FILE"
                 ;;

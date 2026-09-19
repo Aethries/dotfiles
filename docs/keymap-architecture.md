@@ -46,15 +46,16 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │        Space -> Tap: Space | Hold: NAV LAYER                    │
 │        CapsLock -> Tap: Esc | Hold: Ctrl (hoặc Mouse Layer)     │
 └─────────────────────────────────────────────────────────────────┘
-           │ (Hold Space)                     │ (Hold CapsLock / Chord)
+           │ (Hold CapsLock + Key / Double-tap) │ (Press RightShift / Caps+Space)
 ┌─────────────────────────────────────────────────────────────────┐
 │                        NORMAL LAYER (Default)                   │
 │        Gõ phím mặc định 100% tự nhiên không delay/alteration    │
-│        Hold (200ms) hoặc Double-tap CapsLock ──> NAVIGATE       │
+│        Double-tap CapsLock                   ──> NAVIGATE       │
 │        Tap CapsLock + ` ──> NAVIGATE | 1 ──> NIRI | 2 ──> CHROM │
+│        Tap CapsLock + Space                  ──> SUPER LAYER    │
 │        Bấm RightShift (instant)              ──> SUPER LAYER    │
 └─────────────────────────────────────────────────────────────────┘
-           │ (Hold/Double-tap CapsLock)        │ (Press RightShift)
+           │ (Double-tap CapsLock / Caps+`)    │ (Press RightShift / Caps+Space)
            ▼                                   ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
@@ -83,8 +84,9 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 ### 3.1. Normal Layer (Lớp cơ bản)
 - Gõ văn bản hoàn toàn nguyên bản như bàn phím phần cứng.
 - **Chuyển tầng trực tiếp & an toàn:**
-  - `CapsLock`: Double-tap nhanh hoặc Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả đơn lẻ (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
-  - `Tap CapsLock + <key>` (Hợp âm hoặc gõ tuần tự):
+  - `CapsLock`: Double-tap nhanh để chuyển sang **Navigate Layer**. Không còn giữ CapsLock để vào navigate (tránh delay hoặc nhảy nhầm layer khi gõ nhanh). Nhấn thả đơn lẻ không thực hiện hành động nào (tránh mất caret/focus trong ô input).
+  - `Hold / Tap CapsLock + <key>` (Hợp âm hoặc gõ tuần tự):
+    - `CapsLock` + `Space` $\rightarrow$ Chuyển sang **Super Layer**.
     - `CapsLock` + `` ` `` $\rightarrow$ Chuyển sang **Navigate Layer**.
     - `CapsLock` + `1` $\rightarrow$ Chuyển sang **Niri Layer**.
     - `CapsLock` + `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
