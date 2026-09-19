@@ -279,6 +279,21 @@ if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
     ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback)"
 fi
 
+# Verify AI Agent Skills
+if [ -d "$REPO_ROOT/resources/skills" ]; then
+    for skill_dir in "$REPO_ROOT/resources/skills"/*; do
+        [ -d "$skill_dir" ] || continue
+        skill_name="$(basename "$skill_dir")"
+        if [ -f "$skill_dir/SKILL.md" ]; then
+            if [ -L "$HOME/.gemini/config/skills/$skill_name" ] && [ -e "$HOME/.gemini/config/skills/$skill_name" ]; then
+                ok "AI Skill '$skill_name' active in Antigravity/Gemini"
+            else
+                warn "AI Skill '$skill_name' is not linked in ~/.gemini/config/skills (run 'add-skills sync')"
+            fi
+        fi
+    done
+fi
+
 # ------------------------------------------------------------------------------
 # 5. Disk Space & Store Health
 # ------------------------------------------------------------------------------
