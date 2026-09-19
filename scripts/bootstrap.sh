@@ -347,6 +347,8 @@ safe_link "$REPO_ROOT/scripts/tunnel.sh" "$USER_HOME/.local/bin/tunnel"
 safe_link "$REPO_ROOT/scripts/cleanup.sh" "$USER_HOME/.local/bin/cleanup"
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9router"
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
+safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
+safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
 
 # Configure user-level npm global prefix to prevent writing into read-only /nix/store
 if command -v npm >/dev/null 2>&1; then

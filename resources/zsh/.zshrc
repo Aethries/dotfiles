@@ -311,6 +311,52 @@ function 9router() {
   esac
 }
 
+function init-omniroute() {
+  if [ -f "${DOTFILES_DIR:-}/scripts/init-omniroute.sh" ]; then
+    "${DOTFILES_DIR}/scripts/init-omniroute.sh" "$@"
+  else
+    echo "init-omniroute script not found in ${DOTFILES_DIR:-}/scripts"
+  fi
+}
+
+function sync-omniroute() {
+  if [ -f "${DOTFILES_DIR:-}/scripts/sync-omniroute.sh" ]; then
+    "${DOTFILES_DIR}/scripts/sync-omniroute.sh" "$@"
+  else
+    echo "sync-omniroute script not found in ${DOTFILES_DIR:-}/scripts"
+  fi
+}
+
+function omni() {
+  case "${1:-}" in
+    status)
+      systemctl --user status omniroute
+      ;;
+    restart)
+      systemctl --user restart omniroute && echo "✓ omniroute restarted (port 20129)"
+      ;;
+    stop)
+      systemctl --user stop omniroute && echo "✓ omniroute stopped"
+      ;;
+    start)
+      systemctl --user start omniroute && echo "✓ omniroute started (port 20129)"
+      ;;
+    logs)
+      journalctl --user -u omniroute -f
+      ;;
+    sync)
+      sync-omniroute "${2:-status}"
+      ;;
+    *)
+      if command -v omniroute >/dev/null 2>&1; then
+        command omniroute "$@"
+      else
+        echo "omniroute CLI not found. Run init-omniroute first."
+      fi
+      ;;
+  esac
+}
+
 # ------------------------------------------------------------------------------
 # Cloudflare WARP (1.1.1.1) Aliases & Functions
 # ------------------------------------------------------------------------------

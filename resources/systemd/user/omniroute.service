@@ -1,0 +1,20 @@
+[Unit]
+Description=OmniRoute Local AI Gateway Service
+After=default.target
+
+[Service]
+Type=simple
+Environment="PATH=%h/.local/bin:%h/.local/share/fnm/aliases/default/bin:%h/.nix-profile/bin:/etc/profiles/per-user/%u/bin:/run/wrappers/bin:/run/current-system/sw/bin"
+Environment="PORT=20129"
+Environment="HOST=127.0.0.1"
+Environment="NODE_ENV=production"
+Environment="NODE_PATH=%h/.local/lib/node_modules"
+ExecStartPre=/bin/sh -c 'test -x "${HOME}/.local/bin/omniroute" || (echo "omniroute binary not found at ~/.local/bin/omniroute. Run init-omniroute first." >&2; exit 1)'
+ExecStart=%h/.local/bin/omniroute serve --port 20129 --no-open --no-tray
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

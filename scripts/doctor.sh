@@ -123,6 +123,8 @@ check_link "$HOME/.local/bin/tunnel" "CLI: tunnel"
 check_link "$HOME/.local/bin/cleanup" "CLI: cleanup"
 check_link "$HOME/.local/bin/init-9router" "CLI: init-9router"
 check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
+check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
+check_link "$HOME/.local/bin/sync-omniroute" "CLI: sync-omniroute"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
 else
@@ -219,6 +221,37 @@ check_service "bluetooth" "Bluetooth Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
 check_user_service "9router" "9router Local AI Gateway"
+check_user_service "omniroute" "OmniRoute Local AI Gateway"
+
+# Verify AI Gateway Ports (9router on 20128, OmniRoute on 20129)
+ROUTER_9_LISTEN=false
+OMNI_LISTEN=false
+
+if command -v ss >/dev/null 2>&1; then
+    if ss -tlHn 'sport = :20128' 2>/dev/null | grep -q '20128'; then
+        ROUTER_9_LISTEN=true
+    fi
+    if ss -tlHn 'sport = :20129' 2>/dev/null | grep -q '20129'; then
+        OMNI_LISTEN=true
+    fi
+elif command -v lsof >/dev/null 2>&1; then
+    if lsof -nP -i :20128 2>/dev/null | grep -q 'LISTEN'; then
+        ROUTER_9_LISTEN=true
+    fi
+    if lsof -nP -i :20129 2>/dev/null | grep -q 'LISTEN'; then
+        OMNI_LISTEN=true
+    fi
+fi
+
+if [ "$ROUTER_9_LISTEN" = true ]; then
+    ok "9router listening on port 20128"
+fi
+if [ "$OMNI_LISTEN" = true ]; then
+    ok "OmniRoute listening on dedicated port 20129"
+fi
+if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN" = true ]; then
+    ok "AI Gateways coexistence verified (port 20128: 9router, port 20129: OmniRoute)"
+fi
 
 # ------------------------------------------------------------------------------
 # 5. Disk Space & Store Health

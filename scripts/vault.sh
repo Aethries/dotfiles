@@ -93,6 +93,7 @@ CANDIDATE_PATHS=(
     ".antigravity-ide"
     ".antigravity"
     ".9router"
+    ".omniroute"
     ".codex"
     ".config/ChatGPT"
 )
@@ -132,6 +133,14 @@ EXCLUDE_PATTERNS=(
     "*/.9router/runtime/*"
     "*/.9router/model-catalog-raw.json"
     "*/.9router/**/*.pid"
+    "*/.omniroute/logs/*"
+    "*/.omniroute/call_logs/*"
+    "*/.omniroute/db_backups/*"
+    "*/.omniroute/mitm/*"
+    "*/.omniroute/supervisor/*"
+    "*/.omniroute/*.bak*"
+    "*/.omniroute/*.pre-*"
+    "*/.omniroute/**/*.pid"
 )
 
 ensure_user_owned() {
@@ -164,6 +173,7 @@ prepare_restore_permissions() {
 RESTORE_TMP=""
 RESTORE_RESTART_KEYRING=false
 RESTORE_RESTART_9ROUTER=false
+RESTORE_RESTART_OMNIROUTE=false
 
 finish_restore_runtime() {
     local status="$1"
@@ -183,6 +193,13 @@ finish_restore_runtime() {
         info "Restarting 9router service..."
         if ! systemctl --user start 9router.service; then
             warn "9router could not be restarted. Run 'init-9router' after this restore."
+        fi
+    fi
+
+    if [ "$RESTORE_RESTART_OMNIROUTE" = true ] && command -v systemctl >/dev/null 2>&1; then
+        info "Restarting omniroute service..."
+        if ! systemctl --user start omniroute.service; then
+            warn "omniroute could not be restarted. Run 'init-omniroute' after this restore."
         fi
     fi
 
@@ -267,6 +284,13 @@ cmd_restore() {
         RESTORE_RESTART_9ROUTER=true
     fi
 
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service; then
+        RESTORE_RESTART_OMNIROUTE=true
+        systemctl --user stop omniroute.service
+    elif pgrep -u "$UID" -f '[o]mniroute' >/dev/null 2>&1; then
+        RESTORE_RESTART_OMNIROUTE=true
+    fi
+
     if pgrep -u "$UID" -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
         RESTORE_RESTART_KEYRING=true
     fi
@@ -274,7 +298,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js" "omniroute")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -362,12 +386,12 @@ cmd_clean() {
                 force=true
                 shift
                 ;;
-            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|router|phone|jira)
+            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|router|omniroute|phone|jira)
                 categories+=("$1")
                 shift
                 ;;
             *)
-                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, all)"
+                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, router, omniroute, all)"
                 ;;
         esac
     done
@@ -384,6 +408,7 @@ cmd_clean() {
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
         ["router"]=".9router"
+        ["omniroute"]=".omniroute"
         ["phone"]=".config/kdeconnect"
     )
 
@@ -395,11 +420,11 @@ cmd_clean() {
         read -r -p "Enter choice [1-3] (default 1): " choice
         case "${choice:-1}" in
             1) categories=("chrome" "telegram" "git") ;;
-            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "phone") ;;
+            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone") ;;
             *) echo "Operation cancelled."; return 0 ;;
         esac
     elif [[ " ${categories[*]} " =~ " all " ]]; then
-        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "phone")
+        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone")
     fi
 
     local target_paths=()
