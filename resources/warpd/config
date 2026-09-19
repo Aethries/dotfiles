@@ -26,9 +26,9 @@ bottom: L
 start: 0
 end: $
 
-# Scrolling
-scroll_down: e
-scroll_up: r
+# Scrolling (u: down, i: up)
+scroll_down: u
+scroll_up: i
 scroll_speed: 350
 scroll_max_speed: 5000
 scroll_acceleration: 1600

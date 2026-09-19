@@ -281,7 +281,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `,` $\rightarrow$ Click chuột giữa.
   - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode).
   - `c` $\rightarrow$ Copy vùng chọn và thoát mode (`copy_and_exit`).
-  - `e / r` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
+  - `u / i` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
   - `a` (giữ) $\rightarrow$ Tăng tốc độ rê chuột (Accelerator).
   - `d` (giữ) $\rightarrow$ Giảm tốc độ rê chuột để căn chỉnh chính xác từng pixel (Decelerator).
   - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
