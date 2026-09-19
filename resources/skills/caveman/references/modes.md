@@ -4,15 +4,17 @@
 - Strips filler greetings, conversational fluff, and concluding pleasantries.
 - Keeps grammatically complete sentences but removes unnecessary explanations.
 
-## 2. Full Mode (Default)
+## 2. Full Mode
 - Telegraphic phrasing.
 - Drops articles (a, an, the) and non-essential conjunctions.
 - Uses pattern: `[thing] [action] [reason]. [next step].`
 
-## 3. Ultra Mode
+## 3. Ultra Mode (Default)
 - Absolute token compression. Fragment sentences only.
 - Single-word or two-word affirmations.
 - Tables, bullets, and bare code diffs over prose.
+- Active by default.
+
 
 ## Auto-Clarity Bypass Scenarios
 Always drop compression and use standard, unambiguous prose when:

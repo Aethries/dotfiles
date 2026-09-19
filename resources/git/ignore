@@ -1,0 +1,21 @@
+# ============================================================
+# Global Git Ignore Rules
+# Managed by dotfiles: resources/git/ignore
+# ============================================================
+
+# CodeGraph & Codebase Memory AST index
+.codegraph/
+*.sqlite-shm
+*.sqlite-wal
+
+# OS / Editor temporary artifacts
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Local secret vaults (defense-in-depth)
+secrets.vault
+secrets.enc
+*.pre-dotfiles.*

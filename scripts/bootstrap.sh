@@ -286,6 +286,10 @@ fi
 if [ -f "$REPO_ROOT/resources/git/.gitconfig-1bitlab" ]; then
     safe_link "$REPO_ROOT/resources/git/.gitconfig-1bitlab" "$USER_HOME/.gitconfig-1bitlab"
 fi
+if [ -f "$REPO_ROOT/resources/git/ignore" ]; then
+    mkdir -p "$USER_HOME/.config/git"
+    safe_link "$REPO_ROOT/resources/git/ignore" "$USER_HOME/.config/git/ignore"
+fi
 
 # SSH client configuration
 if [ -f "$REPO_ROOT/resources/ssh/config" ]; then
