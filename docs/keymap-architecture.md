@@ -67,9 +67,9 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │  Tab     -> Alt + Tab   │         │  Shift + a/s/d/f ->     │
 │  Ctrl+h/l -> Prev/Next  │         │    Sticky Lock Modifier │
 │  Ctrl+j/k -> PgDn/PgUp  │         │  c -> Lock Ctrl Mode    │
-│  x/y/p/z  -> Del/Cp/Pst │         │  RightShift ──> NORMAL  │
-│  1 ──> NIRI | 2 ──> CHROM│        │  Esc / i ──> NORMAL     │
-│  3 ──> TERMINALS        │         │                         │
+│  v ──> VISUAL (Select)  │         │  RightShift ──> NORMAL  │
+│  x/y/p/z  -> Del/Cp/Pst │         │  Esc / i ──> NORMAL     │
+│  1:Niri | 2:Chrom | 3:Tm│         │                         │
 │  Double Caps / Esc ──> N│         │                         │
 └─────────────────────────┘         └─────────────────────────┘
            │ Bấm 1 / 2 / 3                       │ Shift+a/s/d/f
@@ -97,12 +97,12 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `CapsLock` + `1` $\rightarrow$ Chuyển sang **Niri Layer**.
     - `CapsLock` + `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
     - `CapsLock` + `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
-  - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
+  - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng an toàn (khi thực sự cần gõ IN HOA toàn bộ, không lo bị bấm nhầm).
   - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
-- **Cơ chế thoát hiểm Double Esc toàn cục (Global Double Esc Recovery):**
-  - Áp dụng trên toàn bộ 100% các layer của hệ thống (`Normal`, `Navigate`, `Super`, `Chromium`, `Terminals`, `Niri`, `Ctrl/Super/Alt/Shift Locked`, `Bypass`).
-  - **Single-tap `Esc`**: Hủy toàn bộ modifier đang chờ/active, gửi `Esc` và chuyển ngay về `Normal Layer`.
-  - **Double-tap `Esc`** (trong vòng 250ms): Gửi tín hiệu `caps` (để gỡ bỏ ngay lập tức trạng thái CapsLock phần cứng nếu lỡ bị kẹt in hoa), giải phóng toàn bộ modifier, gửi `Esc` và đưa bàn phím về trạng thái gõ chữ thường mặc định (`Normal Layer`).
+- **Cơ chế thoát hiểm Esc toàn cục tức thì (Zero-Latency Instant Esc Reset):**
+  - Áp dụng trên toàn bộ 100% các layer của hệ thống (`Normal`, `Navigate`, `Visual`, `Super`, `Chromium`, `Terminals`, `Niri`, `Ctrl/Super/Alt/Shift Locked`, `Bypass`).
+  - **Single-tap `Esc` (Instant 0ms latency)**: Giải phóng tức thì toàn bộ modifier đang giữ/chờ (`Meta`, `Ctrl`, `Alt`, `Shift`), gửi tín hiệu `Esc` sạch và đưa bàn phím về trạng thái gõ chữ thông thường (`Normal Layer`).
+  - Đã loại bỏ hoàn toàn tap-dance 250ms trên `Esc`, triệt tiêu độ trễ khi thoát Vim hoặc đóng cửa sổ popup.
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
 - **Di chuyển con trỏ & Ứng dụng:**
@@ -122,6 +122,25 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `G` (`Shift + g`) $\rightarrow$ `Ctrl + End` (Xuống cuối trang / file).
   - `0` $\rightarrow$ `Home` (Đầu dòng).
   - `$` (`Shift + 4`) $\rightarrow$ `End` (Cuối dòng).
+- **Thao tác chọn văn bản (Selection) & Visual Mode:**
+  - **Cách 1 - Chọn trực tiếp trong Navigate (Giữ Shift):**
+    - `Shift + w / e` $\rightarrow$ `Ctrl + Shift + Right` (Bôi đen từ tiếp theo).
+    - `Shift + b` $\rightarrow$ `Ctrl + Shift + Left` (Bôi đen từ trước đó).
+    - `Shift + h / j / k / l` $\rightarrow$ `Shift + Arrows` (Bôi đen theo ký tự / dòng).
+  - **Cách 2 - Vim Visual Mode (Bấm `v` trong Navigate - Không cần giữ phím):**
+    - Nhấn `v` $\rightarrow$ Vào **Visual Layer** (Badge `VIS` trên thanh trạng thái Noctalia).
+    - `w / e` $\rightarrow$ Bôi đen liên tục từng từ về trước (`Ctrl + Shift + Right`).
+    - `b` $\rightarrow$ Bôi đen liên tục từng từ lùi lại (`Ctrl + Shift + Left`).
+    - `h / j / k / l` $\rightarrow$ Bôi đen ký tự / dòng (`Shift + Arrows`).
+    - `0` $\rightarrow$ Bôi đen về đầu dòng (`Shift + Home`).
+    - `$` (`Shift + 4`) $\rightarrow$ Bôi đen về cuối dòng (`Shift + End`).
+    - `gg` / `G` $\rightarrow$ Bôi đen lên đầu trang / xuống cuối trang.
+    - **Thao tác kết thúc:**
+      - `y` $\rightarrow$ Copy (`Ctrl + C`) và tự động quay về `Navigate Layer`.
+      - `x` $\rightarrow$ Cut (`Ctrl + X`) và tự động quay về `Navigate Layer`.
+      - `c` $\rightarrow$ Cut (`Ctrl + X`) và chuyển thẳng về `Normal Layer` để gõ chữ thay thế (chuẩn thao tác `c` của Vim).
+      - `p` $\rightarrow$ Dán đè (`Ctrl + V`) và quay về `Navigate Layer`.
+      - `v` hoặc `Esc` $\rightarrow$ Hủy chọn (`v` về Navigate, `Esc` về Normal).
 - **Thao tác chỉnh sửa nhanh:**
   - `x` $\rightarrow$ `Delete` (Xóa ký tự).
   - `y` $\rightarrow$ `Ctrl + C` (Sao chép).
