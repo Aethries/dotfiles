@@ -21,7 +21,6 @@
     typescript-language-server # Language server for TypeScript & JavaScript
     vscode-langservers-extracted # HTML/CSS/JSON/ESLint language servers
     tailwindcss-language-server # Tailwind CSS language server
-    biome # Toolchain for web (formatter & linter)
 
     # ----------------------------------------------------------
     # Lua LSP
