@@ -57,10 +57,10 @@ hint_exit: esc
 hint_undo: backspace
 hint_undo_all: C-u
 
-# Grid Mode
-grid_keys: u i j k
-grid_nr: 2
-grid_nc: 2
+# Grid Mode (3x3 Matrix Navigation)
+grid_keys: u i o j k l m , .
+grid_nr: 3
+grid_nc: 3
 grid_size: 3
 grid_color: #1e1e2e
 grid_border_color: #89b4fa
