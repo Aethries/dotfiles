@@ -1,0 +1,16 @@
+;; ==============================================================================
+;; Kanata Fallback Configuration: 1:1 Transparent Passthrough
+;; Use for emergency recovery when main keymap is broken or unresponsive.
+;; ==============================================================================
+
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  esc caps spc
+)
+
+(deflayer passthrough
+  esc caps spc
+)

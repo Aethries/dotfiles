@@ -11,6 +11,7 @@
     ./modules/godot.nix
     ./modules/zellij.nix
     ./modules/services.nix
+    ./modules/kanata.nix
     ./modules/swap.nix
   ];
 }
