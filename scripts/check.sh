@@ -81,5 +81,9 @@ if command -v kanata >/dev/null; then
     kanata --check -c resources/kanata/kanata.kbd >/dev/null
     kanata --check -c resources/kanata/fallback.kbd >/dev/null
 fi
+if command -v nvim >/dev/null; then
+    nvim -l scripts/generate-keymaps.lua --check >/dev/null
+    git diff --exit-code resources/antigravity/User/keybindings.generated.jsonc resources/nvim/keymaps/generated-doc.md >/dev/null
+fi
 
 echo "All checks passed."
