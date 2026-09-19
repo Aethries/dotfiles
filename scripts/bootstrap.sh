@@ -349,6 +349,7 @@ safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9rout
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
 safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
 safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
+safe_link "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$USER_HOME/.local/bin/reconcile-ai-gateways"
 
 # Configure user-level npm global prefix to prevent writing into read-only /nix/store
 if command -v npm >/dev/null 2>&1; then
@@ -397,26 +398,14 @@ info "Synchronizing editor configuration and extensions..."
 "$REPO_ROOT/scripts/sync-editors.sh"
 
 # ------------------------------------------------------------
-# AI Gateways Initialization (9Router & OmniRoute)
+# AI Gateways Reconciliation (9Router & OmniRoute)
 # ------------------------------------------------------------
-info "Initializing AI Gateways (9Router & OmniRoute)..."
+info "Reconciling AI Gateways (9Router & OmniRoute)..."
 
-if [ -x "$REPO_ROOT/scripts/init-9router.sh" ]; then
-    info "Setting up 9Router (port 20128)..."
-    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
-        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-9router.sh" || error "9Router initialization failed during bootstrap."
-    else
-        "$REPO_ROOT/scripts/init-9router.sh" || error "9Router initialization failed during bootstrap."
-    fi
-fi
-
-if [ -x "$REPO_ROOT/scripts/init-omniroute.sh" ]; then
-    info "Setting up OmniRoute (port 20129)..."
-    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
-        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-omniroute.sh" || error "OmniRoute initialization failed during bootstrap."
-    else
-        "$REPO_ROOT/scripts/init-omniroute.sh" || error "OmniRoute initialization failed during bootstrap."
-    fi
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+    sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateway reconciliation failed during bootstrap."
+else
+    "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateway reconciliation failed during bootstrap."
 fi
 
 # ------------------------------------------------------------

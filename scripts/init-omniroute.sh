@@ -93,12 +93,28 @@ fi
 
 validate_node_version() {
     command -v node >/dev/null 2>&1 || return 1
-    local major
-    major="$(node -e 'console.log(process.versions.node.split(".")[0])' 2>/dev/null || echo '0')"
-    if [ "$major" -lt 22 ] || [ "$major" -eq 23 ]; then
+    local version
+    version="$(node -p 'process.versions.node' 2>/dev/null || echo '')"
+    [ -n "$version" ] || return 1
+
+    local major minor patch
+    major="$(echo "$version" | cut -d. -f1)"
+    minor="$(echo "$version" | cut -d. -f2)"
+    patch="$(echo "$version" | cut -d. -f3 | cut -d- -f1)"
+
+    # OmniRoute 3.8.50 yêu cầu Node >=22.22.2 <23 hoặc >=24 <27
+    if [ "$major" -eq 22 ]; then
+        if [ "$minor" -gt 22 ]; then
+            return 0
+        elif [ "$minor" -eq 22 ] && [ "$patch" -ge 2 ]; then
+            return 0
+        fi
+        return 1
+    elif [ "$major" -ge 24 ] && [ "$major" -lt 27 ]; then
+        return 0
+    else
         return 1
     fi
-    return 0
 }
 
 if ! command -v npm >/dev/null 2>&1 || ! validate_node_version; then
@@ -279,9 +295,9 @@ if systemctl --user is-active --quiet omniroute.service; then
 
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$OMNIROUTE_PORT/v1/models" 2>/dev/null || echo "000")
     if [ "$HTTP_CODE" != "000" ]; then
-        echo -e "  - Endpoint Status:   ${GREEN}${BOLD}✓ LISTENING${NC} (HTTP $HTTP_CODE on port $OMNIROUTE_PORT)"
+        echo -e "  - Endpoint Reachability: ${GREEN}${BOLD}✓ Reachable${NC} (HTTP $HTTP_CODE on port $OMNIROUTE_PORT)"
     else
-        echo -e "  - Endpoint Status:   ${YELLOW}! Initializing...${NC}"
+        echo -e "  - Endpoint Reachability: ${YELLOW}! Initializing...${NC}"
     fi
 
     echo -e "  - Port:              ${BOLD}$OMNIROUTE_PORT${NC} (9router remains on 20128)"

@@ -40,13 +40,15 @@ OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 OMNIROUTE_DIR="$HOME/.omniroute"
 
 cmd_backup() {
-    info "Triggering Secret Vault backup (authoritative store for ~/.omniroute)..."
-    "$REPO_ROOT/scripts/vault.sh" backup "$@"
+    info "Triggering Secret Vault backup (authoritative store for ~/.omniroute, scoped)..."
+    # Giới hạn scope omniroute để chỉ sao lưu riêng ~/.omniroute vào vault
+    "$REPO_ROOT/scripts/vault.sh" backup --scope omniroute "$@"
 }
 
 cmd_restore() {
-    info "Restoring Secret Vault (restores ~/.omniroute database, keys, and providers)..."
-    "$REPO_ROOT/scripts/vault.sh" restore "$@"
+    info "Restoring Secret Vault (restores ~/.omniroute database, keys, and providers, scoped)..."
+    # Giới hạn scope omniroute để chỉ phục hồi ~/.omniroute, không ghi đè SSH/Chrome/9router
+    "$REPO_ROOT/scripts/vault.sh" restore --scope omniroute "$@"
 }
 
 cmd_status() {

@@ -133,6 +133,7 @@ check_link "$HOME/.local/bin/init-9router" "CLI: init-9router"
 check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
 check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
 check_link "$HOME/.local/bin/sync-omniroute" "CLI: sync-omniroute"
+check_link "$HOME/.local/bin/reconcile-ai-gateways" "CLI: reconcile-ai-gateways"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
 else
@@ -200,9 +201,9 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 4. Services & Daemons
+# 4. Systemd Services
 # ------------------------------------------------------------------------------
-section "Services & Daemons"
+section "Systemd Services"
 
 check_service() {
     local svc="$1"
@@ -224,12 +225,22 @@ check_user_service() {
     fi
 }
 
+check_required_user_service() {
+    local svc="$1"
+    local name="$2"
+    if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
+        ok "$name user service is active"
+    else
+        fail "$name user service is NOT active (status: $(systemctl --user is-active "$svc" 2>/dev/null || echo "inactive"))"
+    fi
+}
+
 check_service "docker" "Docker Daemon"
 check_service "bluetooth" "Bluetooth Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
-check_user_service "9router" "9router Local AI Gateway"
-check_user_service "omniroute" "OmniRoute Local AI Gateway"
+check_required_user_service "9router" "9router Local AI Gateway"
+check_required_user_service "omniroute" "OmniRoute Local AI Gateway"
 
 # Verify AI Gateway Ports (9router on $ROUTER_9_PORT, OmniRoute on $OMNIROUTE_PORT)
 ROUTER_9_LISTEN=false

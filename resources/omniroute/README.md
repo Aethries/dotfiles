@@ -18,22 +18,48 @@ OmniRoute coexists with **9Router** in a dual-gateway architecture:
 ## Key Files & Structure
 
 * `resources/ai/gateway.env`: Single source of truth for ports (`20128`, `20129`), loopback host (`127.0.0.1`), and pinned versions.
-* `resources/systemd/user/omniroute.service`: Declarative systemd user service binding OmniRoute strictly to `127.0.0.1:20129`.
+* `resources/systemd/user/omniroute.service`: Declarative systemd user service binding OmniRoute strictly to `127.0.0.1:20129` with `UMask=0077`.
+* `scripts/reconcile-ai-gateways.sh`: Authoritative reconciliation entry point for both `bootstrap.sh` and `build.sh switch`.
 * `scripts/init-omniroute.sh`: Automated installer, pinned package manager (`omniroute@3.8.50`), loopback port configuration, key desync protection, and service bootstrapper.
-* `scripts/sync-omniroute.sh`: Synchronizes authoritative OmniRoute state (SQLite database, providers, accounts, and `.env`) via encrypted `vault.sh`.
+* `scripts/sync-omniroute.sh`: Scoped state synchronization CLI (`vault backup/restore --scope omniroute`).
 * `resources/omniroute/.gitignore`: Excludes `bundle.json`, `*.json`, `*.sqlite*`, and `*.env` to guarantee sensitive credentials are never committed.
 * `tests/ai/omniroute_test.sh`: Dynamic integration, security, and port isolation test suite wired directly to `scripts/check.sh`.
 * `~/.omniroute/`:
   * `.env`: Contains `PORT=20129`, `HOST=127.0.0.1`, `OMNIROUTE_SERVER_HOST=127.0.0.1`, `API_HOST=127.0.0.1`, `LIVE_WS_HOST=127.0.0.1`, and `STORAGE_ENCRYPTION_KEY`.
-  * `storage.sqlite`: Local encrypted database containing all GUI customizations, accounts, and provider configurations (authoritative store synced safely via `vault backup`).
+  * `storage.sqlite`: Local encrypted database containing all GUI customizations, accounts, and provider configurations (synced safely via `vault backup --scope omniroute`).
 
 ---
 
-## State Synchronization & Single Source of Truth
+## State Architecture: Public Tracked vs. Private Encrypted
 
 OmniRoute state follows a strict security architecture:
-1. **Authoritative State (`vault.sh`)**: All credentials, provider accounts, encrypted SQLite records, and master encryption keys live in `~/.omniroute/` and are encrypted into `secrets.vault` using `vault backup`. During backup, the system pauses the service and checkpoints the SQLite WAL to ensure atomic, non-corrupted snapshots.
-2. **Synchronize CLI (`sync-omniroute`)**: `sync-omniroute export` and `sync-omniroute import` invoke `vault.sh` to safely backup and restore complete configuration state without plaintext bundle leakage.
+
+### 1. Tracked / Public State (Git Repository)
+- Service definition template (`resources/systemd/user/omniroute.service` with `UMask=0077`)
+- Gateway ports & host bindings (`resources/ai/gateway.env`)
+- Pinned version (`3.8.50`)
+- Automation & reconciliation scripts (`init-omniroute.sh`, `reconcile-ai-gateways.sh`)
+
+### 2. Private Encrypted State (`secrets.vault`)
+- `~/.omniroute/storage.sqlite` (SQLite database containing all custom provider configs, accounts, combos, and skills)
+- `~/.omniroute/.env` (`STORAGE_ENCRYPTION_KEY` master database decryption key)
+- Provider API keys, OAuth access tokens, and refresh tokens
+- User sessions and GUI customizations
+
+---
+
+## State Synchronization: Scoped vs. Full-User Operations
+
+* **OmniRoute-Scoped Operations (`sync-omniroute`)**:
+  ```bash
+  sync-omniroute backup   # archives ONLY ~/.omniroute/ into secrets.vault (pauses service, checkpoints WAL)
+  sync-omniroute restore  # restores ONLY ~/.omniroute/ (never touches SSH, Chrome, 9router, or other apps)
+  ```
+* **Full-User Vault Operations (`vault.sh`)**:
+  ```bash
+  vault backup            # archives all user credentials (SSH, GPG, Chrome, Keyring, 9router, OmniRoute)
+  vault restore           # restores all user application sessions and profiles
+  ```
 
 ---
 
@@ -57,11 +83,11 @@ omni logs       # or journalctl --user -u omniroute -f
 
 ### 3. Sync Settings & Providers
 ```bash
-# Sync entire database, provider accounts, and tokens into encrypted vault (authoritative)
-sync-omniroute export   # or: vault backup
+# Sync entire database, provider accounts, and tokens into encrypted vault (OmniRoute scoped)
+sync-omniroute backup   # or: vault backup --scope omniroute
 
-# Restore database and encryption keys on a fresh system
-sync-omniroute import   # or: vault restore
+# Restore database and encryption keys on a fresh system (OmniRoute scoped)
+sync-omniroute restore  # or: vault restore --scope omniroute
 ```
 
 ### 4. Diagnostics & Testing
