@@ -99,6 +99,10 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `CapsLock` + `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
   - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
+- **Cơ chế thoát hiểm Double Esc toàn cục (Global Double Esc Recovery):**
+  - Áp dụng trên toàn bộ 100% các layer của hệ thống (`Normal`, `Navigate`, `Super`, `Chromium`, `Terminals`, `Niri`, `Ctrl/Super/Alt/Shift Locked`, `Bypass`).
+  - **Single-tap `Esc`**: Hủy toàn bộ modifier đang chờ/active, gửi `Esc` và chuyển ngay về `Normal Layer`.
+  - **Double-tap `Esc`** (trong vòng 250ms): Gửi tín hiệu `caps` (để gỡ bỏ ngay lập tức trạng thái CapsLock phần cứng nếu lỡ bị kẹt in hoa), giải phóng toàn bộ modifier, gửi `Esc` và đưa bàn phím về trạng thái gõ chữ thường mặc định (`Normal Layer`).
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
 - **Di chuyển con trỏ & Ứng dụng:**

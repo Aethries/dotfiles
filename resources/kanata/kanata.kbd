@@ -59,8 +59,12 @@
   to_nav_slk  (layer-switch nav_slk)
   to_nav_clk  (layer-switch nav_clk)
 
-  ;; Normal mode Esc: cancels all active/waiting modifiers cleanly
-  esc_norm (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc)
+  ;; Esc definitions:
+  ;; Single tap: cancels all active/waiting modifiers and switches to normal mode.
+  ;; Double tap: sends caps (to cancel any stuck hardware CapsLock) and resets to normal mode.
+  esc_single (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc @to_norm)
+  esc_double (multi caps (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) @to_norm)
+  esc_reset  (tap-dance-eager 250 (@esc_single @esc_double))
 
   ;; Transitions that switch layer without consuming waiting one-shot modifiers
   nav_preserve  (multi (one-shot-pause-processing 100) @to_nav)
@@ -261,7 +265,7 @@
 ;; 1. Normal Layer (Default Physical Typing)
 ;; ----------------------------------------------------------------------------
 (deflayer normal
-  @esc_norm f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @caps_to_nav a s d  f    g    h    j    k    l    ;    apos ret
@@ -273,7 +277,7 @@
 ;; 2. Navigate Layer (Vim Motions & Tab/Word Controls)
 ;; ----------------------------------------------------------------------------
 (deflayer navigate
-  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
   @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
   @caps_nav_layer C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
@@ -285,7 +289,7 @@
 ;; 3. Super Layer (One-Shot Modifiers & Sticky Locks)
 ;; ----------------------------------------------------------------------------
 (deflayer super
-  @norm_preserve f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    @norm_preserve o p [ ]   \
   @caps_nav_layer @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
@@ -297,7 +301,7 @@
 ;; 4. Chromium Layer (Browser Tab & Page Navigation via CapsLock + 2)
 ;; ----------------------------------------------------------------------------
 (deflayer chromium
-  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @ch_1 @ch_2 @ch_3 @ch_4 @ch_5 @ch_6 @ch_7 @ch_8 @ch_9 @ch_0 - = bspc
   tab  q    w    e    @ch_r @ch_t y    u    @norm_preserve o p [ ] \
   @caps_nav_layer a s d f g @ch_h @ch_j @ch_k @ch_l ; apos ret
@@ -309,7 +313,7 @@
 ;; 5. Terminals Layer (Zellij Multiplexer Navigation via CapsLock + 3)
 ;; ----------------------------------------------------------------------------
 (deflayer terminals
-  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @tm_1 @tm_2 @tm_3 @tm_4 @tm_5 @tm_6 @tm_7 @tm_8 @tm_9 @tm_0 - = bspc
   tab  @tm_x @tm_w e    @tm_r @tm_t y    u    @norm_preserve o p @tm_prev @tm_next \
   @caps_nav_layer @tm_a @tm_s @tm_d @tm_f g @tm_h @tm_j @tm_k @tm_l ; apos ret
@@ -321,7 +325,7 @@
 ;; 6. Niri Layer (Window & Workspace Management)
 ;; ----------------------------------------------------------------------------
 (deflayer niri
-  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
   @niri_over M-q w e  @niri_rec @niri_term y u @norm_preserve o @niri_proj [ ] \
   @caps_nav_layer a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
@@ -333,7 +337,7 @@
 ;; 5. Ctrl Locked Layer (Sticky Ctrl until Esc in Normal Mode)
 ;; ----------------------------------------------------------------------------
 (deflayer ctrl_locked
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  C-1  C-2  C-3  C-4  C-5  C-6  C-7  C-8  C-9  C-0  C--  C-=  bspc
   tab  C-q  C-w  C-e  C-r  C-t  C-y  C-u  C-i  C-o  C-p  C-[  C-]  C-\
   @caps_to_nav_clk C-a C-s C-d C-f C-g C-h C-j C-k C-l C-; apos ret
@@ -345,7 +349,7 @@
 ;; 6. Super Locked Layer (Sticky Super until Esc in Normal Mode)
 ;; ----------------------------------------------------------------------------
 (deflayer super_locked
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  M-1  M-2  M-3  M-4  M-5  M-6  M-7  M-8  M-9  M-0  M--  M-=  bspc
   tab  M-q  M-w  M-e  M-r  M-t  M-y  M-u  M-i  M-o  M-p  M-[  M-]  M-\
   @caps_to_nav_slk M-a M-s M-d M-f M-g M-h M-j M-k M-l M-; apos ret
@@ -357,7 +361,7 @@
 ;; 7. Alt Locked Layer (Sticky Alt until Esc in Normal Mode)
 ;; ----------------------------------------------------------------------------
 (deflayer alt_locked
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  A-1  A-2  A-3  A-4  A-5  A-6  A-7  A-8  A-9  A-0  A--  A-=  bspc
   tab  A-q  A-w  A-e  A-r  A-t  A-y  A-u  A-i  A-o  A-p  A-[  A-]  A-\
   @to_norm A-a A-s  A-d  A-f  A-g  A-h  A-j  A-k  A-l  A-;  apos ret
@@ -369,7 +373,7 @@
 ;; 8. Shift Locked Layer (Sticky Shift until Esc in Normal Mode)
 ;; ----------------------------------------------------------------------------
 (deflayer shift_locked
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  S-1  S-2  S-3  S-4  S-5  S-6  S-7  S-8  S-9  S-0  S--  S-=  bspc
   tab  S-q  S-w  S-e  S-r  S-t  S-y  S-u  S-i  S-o  S-p  S-[  S-]  S-\
   @to_norm S-a S-s  S-d  S-f  S-g  S-h  S-j  S-k  S-l  S-;  apos ret
@@ -420,7 +424,7 @@
 ;; Navigation from Locked Modes (Returns to respective locked mode on exit)
 ;; ----------------------------------------------------------------------------
 (deflayer nav_slk
-  @to_slk f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @to_slk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_slk @o_nav C-v [ ] \
   @to_slk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
@@ -429,7 +433,7 @@
 )
 
 (deflayer nav_clk
-  @to_clk f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @to_clk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_clk @o_nav C-v [ ] \
   @to_clk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
@@ -441,7 +445,7 @@
 ;; Bypass Layer (Raw 1:1 Hardware Passthrough)
 ;; ----------------------------------------------------------------------------
 (deflayer bypass
-  @to_norm f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_reset f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    apos ret
