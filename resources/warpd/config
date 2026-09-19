@@ -1,0 +1,70 @@
+# ==============================================================================
+# Warpd Configuration: Modal Keyboard-Driven Pointer & GUI Navigation
+# Reference: Issue #28 & docs/keymap-architecture.md
+# ==============================================================================
+
+# Core Movement & Acceleration
+speed: 300
+max_speed: 1800
+acceleration: 800
+decelerator_speed: 60
+decelerator: d
+accelerator: a
+repeat_interval: 16
+
+# Vim-style cursor navigation
+left: h
+down: j
+up: k
+right: l
+
+# Screen edge jumps
+top: H
+middle: M
+bottom: L
+start: 0
+end: $
+
+# Scrolling
+scroll_down: e
+scroll_up: r
+scroll_speed: 350
+scroll_max_speed: 5000
+scroll_acceleration: 1600
+
+# Mouse clicks & Dragging
+# Persistent clicks (stay in warpd for multiple clicks/drags)
+buttons: m , .
+# Oneshot clicks (click and immediately exit warpd back to typing)
+oneshot_buttons: space - /
+drag: v
+drag_button: 1
+copy_and_exit: c
+
+# Hint Mode (Vimium-like screen target selection)
+hint_chars: asdfghjklqwertyuiopzxcvbnm
+hint_font: monospace
+hint_size: 22
+hint_border_radius: 4
+hint_bgcolor: #1e1e2e
+hint_fgcolor: #cdd6f4
+hint_exit: esc
+hint_undo: backspace
+hint_undo_all: C-u
+
+# Grid Mode
+grid_keys: u i j k
+grid_nr: 2
+grid_nc: 2
+grid_size: 3
+grid_color: #1e1e2e
+grid_border_color: #89b4fa
+grid_exit: c
+
+# Visual Indicator in normal mode
+indicator: topleft
+indicator_color: #a6e3a1
+indicator_size: 10
+cursor_color: #f38ba8
+cursor_size: 14
+exit: esc

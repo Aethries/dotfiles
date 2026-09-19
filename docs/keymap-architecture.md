@@ -53,7 +53,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │        Single-tap CapsLock                   ──> NAVIGATE              │
 │        Double-tap CapsLock                   ──> SUPER LAYER           │
 │        Tap/Hold CapsLock + ` ──> NAV | 1 ──> NIRI | 2 ──> CHROM        │
-│        Tap/Hold CapsLock + 3 ──> TERMINALS | Space ──> SUPER           │
+│        Tap/Hold CapsLock + 3 ──> TERM | 4 ──> WARPD | Spc ──> SUPER   │
 │        Bấm RightShift (instant)              ──> SUPER LAYER           │
 └────────────────────────────────────────────────────────────────────────┘
            │ (Single-tap CapsLock / Caps+`)    │ (Double-tap Caps / RightShift)
@@ -68,7 +68,8 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │  Ctrl+h/l -> Prev/Next  │         │    Sticky Lock Modifier │
 │  Ctrl+j/k -> PgDn/PgUp  │         │  c -> Lock Ctrl Mode    │
 │  v ──> VISUAL (Select)  │         │  RightShift ──> NORMAL  │
-│  x/y/p/z  -> Del/Cp/Pst │         │  Esc / i ──> NORMAL     │
+│  m / M ──> WARPD (Mouse)│         │  Esc / i ──> NORMAL     │
+│  x/y/p/z  -> Del/Cp/Pst │         │                         │
 │  1:Niri | 2:Chrom | 3:Tm│         │                         │
 │  Double Caps / Esc ──> N│         │                         │
 └─────────────────────────┘         └─────────────────────────┘
@@ -97,6 +98,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `CapsLock` + `1` $\rightarrow$ Chuyển sang **Niri Layer**.
     - `CapsLock` + `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
     - `CapsLock` + `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
+    - `CapsLock` + `4` $\rightarrow$ Kích hoạt **Warpd Hint Mode** (Điều khiển chuột bằng bàn phím).
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng an toàn (khi thực sự cần gõ IN HOA toàn bộ, không lo bị bấm nhầm).
   - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
 - **Cơ chế thoát hiểm Esc toàn cục tức thì (Zero-Latency Instant Esc Reset):**
@@ -152,7 +154,9 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `1` $\rightarrow$ Chuyển sang **Niri Layer**.
   - `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
   - `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
-  - `Hold CapsLock + 1/2/3/`` $\rightarrow$ Chuyển trực tiếp sang các layer tương ứng mà không bị thoát về Normal.
+  - `m` $\rightarrow$ Kích hoạt **Warpd Hint Mode** (Nhảy & click nhanh bằng bàn phím).
+  - `M` (`Shift + m`) $\rightarrow$ Kích hoạt **Warpd Normal Movement** (Rê chuột bằng vi-keys `h/j/k/l`).
+  - `Hold CapsLock + 1/2/3/4/`` $\rightarrow$ Chuyển trực tiếp sang các layer tương ứng mà không bị thoát về Normal.
   - `Single-tap CapsLock` $\rightarrow$ Duy trì ở **Navigate Layer**.
   - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
 
@@ -257,7 +261,32 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
   - `Hold CapsLock + 1/2/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Chromium, Navigate.
 
-### 3.7. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
+### 3.7. Warpd Pointer Layer (Điều khiển chuột toàn diện bằng bàn phím - Issue #28)
+- **Kích hoạt tức thì:**
+  - Trong **Navigate Layer**: Nhấn `m` để vào **Hint Mode** (`warpd --hint`); Nhấn `Shift + m` (`M`) để vào **Normal Movement Mode** (`warpd --normal`).
+  - Hợp âm toàn cục: `CapsLock + 4` $\rightarrow$ Kích hoạt **Hint Mode** (hoàn tất chuỗi số `1: Niri`, `2: Chromium`, `3: Terminals`, `4: Mouse`).
+  - Phím tắt Compositor Niri trực tiếp: `Mod + Alt + P` (Hint), `Mod + Alt + M` (Normal), `Mod + Alt + G` (Grid).
+- **Thao tác trong Hint Mode (Vimium-style Screen Target Selection):**
+  - Màn hình hiển thị lưới nhãn 2 ký tự trên các nút bấm, link hoặc bất kỳ vùng tương tác nào.
+  - Gõ 2 ký tự: Con trỏ lập tức nhảy đến vị trí đó và click chuột trái, sau đó tự động thoát mode.
+  - `Esc`: Hủy và thoát hint mode.
+  - `Backspace`: Xóa ký tự đầu tiên nếu gõ nhầm.
+- **Thao tác trong Normal Movement Mode (Di chuyển chuột bằng Vi-keys):**
+  - `h / j / k / l` $\rightarrow$ Rê chuột Trái / Xuống / Lên / Phải (gia tốc mượt mà, phản hồi 16ms).
+  - `H / M / L` $\rightarrow$ Nhảy nhanh con trỏ lên Đỉnh / Giữa / Đáy màn hình.
+  - `0 / $` $\rightarrow$ Nhảy nhanh con trỏ sang Cực trái / Cực phải màn hình.
+  - `Space` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay (Oneshot Click).
+  - `m` $\rightarrow$ Click chuột trái (duy trì mode để click liên tục hoặc double-click).
+  - `.` $\rightarrow$ Click chuột phải.
+  - `,` $\rightarrow$ Click chuột giữa.
+  - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode).
+  - `c` $\rightarrow$ Copy vùng chọn và thoát mode (`copy_and_exit`).
+  - `e / r` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
+  - `a` (giữ) $\rightarrow$ Tăng tốc độ rê chuột (Accelerator).
+  - `d` (giữ) $\rightarrow$ Giảm tốc độ rê chuột để căn chỉnh chính xác từng pixel (Decelerator).
+  - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
+
+### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
 - **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
 - **Thanh trạng thái Niri (Noctalia Status Bar):** Widget `keymap` trên thanh bar hiển thị nhãn chế độ thời gian thực (`NORMAL`, `NAV`, `CHROM`, `TERM`, `NIRI`, `SUPER`, `C-LOCK`), cho phép click để mở bảng tra cứu phím tắt.
 - **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` lắng nghe sự kiện `Entered layer` từ Kanata stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và phát thông báo OSD qua `notify-send`. Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.

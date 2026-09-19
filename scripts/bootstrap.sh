@@ -315,6 +315,12 @@ if [ -d "$REPO_ROOT/resources/yazi" ]; then
     safe_link "$REPO_ROOT/resources/yazi/yazi.toml" "$USER_HOME/.config/yazi/yazi.toml"
 fi
 
+# Warpd keyboard-driven pointer configuration
+if [ -d "$REPO_ROOT/resources/warpd" ]; then
+    mkdir -p "$USER_HOME/.config/warpd"
+    safe_link "$REPO_ROOT/resources/warpd/config" "$USER_HOME/.config/warpd/config"
+fi
+
 # Custom application desktop entries (Jira, etc.)
 mkdir -p "$USER_HOME/.local/share/applications"
 if [ -f "$REPO_ROOT/resources/static/jira.desktop" ]; then
@@ -384,6 +390,7 @@ if [ -n "${SUDO_USER:-}" ]; then
     chown -h "$SUDO_USER:" "$USER_HOME/.zshrc" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/config" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/profile" 2>/dev/null || true
+    chown -R "$SUDO_USER:" "$USER_HOME/.config/warpd" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.config" 2>/dev/null || true
 fi
 

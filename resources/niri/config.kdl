@@ -548,6 +548,16 @@ binds {
     Super+Escape hotkey-overlay-title="Lock the Screen: Noctalia" {
         spawn-sh "noctalia msg session lock"
     }
+    // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
+    Mod+Alt+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
+        spawn "warpd" "--hint"
+    }
+    Mod+Alt+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
+        spawn "warpd" "--normal"
+    }
+    Mod+Alt+G hotkey-overlay-title="Mouse: Warpd Grid Mode" {
+        spawn "warpd" "--grid"
+    }
     // Noctalia Shell keybinds
     Mod+Comma hotkey-overlay-title="Settings: Noctalia" {
         spawn-sh "noctalia msg settings-toggle"
