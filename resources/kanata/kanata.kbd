@@ -48,16 +48,17 @@
   to_shlk (layer-switch shift_locked)
   to_bp   (layer-switch bypass)
 
-  ;; Normal mode Esc: cancels any active modifiers cleanly
+  ;; Normal mode Esc: cancels all active/waiting modifiers cleanly
   esc_norm (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc)
 
-  ;; Exit super layer without consuming waiting one-shot modifiers
-  esc_from_super (multi (one-shot-pause-processing 100) @to_norm)
+  ;; Transitions that switch layer without consuming waiting one-shot modifiers
+  nav_preserve  (multi (one-shot-pause-processing 100) @to_nav)
+  norm_preserve (multi (one-shot-pause-processing 100) @to_norm)
 
   ;; Normal mode triggers:
-  ;; CapsLock directly switches to navigate layer without sending Esc/Caps.
+  ;; CapsLock switches to navigate layer preserving waiting modifiers.
   ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
-  caps_to_nav (fork @to_nav caps (lsft rsft))
+  caps_to_nav (fork @nav_preserve caps (lsft rsft))
   rsft_to_sup (tap-hold-release 200 200 rsft @to_sup)
 
   ;; --------------------------------------------------------------------------
@@ -74,9 +75,9 @@
   u_nav (fork pgup C-pgup (lctl rctl))
 
   ;; o/i: Jump Backward (Alt+Left) / Forward (Alt+Right).
-  ;; i alone returns to normal mode (Vim insert mode muscle memory).
+  ;; i alone returns to normal mode preserving waiting modifiers.
   o_nav (fork o A-left (lctl rctl))
-  i_nav (fork @to_norm A-rght (lctl rctl))
+  i_nav (fork @norm_preserve A-rght (lctl rctl))
 
   ;; Word & Line motions
   w_fwd C-rght
@@ -147,10 +148,10 @@
 ;; 2. Navigate Layer (Vim Motions & Tab/Word Controls)
 ;; ----------------------------------------------------------------------------
 (deflayer navigate
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
   tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
-  @to_norm C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
+  @norm_preserve C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
@@ -159,10 +160,10 @@
 ;; 3. Super Layer (One-Shot Modifiers & Sticky Locks)
 ;; ----------------------------------------------------------------------------
 (deflayer super
-  @esc_from_super f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
+  @norm_preserve f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    @esc_from_super o p [ ]   \
-  @esc_from_super @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
+  tab  q    w    e    r    t    y    u    @norm_preserve o p [ ]   \
+  @norm_preserve @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
   lsft z    x    @to_clk v b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
@@ -171,10 +172,10 @@
 ;; 4. Niri Layer (Window & Workspace Management)
 ;; ----------------------------------------------------------------------------
 (deflayer niri
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
-  @niri_over M-q w e  @niri_rec @niri_term y u @to_norm o @niri_proj [ ] \
-  @to_norm a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
+  @niri_over M-q w e  @niri_rec @niri_term y u @norm_preserve o @niri_proj [ ] \
+  @norm_preserve a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
   lsft z    x    @niri_center @niri_clip b n m , . / rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
