@@ -82,6 +82,16 @@ safe_link \
     "$REPO_ROOT/resources/gemini/mcp_config.json" \
     "$TARGET_HOME/.gemini/antigravity/mcp_config.json"
 
+if [ -d "$REPO_ROOT/resources/skills" ]; then
+    for skill_dir in "$REPO_ROOT/resources/skills"/*; do
+        if [ -d "$skill_dir" ]; then
+            skill_name="$(basename "$skill_dir")"
+            safe_link "$skill_dir" "$TARGET_HOME/.gemini/config/skills/$skill_name"
+            safe_link "$skill_dir" "$TARGET_HOME/.codex/skills/$skill_name"
+        fi
+    done
+fi
+
 TEMPLATE_SOURCE="${GODOT_EXPORT_TEMPLATES_SOURCE:-/run/current-system/sw/share/godot/export_templates}"
 if [ -d "$TEMPLATE_SOURCE" ]; then
     safe_link "$TEMPLATE_SOURCE" "$TARGET_DATA/godot/export_templates"
@@ -100,8 +110,9 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
     chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
 fi
-success "Neovim, Antigravity, Godot MCP and template links are synchronized"
+success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 
 if [ "$SYNC_EXTENSIONS" = false ]; then
     exit 0

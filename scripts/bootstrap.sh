@@ -350,6 +350,8 @@ safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-in
 safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
 safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
 safe_link "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$USER_HOME/.local/bin/reconcile-ai-gateways"
+safe_link "$REPO_ROOT/scripts/ai-skills.sh" "$USER_HOME/.local/bin/ai-skills"
+safe_link "$REPO_ROOT/scripts/ai-skills.sh" "$USER_HOME/.local/bin/add-skills"
 
 # Configure user-level npm global prefix to prevent writing into read-only /nix/store
 if command -v npm >/dev/null 2>&1; then
