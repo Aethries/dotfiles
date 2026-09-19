@@ -58,32 +58,33 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
 │  h/j/k/l -> Arrows      │         │  a -> One-shot Super    │
-│  Ctrl+h/l -> Prev/Next  │         │  s -> One-shot Alt      │
+│  Ctrl+h/l -> Prev/Next  │         │  s -> One-shot Shift    │
 │  Ctrl+j/k -> PgDn/PgUp  │         │  d -> One-shot Ctrl     │
-│  Ctrl+o/i -> Back/Fwd   │         │  f -> One-shot Shift    │
-│  w/e/b    -> Word jumps │         │  c -> Lock Ctrl Mode    │
-│  x/y/p/z  -> Del/Cp/Pst │         │                         │
-│  Bấm 1    ──> NIRI      │         │  Esc -> Về Normal       │
-│  Esc      ──> NORMAL    │         └─────────────────────────┘
-└─────────────────────────┘                      │ Bấm c
-           │ Bấm 1                               ▼
-           ▼                        ┌─────────────────────────┐
-┌─────────────────────────┐         │    CTRL_LOCKED LAYER    │
-│       NIRI LAYER        │         │  Mọi phím tự động kèm   │
-│  h/l     -> Focus Col   │         │  Ctrl+<key>             │
-│  j/k     -> Focus Ws    │         │                         │
-│  1-9     -> Jump Ws     │         │  Esc -> Về Normal       │
-│  Ctrl+...-> Move Col/Ws │         └─────────────────────────┘
-│  c/p/s/r/d/t -> Actions │
-│  Esc     ──> NORMAL     │
+│  Ctrl+o/i -> Back/Fwd   │         │  f -> One-shot Alt      │
+│  w/e/b    -> Word jumps │         │  Shift + a/s/d/f ->     │
+│  x/y/p/z  -> Del/Cp/Pst │         │    Sticky Lock Modifier │
+│  Bấm 1    ──> NIRI      │         │  c -> Lock Ctrl Mode    │
+│  i / Esc  ──> NORMAL    │         │  Esc / i ──> NORMAL     │
+└─────────────────────────┘         └─────────────────────────┘
+           │ Bấm 1                               │ Shift+a/s/d/f
+           ▼                                     ▼
+┌─────────────────────────┐         ┌─────────────────────────┐
+│       NIRI LAYER        │         │   LOCKED MODIFIER MODES │
+│  h/l     -> Focus Col   │         │  (CTRL/SUPER/ALT/SHIFT) │
+│  j/k     -> Focus Ws    │         │  Mọi phím tự động kèm   │
+│  1-9     -> Jump Ws     │         │  Modifier cho đến Esc   │
+│  Ctrl+...-> Move Col/Ws │         │                         │
+│  c/p/s/r/d/t -> Actions │         │  Esc / Caps ──> NORMAL  │
+│  i / Esc ──> NORMAL     │         └─────────────────────────┘
 └─────────────────────────┘
 ```
 
 ### 3.1. Normal Layer (Lớp cơ bản)
 - Gõ văn bản hoàn toàn nguyên bản như bàn phím phần cứng.
-- **Chuyển tầng thông minh (Latching layer switch):**
-  - `CapsLock`: Nhấn thả nhanh (< 200ms) = phím `Esc`. Giữ $\ge$ 200ms = Chuyển hẳn sang **Navigate Layer** (thả tay ra vẫn ở Navigate).
-  - `RightShift`: Nhấn thả nhanh (< 200ms) = phím `RightShift`. Giữ $\ge$ 200ms = Chuyển hẳn sang **Super Layer** (thả tay ra vẫn ở Super).
+- **Chuyển tầng trực tiếp & an toàn:**
+  - `CapsLock`: Nhấn để chuyển ngay sang **Navigate Layer** (không phát phím `Esc` tránh mất dấu caret/focus trong input, không bật đèn CapsLock phần cứng).
+  - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
+  - `RightShift`: Nhấn thả bình thường = `RightShift`. Giữ $\ge$ 200ms = Chuyển sang **Super Layer**.
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
 - **Di chuyển con trỏ:**
@@ -92,7 +93,8 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Ctrl + l` $\rightarrow$ `Ctrl + Tab` (Tab kế tiếp).
   - `Ctrl + j / k` $\rightarrow$ `Ctrl + PageDown / PageUp`.
   - `Ctrl + d / u` $\rightarrow$ `PageDown / PageUp`.
-  - `Ctrl + o / i` $\rightarrow$ `Alt + Left / Right` (Lịch sử trình duyệt / Jump list).
+  - `Ctrl + o` $\rightarrow$ `Alt + Left` (Lịch sử trình duyệt lùi).
+  - `Ctrl + i` $\rightarrow$ `Alt + Right` (Lịch sử trình duyệt tiến).
 - **Nhảy từ & Biên dòng:**
   - `w` $\rightarrow$ `Ctrl + Right` (Nhảy tới đầu từ kế).
   - `e` / `b` $\rightarrow$ `Ctrl + Left` (Nhảy về đầu từ trước).
@@ -105,20 +107,25 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `z` $\rightarrow$ `Ctrl + Z` (Hoàn tác / Undo).
   - `r` $\rightarrow$ `Ctrl + Y` (Làm lại / Redo).
   - `/` $\rightarrow$ `Ctrl + F` (Tìm kiếm).
-- **Chuyển tiếp:**
+- **Chuyển tiếp & Thoát:**
   - `1` $\rightarrow$ Chuyển sang **Niri Layer**.
-  - `Esc` $\rightarrow$ Trở về **Normal Layer**.
+  - `i` $\rightarrow$ Trở về **Normal Layer** (theo thói quen Insert mode của Vim).
+  - `Esc` hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer** (không kích hoạt in hoa).
 
 ### 3.3. Super Layer (Lớp phím bổ trợ One-Shot & Sticky)
-- **One-Shot Modifiers (chờ 1000ms):**
+- **One-Shot Modifiers (cho 1 thao tác tiếp theo, timeout 1000ms):**
   - `a` $\rightarrow$ `Super` (Windows key).
-  - `s` $\rightarrow$ `Alt`.
+  - `s` $\rightarrow$ `Shift`.
   - `d` $\rightarrow$ `Ctrl`.
-  - `f` $\rightarrow$ `Shift`.
-  *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Shift` cho phím gõ tiếp theo).*
-- **Chế độ khóa Ctrl (Ctrl Locked Mode):**
-  - `c` $\rightarrow$ Chuyển sang layer `ctrl_locked`. Ở chế độ này, mọi ký tự gõ vào đều tự động kèm Ctrl (`Ctrl+C`, `Ctrl+V`, `Ctrl+A`, v.v.), chỉ hủy và trở về `normal` khi bấm `Esc`.
-- **Thoát:** `Esc` giải phóng mọi modifier và trở về **Normal Layer**.
+  - `f` $\rightarrow$ `Alt`.
+  *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Alt` cho phím gõ tiếp theo).*
+- **Sticky Locking (cho thao tác lặp đi lặp lại):**
+  - `Shift + a` $\rightarrow$ Khóa `Super` liên tục (`super_locked`).
+  - `Shift + s` $\rightarrow$ Khóa `Shift` liên tục (`shift_locked`).
+  - `Shift + d` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
+  - `Shift + f` $\rightarrow$ Khóa `Alt` liên tục (`alt_locked`).
+  - `c` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
+- **Thoát:** `Esc` hoặc `CapsLock` giải phóng mọi modifier và trở về **Normal Layer**.
 
 ### 3.4. Niri Layer (Lớp điều khiển Window Manager Niri)
 - **Điều hướng cửa sổ & Workspace:**
@@ -131,6 +138,8 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Ctrl + 1 - 9` $\rightarrow$ Chuyển window đang focus sang workspace tương ứng (`Mod+Ctrl+1..9`).
   - `Shift + h / l` $\rightarrow$ Chuyển focus sang màn hình trái / phải.
   - `Alt + h / l` $\rightarrow$ Chuyển window sang màn hình trái / phải.
+- **Thoát layer:**
+  - `i`, `Esc`, hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer**.
 - **Hành động One-shot (Chạy xong tự động về Normal):**
   - `c` $\rightarrow$ Căn giữa cột (`Mod+C`).
   - `p` $\rightarrow$ Mở Project launcher (`Mod+P`).

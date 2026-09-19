@@ -43,10 +43,15 @@
   to_sup  (layer-switch super)
   to_niri (layer-switch niri)
   to_clk  (layer-switch ctrl_locked)
+  to_slk  (layer-switch super_locked)
+  to_alk  (layer-switch alt_locked)
+  to_shlk (layer-switch shift_locked)
   to_bp   (layer-switch bypass)
 
-  ;; Normal mode triggers: Hold 200ms switches layer permanently until Esc
-  caps_to_nav (tap-hold-release 200 200 esc @to_nav)
+  ;; Normal mode triggers:
+  ;; CapsLock directly switches to navigate layer without sending Esc/Caps.
+  ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
+  caps_to_nav (fork @to_nav caps (lsft rsft))
   rsft_to_sup (tap-hold-release 200 200 rsft @to_sup)
 
   ;; --------------------------------------------------------------------------
@@ -62,9 +67,10 @@
   d_nav (fork pgdn C-pgdn (lctl rctl))
   u_nav (fork pgup C-pgup (lctl rctl))
 
-  ;; o/i: Web / Jump list Backward and Forward (Alt+Left / Alt+Right)
+  ;; o/i: Jump Backward (Alt+Left) / Forward (Alt+Right).
+  ;; i alone returns to normal mode (Vim insert mode muscle memory).
   o_nav (fork o A-left (lctl rctl))
-  i_nav (fork i A-rght (lctl rctl))
+  i_nav (fork @to_norm A-rght (lctl rctl))
 
   ;; Word & Line motions
   w_fwd C-rght
@@ -72,12 +78,19 @@
   key_4 (fork 4 end (lsft rsft))
 
   ;; --------------------------------------------------------------------------
-  ;; Super Layer Actions (One-Shot 1000ms Modifiers)
+  ;; Super Layer Actions (One-Shot Modifiers & Sticky Locks with Shift)
   ;; --------------------------------------------------------------------------
   os_super (one-shot 1000 lmet)
   os_shift (one-shot 1000 lsft)
   os_ctrl  (one-shot 1000 lctl)
   os_alt   (one-shot 1000 lalt)
+
+  ;; Pressing key alone -> One-shot for next key only
+  ;; Pressing Shift + key -> Sticky lock modifier indefinitely until Esc
+  sup_a (fork @os_super @to_slk  (lsft rsft))
+  sup_s (fork @os_shift @to_shlk (lsft rsft))
+  sup_d (fork @os_ctrl  @to_clk  (lsft rsft))
+  sup_f (fork @os_alt   @to_alk  (lsft rsft))
 
   ;; --------------------------------------------------------------------------
   ;; Niri Layer Actions
@@ -131,19 +144,19 @@
   @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
   tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
-  caps C-a  s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
+  @to_norm C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
 ;; ----------------------------------------------------------------------------
-;; 3. Super Layer (One-Shot Modifiers & Sticky Ctrl)
+;; 3. Super Layer (One-Shot Modifiers & Sticky Locks)
 ;; ----------------------------------------------------------------------------
 (deflayer super
   @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  caps @os_super @os_shift @os_ctrl @os_alt g h j k l ; apos ret
+  tab  q    w    e    r    t    y    u    @to_norm o p    [    ]    \
+  @to_norm @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
   lsft z    x    @to_clk v b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
@@ -154,26 +167,62 @@
 (deflayer niri
   @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
-  @niri_over M-q w e  @niri_rec @niri_term y u i o @niri_proj [ ]   \
-  caps a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
+  @niri_over M-q w e  @niri_rec @niri_term y u @to_norm o @niri_proj [ ] \
+  @to_norm a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
   lsft z    x    @niri_center @niri_clip b n m , . / rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
 ;; ----------------------------------------------------------------------------
-;; 5. Ctrl Locked Layer (Sticky Ctrl until Esc)
+;; 5. Ctrl Locked Layer (Sticky Ctrl until Esc or Caps)
 ;; ----------------------------------------------------------------------------
 (deflayer ctrl_locked
   @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  C-1  C-2  C-3  C-4  C-5  C-6  C-7  C-8  C-9  C-0  C--  C-=  bspc
   tab  C-q  C-w  C-e  C-r  C-t  C-y  C-u  C-i  C-o  C-p  C-[  C-]  C-\
-  caps C-a  C-s  C-d  C-f  C-g  C-h  C-j  C-k  C-l  C-;  apos ret
+  @to_norm C-a C-s  C-d  C-f  C-g  C-h  C-j  C-k  C-l  C-;  apos ret
   lsft C-z  C-x  C-c  C-v  C-b  C-n  C-m  C-,  C-.  C-/  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
 ;; ----------------------------------------------------------------------------
-;; 6. Bypass Layer (Raw 1:1 Hardware Passthrough)
+;; 6. Super Locked Layer (Sticky Super/Win until Esc or Caps)
+;; ----------------------------------------------------------------------------
+(deflayer super_locked
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  M-1  M-2  M-3  M-4  M-5  M-6  M-7  M-8  M-9  M-0  M--  M-=  bspc
+  tab  M-q  M-w  M-e  M-r  M-t  M-y  M-u  M-i  M-o  M-p  M-[  M-]  M-\
+  @to_norm M-a M-s  M-d  M-f  M-g  M-h  M-j  M-k  M-l  M-;  apos ret
+  lsft M-z  M-x  M-c  M-v  M-b  M-n  M-m  M-,  M-.  M-/  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 7. Alt Locked Layer (Sticky Alt until Esc or Caps)
+;; ----------------------------------------------------------------------------
+(deflayer alt_locked
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  A-1  A-2  A-3  A-4  A-5  A-6  A-7  A-8  A-9  A-0  A--  A-=  bspc
+  tab  A-q  A-w  A-e  A-r  A-t  A-y  A-u  A-i  A-o  A-p  A-[  A-]  A-\
+  @to_norm A-a A-s  A-d  A-f  A-g  A-h  A-j  A-k  A-l  A-;  apos ret
+  lsft A-z  A-x  A-c  A-v  A-b  A-n  A-m  A-,  A-.  A-/  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 8. Shift Locked Layer (Sticky Shift until Esc or Caps)
+;; ----------------------------------------------------------------------------
+(deflayer shift_locked
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  S-1  S-2  S-3  S-4  S-5  S-6  S-7  S-8  S-9  S-0  S--  S-=  bspc
+  tab  S-q  S-w  S-e  S-r  S-t  S-y  S-u  S-i  S-o  S-p  S-[  S-]  S-\
+  @to_norm S-a S-s  S-d  S-f  S-g  S-h  S-j  S-k  S-l  S-;  apos ret
+  lsft S-z  S-x  S-c  S-v  S-b  S-n  S-m  S-,  S-.  S-/  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 9. Bypass Layer (Raw 1:1 Hardware Passthrough)
 ;; ----------------------------------------------------------------------------
 (deflayer bypass
   @to_norm f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
