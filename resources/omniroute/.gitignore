@@ -1,0 +1,6 @@
+# Prevent accidental commit of bundle exports, SQLite databases, or local env files
+*.json
+*.sqlite*
+*.env
+*.bak*
+*.log

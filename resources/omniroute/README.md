@@ -17,13 +17,22 @@ OmniRoute coexists with **9Router** in a dual-gateway architecture:
 
 ## Key Files & Structure
 
-* `resources/systemd/user/omniroute.service`: Declarative systemd user service binding OmniRoute to `127.0.0.1:20129`.
-* `scripts/init-omniroute.sh`: Automated installer, port configuration, and service bootstrapper.
-* `scripts/sync-omniroute.sh`: Declarative configuration bundle export/import and vault synchronization.
-* `resources/omniroute/bundle.json`: Declarative export of settings, combos, keys, policies, and skills.
+* `resources/systemd/user/omniroute.service`: Declarative systemd user service binding OmniRoute strictly to `127.0.0.1:20129`.
+* `scripts/init-omniroute.sh`: Automated installer, pinned package manager (`omniroute@3.8.50`), loopback port configuration, key desync protection, and service bootstrapper.
+* `scripts/sync-omniroute.sh`: Declarative non-sensitive configuration bundle export/import and vault synchronization.
+* `resources/omniroute/.gitignore`: Excludes `bundle.json`, `*.json`, `*.sqlite*`, and `*.env` to guarantee sensitive credentials are never committed.
+* `tests/ai/omniroute_test.sh`: Integration, security, and port isolation test suite wired directly to `scripts/check.sh`.
 * `~/.omniroute/`:
-  * `.env`: Contains `PORT=20129` and `STORAGE_ENCRYPTION_KEY`.
-  * `storage.sqlite`: Local encrypted database containing all GUI customizations, accounts, and provider configurations (synced via `vault backup`).
+  * `.env`: Contains `PORT=20129`, `HOST=127.0.0.1`, `OMNIROUTE_SERVER_HOST=127.0.0.1`, `API_HOST=127.0.0.1`, `LIVE_WS_HOST=127.0.0.1`, and `STORAGE_ENCRYPTION_KEY`.
+  * `storage.sqlite`: Local encrypted database containing all GUI customizations, accounts, and provider configurations (authoritative store synced safely via `vault backup`).
+
+---
+
+## State Synchronization & Single Source of Truth
+
+OmniRoute state follows a strict security architecture:
+1. **Authoritative State (`vault.sh`)**: All credentials, provider accounts, encrypted SQLite records, and master encryption keys live in `~/.omniroute/` and are encrypted into `secrets.vault` using `vault backup`. During backup, the system pauses the service and checkpoints the SQLite WAL to ensure atomic, non-corrupted snapshots.
+2. **Declarative State (`bundle.json`)**: `sync-omniroute export` exports non-sensitive declarative policies, combos, and skills. Raw provider tokens and credentials are intentionally omitted, and the bundle is gitignored.
 
 ---
 
@@ -32,30 +41,33 @@ OmniRoute coexists with **9Router** in a dual-gateway architecture:
 ### 1. Initialize or Reinstall
 ```bash
 init-omniroute
+# Or if resetting an orphaned database with a new encryption key:
+init-omniroute --force
 ```
-This ensures Node.js dependencies, configures port `20129`, and starts the systemd service.
+This guarantees Node.js LTS via `fnm`, pins `omniroute@3.8.50`, configures loopback bindings, protects against key desync, and starts the systemd service.
 
 ### 2. Service Management
 ```bash
-systemctl --user status omniroute
-systemctl --user restart omniroute
-journalctl --user -u omniroute -f
+omni status     # or systemctl --user status omniroute
+omni restart    # or systemctl --user restart omniroute
+omni stop       # or systemctl --user stop omniroute
+omni logs       # or journalctl --user -u omniroute -f
 ```
 
 ### 3. Sync Settings & Providers
 ```bash
-# Export configuration bundle to resources/omniroute/bundle.json
-sync-omniroute export
-
-# Import bundle back into local instance
-sync-omniroute import
-
-# Sync entire database and tokens into encrypted vault
+# Sync entire database, provider accounts, and tokens into encrypted vault (authoritative)
 vault backup
+
+# Restore database and encryption keys on a fresh system
+vault restore
+
+# (Optional) Export non-sensitive declarative bundle
+sync-omniroute export
 ```
 
-### 4. Health Check
+### 4. Diagnostics & Testing
 ```bash
-doctor
+doctor                    # Verifies service status, 127.0.0.1 loopback binding, and coexistence
+dotfiles-check            # Runs full repo verification including tests/ai/omniroute_test.sh
 ```
-The dotfiles system doctor checks that both 9Router (`20128`) and OmniRoute (`20129`) are healthy and non-conflicting.

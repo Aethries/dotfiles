@@ -225,32 +225,45 @@ check_user_service "omniroute" "OmniRoute Local AI Gateway"
 
 # Verify AI Gateway Ports (9router on 20128, OmniRoute on 20129)
 ROUTER_9_LISTEN=false
-OMNI_LISTEN=false
+OMNI_LISTEN_LOOPBACK=false
+OMNI_LISTEN_PUBLIC=false
 
 if command -v ss >/dev/null 2>&1; then
     if ss -tlHn 'sport = :20128' 2>/dev/null | grep -q '20128'; then
         ROUTER_9_LISTEN=true
     fi
-    if ss -tlHn 'sport = :20129' 2>/dev/null | grep -q '20129'; then
-        OMNI_LISTEN=true
+    if ss -tlHn 'sport = :20129' 2>/dev/null | grep -E '0\.0\.0\.0:20129|\*:20129' >/dev/null; then
+        OMNI_LISTEN_PUBLIC=true
+    elif ss -tlHn 'sport = :20129' 2>/dev/null | grep -E '127\.0\.0\.1:20129|\[::1\]:20129' >/dev/null; then
+        OMNI_LISTEN_LOOPBACK=true
     fi
 elif command -v lsof >/dev/null 2>&1; then
     if lsof -nP -i :20128 2>/dev/null | grep -q 'LISTEN'; then
         ROUTER_9_LISTEN=true
     fi
-    if lsof -nP -i :20129 2>/dev/null | grep -q 'LISTEN'; then
-        OMNI_LISTEN=true
+    if lsof -nP -i :20129 2>/dev/null | grep -E '(\*|0\.0\.0\.0):20129' >/dev/null; then
+        OMNI_LISTEN_PUBLIC=true
+    elif lsof -nP -i :20129 2>/dev/null | grep -E '(127\.0\.0\.1|\[::1\]):20129' >/dev/null; then
+        OMNI_LISTEN_LOOPBACK=true
     fi
 fi
 
 if [ "$ROUTER_9_LISTEN" = true ]; then
     ok "9router listening on port 20128"
+else
+    warn "9router is NOT listening on port 20128 (run 'init-9router' to start)"
 fi
-if [ "$OMNI_LISTEN" = true ]; then
-    ok "OmniRoute listening on dedicated port 20129"
+
+if [ "$OMNI_LISTEN_PUBLIC" = true ]; then
+    fail "OmniRoute port 20129 is exposed to 0.0.0.0 (insecure, not bound to loopback 127.0.0.1!)"
+elif [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
+    ok "OmniRoute listening on dedicated loopback port 127.0.0.1:20129"
+else
+    warn "OmniRoute is NOT listening on port 20129 (run 'init-omniroute' to start)"
 fi
-if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN" = true ]; then
-    ok "AI Gateways coexistence verified (port 20128: 9router, port 20129: OmniRoute)"
+
+if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
+    ok "AI Gateways coexistence verified (port 20128: 9router, port 20129: OmniRoute loopback)"
 fi
 
 # ------------------------------------------------------------------------------

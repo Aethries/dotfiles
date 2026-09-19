@@ -141,6 +141,8 @@ EXCLUDE_PATTERNS=(
     "*/.omniroute/*.bak*"
     "*/.omniroute/*.pre-*"
     "*/.omniroute/**/*.pid"
+    "*/.omniroute/*.sock"
+    "*/.omniroute/**/*.sock"
 )
 
 ensure_user_owned() {
@@ -224,6 +226,27 @@ cmd_backup() {
         error "No application profiles or secrets found in $USER_HOME."
     fi
 
+    # Consistent database snapshot: pause active services writing SQLite WAL
+    local restart_omniroute=false
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service 2>/dev/null; then
+        info "Temporarily pausing omniroute service for consistent SQLite snapshot..."
+        systemctl --user stop omniroute.service 2>/dev/null || true
+        restart_omniroute=true
+    fi
+
+    # Checkpoint SQLite WAL if database exists and sqlite3 CLI is available
+    if [ -f "$USER_HOME/.omniroute/storage.sqlite" ] && command -v sqlite3 >/dev/null 2>&1; then
+        sqlite3 "$USER_HOME/.omniroute/storage.sqlite" "PRAGMA wal_checkpoint(TRUNCATE);" 2>/dev/null || true
+    fi
+
+    finish_backup_runtime() {
+        if [ "$restart_omniroute" = true ] && command -v systemctl >/dev/null 2>&1; then
+            info "Resuming omniroute service..."
+            systemctl --user start omniroute.service 2>/dev/null || true
+        fi
+    }
+    trap finish_backup_runtime EXIT
+
     echo
     echo "This vault will contain sensitive credentials (cookies, 2FA sessions, SSH keys)."
     echo "Please set a strong Master Password to encrypt this vault:"
@@ -258,6 +281,9 @@ cmd_backup() {
 
     local size
     size="$(du -h "$out_file" | cut -f1)"
+
+    finish_backup_runtime
+    trap - EXIT
 
     echo
     success "Vault created successfully: $out_file ($size)"

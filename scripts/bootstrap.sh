@@ -396,6 +396,28 @@ success "NixOS configuration applied successfully!"
 info "Synchronizing editor configuration and extensions..."
 "$REPO_ROOT/scripts/sync-editors.sh"
 
+# ------------------------------------------------------------
+# AI Gateways Initialization (9Router & OmniRoute)
+# ------------------------------------------------------------
+info "Initializing AI Gateways (9Router & OmniRoute)..."
+
+if [ -x "$REPO_ROOT/scripts/init-9router.sh" ]; then
+    info "Setting up 9Router (port 20128)..."
+    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-9router.sh" || warn "9Router initialization failed or skipped during bootstrap."
+    else
+        "$REPO_ROOT/scripts/init-9router.sh" || warn "9Router initialization failed or skipped during bootstrap."
+    fi
+fi
+
+if [ -x "$REPO_ROOT/scripts/init-omniroute.sh" ]; then
+    info "Setting up OmniRoute (port 20129)..."
+    if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-omniroute.sh" || warn "OmniRoute initialization failed or skipped during bootstrap."
+    else
+        "$REPO_ROOT/scripts/init-omniroute.sh" || warn "OmniRoute initialization failed or skipped during bootstrap."
+    fi
+fi
 
 # ------------------------------------------------------------
 # Done

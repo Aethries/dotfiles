@@ -46,20 +46,24 @@ cmd_export() {
     export PORT="$OMNIROUTE_PORT"
     export DASHBOARD_PORT="$OMNIROUTE_PORT"
 
-    if omniroute sync bundle "$BUNDLE_FILE" 2>/dev/null; then
-        success "Exported bundle to $BUNDLE_FILE ($(du -h "$BUNDLE_FILE" | cut -f1))"
+    # Export declarative non-secret parts (exclude keys and providers to protect credentials)
+    if omniroute sync bundle --include settings,combos,policies,skills,memory "$BUNDLE_FILE" 2>/dev/null; then
+        success "Exported non-sensitive declarative bundle to $BUNDLE_FILE ($(du -h "$BUNDLE_FILE" | cut -f1))"
     else
-        warn "Could not export via 'omniroute sync bundle'. Creating database snapshot in vault instead."
+        warn "Declarative bundle export skipped or unavailable. The authoritative sync is managed via vault."
     fi
 
     echo
-    echo "Tip: Run 'vault backup' to include all providers, tokens, and storage.sqlite into your encrypted secrets.vault!"
+    echo -e "${BOLD}NOTE:${NC} The authoritative source of truth for accounts, tokens, and storage.sqlite"
+    echo "      is your encrypted vault. Run 'vault backup' to sync all state securely."
 }
 
 cmd_import() {
     info "Importing OmniRoute declarative bundle from $BUNDLE_FILE..."
     if [ ! -f "$BUNDLE_FILE" ]; then
-        error "Bundle file not found: $BUNDLE_FILE. Run 'sync-omniroute export' first."
+        warn "Bundle file not found: $BUNDLE_FILE."
+        info "If restoring on a new machine, run 'vault restore' to restore full OmniRoute database and environment."
+        return 0
     fi
 
     if ! command -v omniroute >/dev/null 2>&1; then
@@ -69,10 +73,13 @@ cmd_import() {
     export PORT="$OMNIROUTE_PORT"
     export DASHBOARD_PORT="$OMNIROUTE_PORT"
 
-    omniroute sync import "$BUNDLE_FILE"
-    success "OmniRoute configuration bundle imported successfully!"
-    echo "Restarting service to load new settings..."
-    systemctl --user restart omniroute.service 2>/dev/null || true
+    if omniroute sync import "$BUNDLE_FILE" 2>/dev/null; then
+        success "OmniRoute configuration bundle imported successfully!"
+        echo "Restarting service to load new settings..."
+        systemctl --user restart omniroute.service 2>/dev/null || true
+    else
+        warn "Could not import bundle. Run 'vault restore' to restore your complete database."
+    fi
 }
 
 cmd_status() {
@@ -86,10 +93,24 @@ cmd_status() {
         echo -e "  - Service Status:    ${YELLOW}! Inactive or Stopped${NC}"
     fi
 
-    # Port state
-    if lsof -i ":$OMNIROUTE_PORT" >/dev/null 2>&1; then
-        echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Dedicated, no conflict with 20128)${NC}"
-    else
+    # Port and host binding state
+    local port_bound=false
+    if command -v ss >/dev/null 2>&1; then
+        if ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E '0\.0\.0\.0|\*:' >/dev/null; then
+            echo -e "  - Listening Port:    ${RED}${BOLD}$OMNIROUTE_PORT (INSECURE: Bound to 0.0.0.0)${NC}"
+            port_bound=true
+        elif ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E '127\.0\.0\.1|\[::1\]' >/dev/null; then
+            echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Loopback 127.0.0.1, isolated)${NC}"
+            port_bound=true
+        fi
+    elif command -v lsof >/dev/null 2>&1; then
+        if lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -q 'LISTEN'; then
+            echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Dedicated, isolated from 20128)${NC}"
+            port_bound=true
+        fi
+    fi
+
+    if [ "$port_bound" = false ]; then
         echo -e "  - Listening Port:    ${YELLOW}! Not listening on $OMNIROUTE_PORT${NC}"
     fi
 
@@ -106,29 +127,39 @@ cmd_status() {
     if [ -f "$OMNIROUTE_DIR/.env" ] && grep -q '^STORAGE_ENCRYPTION_KEY=' "$OMNIROUTE_DIR/.env"; then
         echo -e "  - Encryption Key:    ${GREEN}${BOLD}Configured${NC} in $OMNIROUTE_DIR/.env"
     else
-        echo -e "  - Encryption Key:    ${YELLOW}! Missing key${NC}"
+        echo -e "  - Encryption Key:    ${YELLOW}! Missing key in $OMNIROUTE_DIR/.env${NC}"
     fi
 
-    # Tracked bundle
-    if [ -f "$BUNDLE_FILE" ]; then
-        local b_size
-        b_size="$(du -h "$BUNDLE_FILE" | cut -f1)"
-        local b_time
-        b_time="$(date -r "$BUNDLE_FILE" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "Unknown")"
-        echo -e "  - Dotfiles Bundle:   ${GREEN}${BOLD}Synced ($b_size, $b_time)${NC}"
+    # Vault backup state
+    local vault_file="$REPO_ROOT/secrets.vault"
+    if [ -f "$vault_file" ]; then
+        local v_size v_time
+        v_size="$(du -h "$vault_file" | cut -f1)"
+        v_time="$(date -r "$vault_file" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "Unknown")"
+        echo -e "  - Encrypted Vault:   ${GREEN}${BOLD}Present ($v_size, $v_time)${NC} at secrets.vault"
     else
-        echo -e "  - Dotfiles Bundle:   ${YELLOW}! No exported bundle in $RESOURCES_OMNI${NC}"
+        echo -e "  - Encrypted Vault:   ${YELLOW}! No secrets.vault found (run 'vault backup')${NC}"
+    fi
+
+    # Declarative bundle
+    if [ -f "$BUNDLE_FILE" ]; then
+        local b_size b_time
+        b_size="$(du -h "$BUNDLE_FILE" | cut -f1)"
+        b_time="$(date -r "$BUNDLE_FILE" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "Unknown")"
+        echo -e "  - Declarative Bundle:${GREEN}${BOLD} Present ($b_size, $b_time)${NC} (gitignored)"
+    else
+        echo -e "  - Declarative Bundle:${YELLOW}! Not exported yet${NC}"
     fi
     echo
 }
 
 cmd_backup() {
-    info "Triggering Secret Vault backup (includes ~/.omniroute)..."
+    info "Triggering Secret Vault backup (authoritative store for ~/.omniroute)..."
     "$REPO_ROOT/scripts/vault.sh" backup
 }
 
 cmd_restore() {
-    info "Restoring Secret Vault (restores ~/.omniroute)..."
+    info "Restoring Secret Vault (restores ~/.omniroute database and keys)..."
     "$REPO_ROOT/scripts/vault.sh" restore
 }
 
@@ -136,9 +167,9 @@ usage() {
     echo "Usage: $0 {export|import|status|backup|restore}"
     echo
     echo "Commands:"
-    echo "  export    Export local OmniRoute configuration bundle to resources/omniroute/bundle.json"
-    echo "  import    Import resources/omniroute/bundle.json into local OmniRoute instance"
-    echo "  status    Show status of OmniRoute service, port, database, and repository sync"
+    echo "  export    Export non-sensitive declarative bundle (settings, combos, skills)"
+    echo "  import    Import declarative bundle into local OmniRoute instance"
+    echo "  status    Show status of OmniRoute service, loopback port, database, and vault"
     echo "  backup    Encrypt full OmniRoute database and environment into secrets.vault"
     echo "  restore   Decrypt and restore OmniRoute database and environment from secrets.vault"
     echo

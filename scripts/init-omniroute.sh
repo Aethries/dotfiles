@@ -30,6 +30,21 @@ error() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OMNIROUTE_PORT="20129"
+OMNIROUTE_PINNED_VERSION="3.8.50"
+
+FORCE=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f|--force)
+            FORCE=true
+            shift
+            ;;
+        *)
+            warn "Unknown argument: $1"
+            shift
+            ;;
+    esac
+done
 
 if [ "$EUID" -eq 0 ]; then
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
@@ -65,6 +80,15 @@ echo -e "${BOLD}=========================================${NC}"
 info "Checking Node.js & npm environment..."
 if command -v fnm >/dev/null 2>&1; then
     eval "$(fnm env --shell bash)"
+fi
+
+if ! command -v npm >/dev/null 2>&1 || ! command -v node >/dev/null 2>&1; then
+    if command -v fnm >/dev/null 2>&1; then
+        info "Node.js/npm not active; installing and setting up LTS via fnm..."
+        fnm install --lts
+        fnm default lts-latest 2>/dev/null || true
+        eval "$(fnm env --shell bash)"
+    fi
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
@@ -108,14 +132,24 @@ done
 info "Configuring OmniRoute environment and port settings..."
 
 ENV_FILE="$HOME/.omniroute/.env"
+DB_FILE="$HOME/.omniroute/storage.sqlite"
 
 if [ ! -f "$ENV_FILE" ]; then
     touch "$ENV_FILE"
     chmod 600 "$ENV_FILE"
 fi
 
-# Ensure STORAGE_ENCRYPTION_KEY exists
+# Ensure STORAGE_ENCRYPTION_KEY exists and protect existing database
 if ! grep -q '^STORAGE_ENCRYPTION_KEY=' "$ENV_FILE" 2>/dev/null; then
+    if [ -s "$DB_FILE" ]; then
+        if [ "$FORCE" = false ]; then
+            error "Existing database found at $DB_FILE, but STORAGE_ENCRYPTION_KEY is missing in $ENV_FILE. Generating a random key will render existing encrypted credentials unreadable. Either restore your key via 'vault restore' or run 'init-omniroute --force' (which will back up the orphan database to $DB_FILE.orphan.<timestamp> first)."
+        else
+            ORPHAN_BACKUP="$DB_FILE.orphan.$(date +%Y%m%d%H%M%S)"
+            warn "Force flag provided: backing up orphan database to $ORPHAN_BACKUP..."
+            mv "$DB_FILE" "$ORPHAN_BACKUP"
+        fi
+    fi
     NEW_KEY="$(node -e 'console.log(require("crypto").randomBytes(32).toString("hex"))')"
     echo "STORAGE_ENCRYPTION_KEY=$NEW_KEY" >> "$ENV_FILE"
     chmod 600 "$ENV_FILE"
@@ -124,36 +158,37 @@ else
     success "Existing STORAGE_ENCRYPTION_KEY found in $ENV_FILE"
 fi
 
-# Ensure non-conflicting PORT=20129 is configured
-if grep -q '^PORT=' "$ENV_FILE" 2>/dev/null; then
-    CURRENT_PORT="$(grep '^PORT=' "$ENV_FILE" | head -n1 | cut -d= -f2)"
-    if [ "$CURRENT_PORT" != "$OMNIROUTE_PORT" ]; then
-        sed -i "s/^PORT=.*/PORT=$OMNIROUTE_PORT/" "$ENV_FILE"
-        success "Updated PORT to $OMNIROUTE_PORT in $ENV_FILE"
+set_or_replace_env() {
+    local key="$1"
+    local val="$2"
+    if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${val}|" "$ENV_FILE"
     else
-        success "PORT is already set to $OMNIROUTE_PORT in $ENV_FILE"
+        echo "${key}=${val}" >> "$ENV_FILE"
     fi
-else
-    echo "PORT=$OMNIROUTE_PORT" >> "$ENV_FILE"
-    success "Set PORT=$OMNIROUTE_PORT in $ENV_FILE"
-fi
+}
 
-# Ensure DASHBOARD_PORT=20129 is configured
-if grep -q '^DASHBOARD_PORT=' "$ENV_FILE" 2>/dev/null; then
-    sed -i "s/^DASHBOARD_PORT=.*/DASHBOARD_PORT=$OMNIROUTE_PORT/" "$ENV_FILE"
-else
-    echo "DASHBOARD_PORT=$OMNIROUTE_PORT" >> "$ENV_FILE"
-fi
-success "Dedicated loopback port configured: $OMNIROUTE_PORT (avoids 9router port 20128)"
+set_or_replace_env "PORT" "$OMNIROUTE_PORT"
+set_or_replace_env "DASHBOARD_PORT" "$OMNIROUTE_PORT"
+set_or_replace_env "HOST" "127.0.0.1"
+set_or_replace_env "OMNIROUTE_SERVER_HOST" "127.0.0.1"
+set_or_replace_env "API_HOST" "127.0.0.1"
+set_or_replace_env "LIVE_WS_HOST" "127.0.0.1"
+success "Dedicated loopback host (127.0.0.1) and port ($OMNIROUTE_PORT) configured in $ENV_FILE"
 
 # ------------------------------------------------------------------------------
-# 4. Install & Update OmniRoute via npm
+# 4. Install & Pin OmniRoute via npm
 # ------------------------------------------------------------------------------
-info "Ensuring omniroute is installed and updated via npm..."
-npm i -g omniroute@latest
+info "Ensuring omniroute@$OMNIROUTE_PINNED_VERSION is installed via npm..."
 ROUTER_BIN="$NPM_PREFIX/bin/omniroute"
-[ -x "$ROUTER_BIN" ] || error "npm completed, but $ROUTER_BIN was not created."
-success "omniroute binary is ready: $("$ROUTER_BIN" --version 2>/dev/null || echo 'installed')"
+CURRENT_OMNI_VER="$("$ROUTER_BIN" --version 2>/dev/null || echo '')"
+if [ "$CURRENT_OMNI_VER" != "$OMNIROUTE_PINNED_VERSION" ]; then
+    npm i -g "omniroute@$OMNIROUTE_PINNED_VERSION"
+    [ -x "$ROUTER_BIN" ] || error "npm completed, but $ROUTER_BIN was not created."
+    success "Installed omniroute@$OMNIROUTE_PINNED_VERSION successfully."
+else
+    success "omniroute is already at pinned version: $OMNIROUTE_PINNED_VERSION"
+fi
 
 # ------------------------------------------------------------------------------
 # 5. Configure & Enable Systemd Autostart Service

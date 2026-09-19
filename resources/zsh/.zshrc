@@ -246,10 +246,13 @@ function screenshot() {
 alias shot="screenshot"
 
 function doctor() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/doctor.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/doctor.sh" ]; then
     "${DOTFILES_DIR}/scripts/doctor.sh" "$@"
-  else
+  elif command -v doctor >/dev/null 2>&1; then
     command doctor "$@"
+  else
+    echo "doctor not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
@@ -259,10 +262,13 @@ if [ -f "$HOME/.9router/mitm/rootCA.crt" ]; then
 fi
 
 function init-9router() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/init-9router.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/init-9router.sh" ]; then
     "${DOTFILES_DIR}/scripts/init-9router.sh" "$@"
+  elif command -v init-9router >/dev/null 2>&1; then
+    command init-9router "$@"
   else
-    echo "init-9router script not found in ${DOTFILES_DIR:-}/scripts"
+    echo "init-9router not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
@@ -312,18 +318,24 @@ function 9router() {
 }
 
 function init-omniroute() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/init-omniroute.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/init-omniroute.sh" ]; then
     "${DOTFILES_DIR}/scripts/init-omniroute.sh" "$@"
+  elif command -v init-omniroute >/dev/null 2>&1; then
+    command init-omniroute "$@"
   else
-    echo "init-omniroute script not found in ${DOTFILES_DIR:-}/scripts"
+    echo "init-omniroute not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
 function sync-omniroute() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/sync-omniroute.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/sync-omniroute.sh" ]; then
     "${DOTFILES_DIR}/scripts/sync-omniroute.sh" "$@"
+  elif command -v sync-omniroute >/dev/null 2>&1; then
+    command sync-omniroute "$@"
   else
-    echo "sync-omniroute script not found in ${DOTFILES_DIR:-}/scripts"
+    echo "sync-omniroute not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
