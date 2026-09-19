@@ -50,22 +50,24 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 ┌─────────────────────────────────────────────────────────────────┐
 │                        NORMAL LAYER (Default)                   │
 │        Gõ phím mặc định 100% tự nhiên không delay/alteration    │
-│        Giữ CapsLock (200ms)    ──> NAVIGATE LAYER               │
-│        Bấm RightShift (instant)──> SUPER LAYER                  │
+│        Hold (200ms) hoặc Double-tap CapsLock ──> NAVIGATE       │
+│        Tap CapsLock + ` ──> NAVIGATE | 1 ──> NIRI | 2 ──> CHROM │
+│        Bấm RightShift (instant)              ──> SUPER LAYER    │
 └─────────────────────────────────────────────────────────────────┘
-           │ (Hold CapsLock 200ms)             │ (Press RightShift)
+           │ (Hold/Double-tap CapsLock)        │ (Press RightShift)
            ▼                                   ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
 │  h/j/k/l -> Arrows      │         │  a -> One-shot Super    │
-│  Ctrl+h/l -> Prev/Next  │         │  s -> One-shot Shift    │
-│  Ctrl+j/k -> PgDn/PgUp  │         │  d -> One-shot Ctrl     │
-│  Ctrl+o/i -> Back/Fwd   │         │  f -> One-shot Alt      │
-│  w/e/b    -> Word jumps │         │  Shift + a/s/d/f ->     │
-│  x/y/p/z  -> Del/Cp/Pst │         │    Sticky Lock Modifier │
-│  Bấm 1    ──> NIRI      │         │  c -> Lock Ctrl Mode    │
-│  Bấm 2    ──> CHROMIUM  │         │  RightShift ──> NORMAL  │
-│  i / Esc  ──> NORMAL    │         │  Esc / i ──> NORMAL     │
+│  Tab     -> Alt + Tab   │         │  s -> One-shot Shift    │
+│  Ctrl+h/l -> Prev/Next  │         │  d -> One-shot Ctrl     │
+│  Ctrl+j/k -> PgDn/PgUp  │         │  f -> One-shot Alt      │
+│  Ctrl+o/i -> Back/Fwd   │         │  Shift + a/s/d/f ->     │
+│  w/e/b    -> Word jumps │         │    Sticky Lock Modifier │
+│  x/y/p/z  -> Del/Cp/Pst │         │  c -> Lock Ctrl Mode    │
+│  Bấm 1    ──> NIRI      │         │  RightShift ──> NORMAL  │
+│  Bấm 2    ──> CHROMIUM  │         │  Esc / i ──> NORMAL     │
+│  i / Esc  ──> NORMAL    │         │                         │
 └─────────────────────────┘         └─────────────────────────┘
            │ Bấm 1 / Bấm 2                       │ Shift+a/s/d/f
            ▼                                     ▼
@@ -81,12 +83,18 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 ### 3.1. Normal Layer (Lớp cơ bản)
 - Gõ văn bản hoàn toàn nguyên bản như bàn phím phần cứng.
 - **Chuyển tầng trực tiếp & an toàn:**
-  - `CapsLock`: Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả nhanh (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
+  - `CapsLock`: Double-tap nhanh hoặc Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả đơn lẻ (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
+  - `Tap CapsLock + <key>` (Hợp âm hoặc gõ tuần tự):
+    - `CapsLock` + `` ` `` $\rightarrow$ Chuyển sang **Navigate Layer**.
+    - `CapsLock` + `1` $\rightarrow$ Chuyển sang **Niri Layer**.
+    - `CapsLock` + `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
   - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
-- **Di chuyển con trỏ:**
+- **Di chuyển con trỏ & Ứng dụng:**
+  - `tab` $\rightarrow$ `Alt + Tab` (Chuyển nhanh qua lại giữa các cửa sổ ứng dụng).
+  - `` ` `` $\rightarrow$ Duy trì **Navigate Layer**.
   - `h / j / k / l` $\rightarrow$ Mũi tên Trái / Xuống / Lên / Phải.
   - `Ctrl + h` $\rightarrow$ `Ctrl + Shift + Tab` (Tab trước).
   - `Ctrl + l` $\rightarrow$ `Ctrl + Tab` (Tab kế tiếp).
@@ -163,6 +171,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `t` $\rightarrow$ Mở tab mới (`Ctrl + T`).
   - `Shift + t` $\rightarrow$ Khôi phục tab vừa đóng (`Ctrl + Shift + T`).
   - `x` $\rightarrow$ Đóng tab hiện tại (`Ctrl + W`).
+  - `m` $\rightarrow$ Toggle mute site / tab (`Alt + M` tương thích Vimium-C).
   - `h` $\rightarrow$ Tab trước (`Ctrl + Shift + Tab`).
   - `l` $\rightarrow$ Tab kế tiếp (`Ctrl + Tab`).
 - **Cuộn trang:**
