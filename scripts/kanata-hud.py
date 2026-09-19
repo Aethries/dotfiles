@@ -27,32 +27,32 @@ MODE_FILE = os.path.join(RUNTIME_DIR, "kanata-mode")
 LAYERS = {
     "navigate": {
         "badge": "🧭 NAVIGATE",
-        "desc": "h/j/k/l · w/e · v:Visual · m/M:Mouse · Esc:Exit",
+        "desc": "h/j/k/l · w/e · v:Visual · m/M:Mouse · ?:Help · Esc:Exit",
         "badge_color": "#89b4fa",
     },
     "visual": {
         "badge": "👁️ VISUAL",
-        "desc": "w/e/b:Word · h/j/k/l:Char · y/x:Yank/Cut · Esc:Exit",
+        "desc": "w/e/b:Word · h/j/k/l:Char · y/x:Yank/Cut · ?:Help · Esc:Exit",
         "badge_color": "#f9e2af",
     },
     "super": {
         "badge": "⚡ SUPER",
-        "desc": "a:Super · s:Shift · d:Ctrl · f:Alt · Esc:Exit",
+        "desc": "a:Super · s:Shift · d:Ctrl · f:Alt · Chords: a+d, s+d... · ?:Help",
         "badge_color": "#cba6f7",
     },
     "chromium": {
         "badge": "🌐 CHROMIUM",
-        "desc": "t:New · x:Close · j/k:Scroll · Esc:Exit",
+        "desc": "t:New · x:Close · j/k:Scroll · 1-9:Tab · ?:Help · Esc:Exit",
         "badge_color": "#a6e3a1",
     },
     "terminals": {
         "badge": "📟 TERMINALS",
-        "desc": "h/l:Panes · s:Session · x:Close · Esc:Exit",
+        "desc": "h/l:Panes · s:Session · x:Close · 1-9:Tab · ?:Help · Esc:Exit",
         "badge_color": "#fab387",
     },
     "niri": {
         "badge": "🪟 NIRI",
-        "desc": "h/l:Col · j/k:Ws · 1-9:Jump · c/p/s/r/d/t · Esc:Exit",
+        "desc": "h/l:Col · j/k:Ws · 1-9:Jump · c/p/s/r/d/t · ?:Help · Esc:Exit",
         "badge_color": "#94e2d5",
     },
     "ctrl_locked": {
@@ -75,14 +75,34 @@ LAYERS = {
         "desc": "Sticky Shift Active · Esc:Unlock",
         "badge_color": "#f38ba8",
     },
+    "super_armed_slk": {
+        "badge": "⚡ ARMED (SUPER-LOCK)",
+        "desc": "Press key with Super, or Esc to lock",
+        "badge_color": "#fab387",
+    },
+    "super_armed_clk": {
+        "badge": "⚡ ARMED (CTRL-LOCK)",
+        "desc": "Press key with Ctrl, or Esc to lock",
+        "badge_color": "#fab387",
+    },
+    "super_armed_alk": {
+        "badge": "⚡ ARMED (ALT-LOCK)",
+        "desc": "Press key with Alt, or Esc to lock",
+        "badge_color": "#fab387",
+    },
+    "super_armed_shlk": {
+        "badge": "⚡ ARMED (SHIFT-LOCK)",
+        "desc": "Press key with Shift, or Esc to lock",
+        "badge_color": "#fab387",
+    },
     "nav_slk": {
-        "badge": "🧭 NAV (LOCKED)",
-        "desc": "Navigation in locked mode · Esc:Back",
+        "badge": "🧭 NAV (SUPER-LOCKED)",
+        "desc": "Navigation in Super-locked mode · Esc:Back",
         "badge_color": "#f38ba8",
     },
     "nav_clk": {
-        "badge": "🧭 NAV (LOCKED)",
-        "desc": "Navigation in locked mode · Esc:Back",
+        "badge": "🧭 NAV (CTRL-LOCKED)",
+        "desc": "Navigation in Ctrl-locked mode · Esc:Back",
         "badge_color": "#f38ba8",
     },
     "bypass": {
@@ -104,8 +124,12 @@ SHORT_MODES = {
     "super_locked": "M-LOCK",
     "alt_locked": "A-LOCK",
     "shift_locked": "S-LOCK",
-    "nav_slk": "NAV-LK",
-    "nav_clk": "NAV-LK",
+    "super_armed_slk": "ARM-M",
+    "super_armed_clk": "ARM-C",
+    "super_armed_alk": "ARM-A",
+    "super_armed_shlk": "ARM-S",
+    "nav_slk": "NAV-M",
+    "nav_clk": "NAV-C",
     "bypass": "BYPASS",
 }
 
@@ -180,6 +204,10 @@ class KanataHud:
         self.win.realize()
         self._apply_clickthrough()
 
+        # Input method state tracking (Auto-switch English in modal layers)
+        self.fcitx_was_active = False
+        self.current_layer = "normal"
+
         # Write initial state
         self._update_mode_file("NORMAL")
 
@@ -195,15 +223,49 @@ class KanataHud:
         except OSError:
             pass
 
+    def _toggle_fcitx_enter(self):
+        """Disable Vietnamese IME when entering modal layers to avoid Telex accent collisions."""
+        try:
+            out = subprocess.check_output(["fcitx5-remote"], timeout=0.15).strip()
+            if out == b"2":
+                self.fcitx_was_active = True
+                subprocess.Popen(
+                    ["fcitx5-remote", "-c"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+        except Exception:
+            pass
+
+    def _toggle_fcitx_exit(self):
+        """Restore Vietnamese IME if it was active prior to entering modal layers."""
+        if getattr(self, "fcitx_was_active", False):
+            self.fcitx_was_active = False
+            try:
+                subprocess.Popen(
+                    ["fcitx5-remote", "-o"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            except Exception:
+                pass
+
     def set_layer(self, layer):
         if layer == "caps_mode":
-            # Transient chord layer; do not alter HUD
+            # Transient chord layer; do not alter HUD or IME state
             return
+
+        prev_layer = self.current_layer
+        self.current_layer = layer
 
         if layer == "normal":
             self._update_mode_file("NORMAL")
             self.win.hide()
+            self._toggle_fcitx_exit()
             return
+
+        if prev_layer == "normal":
+            self._toggle_fcitx_enter()
 
         info = LAYERS.get(layer)
         if info:

@@ -38,6 +38,7 @@ scroll_acceleration: 1600
 buttons: space , .
 # Oneshot clicks (click and immediately exit warpd back to typing)
 oneshot_buttons: i - /
+oneshot_timeout: 400
 drag: v
 drag_button: 1
 copy_and_exit: c

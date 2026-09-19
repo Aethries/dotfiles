@@ -40,6 +40,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 | **Cuộn trang (Scroll)** | `d` / `u` | `d`: Cuộn xuống (`PageDown`), `u`: Cuộn lên (`PageUp`). Nhất quán trên `navigate`, `chromium`, `terminals` (scrollback), `warpd`! |
 | **Điều hướng 4 hướng** | `h` `j` `k` `l` | Trái / Xuống / Lên / Phải trên toàn bộ text, app tabs, terminal panes, compositor windows, warpd pointer. |
 | **Nhảy ngữ cảnh (Index)** | `1` ... `9`, `0` | Luôn là số thứ tự Tab / Workspace / Sub-layer (`Ctrl+1..9` trong Chromium, `Ctrl+Shift+1..9` trong Zellij, `Mod+1..9` trong Niri, `1..3` trong Navigate). |
+| **Tra cứu phím tắt (Help)** | `?` (`Shift+/`) | Mở / Đóng bảng tra cứu phím tắt tương tác Noctalia Cheatsheet (`kenn/keybind-cheatsheet:cheatsheet`) trên mọi modal layer. Ở normal mode: `Mod+Shift+/`. |
 | **Cổng chuyển đổi (Gateway)** | `CapsLock` | Trong `normal`: Tap $\rightarrow$ `navigate`, Double-tap/RShift $\rightarrow$ `super`, Giữ $\rightarrow$ hợp âm. Trong **mọi sub-layer khác**: Tap `CapsLock` 1 chạm duy nhất là về thẳng `normal` (zero delay). |
 
 ---
@@ -320,8 +321,8 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `g` $\rightarrow$ Kích hoạt ngay Grid Mode (lưới 3x6 ma trận 18 ô bằng 2 tay: `q w e u i o / a s d j k l / z x c m , .`). Bấm 1 phím thu hẹp 1/18 màn hình, phủ kín toàn bộ màn hình ngang 16:9.
     - `Esc`: Thoát Grid Mode về lại Normal Movement Mode.
   - **Click chuột, Kéo thả & Bôi đen văn bản:**
-    - `Space` $\rightarrow$ Click chuột trái và duy trì mode (Persistent Click - dùng để click nhiều lần hoặc double-click).
-    - `i` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay về chế độ gõ văn bản (Oneshot Click - theo quy ước phím `i` Insert của Vim).
+    - `Space` $\rightarrow$ Click chuột trái và duy trì mode (Persistent Click - dùng để click nhiều lần: `Space Space` để double-click, `Space Space Space` để triple-click chọn cả dòng).
+    - `i` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay về chế độ gõ văn bản (Oneshot Click - theo quy ước phím `i` Insert của Vim). Với cấu hình `oneshot_timeout: 400`, cho phép gõ nhanh `i i` để double-click (bôi đen từ) rồi lập tức thoát Warpd trở về gõ chữ!
     - `.` $\rightarrow$ Click chuột phải.
     - `,` $\rightarrow$ Click chuột giữa.
     - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode) để bôi đen văn bản. Khi bật `v`, có thể bấm tiếp `h/j/k/l` hoặc bấm `f` để nhảy thẳng đến điểm cuối vùng chọn!
@@ -334,6 +335,10 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 
 ### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & HUD Overlay)
 - **On-Screen Display (HUD Overlay):** Sử dụng Wayland layer-shell (`scripts/kanata-hud.py`) hiển thị một badge pill nhỏ gọn, bán trong suốt ở chính giữa mép dưới màn hình (Bottom-Center). Hiển thị liên tục khi ở bất kỳ layer đặc biệt nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, `VISUAL`, v.v.) kèm tóm tắt phím tắt chính; tự động ẩn hoàn toàn khi trở về `NORMAL`. Hỗ trợ click-through 100% (không cản trở click chuột) và không chiếm focus bàn phím.
+- **Dynamic Chord Feedback:** Trong chế độ `SUPER`, HUD gợi ý trực quan danh sách modifier và hợp âm (`a:Super · s:Shift · d:Ctrl · f:Alt · Chords: a+d, s+d... · ?:Help`). Khi kích hoạt các trạng thái khóa tạm thời (Armed) hoặc Sticky Lock, badge đổi màu cảnh báo nổi bật (`#f38ba8`).
+- **Tự động chuyển bộ gõ Fcitx5 (Auto-English in Modal Layers):**
+  - Khi người dùng đang gõ tiếng Việt (Telex) ở chế độ `NORMAL` và chuyển sang bất kỳ modal layer nào (`NAVIGATE`, `SUPER`, `NIRI`, `CHROMIUM`, `TERMINALS`, `VISUAL`, `WARPD`), daemon `kanata-hud.py` tự động gửi tín hiệu `fcitx5-remote -c` chuyển sang tiếng Anh. Điều này ngăn chặn hoàn toàn việc các phím điều hướng (`s`, `f`, `r`, `x`, `j`, `d`) bị bộ gõ nuốt ký tự hoặc ghép dấu tiếng Việt.
+  - Khi thoát trở về `NORMAL` mode (bấm `Esc` hoặc chạm `CapsLock`), daemon tự động gọi `fcitx5-remote -o` khôi phục lại trạng thái tiếng Việt ban đầu một cách liền mạch, không cần bấm tổ hợp phím đổi bộ gõ thủ công.
 - **Thanh trạng thái Niri (Noctalia Status Bar):** Widget `keymap` trên thanh bar hiển thị nhãn chế độ thời gian thực (`NORMAL`, `NAV`, `CHROM`, `TERM`, `NIRI`, `SUPER`, `C-LOCK`), cho phép click để mở bảng tra cứu phím tắt.
 - **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` khởi chạy `kanata-hud.py`, lắng nghe sự kiện `Entered layer` từ Kanata log stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và điều khiển hiển thị HUD tức thì (0 latency). Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.
 

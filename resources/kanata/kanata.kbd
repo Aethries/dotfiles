@@ -260,6 +260,15 @@
   warp_norm_norm (multi (macro M-A-m) @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
+
+  ;; Quick Keybind Cheat-Sheet Toggle (Shift + / across modal layers)
+  cheat_help (multi (release-key lsft) (release-key rsft) M-S-/)
+  nav_slash  (fork C-f @cheat_help (lsft rsft))
+  vis_slash  (fork C-f @cheat_help (lsft rsft))
+  sup_slash  (fork /   @cheat_help (lsft rsft))
+  ch_slash   (fork /   @cheat_help (lsft rsft))
+  tm_slash   (fork @tm_srch @cheat_help (lsft rsft))
+  niri_slash (fork /   @cheat_help (lsft rsft))
 )
 
 ;; ----------------------------------------------------------------------------
@@ -345,7 +354,7 @@
   @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
   @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
   @caps_nav_direct C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    C-f  rsft
+  lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    @nav_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -357,7 +366,7 @@
   @to_nav 1    2    3    @vis_4 5 6   7    8    9    @vis_0 -  =    bspc
   @tab_nav q    @vis_w @vis_w C-y  t    @vis_y @u_nav @norm_preserve @d_nav @vis_p [ ] \
   @caps_nav_layer C-a s    @d_nav f  @vis_g @vis_h @vis_j @vis_k @vis_l ; apos ret
-  lsft C-z  @vis_x @vis_c @to_nav @vis_b n  @m_nav ,    .    C-f  rsft
+  lsft C-z  @vis_x @vis_c @to_nav @vis_b n  @m_nav ,    .    @vis_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -369,7 +378,7 @@
   grv  @to_niri @to_chrom @to_term 4 5 6 7 8 9 0 - = bspc
   tab  q    w    e    r    t    y    @u_nav @norm_preserve o p [ ]   \
   @caps_nav_layer @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
-  lsft z    x    @to_arm_clk v b    n    @m_nav ,    .    /    @norm_preserve
+  lsft z    x    @to_arm_clk v b    n    @m_nav ,    .    @sup_slash    @norm_preserve
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -381,7 +390,7 @@
   grv  @ch_1 @ch_2 @ch_3 @ch_4 @ch_5 @ch_6 @ch_7 @ch_8 @ch_9 @ch_0 - = bspc
   tab  q    w    e    @ch_r @ch_t y    @u_nav @norm_preserve o p [ ] \
   @caps_nav_layer a s @d_nav f g @ch_h @ch_j @ch_k @ch_l ; apos ret
-  lsft z    @ch_x c    v    b    n    @m_nav ,    .    /    rsft
+  lsft z    @ch_x c    v    b    n    @m_nav ,    .    @ch_slash    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -393,7 +402,7 @@
   grv  @tm_1 @tm_2 @tm_3 @tm_4 @tm_5 @tm_6 @tm_7 @tm_8 @tm_9 @tm_0 - = bspc
   tab  @tm_x @tm_w e    @tm_r @tm_t y    @u_nav @norm_preserve o p @tm_prev @tm_next \
   @caps_nav_layer @tm_a @tm_s @d_nav @tm_f g @tm_h @tm_j @tm_k @tm_l ; apos ret
-  lsft @tm_z @tm_x c    v    @tm_b @tm_n @m_nav ,    .    @tm_srch rsft
+  lsft @tm_z @tm_x c    v    @tm_b @tm_n @m_nav ,    .    @tm_slash rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -405,7 +414,7 @@
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
   @niri_over M-q w e  @niri_rec @niri_term y @u_nav @norm_preserve o @niri_proj [ ] \
   @caps_nav_layer a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
-  lsft z    x    @niri_center @niri_clip b n @m_nav , . / rsft
+  lsft z    x    @niri_center @niri_clip b n @m_nav , . @niri_slash rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -504,7 +513,7 @@
   @to_slk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_slk @o_nav C-v [ ] \
   @to_slk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
+  lsft C-z  del  c    v    @w_bwd n  m    ,    .    @nav_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -513,7 +522,7 @@
   @to_clk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_clk @o_nav C-v [ ] \
   @to_clk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
+  lsft C-z  del  c    v    @w_bwd n  m    ,    .    @nav_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 

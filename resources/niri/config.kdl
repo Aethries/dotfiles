@@ -489,8 +489,11 @@ binds {
     // Most actions that you can bind here can also be invoked programmatically with
     // `niri msg action do-something`.
     // Mod-Shift-/, which is usually the same as Mod-?,
-    // shows a list of important hotkeys.
-    Mod+Shift+Slash {
+    // toggles Noctalia's interactive cheatsheet panel.
+    Mod+Shift+Slash hotkey-overlay-title="Keybind Cheatsheet: Noctalia" {
+        spawn "noctalia" "msg" "panel-toggle" "kenn/keybind-cheatsheet:cheatsheet"
+    }
+    Mod+Ctrl+Slash hotkey-overlay-title="Hotkey Overlay: Niri" {
         show-hotkey-overlay
     }
     // Program binds using Kitty and Noctalia Shell
@@ -550,19 +553,19 @@ binds {
     }
     // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
     Mod+Alt+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
-        spawn-sh "pkill -x warpd 2>/dev/null; warpd --hint"
+        spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --hint"
     }
     Mod+Alt+Shift+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
-        spawn-sh "pkill -x warpd 2>/dev/null; warpd --hint"
+        spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --hint"
     }
     Mod+Alt+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
-        spawn-sh "pkill -x warpd 2>/dev/null; warpd --normal"
+        spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --normal"
     }
     Mod+Alt+Shift+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
-        spawn-sh "pkill -x warpd 2>/dev/null; warpd --normal"
+        spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --normal"
     }
     Mod+Alt+G hotkey-overlay-title="Mouse: Warpd Grid Mode" {
-        spawn-sh "pkill -x warpd 2>/dev/null; warpd --grid"
+        spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --grid"
     }
     Mod+Alt+Escape hotkey-overlay-title="Mouse: Exit Warpd" {
         spawn-sh "pkill -x warpd"
