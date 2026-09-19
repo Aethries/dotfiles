@@ -9,9 +9,11 @@
 *.tmp
 *.orig
 
-# OS generated artifacts
+# OS and runtime generated artifacts
 .DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
 
 # Sensitive credentials & environment files (prevent accidental plaintext commit)
 .env
