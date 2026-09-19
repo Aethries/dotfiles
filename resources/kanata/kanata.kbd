@@ -212,12 +212,17 @@
   os_ctrl  (one-shot 2000 lctl)
   os_alt   (one-shot 2000 lalt)
 
-  ;; Pressing key alone -> One-shot for next key only
+  sup_a_raw (chord sup_mod a)
+  sup_s_raw (chord sup_mod s)
+  sup_d_raw (chord sup_mod d)
+  sup_f_raw (chord sup_mod f)
+
+  ;; Pressing key alone -> One-shot or chord for next key only
   ;; Pressing Shift + key -> Arms sticky lock, Esc transitions into locked mode
-  sup_a (fork @os_super @to_arm_slk  (lsft rsft))
-  sup_s (fork @os_shift @to_arm_shlk (lsft rsft))
-  sup_d (fork @os_ctrl  @to_arm_clk  (lsft rsft))
-  sup_f (fork @os_alt   @to_arm_alk  (lsft rsft))
+  sup_a (fork @sup_a_raw @to_arm_slk  (lsft rsft))
+  sup_s (fork @sup_s_raw @to_arm_shlk (lsft rsft))
+  sup_d (fork @sup_d_raw @to_arm_clk  (lsft rsft))
+  sup_f (fork @sup_f_raw @to_arm_alk  (lsft rsft))
 
   ;; --------------------------------------------------------------------------
   ;; Niri Layer Actions
@@ -260,6 +265,34 @@
   warp_norm_norm (multi (macro M-A-m) @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
+)
+
+;; ----------------------------------------------------------------------------
+;; Super Layer Modifier Chords (Simultaneous Presses on a s d f)
+;; ----------------------------------------------------------------------------
+(defchords sup_mod 150
+  ;; Single Modifiers
+  (a)       @os_super
+  (s)       @os_shift
+  (d)       @os_ctrl
+  (f)       @os_alt
+
+  ;; 2-Key Chords (Dual Modifiers)
+  (a d)     (multi @os_super @os_ctrl)               ;; Super + Ctrl
+  (a s)     (multi @os_super @os_shift)              ;; Super + Shift
+  (a f)     (multi @os_super @os_alt)                ;; Super + Alt
+  (d s)     (multi @os_ctrl @os_shift)               ;; Ctrl + Shift
+  (d f)     (multi @os_ctrl @os_alt)                 ;; Ctrl + Alt
+  (s f)     (multi @os_shift @os_alt)                ;; Shift + Alt
+
+  ;; 3-Key Chords (Triple Modifiers)
+  (a d f)   (multi @os_super @os_ctrl @os_alt)       ;; Super + Ctrl + Alt
+  (a s f)   (multi @os_super @os_shift @os_alt)      ;; Super + Shift + Alt
+  (a s d)   (multi @os_super @os_shift @os_ctrl)     ;; Super + Shift + Ctrl
+  (d s f)   (multi @os_ctrl @os_shift @os_alt)       ;; Ctrl + Shift + Alt (Meh)
+
+  ;; 4-Key Chord (Quad Modifier)
+  (a s d f) (multi @os_super @os_shift @os_ctrl @os_alt) ;; Hyper
 )
 
 ;; ----------------------------------------------------------------------------
