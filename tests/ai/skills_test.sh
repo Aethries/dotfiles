@@ -63,7 +63,12 @@ JUNIOR_FILE="$REPO_ROOT/resources/skills/junior-coding-agent/SKILL.md"
 grep -Eiq '^name:[[:space:]]*junior-coding-agent' "$JUNIOR_FILE" || log_fail "junior-coding-agent SKILL.md missing valid name"
 [ -f "$REPO_ROOT/resources/skills/junior-coding-agent/references/approval-and-workflow.md" ] || log_fail "Missing approval-and-workflow.md"
 
-log_ok "Ponytail and Junior Coding Agent skill schemas are valid"
+RELEASE_NOTES_FILE="$REPO_ROOT/resources/skills/release-notes/SKILL.md"
+[ -f "$RELEASE_NOTES_FILE" ] || log_fail "Missing $RELEASE_NOTES_FILE"
+grep -Eiq '^name:[[:space:]]*release-notes' "$RELEASE_NOTES_FILE" || log_fail "release-notes SKILL.md missing valid name"
+grep -Fq "SemVer" "$RELEASE_NOTES_FILE" || log_fail "release-notes SKILL.md missing SemVer"
+
+log_ok "Ponytail, Junior Coding Agent, and Release Notes skill schemas are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
@@ -115,6 +120,8 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex ponytail"
 [ -L "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync command failed to link gemini junior-coding-agent"
 [ -L "$MOCK_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync command failed to link codex junior-coding-agent"
+[ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync command failed to link gemini release-notes"
+[ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync command failed to link codex release-notes"
 log_ok "ai-skills.sh sync synchronizes canonical skills"
 
 # ------------------------------------------------------------------------------
@@ -130,6 +137,8 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.codex/skills/ponytail" ] || log_fail "sync-editors.sh did not link codex skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link junior-coding-agent skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link codex junior-coding-agent skill"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync-editors.sh did not link release-notes skill"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/release-notes" ] || log_fail "sync-editors.sh did not link codex release-notes skill"
 log_ok "sync-editors.sh links skills automatically"
 
 echo
