@@ -113,19 +113,22 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Esc` hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer** (không kích hoạt in hoa).
 
 ### 3.3. Super Layer (Lớp phím bổ trợ One-Shot & Sticky)
-- **One-Shot Modifiers (cho 1 thao tác tiếp theo, timeout 1000ms):**
+- **One-Shot Modifiers (cho 1 thao tác tiếp theo, timeout 2000ms):**
   - `a` $\rightarrow$ `Super` (Windows key).
   - `s` $\rightarrow$ `Shift`.
   - `d` $\rightarrow$ `Ctrl`.
   - `f` $\rightarrow$ `Alt`.
   *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Alt` cho phím gõ tiếp theo).*
+- **Cơ chế thoát Super & Giữ phím chờ (Waiting Preserved):**
+  - Trong `super`: Nhấn `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
+  - Trong `normal`: Chỉ khi bấm `Esc` ở `normal`, Kanata mới **hủy toàn bộ modifier đang chờ** (cancel waiting).
 - **Sticky Locking (cho thao tác lặp đi lặp lại):**
   - `Shift + a` $\rightarrow$ Khóa `Super` liên tục (`super_locked`).
   - `Shift + s` $\rightarrow$ Khóa `Shift` liên tục (`shift_locked`).
   - `Shift + d` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
   - `Shift + f` $\rightarrow$ Khóa `Alt` liên tục (`alt_locked`).
   - `c` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
-- **Thoát:** `Esc` hoặc `CapsLock` giải phóng mọi modifier và trở về **Normal Layer**.
+- **Thoát các lớp Locked:** `Esc` hoặc `CapsLock` giải phóng mọi modifier và trở về **Normal Layer**.
 
 ### 3.4. Niri Layer (Lớp điều khiển Window Manager Niri)
 - **Điều hướng cửa sổ & Workspace:**

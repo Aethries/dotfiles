@@ -48,6 +48,12 @@
   to_shlk (layer-switch shift_locked)
   to_bp   (layer-switch bypass)
 
+  ;; Normal mode Esc: cancels any active modifiers cleanly
+  esc_norm (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc)
+
+  ;; Exit super layer without consuming waiting one-shot modifiers
+  esc_from_super (multi (one-shot-pause-processing 100) @to_norm)
+
   ;; Normal mode triggers:
   ;; CapsLock directly switches to navigate layer without sending Esc/Caps.
   ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
@@ -80,10 +86,10 @@
   ;; --------------------------------------------------------------------------
   ;; Super Layer Actions (One-Shot Modifiers & Sticky Locks with Shift)
   ;; --------------------------------------------------------------------------
-  os_super (one-shot 1000 lmet)
-  os_shift (one-shot 1000 lsft)
-  os_ctrl  (one-shot 1000 lctl)
-  os_alt   (one-shot 1000 lalt)
+  os_super (one-shot 2000 lmet)
+  os_shift (one-shot 2000 lsft)
+  os_ctrl  (one-shot 2000 lctl)
+  os_alt   (one-shot 2000 lalt)
 
   ;; Pressing key alone -> One-shot for next key only
   ;; Pressing Shift + key -> Sticky lock modifier indefinitely until Esc
@@ -129,7 +135,7 @@
 ;; 1. Normal Layer (Default Physical Typing)
 ;; ----------------------------------------------------------------------------
 (deflayer normal
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_norm f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @caps_to_nav a s d  f    g    h    j    k    l    ;    apos ret
@@ -153,10 +159,10 @@
 ;; 3. Super Layer (One-Shot Modifiers & Sticky Locks)
 ;; ----------------------------------------------------------------------------
 (deflayer super
-  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc_from_super f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    @to_norm o p    [    ]    \
-  @to_norm @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
+  tab  q    w    e    r    t    y    u    @esc_from_super o p [ ]   \
+  @esc_from_super @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
   lsft z    x    @to_clk v b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
