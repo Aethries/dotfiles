@@ -156,6 +156,15 @@ export GIT_PAGER="delta --dark --line-numbers --paging=auto"
 alias lg="lazygit"
 alias ld="lazydocker"
 
+# RTK (Rust Token Killer) Shell Integration for AI Token Optimization
+if command -v rtk >/dev/null 2>&1; then
+  eval "$(rtk init - --shell zsh 2>/dev/null)" 2>/dev/null || true
+  alias rgit="rtk git"
+  alias rdiff="rtk diff"
+  alias rtest="rtk test"
+  alias rlog="rtk log"
+fi
+
 # Eza: Modern replacement for ls
 if command -v eza >/dev/null 2>&1; then
   alias ls='eza --icons=auto'

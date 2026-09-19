@@ -68,7 +68,20 @@ RELEASE_NOTES_FILE="$REPO_ROOT/resources/skills/release-notes/SKILL.md"
 grep -Eiq '^name:[[:space:]]*release-notes' "$RELEASE_NOTES_FILE" || log_fail "release-notes SKILL.md missing valid name"
 grep -Fq "SemVer" "$RELEASE_NOTES_FILE" || log_fail "release-notes SKILL.md missing SemVer"
 
-log_ok "Ponytail, Junior Coding Agent, and Release Notes skill schemas are valid"
+CAVEMAN_FILE="$REPO_ROOT/resources/skills/caveman/SKILL.md"
+[ -f "$CAVEMAN_FILE" ] || log_fail "Missing $CAVEMAN_FILE"
+grep -Eiq '^name:[[:space:]]*caveman' "$CAVEMAN_FILE" || log_fail "caveman SKILL.md missing valid name"
+[ -f "$REPO_ROOT/resources/skills/caveman/references/modes.md" ] || log_fail "Missing modes.md"
+grep -Fq "Full Mode (Default)" "$REPO_ROOT/resources/skills/caveman/references/modes.md" || log_fail "Missing Full Mode in modes.md"
+
+RTK_FILE="$REPO_ROOT/resources/skills/rtk/SKILL.md"
+[ -f "$RTK_FILE" ] || log_fail "Missing $RTK_FILE"
+grep -Eiq '^name:[[:space:]]*rtk' "$RTK_FILE" || log_fail "rtk SKILL.md missing valid name"
+
+# Assert OmniRoute cavemanEnabled is false by default
+grep -Eiq '^OMNIROUTE_CAVEMAN_ENABLED="false"' "$REPO_ROOT/resources/ai/gateway.env" || log_fail "OMNIROUTE_CAVEMAN_ENABLED must be false"
+
+log_ok "Ponytail, Junior, Release Notes, Caveman, and RTK skill schemas are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
@@ -122,6 +135,10 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync command failed to link codex junior-coding-agent"
 [ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync command failed to link gemini release-notes"
 [ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync command failed to link codex release-notes"
+[ -L "$MOCK_HOME/.gemini/config/skills/caveman" ] || log_fail "sync command failed to link gemini caveman"
+[ -L "$MOCK_HOME/.codex/skills/caveman" ] || log_fail "sync command failed to link codex caveman"
+[ -L "$MOCK_HOME/.gemini/config/skills/rtk" ] || log_fail "sync command failed to link gemini rtk"
+[ -L "$MOCK_HOME/.codex/skills/rtk" ] || log_fail "sync command failed to link codex rtk"
 log_ok "ai-skills.sh sync synchronizes canonical skills"
 
 # ------------------------------------------------------------------------------
@@ -139,6 +156,10 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link codex junior-coding-agent skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync-editors.sh did not link release-notes skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/release-notes" ] || log_fail "sync-editors.sh did not link codex release-notes skill"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/caveman" ] || log_fail "sync-editors.sh did not link caveman skill"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/caveman" ] || log_fail "sync-editors.sh did not link codex caveman skill"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/rtk" ] || log_fail "sync-editors.sh did not link rtk skill"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/rtk" ] || log_fail "sync-editors.sh did not link codex rtk skill"
 log_ok "sync-editors.sh links skills automatically"
 
 echo
