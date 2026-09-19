@@ -85,6 +85,7 @@ let
       });
 
   lark = pkgs.callPackage ../pkgs/lark.nix { };
+  rtk = pkgs.callPackage ../pkgs/rtk.nix { };
 
 in
 {
@@ -200,6 +201,7 @@ in
     antigravityCli
     codex
     codexDesktop
+    rtk
     fuzzel
   ];
 }
