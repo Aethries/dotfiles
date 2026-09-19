@@ -304,7 +304,8 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `M` (`Shift + m`) $\rightarrow$ Nhảy thẳng vào chính giữa màn hình (Center / Middle cả ngang lẫn dọc).
   - **Nhảy mục tiêu trực tiếp trong phiên di chuyển (In-session Jump):**
     - `f` $\rightarrow$ Kích hoạt ngay Hint Mode trong khi đang di chuyển mà không cần thoát mode!
-    - `g` $\rightarrow$ Kích hoạt ngay Grid Mode (lưới 3x3 ma trận 9 ô: `u i o / j k l / m , .`). Bấm 1 phím thu hẹp 1/9 màn hình, phím `k` ở chính giữa tâm.
+    - `g` $\rightarrow$ Kích hoạt ngay Grid Mode (lưới 3x6 ma trận 18 ô bằng 2 tay: `q w e u i o / a s d j k l / z x c m , .`). Bấm 1 phím thu hẹp 1/18 màn hình, phủ kín toàn bộ màn hình ngang 16:9.
+    - `Esc`: Thoát Grid Mode về lại Normal Movement Mode.
   - **Click chuột, Kéo thả & Bôi đen văn bản:**
     - `Space` $\rightarrow$ Click chuột trái và duy trì mode (Persistent Click - dùng để click nhiều lần hoặc double-click).
     - `i` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay về chế độ gõ văn bản (Oneshot Click - theo quy ước phím `i` Insert của Vim).

@@ -57,14 +57,14 @@ hint_exit: esc
 hint_undo: backspace
 hint_undo_all: C-u
 
-# Grid Mode (3x3 Matrix Navigation)
-grid_keys: u i o j k l m , .
+# Grid Mode (3x6 Two-Hand Matrix Navigation, 18 cells)
+grid_keys: q w e u i o a s d j k l z x c m , .
 grid_nr: 3
-grid_nc: 3
+grid_nc: 6
 grid_size: 3
 grid_color: #1e1e2e
 grid_border_color: #89b4fa
-grid_exit: c
+grid_exit: esc
 
 # Visual Indicator in normal mode
 indicator: topleft
