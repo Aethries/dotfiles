@@ -104,22 +104,21 @@
   ch_t (fork C-t C-S-t (lsft rsft))
   ch_h (multi lctl lsft tab)
   ch_l (multi lctl tab)
-  ch_j pgdn
-  ch_k pgup
+  ch_j down
+  ch_k up
   ch_x C-w
-  ch_m A-m
   ch_r (fork C-r C-S-r (lsft rsft))
 
-  ch_1 (fork 1 C-1 (lctl rctl))
-  ch_2 (fork 2 C-2 (lctl rctl))
-  ch_3 (fork 3 C-3 (lctl rctl))
-  ch_4 (fork 4 C-4 (lctl rctl))
-  ch_5 (fork 5 C-5 (lctl rctl))
-  ch_6 (fork 6 C-6 (lctl rctl))
-  ch_7 (fork 7 C-7 (lctl rctl))
-  ch_8 (fork 8 C-8 (lctl rctl))
-  ch_9 (fork 9 C-9 (lctl rctl))
-  ch_0 (fork 0 C-9 (lctl rctl))
+  ch_1 C-1
+  ch_2 C-2
+  ch_3 C-3
+  ch_4 C-4
+  ch_5 C-5
+  ch_6 C-6
+  ch_7 C-7
+  ch_8 C-8
+  ch_9 C-9
+  ch_0 C-9
 
   ;; --------------------------------------------------------------------------
   ;; Navigate Layer Actions
@@ -188,16 +187,16 @@
   tm_prev C-S-[
   tm_next C-S-]
 
-  tm_1 (fork 1 C-S-1 (lctl rctl))
-  tm_2 (fork 2 C-S-2 (lctl rctl))
-  tm_3 (fork 3 C-S-3 (lctl rctl))
-  tm_4 (fork 4 C-S-4 (lctl rctl))
-  tm_5 (fork 5 C-S-5 (lctl rctl))
-  tm_6 (fork 6 C-S-6 (lctl rctl))
-  tm_7 (fork 7 C-S-7 (lctl rctl))
-  tm_8 (fork 8 C-S-8 (lctl rctl))
-  tm_9 (fork 9 C-S-9 (lctl rctl))
-  tm_0 (fork 0 C-S-9 (lctl rctl))
+  tm_1 C-S-1
+  tm_2 C-S-2
+  tm_3 C-S-3
+  tm_4 C-S-4
+  tm_5 C-S-5
+  tm_6 C-S-6
+  tm_7 C-S-7
+  tm_8 C-S-8
+  tm_9 C-S-9
+  tm_0 C-S-9
 
   ;; --------------------------------------------------------------------------
   ;; Super Layer Actions (One-Shot Modifiers & Sticky Locks with Shift)
@@ -510,19 +509,19 @@
 ;; ----------------------------------------------------------------------------
 (deflayer nav_slk
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @to_slk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
+  @to_slk @to_niri @to_chrom @to_term @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_slk @o_nav C-v [ ] \
-  @to_slk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    v    @w_bwd n  m    ,    .    @nav_slash  rsft
+  @to_slk C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
+  lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    @nav_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
 (deflayer nav_clk
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @to_clk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
+  @to_clk @to_niri @to_chrom @to_term @key_4 5 6 7    8    9    home -    =    bspc
   @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_clk @o_nav C-v [ ] \
-  @to_clk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    v    @w_bwd n  m    ,    .    @nav_slash  rsft
+  @to_clk C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
+  lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    @nav_slash  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
