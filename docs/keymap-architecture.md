@@ -184,6 +184,11 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 - **Thoát layer:**
   - `CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer** (vẫn bảo toàn modifier waiting nếu có).
 
+### 3.6. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
+- **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
+- **Thanh trạng thái Niri (Noctalia Status Bar):** Widget `keymap` trên thanh bar hiển thị nhãn chế độ thời gian thực (`NORMAL`, `NAV`, `CHROM`, `NIRI`, `SUPER`, `C-LOCK`), cho phép click để mở bảng tra cứu phím tắt.
+- **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` lắng nghe sự kiện `Entered layer` từ Kanata stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và phát thông báo OSD qua `notify-send`. Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.
+
 ---
 
 ## 4. Bảng phân định & Xử lý xung đột (Conflict Resolution Table)
