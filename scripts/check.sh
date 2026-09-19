@@ -4,8 +4,8 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
-shellcheck scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then

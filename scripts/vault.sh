@@ -215,6 +215,22 @@ finish_restore_runtime() {
     return "$status"
 }
 
+default_vault_for_scope() {
+    local scope="$1"
+
+    case "$scope" in
+        all)
+            printf '%s\n' "$REPO_ROOT/secrets.vault"
+            ;;
+        omniroute)
+            printf '%s\n' "$REPO_ROOT/secrets.omniroute.vault"
+            ;;
+        *)
+            error "Unknown vault scope: $scope"
+            ;;
+    esac
+}
+
 cmd_backup() {
     local scope="all"
     local out_file=""
@@ -236,7 +252,7 @@ cmd_backup() {
         esac
     done
 
-    out_file="${out_file:-$REPO_ROOT/secrets.vault}"
+    out_file="${out_file:-$(default_vault_for_scope "$scope")}"
 
     local candidate_paths=()
     case "$scope" in
@@ -366,7 +382,7 @@ cmd_restore() {
         esac
     done
 
-    in_file="${in_file:-$REPO_ROOT/secrets.vault}"
+    in_file="${in_file:-$(default_vault_for_scope "$scope")}"
 
     if [ ! -f "$in_file" ]; then
         error "Vault file not found: $in_file"
@@ -378,21 +394,33 @@ cmd_restore() {
 
     prepare_restore_permissions "$scope"
 
+    # Đặt trap EXIT trước khi dừng bất kỳ service hoặc tiến trình nào
+    RESTORE_RESTART_KEYRING=false
+    RESTORE_RESTART_9ROUTER=false
+    RESTORE_RESTART_OMNIROUTE=false
+    trap 'finish_restore_runtime $?' EXIT
+
     if [ "$scope" = "omniroute" ]; then
         # Không được tắt các ứng dụng khác (Chrome, Slack, 9router...) khi restore với scope omniroute để tránh làm mất phiên làm việc không liên quan
         if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service; then
             RESTORE_RESTART_OMNIROUTE=true
-            systemctl --user stop omniroute.service
+            if ! systemctl --user stop omniroute.service; then
+                error "Failed to stop omniroute.service before restore."
+            fi
         elif pgrep -u "$UID" -f '[o]mniroute' >/dev/null 2>&1; then
             RESTORE_RESTART_OMNIROUTE=true
         fi
 
+        # Không được restore SQLite khi tiến trình OmniRoute vẫn còn chạy
+        # vì process cũ có thể tiếp tục ghi vào database đã được thay thế.
         if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+            warn "Active omniroute process detected; stopping..."
             pkill -TERM -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
             sleep 1
+            if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+                error "Could not stop OmniRoute before restore. Refusing unsafe database replacement."
+            fi
         fi
-
-        trap 'finish_restore_runtime $?' EXIT
 
         RESTORE_TMP="$(mktemp -d)"
 
@@ -679,8 +707,8 @@ usage() {
     echo "Usage: $0 {backup|restore|clean|list} [args]"
     echo
     echo "Commands:"
-    echo "  backup   [--scope scope] [file]   Encrypt and bundle to local vault file (default: secrets.vault, scopes: all, omniroute)"
-    echo "  restore  [--scope scope] [file]   Decrypt and unpack local vault file"
+    echo "  backup   [--scope scope] [file]   Encrypt and bundle to local vault file (default: secrets.vault or secrets.omniroute.vault)"
+    echo "  restore  [--scope scope] [file]   Decrypt and unpack local vault file (default: secrets.vault or secrets.omniroute.vault)"
     echo "  list     [file]                   List contents of encrypted vault"
     echo "  clean    [args]                   Wipe local auth sessions to test vault restore"
     echo

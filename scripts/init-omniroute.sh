@@ -35,15 +35,25 @@ if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
     source "$REPO_ROOT/resources/ai/gateway.env"
 fi
 
+if [ -f "$REPO_ROOT/scripts/lib/ai-gateway-common.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/ai-gateway-common.sh"
+fi
+
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 OMNIROUTE_PINNED_VERSION="${OMNIROUTE_PINNED_VERSION:-3.8.50}"
 
 FORCE=false
+ENSURE=false
 while [ $# -gt 0 ]; do
     case "$1" in
         -f|--force)
             FORCE=true
+            shift
+            ;;
+        -e|--ensure)
+            ENSURE=true
             shift
             ;;
         *)
@@ -52,6 +62,10 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+if [ "$ENSURE" = true ]; then
+    info "Running in ensure mode: validating state and repairing configuration drift..."
+fi
 
 if [ "$EUID" -eq 0 ]; then
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
@@ -92,29 +106,7 @@ if command -v fnm >/dev/null 2>&1; then
 fi
 
 validate_node_version() {
-    command -v node >/dev/null 2>&1 || return 1
-    local version
-    version="$(node -p 'process.versions.node' 2>/dev/null || echo '')"
-    [ -n "$version" ] || return 1
-
-    local major minor patch
-    major="$(echo "$version" | cut -d. -f1)"
-    minor="$(echo "$version" | cut -d. -f2)"
-    patch="$(echo "$version" | cut -d. -f3 | cut -d- -f1)"
-
-    # OmniRoute 3.8.50 yêu cầu Node >=22.22.2 <23 hoặc >=24 <27
-    if [ "$major" -eq 22 ]; then
-        if [ "$minor" -gt 22 ]; then
-            return 0
-        elif [ "$minor" -eq 22 ] && [ "$patch" -ge 2 ]; then
-            return 0
-        fi
-        return 1
-    elif [ "$major" -ge 24 ] && [ "$major" -lt 27 ]; then
-        return 0
-    else
-        return 1
-    fi
+    validate_omniroute_node_version
 }
 
 if ! command -v npm >/dev/null 2>&1 || ! validate_node_version; then
@@ -185,7 +177,7 @@ fi
 # Ensure STORAGE_ENCRYPTION_KEY exists and protect existing database
 if ! grep -q '^STORAGE_ENCRYPTION_KEY=' "$ENV_FILE" 2>/dev/null; then
     if [ -s "$DB_FILE" ]; then
-        if [ "$FORCE" = false ]; then
+        if [ "$FORCE" = false ] || [ "$ENSURE" = true ]; then
             error "Existing database found at $DB_FILE, but STORAGE_ENCRYPTION_KEY is missing in $ENV_FILE. Generating a random key will render existing encrypted credentials unreadable. Either restore your key via 'vault restore' or run 'init-omniroute --force' (which will back up the orphan database to $DB_FILE.orphan.<timestamp> first)."
         else
             ORPHAN_BACKUP="$DB_FILE.orphan.$(date +%Y%m%d%H%M%S)"
@@ -259,6 +251,7 @@ success "omniroute.service is linked to the repository template."
 # Reload and enable systemd user service
 systemctl --user daemon-reload
 systemctl --user enable omniroute.service
+systemctl --user is-enabled --quiet omniroute.service || error "Failed to enable omniroute.service"
 success "omniroute.service is enabled to start automatically on system boot!"
 
 # Enable user lingering so service persists across sessions

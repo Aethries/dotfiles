@@ -40,7 +40,7 @@ OmniRoute state follows a strict security architecture:
 - Pinned version (`3.8.50`)
 - Automation & reconciliation scripts (`init-omniroute.sh`, `reconcile-ai-gateways.sh`)
 
-### 2. Private Encrypted State (`secrets.vault`)
+### 2. Private Encrypted State (`secrets.omniroute.vault` or `secrets.vault`)
 - `~/.omniroute/storage.sqlite` (SQLite database containing all custom provider configs, accounts, combos, and skills)
 - `~/.omniroute/.env` (`STORAGE_ENCRYPTION_KEY` master database decryption key)
 - Provider API keys, OAuth access tokens, and refresh tokens
@@ -50,15 +50,18 @@ OmniRoute state follows a strict security architecture:
 
 ## State Synchronization: Scoped vs. Full-User Operations
 
-* **OmniRoute-Scoped Operations (`sync-omniroute`)**:
+* **OmniRoute-Scoped Operations (`sync-omniroute` or `vault --scope omniroute`)**:
+  - Uses dedicated file: `secrets.omniroute.vault`
+  - Completely isolated: Never touches or overwrites `secrets.vault`.
   ```bash
-  sync-omniroute backup   # archives ONLY ~/.omniroute/ into secrets.vault (pauses service, checkpoints WAL)
-  sync-omniroute restore  # restores ONLY ~/.omniroute/ (never touches SSH, Chrome, 9router, or other apps)
+  sync-omniroute backup   # archives ONLY ~/.omniroute/ into secrets.omniroute.vault (pauses service, checkpoints WAL)
+  sync-omniroute restore  # restores ONLY ~/.omniroute/ from secrets.omniroute.vault (never touches SSH, Chrome, 9router, or other apps)
   ```
 * **Full-User Vault Operations (`vault.sh`)**:
+  - Uses default file: `secrets.vault`
   ```bash
-  vault backup            # archives all user credentials (SSH, GPG, Chrome, Keyring, 9router, OmniRoute)
-  vault restore           # restores all user application sessions and profiles
+  vault backup            # archives all user credentials (SSH, GPG, Chrome, Keyring, 9router, OmniRoute) into secrets.vault
+  vault restore           # restores all user application sessions and profiles from secrets.vault
   ```
 
 ---

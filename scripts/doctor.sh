@@ -52,6 +52,10 @@ if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
     # shellcheck disable=SC1091
     source "$REPO_ROOT/resources/ai/gateway.env"
 fi
+if [ -f "$REPO_ROOT/scripts/lib/ai-gateway-common.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/ai-gateway-common.sh"
+fi
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
@@ -247,24 +251,14 @@ ROUTER_9_LISTEN=false
 OMNI_LISTEN_LOOPBACK=false
 OMNI_LISTEN_PUBLIC=false
 
-if command -v ss >/dev/null 2>&1; then
-    if ss -tlHn "sport = :$ROUTER_9_PORT" 2>/dev/null | grep -q "$ROUTER_9_PORT"; then
-        ROUTER_9_LISTEN=true
-    fi
-    if ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E "0\.0\.0\.0:$OMNIROUTE_PORT|\*:$OMNIROUTE_PORT" >/dev/null; then
-        OMNI_LISTEN_PUBLIC=true
-    elif ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E "(127\.0\.0\.1|\[::1\]):$OMNIROUTE_PORT" >/dev/null; then
-        OMNI_LISTEN_LOOPBACK=true
-    fi
-elif command -v lsof >/dev/null 2>&1; then
-    if lsof -nP -i ":$ROUTER_9_PORT" 2>/dev/null | grep -q 'LISTEN'; then
-        ROUTER_9_LISTEN=true
-    fi
-    if lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -E "(\*|0\.0\.0\.0):$OMNIROUTE_PORT" >/dev/null; then
-        OMNI_LISTEN_PUBLIC=true
-    elif lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -E "(127\.0\.0\.1|\[::1\]):$OMNIROUTE_PORT" >/dev/null; then
-        OMNI_LISTEN_LOOPBACK=true
-    fi
+if is_port_listening "$ROUTER_9_PORT"; then
+    ROUTER_9_LISTEN=true
+fi
+
+if is_port_loopback_only "$OMNIROUTE_PORT"; then
+    OMNI_LISTEN_LOOPBACK=true
+elif is_port_listening "$OMNIROUTE_PORT"; then
+    OMNI_LISTEN_PUBLIC=true
 fi
 
 if [ "$ROUTER_9_LISTEN" = true ]; then
@@ -274,7 +268,7 @@ else
 fi
 
 if [ "$OMNI_LISTEN_PUBLIC" = true ]; then
-    fail "OmniRoute port $OMNIROUTE_PORT is exposed to 0.0.0.0 (insecure, not bound to loopback $OMNIROUTE_HOST!)"
+    fail "OmniRoute port $OMNIROUTE_PORT is exposed to 0.0.0.0 or non-loopback interface (insecure, not bound strictly to loopback $OMNIROUTE_HOST!)"
 elif [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
     ok "OmniRoute listening on dedicated loopback port $OMNIROUTE_HOST:$OMNIROUTE_PORT"
 else

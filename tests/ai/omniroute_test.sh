@@ -34,6 +34,11 @@ GATEWAY_ENV="$REPO_ROOT/resources/ai/gateway.env"
 # shellcheck disable=SC1090
 source "$GATEWAY_ENV"
 
+COMMON_LIB="$REPO_ROOT/scripts/lib/ai-gateway-common.sh"
+[ -f "$COMMON_LIB" ] || log_fail "ai-gateway-common.sh missing at $COMMON_LIB"
+# shellcheck disable=SC1090
+source "$COMMON_LIB"
+
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
@@ -111,7 +116,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --user) user_mode=true; shift ;;
         --quiet) shift ;;
-        is-active|start|stop|restart|enable|disable|daemon-reload)
+        is-active|is-enabled|start|stop|restart|enable|disable|daemon-reload)
             action="$1"
             shift
             ;;
@@ -133,6 +138,18 @@ case "$action" in
             exit 1
         fi
         ;;
+    is-enabled)
+        if [ "${MOCK_SYSTEMCTL_ENABLE_FAIL:-0}" = "1" ]; then
+            exit 1
+        fi
+        exit 0
+        ;;
+    enable)
+        if [ "${MOCK_SYSTEMCTL_ENABLE_FAIL:-0}" = "1" ]; then
+            exit 1
+        fi
+        exit 0
+        ;;
     start|restart)
         echo "active" > "$unit_file"
         exit 0
@@ -141,7 +158,7 @@ case "$action" in
         echo "inactive" > "$unit_file"
         exit 0
         ;;
-    daemon-reload|enable|disable)
+    daemon-reload|disable)
         exit 0
         ;;
     *)
@@ -154,6 +171,10 @@ chmod +x "$MOCK_BIN/systemctl"
 # Mock pgrep and pkill
 cat << 'EOS' > "$MOCK_BIN/pgrep"
 #!/usr/bin/env bash
+if [ "${MOCK_PGREP_OMNIROUTE_PERSIST:-0}" = "1" ]; then
+    echo "99999"
+    exit 0
+fi
 exit 1
 EOS
 chmod +x "$MOCK_BIN/pgrep"
@@ -288,9 +309,46 @@ log_ok "Node 24.2.0 correctly accepted."
 
 # Test J: Node 27.x (Must be rejected)
 if check_node_semver "27.0.0"; then
-    log_fail "Node 27.0.0 was incorrectly rejected!"
+    log_fail "Node 27.0.0 was incorrectly accepted!"
 fi
 log_ok "Node 27.0.0 correctly rejected."
+
+# ------------------------------------------------------------------------------
+# 2.1 Loopback Isolation Port Logic Tests (is_port_loopback_only)
+# ------------------------------------------------------------------------------
+log_info "2.1 Testing loopback-only isolation validator across network address matrix..."
+
+test_loopback_matrix() {
+    local test_name="$1"
+    local raw_output="$2"
+    local expected_result="$3" # "pass" or "fail"
+
+    cat << EOS > "$MOCK_BIN/ss"
+#!/usr/bin/env bash
+$raw_output
+exit 0
+EOS
+    chmod +x "$MOCK_BIN/ss"
+
+    if PATH="$MOCK_BIN:$ORIGINAL_PATH" is_port_loopback_only "20129"; then
+        if [ "$expected_result" != "pass" ]; then
+            log_fail "is_port_loopback_only incorrectly PASSED for $test_name"
+        fi
+    else
+        if [ "$expected_result" != "fail" ]; then
+            log_fail "is_port_loopback_only incorrectly FAILED for $test_name"
+        fi
+    fi
+}
+
+test_loopback_matrix "IPv4 loopback 127.0.0.1" 'echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"' "pass"
+test_loopback_matrix "IPv6 loopback [::1]" 'echo "LISTEN 0 512 [::1]:20129 [::]:*"' "pass"
+test_loopback_matrix "Wildcard IPv4 0.0.0.0" 'echo "LISTEN 0 512 0.0.0.0:20129 0.0.0.0:*"' "fail"
+test_loopback_matrix "Wildcard all *" 'echo "LISTEN 0 512 *:20129 0.0.0.0:*"' "fail"
+test_loopback_matrix "LAN Interface IP 192.168.1.15" 'echo "LISTEN 0 512 192.168.1.15:20129 0.0.0.0:*"' "fail"
+test_loopback_matrix "Dual binding loopback + wildcard" 'echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"; echo "LISTEN 0 512 0.0.0.0:20129 0.0.0.0:*"' "fail"
+test_loopback_matrix "No listeners (empty)" 'echo -n ""' "fail"
+log_ok "is_port_loopback_only passed full network address rejection/acceptance matrix."
 
 # ------------------------------------------------------------------------------
 # 3. Dynamic Execution of Real scripts/init-omniroute.sh in Sandbox
@@ -411,6 +469,49 @@ MOCK_STATE_DIR="$MOCK_STATE" \
 [ "$(cat "$RESTORE_TARGET_HOME/.9router/keep-me")" = "preserve-my-router" ] || log_fail ".9router content modified!"
 log_ok "Scoped restore restored ~/.omniroute without modifying unrelated directories."
 
+# Test A.1: Scoped backup uses secrets.omniroute.vault by default and leaves secrets.vault untouched
+DEFAULT_TEST_REPO="$SANDBOX_DIR/repo_default"
+mkdir -p "$DEFAULT_TEST_REPO/scripts"
+cp "$REPO_ROOT/scripts/vault.sh" "$DEFAULT_TEST_REPO/scripts/"
+chmod +x "$DEFAULT_TEST_REPO/scripts/vault.sh"
+
+# Create a full vault first
+HOME="$VAULT_TEST_HOME" \
+PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+MOCK_STATE_DIR="$MOCK_STATE" \
+"$DEFAULT_TEST_REPO/scripts/vault.sh" backup >/dev/null
+
+[ -f "$DEFAULT_TEST_REPO/secrets.vault" ] || log_fail "Default full vault was not created!"
+FULL_VAULT_HASH_BEFORE="$(sha256sum "$DEFAULT_TEST_REPO/secrets.vault" | awk '{print $1}')"
+
+# Run scoped backup without explicit filename
+HOME="$VAULT_TEST_HOME" \
+PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+MOCK_STATE_DIR="$MOCK_STATE" \
+"$DEFAULT_TEST_REPO/scripts/vault.sh" backup --scope omniroute >/dev/null
+
+[ -f "$DEFAULT_TEST_REPO/secrets.omniroute.vault" ] || log_fail "Default scoped vault secrets.omniroute.vault was not created!"
+FULL_VAULT_HASH_AFTER="$(sha256sum "$DEFAULT_TEST_REPO/secrets.vault" | awk '{print $1}')"
+
+[ "$FULL_VAULT_HASH_BEFORE" = "$FULL_VAULT_HASH_AFTER" ] || log_fail "secrets.vault was mutated by scoped omniroute backup!"
+log_ok "Scoped vault separation verified: secrets.omniroute.vault created while secrets.vault hash remained strictly identical."
+
+# Test B.1: Scoped restore writer protection (refuse replacement if writer cannot be stopped)
+WRITER_TEST_HOME="$SANDBOX_DIR/writer_protect_home"
+mkdir -p "$WRITER_TEST_HOME/.omniroute"
+echo "original-unmodified-db" > "$WRITER_TEST_HOME/.omniroute/storage.sqlite"
+
+if HOME="$WRITER_TEST_HOME" \
+   PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+   MOCK_STATE_DIR="$MOCK_STATE" \
+   MOCK_PGREP_OMNIROUTE_PERSIST=1 \
+   "$REPO_ROOT/scripts/vault.sh" restore --scope omniroute "$TEST_VAULT" >/dev/null 2>&1; then
+    log_fail "Scoped restore unexpectedly succeeded despite persistent writer process!"
+fi
+
+[ "$(cat "$WRITER_TEST_HOME/.omniroute/storage.sqlite")" = "original-unmodified-db" ] || log_fail "Live database was replaced despite persistent writer process!"
+log_ok "Scoped restore refused to replace database when active writer process persisted."
+
 # Test K: Failure during backup must trigger EXIT cleanup and restart omniroute.service
 echo "active" > "$MOCK_STATE/unit_omniroute.service"
 FAIL_VAULT="/nonexistent_dir_cannot_write/fail.vault"
@@ -433,9 +534,10 @@ log_ok "Backup EXIT trap safely restored omniroute.service on failure."
 log_info "6. Testing reconcile-ai-gateways.sh behavior..."
 
 RECON_HOME="$SANDBOX_DIR/recon_home"
-mkdir -p "$RECON_HOME/.local/bin" "$RECON_HOME/.omniroute" "$RECON_HOME/.9router"
+mkdir -p "$RECON_HOME/.local/bin" "$RECON_HOME/.omniroute" "$RECON_HOME/.9router/mitm"
 echo "STORAGE_ENCRYPTION_KEY=reconkey" > "$RECON_HOME/.omniroute/.env"
 echo "db-recon" > "$RECON_HOME/.omniroute/storage.sqlite"
+echo "dummy-rootCA" > "$RECON_HOME/.9router/mitm/rootCA.crt"
 
 # Create dummy mock 9router binary so 9router doesn't need external npm
 cat << 'EOS' > "$RECON_HOME/.local/bin/9router"
@@ -462,8 +564,20 @@ echo "inactive" > "$MOCK_STATE/unit_9router.service"
 # Mock ss to simulate listening ports for reconciliation verification
 cat << 'EOS' > "$MOCK_BIN/ss"
 #!/usr/bin/env bash
-echo "LISTEN 0 512 127.0.0.1:20128 0.0.0.0:*"
-echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+port=""
+for arg in "$@"; do
+    if [[ "$arg" =~ :([0-9]+) ]]; then
+        port="${BASH_REMATCH[1]}"
+    fi
+done
+if [ "$port" = "20128" ]; then
+    echo "LISTEN 0 512 127.0.0.1:20128 0.0.0.0:*"
+elif [ "$port" = "20129" ]; then
+    echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+else
+    echo "LISTEN 0 512 127.0.0.1:20128 0.0.0.0:*"
+    echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+fi
 exit 0
 EOS
 chmod +x "$MOCK_BIN/ss"
@@ -524,6 +638,72 @@ if (
     log_fail "Reconciler unexpectedly succeeded when init-omniroute failed!"
 fi
 log_ok "Reconciler propagates initializer failures with nonzero exit code."
+
+# Test O: Reconciler fails if systemctl --user enable fails
+if (
+    HOME="$RECON_HOME" \
+    PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+    MOCK_STATE_DIR="$MOCK_STATE" \
+    MOCK_LOG_FILE="$MOCK_LOG" \
+    MOCK_SYSTEMCTL_ENABLE_FAIL=1 \
+    "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" >/dev/null 2>&1
+); then
+    log_fail "Reconciler unexpectedly succeeded when systemctl --user enable failed!"
+fi
+log_ok "Reconciler strictly fails when systemctl --user enable fails."
+
+# Test P: Configuration drift repair via init-omniroute --ensure
+DRIFT_TEST_HOME="$SANDBOX_DIR/drift_home"
+mkdir -p "$DRIFT_TEST_HOME/.omniroute"
+cat << 'EOF' > "$DRIFT_TEST_HOME/.omniroute/.env"
+PORT=8888
+HOST=0.0.0.0
+OMNIROUTE_SERVER_HOST=0.0.0.0
+API_HOST=0.0.0.0
+LIVE_WS_HOST=0.0.0.0
+STORAGE_ENCRYPTION_KEY=drift-preserved-secret-key-1234
+EOF
+echo "drift-db-content" > "$DRIFT_TEST_HOME/.omniroute/storage.sqlite"
+chmod 755 "$DRIFT_TEST_HOME/.omniroute"
+chmod 644 "$DRIFT_TEST_HOME/.omniroute/.env"
+chmod 644 "$DRIFT_TEST_HOME/.omniroute/storage.sqlite"
+
+HOME="$DRIFT_TEST_HOME" \
+PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+MOCK_STATE_DIR="$MOCK_STATE" \
+MOCK_LOG_FILE="$MOCK_LOG" \
+"$REPO_ROOT/scripts/init-omniroute.sh" --ensure >/dev/null
+
+grep -q '^PORT=20129$' "$DRIFT_TEST_HOME/.omniroute/.env" || log_fail "Drifted PORT was not repaired to 20129!"
+grep -q '^HOST=127.0.0.1$' "$DRIFT_TEST_HOME/.omniroute/.env" || log_fail "Drifted HOST was not repaired to 127.0.0.1!"
+grep -q '^OMNIROUTE_SERVER_HOST=127.0.0.1$' "$DRIFT_TEST_HOME/.omniroute/.env" || log_fail "Drifted OMNIROUTE_SERVER_HOST was not repaired to 127.0.0.1!"
+grep -q '^STORAGE_ENCRYPTION_KEY=drift-preserved-secret-key-1234$' "$DRIFT_TEST_HOME/.omniroute/.env" || log_fail "Encryption key was lost during --ensure!"
+[ "$(cat "$DRIFT_TEST_HOME/.omniroute/storage.sqlite")" = "drift-db-content" ] || log_fail "storage.sqlite modified during --ensure!"
+[ "$(stat -c "%a" "$DRIFT_TEST_HOME/.omniroute")" = "700" ] || log_fail "Permissions not fixed on .omniroute"
+log_ok "init-omniroute --ensure successfully repaired configuration and permission drift without altering encryption key or database."
+
+# Test Q: Consecutive reconciliation runs are strictly idempotent
+IDEM_HOME="$SANDBOX_DIR/idem_home"
+mkdir -p "$IDEM_HOME/.local/bin" "$IDEM_HOME/.omniroute" "$IDEM_HOME/.9router/mitm"
+cp "$RECON_HOME/.local/bin/9router" "$IDEM_HOME/.local/bin/9router"
+cp "$RECON_HOME/.local/bin/omniroute" "$IDEM_HOME/.local/bin/omniroute"
+echo "STORAGE_ENCRYPTION_KEY=idemkey" > "$IDEM_HOME/.omniroute/.env"
+echo "idem-db-content" > "$IDEM_HOME/.omniroute/storage.sqlite"
+echo "dummy-ca" > "$IDEM_HOME/.9router/mitm/rootCA.crt"
+
+for _ in 1 2; do
+    HOME="$IDEM_HOME" \
+    PATH="$MOCK_BIN:$ORIGINAL_PATH" \
+    MOCK_STATE_DIR="$MOCK_STATE" \
+    MOCK_LOG_FILE="$MOCK_LOG" \
+    "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" >/dev/null
+done
+
+grep -q '^STORAGE_ENCRYPTION_KEY=idemkey$' "$IDEM_HOME/.omniroute/.env" || log_fail "Idempotency failed: key was modified!"
+[ "$(cat "$IDEM_HOME/.omniroute/storage.sqlite")" = "idem-db-content" ] || log_fail "Idempotency failed: DB was modified!"
+IDEM_ORPHANS="$(find "$IDEM_HOME/.omniroute" -name "storage.sqlite.orphan.*" | wc -l)"
+[ "$IDEM_ORPHANS" -eq 0 ] || log_fail "Idempotency failed: orphan backup was created during clean runs!"
+log_ok "Reconciler demonstrated complete idempotency across repeated executions."
 
 # ------------------------------------------------------------------------------
 # 7. Verify No Real Host State Was Mutated

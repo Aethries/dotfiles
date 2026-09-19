@@ -35,19 +35,24 @@ if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
     source "$REPO_ROOT/resources/ai/gateway.env"
 fi
 
+if [ -f "$REPO_ROOT/scripts/lib/ai-gateway-common.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/ai-gateway-common.sh"
+fi
+
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 OMNIROUTE_DIR="$HOME/.omniroute"
 
 cmd_backup() {
     info "Triggering Secret Vault backup (authoritative store for ~/.omniroute, scoped)..."
-    # Giới hạn scope omniroute để chỉ sao lưu riêng ~/.omniroute vào vault
+    # Giới hạn scope omniroute để chỉ sao lưu riêng ~/.omniroute vào secrets.omniroute.vault
     "$REPO_ROOT/scripts/vault.sh" backup --scope omniroute "$@"
 }
 
 cmd_restore() {
     info "Restoring Secret Vault (restores ~/.omniroute database, keys, and providers, scoped)..."
-    # Giới hạn scope omniroute để chỉ phục hồi ~/.omniroute, không ghi đè SSH/Chrome/9router
+    # Giới hạn scope omniroute để chỉ phục hồi ~/.omniroute từ secrets.omniroute.vault
     "$REPO_ROOT/scripts/vault.sh" restore --scope omniroute "$@"
 }
 
@@ -63,23 +68,13 @@ cmd_status() {
     fi
 
     # Port and host binding state
-    local port_bound=false
-    if command -v ss >/dev/null 2>&1; then
-        if ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E '0\.0\.0\.0|\*:' >/dev/null; then
-            echo -e "  - Listening Port:    ${RED}${BOLD}$OMNIROUTE_PORT (INSECURE: Bound to 0.0.0.0)${NC}"
-            port_bound=true
-        elif ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E '127\.0\.0\.1|\[::1\]' >/dev/null; then
-            echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Loopback $OMNIROUTE_HOST, isolated)${NC}"
-            port_bound=true
-        fi
-    elif command -v lsof >/dev/null 2>&1; then
-        if lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -q 'LISTEN'; then
-            echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Dedicated, isolated)${NC}"
-            port_bound=true
-        fi
-    fi
-
-    if [ "$port_bound" = false ]; then
+    if is_port_loopback_only "$OMNIROUTE_PORT"; then
+        echo -e "  - Listening Port:    ${GREEN}${BOLD}$OMNIROUTE_PORT (Loopback $OMNIROUTE_HOST, isolated)${NC}"
+    elif is_port_listening "$OMNIROUTE_PORT"; then
+        local listeners
+        listeners="$(get_port_listeners "$OMNIROUTE_PORT" | tr '\n' ' ')"
+        echo -e "  - Listening Port:    ${RED}${BOLD}$OMNIROUTE_PORT (INSECURE: Non-loopback bindings: $listeners)${NC}"
+    else
         echo -e "  - Listening Port:    ${YELLOW}! Not listening on $OMNIROUTE_PORT${NC}"
     fi
 
@@ -111,14 +106,14 @@ cmd_status() {
     fi
 
     # Vault backup state
-    local vault_file="$REPO_ROOT/secrets.vault"
+    local vault_file="$REPO_ROOT/secrets.omniroute.vault"
     if [ -f "$vault_file" ]; then
         local v_size v_time
         v_size="$(du -h "$vault_file" | cut -f1)"
         v_time="$(date -r "$vault_file" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "Unknown")"
-        echo -e "  - Encrypted Vault:   ${GREEN}${BOLD}Present ($v_size, $v_time)${NC} at secrets.vault"
+        echo -e "  - OmniRoute Vault:   ${GREEN}${BOLD}Present ($v_size, $v_time)${NC} at secrets.omniroute.vault"
     else
-        echo -e "  - Encrypted Vault:   ${YELLOW}! No secrets.vault found (run 'sync-omniroute backup')${NC}"
+        echo -e "  - OmniRoute Vault:   ${YELLOW}! No secrets.omniroute.vault found (run 'sync-omniroute backup')${NC}"
     fi
     echo
 }
@@ -127,8 +122,8 @@ usage() {
     echo "Usage: $0 {backup|restore|status|export|import}"
     echo
     echo "Commands:"
-    echo "  backup, export    Encrypt full OmniRoute state (accounts, tokens, storage.sqlite) into secrets.vault"
-    echo "  restore, import   Decrypt and restore OmniRoute state from secrets.vault"
+    echo "  backup, export    Encrypt full OmniRoute state (accounts, tokens, storage.sqlite) into secrets.omniroute.vault"
+    echo "  restore, import   Decrypt and restore OmniRoute state from secrets.omniroute.vault"
     echo "  status            Show status of OmniRoute service, loopback port, database, and vault"
     echo
     exit 1
