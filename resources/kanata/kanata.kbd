@@ -49,6 +49,7 @@
   to_shlk (layer-switch shift_locked)
   to_chrom (layer-switch chromium)
   to_term (layer-switch terminals)
+  to_vis  (layer-switch visual)
   to_bp   (layer-switch bypass)
 
   to_arm_slk  (layer-switch super_armed_slk)
@@ -59,12 +60,9 @@
   to_nav_slk  (layer-switch nav_slk)
   to_nav_clk  (layer-switch nav_clk)
 
-  ;; Esc definitions:
-  ;; Single tap: cancels all active/waiting modifiers and switches to normal mode.
-  ;; Double tap: sends caps (to cancel any stuck hardware CapsLock) and resets to normal mode.
-  esc_single (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc @to_norm)
-  esc_double (multi caps (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) @to_norm)
-  esc_reset  (tap-dance-eager 250 (@esc_single @esc_double))
+  ;; Esc definition:
+  ;; Zero-latency immediate reset: releases all modifiers, sends Esc, and switches to normal mode.
+  esc_reset (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc @to_norm)
 
   ;; Transitions that switch layer without consuming waiting one-shot modifiers
   nav_preserve  (multi (one-shot-pause-processing 100) @to_nav)
@@ -148,6 +146,24 @@
   key_4 (fork 4 end (lsft rsft))
   g_td  (tap-dance 250 (XX C-home))
   g_nav (fork @g_td C-end (lsft rsft))
+
+  ;; --------------------------------------------------------------------------
+  ;; Visual Layer Actions (Text Selection & Clipboard via 'v' in Navigate)
+  ;; --------------------------------------------------------------------------
+  vis_y    (multi C-c @to_nav)
+  vis_x    (multi C-x @to_nav)
+  vis_c    (multi C-x @to_norm)
+  vis_p    (multi C-v @to_nav)
+  vis_w    C-S-rght
+  vis_b    C-S-left
+  vis_h    S-left
+  vis_l    S-rght
+  vis_j    S-down
+  vis_k    S-up
+  vis_0    S-home
+  vis_4    S-end
+  vis_g_td (tap-dance 250 (XX C-S-home))
+  vis_g    (fork @vis_g_td C-S-end (lsft rsft))
 
   ;; --------------------------------------------------------------------------
   ;; Terminals Layer Actions (Zellij Multiplexer Navigation via CapsLock + 3)
@@ -281,7 +297,19 @@
   @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
   @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
   @caps_nav_layer C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
+  lsft C-z  del  c    @to_vis @w_bwd n  m    ,    .    C-f  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 3. Visual Layer (Text Selection & Clipboard Actions via 'v' in Navigate)
+;; ----------------------------------------------------------------------------
+(deflayer visual
+  @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @to_nav 1    2    3    @vis_4 5 6   7    8    9    @vis_0 -  =    bspc
+  @tab_nav q    @vis_w @vis_w C-y  t    @vis_y pgup @norm_preserve pgdn @vis_p [ ] \
+  @caps_nav_layer C-a s    pgdn f  @vis_g @vis_h @vis_j @vis_k @vis_l ; apos ret
+  lsft C-z  @vis_x @vis_c @to_nav @vis_b n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
