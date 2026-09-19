@@ -67,13 +67,46 @@ end
 
 -- 3. Generate keymaps/generated-doc.md
 local doc_lines = {
-  "# Unified Keymap Reference",
+  "# Unified Workstation Keymap Reference (Issue #30)",
   "",
-  "> Auto-generated from `manifest.lua`. Single source of truth across Neovim, Neovide, and Antigravity IDE.",
+  "> Auto-generated from `resources/nvim/lua/keymaps/manifest.lua`. Workstation-wide single source of truth.",
   "",
-  "| Modes | Key | Group | Description | Native Action | Antigravity Action |",
-  "| :--- | :--- | :--- | :--- | :--- | :--- |",
+  "## 1. Universal Modal Grammar (Quy tắc bất biến toàn hệ thống)",
+  "",
+  "| Khái niệm (Concept) | Phím chuẩn (Key) | Phạm vi (Scope) | Hành vi đồng bộ (Unified Behavior) |",
+  "| :--- | :--- | :--- | :--- |",
 }
+
+if manifest.global_grammar then
+  for _, g in ipairs(manifest.global_grammar) do
+    table.insert(
+      doc_lines,
+      string.format("| **%s** | `%s` | %s | %s |", g.concept, g.key, g.scope, g.behavior)
+    )
+  end
+end
+
+table.insert(doc_lines, "")
+table.insert(doc_lines, "## 2. Workstation Layer Hierarchy (Phân cấp Layer)")
+table.insert(doc_lines, "")
+table.insert(doc_lines, "| Layer | Tên hiển thị | Trách nhiệm chính | Phần mềm chủ quản |")
+table.insert(doc_lines, "| :--- | :--- | :--- | :--- |")
+
+if manifest.workstation_layers then
+  local layer_order = { "normal", "navigate", "super", "chromium", "terminals", "niri", "visual", "warpd" }
+  for _, lk in ipairs(layer_order) do
+    local l = manifest.workstation_layers[lk]
+    if l then
+      table.insert(doc_lines, string.format("| `%s` | %s | %s | %s |", lk, l.name, l.desc, l.ownership))
+    end
+  end
+end
+
+table.insert(doc_lines, "")
+table.insert(doc_lines, "## 3. Editor & IDE Keymaps (Neovim / Antigravity)")
+table.insert(doc_lines, "")
+table.insert(doc_lines, "| Modes | Key | Group | Description | Native Action | Antigravity Action |")
+table.insert(doc_lines, "| :--- | :--- | :--- | :--- | :--- | :--- |")
 
 for _, entry in ipairs(manifest.entries) do
   local modes = table.concat(entry.modes, ", ")

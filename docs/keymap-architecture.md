@@ -28,6 +28,20 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 | **3. Editor** | **Neovim** / **Antigravity** | `<leader>` (`Space` trong normal mode), `<C-w>` | Chỉnh sửa văn bản, điều hướng AST code, thao tác file, gọi LSP & Git. |
 | **4. Browser & GUI** | **Chrome + Vimium-C** / **Warpd** | `f`, `F`, `j/k`, `d/u`, `Super+Alt+P` | Bấm link, điều hướng DOM web, mô phỏng con trỏ chuột không dùng chuột vật lý. |
 
+## 2.1. Ngữ pháp Modal thống nhất toàn Workstation (Universal Modal Grammar - Issue #30)
+
+Để giải quyết triệt để tình trạng phân mảnh, loạn phím và khó nhớ khi mở rộng các extension/layer trong tương lai, toàn bộ hệ thống tuân thủ **7 nguyên tắc bất biến (Invariants)**:
+
+| Khái niệm (Concept) | Phím chuẩn | Hành vi đồng bộ trên 100% các Layer |
+| :--- | :---: | :--- |
+| **Thoát hiểm tức thì** | `Esc` | Luôn nhả sạch 100% modifier, đóng overlay/menu và trở về `NORMAL` mode ngay lập tức (0ms latency, zero stickiness). |
+| **Nhập liệu / Insert** | `i` | Luôn thoát mode để quay về `NORMAL` gõ văn bản! (Ở Warpd: click 1 chạm rồi về gõ chữ). |
+| **Chuột ảo (Pointer)** | `m` / `M` (`Shift+m`) | `m`: **Warpd Hint Mode** (nhảy nhãn 2 ký tự & click). `M`: **Warpd Movement Mode** (rê chuột bằng `h/j/k/l` không click). Khả dụng đồng bộ ở `navigate`, `super`, `niri`, `chromium`, `terminals`. Ở `normal`: Bấm `CapsLock + m` / `CapsLock + M`. |
+| **Cuộn trang (Scroll)** | `d` / `u` | `d`: Cuộn xuống (`PageDown`), `u`: Cuộn lên (`PageUp`). Nhất quán trên `navigate`, `chromium`, `terminals` (scrollback), `warpd`! |
+| **Điều hướng 4 hướng** | `h` `j` `k` `l` | Trái / Xuống / Lên / Phải trên toàn bộ text, app tabs, terminal panes, compositor windows, warpd pointer. |
+| **Nhảy ngữ cảnh (Index)** | `1` ... `9`, `0` | Luôn là số thứ tự Tab / Workspace / Sub-layer (`Ctrl+1..9` trong Chromium, `Ctrl+Shift+1..9` trong Zellij, `Mod+1..9` trong Niri, `1..3` trong Navigate). |
+| **Cổng chuyển đổi (Gateway)** | `CapsLock` | Trong `normal`: Tap $\rightarrow$ `navigate`, Double-tap/RShift $\rightarrow$ `super`, Giữ $\rightarrow$ hợp âm. Trong **mọi sub-layer khác**: Tap `CapsLock` 1 chạm duy nhất là về thẳng `normal` (zero delay). |
+
 ---
 
 ## 3. Hệ thống Layer toàn cục của Kanata (Global Layer Hierarchy)
@@ -52,36 +66,32 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │        Gõ phím mặc định 100% tự nhiên không delay/alteration           │
 │        Single-tap CapsLock                   ──> NAVIGATE              │
 │        Double-tap CapsLock                   ──> SUPER LAYER           │
-│        Tap/Hold CapsLock + ` ──> NAV | 1 ──> NIRI | 2 ──> CHROM        │
-│        Tap/Hold CapsLock + 3 ──> TERM | 4 ──> WARPD | Spc ──> SUPER   │
+│        Hold CapsLock + m ──> HINT | M ──> MOVE | d/u ──> SCROLL        │
+│        Hold CapsLock + 1 ──> NIRI | 2 ──> CHROM | 3 ──> TERM           │
 │        Bấm RightShift (instant)              ──> SUPER LAYER           │
 └────────────────────────────────────────────────────────────────────────┘
-           │ (Single-tap CapsLock / Caps+`)    │ (Double-tap Caps / RightShift)
+           │ (Single-tap CapsLock)             │ (Double-tap Caps / RightShift)
            ▼                                   ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
 │  h/j/k/l -> Arrows      │         │  a -> One-shot Super    │
-│  gg / G  -> Top / End   │         │  s -> One-shot Shift    │
+│  d / u   -> PageDown/Up │         │  s -> One-shot Shift    │
 │  w / e   -> Next word   │         │  d -> One-shot Ctrl     │
 │  b       -> Prev word   │         │  f -> One-shot Alt      │
-│  Tab     -> Alt + Tab   │         │  Shift + a/s/d/f ->     │
-│  Ctrl+h/l -> Prev/Next  │         │    Sticky Lock Modifier │
-│  Ctrl+j/k -> PgDn/PgUp  │         │  c -> Lock Ctrl Mode    │
-│  v ──> VISUAL (Select)  │         │  RightShift ──> NORMAL  │
-│  m / M ──> WARPD (Mouse)│         │  Esc / i ──> NORMAL     │
-│  x/y/p/z  -> Del/Cp/Pst │         │                         │
-│  1:Niri | 2:Chrom | 3:Tm│         │                         │
-│  Double Caps / Esc ──> N│         │                         │
+│  m / M   -> Warpd Mouse │         │  m / M -> Warpd Mouse   │
+│  1/2/3   -> Niri/Chr/Trm│         │  1/2/3 -> Niri/Chr/Trm  │
+│  v       -> Visual Mode │         │  Shift+a/s/d/f -> Lock  │
+│  Caps / Esc / i ──> N   │         │  Caps / Esc / i ──> N   │
 └─────────────────────────┘         └─────────────────────────┘
            │ Bấm 1 / 2 / 3                       │ Shift+a/s/d/f
            ▼                                     ▼
 ┌─────────────────────────────────┐ ┌─────────────────────────┐
 │ NIRI / CHROMIUM / TERMINALS     │ │   LOCKED MODIFIER MODES │
-│ 1: Niri (WM, Workspaces)        │ │  (CTRL/SUPER/ALT/SHIFT) │
-│ 2: Chromium (Tabs, Vimium-C)    │ │  Mọi phím tự động kèm   │
-│ 3: Terminals (Zellij Multiplex) │ │  Modifier cho đến Esc   │
-│ Chuyển qua lại: Hold Caps+1/2/3 │ │  Esc / Caps ──> NORMAL  │
-│ Thoát: Double Caps / Esc ──> N  │ └─────────────────────────┘
+│ 1: Niri (WM, Workspaces 1..9)   │ │  (CTRL/SUPER/ALT/SHIFT) │
+│ 2: Chromium (Tabs 1..9, d/u)    │ │  Mọi phím tự động kèm   │
+│ 3: Terminals (Panes, Tabs 1..9) │ │  Modifier cho đến Esc   │
+│ m / M: Chuột Warpd mọi layer    │ │  Caps / Esc ──> NORMAL  │
+│ Caps / Esc / i ──> NORMAL (1x)  │ └─────────────────────────┘
 └─────────────────────────────────┘
 ```
 
@@ -217,31 +227,31 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `f` $\rightarrow$ Fullscreen (`Mod+F`).
   - `q` $\rightarrow$ Đóng cửa sổ (`Mod+Q`).
 - **Thoát layer:**
-  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
-  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
-  - `Hold CapsLock + 1/2/3/`` $\rightarrow$ Chuyển trực tiếp giữa các layer.
+  - `m` $\rightarrow$ Kích hoạt **Warpd Hint Mode** (nhảy nhanh & click bằng bàn phím).
+  - `M` (`Shift + m`) $\rightarrow$ Kích hoạt **Warpd Movement Mode** (rê chuột bằng `h/j/k/l`).
+  - `Single-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về thẳng **Normal Layer** (1 chạm tức thì, zero delay).
+  - `Hold CapsLock + 1/2/3/m` $\rightarrow$ Chuyển trực tiếp giữa các layer.
 
 ### 3.5. Chromium Layer (Lớp thao tác trình duyệt)
 - **Kích hoạt:** Trong `Navigate Layer` (hoặc `nav_slk`/`nav_clk`), bấm `2` (tương ứng tổ hợp `CapsLock + 2`).
-- **Thao tác Tab:**
+- **Thao tác Tab & Điều hướng:**
   - `t` $\rightarrow$ Mở tab mới (`Ctrl + T`).
   - `Shift + t` $\rightarrow$ Khôi phục tab vừa đóng (`Ctrl + Shift + T`).
   - `r` $\rightarrow$ Tải lại trang (`Ctrl + R`). `Shift + r` $\rightarrow$ Tải lại không cache (`Ctrl + Shift + R`).
   - `x` $\rightarrow$ Đóng tab hiện tại (`Ctrl + W`).
-  - `m` $\rightarrow$ Toggle mute site / tab (`Alt + M` tương thích Vimium-C).
   - `h` $\rightarrow$ Tab trước (`Ctrl + Shift + Tab`).
   - `l` $\rightarrow$ Tab kế tiếp (`Ctrl + Tab`).
-- **Cuộn trang:**
-  - `j` $\rightarrow$ Cuộn xuống 1 trang (`PageDown`).
-  - `k` $\rightarrow$ Cuộn lên 1 trang (`PageUp`).
+- **Cuộn trang & Chuột:**
+  - `d` $\rightarrow$ Cuộn xuống (`PageDown`).
+  - `u` $\rightarrow$ Cuộn lên (`PageUp`).
+  - `j / k` $\rightarrow$ Mũi tên xuống / lên (cuộn từng dòng).
+  - `m` $\rightarrow$ Kích hoạt **Warpd Hint Mode** (click link / nút web tức thì).
+  - `M` (`Shift + m`) $\rightarrow$ Kích hoạt **Warpd Movement Mode** (rê chuột).
 - **Số & Nhảy tab:**
-  - `1 - 9`, `0` $\rightarrow$ Gõ số bình thường (`1 - 9`, `0`).
-  - `Ctrl + 1 - 9` $\rightarrow$ Nhảy trực tiếp tới tab 1..9 (`Ctrl + 1..9`).
-  - `Ctrl + 0` $\rightarrow$ Nhảy tới tab cuối cùng (`Ctrl + 9`).
+  - `1 - 9`, `0` $\rightarrow$ Nhảy trực tiếp tới tab 1..9 (`Ctrl + 1..9`).
 - **Thoát layer:**
-  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
-  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
-  - `Hold CapsLock + 1/3/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Terminals, Navigate.
+  - `Single-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về thẳng **Normal Layer** (1 chạm tức thì, zero delay).
+  - `Hold CapsLock + 1/3/m` $\rightarrow$ Chuyển trực tiếp sang Niri, Terminals, Warpd.
 
 ### 3.6. Terminals Layer (Lớp thao tác Terminal Multiplexer Zellij)
 - **Kích hoạt:**
@@ -253,6 +263,11 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `l` $\rightarrow$ Chuyển focus pane sang phải (`Ctrl + L`, tương thích Neovim split).
   - `j` $\rightarrow$ Mũi tên xuống (`Down`) để cuộn lịch sử lệnh CLI / chọn menu fzf / TUI. (Khi kèm Ctrl: `Ctrl + J` để chuyển pane xuống trong Zellij).
   - `k` $\rightarrow$ Mũi tên lên (`Up`) để cuộn lịch sử lệnh CLI / chọn menu fzf / TUI. (Khi kèm Ctrl: `Ctrl + K` để chuyển pane lên trong Zellij).
+- **Cuộn trang & Chuột:**
+  - `d` $\rightarrow$ Cuộn log scrollback xuống (`PageDown`).
+  - `u` $\rightarrow$ Cuộn log scrollback lên (`PageUp`).
+  - `m` $\rightarrow$ Kích hoạt **Warpd Hint Mode**.
+  - `M` (`Shift + m`) $\rightarrow$ Kích hoạt **Warpd Movement Mode**.
 - **Quản lý Session, Window & Pane:**
   - `s` $\rightarrow$ Mở Zellij Session Manager (`Ctrl + Shift + S`).
   - `x` $\rightarrow$ Đóng pane đang focus (`Ctrl + Shift + W`). `Shift + x` $\rightarrow$ Đóng cả tab (`Ctrl + Shift + Q`).
@@ -260,7 +275,6 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `t` $\rightarrow$ Tạo tab mới trong Zellij (`Ctrl + Shift + T`).
   - `q` $\rightarrow$ Đóng tab hiện tại (`Ctrl + Shift + Q`).
   - `n` $\rightarrow$ Tạo pane split mới bên phải (`Ctrl + Shift + N`).
-  - `d` $\rightarrow$ Tạo pane split mới bên dưới (`Ctrl + Shift + D`).
   - `f` $\rightarrow$ Phóng to / Thu nhỏ pane đang chọn (`Ctrl + Shift + F` - Fullscreen).
   - `r` $\rightarrow$ Đổi tên tab (`Ctrl + Shift + R`).
 - **Scroll & Tìm kiếm:**
@@ -270,11 +284,10 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `a` $\rightarrow$ Mở Room plugin tìm nhanh tab/session (`Ctrl + Shift + A`).
   - `z` $\rightarrow$ Mở bảng trợ giúp phím tắt Zellij (`Ctrl + Shift + Z` - Zellij forgot).
   - `[` / `]` $\rightarrow$ Chuyển tab trước / tab kế (`Ctrl + Shift + [` / `Ctrl + Shift + ]`).
-  - `1 - 9`, `0` $\rightarrow$ Gõ số bình thường; `Ctrl + 1 - 9`: Nhảy trực tiếp tới tab 1..9 (`Ctrl + Shift + 1..9`).
+  - `1 - 9`, `0` $\rightarrow$ Nhảy trực tiếp tới tab 1..9 (`Ctrl + Shift + 1..9`).
 - **Thoát layer:**
-  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
-  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
-  - `Hold CapsLock + 1/2/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Chromium, Navigate.
+  - `Single-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về thẳng **Normal Layer** (1 chạm tức thì, zero delay).
+  - `Hold CapsLock + 1/2/m` $\rightarrow$ Chuyển trực tiếp sang Niri, Chromium, Warpd.
 
 ### 3.7. Warpd Pointer Layer (Điều khiển chuột toàn diện bằng bàn phím - Issue #28)
 - **Kích hoạt tức thì & Đồng bộ phím tắt:**

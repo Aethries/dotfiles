@@ -396,4 +396,95 @@ M.entries = {
   },
 }
 
+-- ==============================================================================
+-- Universal Modal Grammar (Issue #30 & Workstation Standards)
+-- ==============================================================================
+M.global_grammar = {
+  {
+    concept = "Instant Reset & Escape Hatch",
+    key = "Esc",
+    scope = "global",
+    behavior = "Release all modifiers, dismiss overlays/menus, and return immediately to NORMAL (0ms latency).",
+  },
+  {
+    concept = "Insert / Text Entry",
+    key = "i",
+    scope = "modal_layers",
+    behavior = "Return directly to NORMAL typing mode (in Warpd: click and exit to normal).",
+  },
+  {
+    concept = "Virtual Pointer (Mouse)",
+    key = "m / Shift+m",
+    scope = "universal",
+    behavior = "m: Warpd Hint Mode (jump & click). Shift+m (M): Warpd Movement Mode (h/j/k/l continuous movement).",
+  },
+  {
+    concept = "Vertical Page Scroll",
+    key = "d / u",
+    scope = "universal",
+    behavior = "d: Scroll down (PageDown). u: Scroll up (PageUp). Synchronized across Navigate, Chromium, Terminals, Warpd.",
+  },
+  {
+    concept = "Directional Navigation",
+    key = "h / j / k / l",
+    scope = "universal",
+    behavior = "Left, Down, Up, Right on all text, tabs, splits, windows, and pointer movement.",
+  },
+  {
+    concept = "Context Jump (Index)",
+    key = "1 .. 9, 0",
+    scope = "universal",
+    behavior = "Switch tab / workspace / sublayer by numerical index across Niri, Chromium, and Zellij.",
+  },
+  {
+    concept = "Modal Gateway",
+    key = "CapsLock",
+    scope = "universal",
+    behavior = "Normal: tap->navigate, double-tap/RShift->super, hold->chord. In all sublayers: tap 1-touch->normal.",
+  },
+}
+
+M.workstation_layers = {
+  normal = {
+    name = "Normal Layer",
+    desc = "Default physical typing. CapsLock is the gateway.",
+    ownership = "Kernel/Kanata",
+  },
+  navigate = {
+    name = "Navigate Layer",
+    desc = "Vim cursor motions (h/j/k/l), word jumps (w/e/b), page scroll (d/u), mouse (m/M).",
+    ownership = "Kanata",
+  },
+  super = {
+    name = "Super Layer",
+    desc = "One-shot & chorded modifiers (a:Super, s:Shift, d:Ctrl, f:Alt), mouse (m/M).",
+    ownership = "Kanata",
+  },
+  chromium = {
+    name = "Chromium Layer",
+    desc = "Browser tabs (h/l, 1..9, t, x, r), page scroll (d/u), mouse (m/M).",
+    ownership = "Kanata -> Chrome/Vimium",
+  },
+  terminals = {
+    name = "Terminals Layer",
+    desc = "Zellij multiplexer (h/l:panes, 1..9:tabs, d/u:scrollback, s:sessions), mouse (m/M).",
+    ownership = "Kanata -> Zellij",
+  },
+  niri = {
+    name = "Niri Layer",
+    desc = "Window manager (h/l:columns, j/k:workspaces, 1..9:jump, d/u:scroll), mouse (m/M).",
+    ownership = "Kanata -> Niri",
+  },
+  visual = {
+    name = "Visual Layer",
+    desc = "Text selection & clipboard (w/e/b, h/j/k/l, y:yank, x/c:cut, p:paste, d/u:scroll).",
+    ownership = "Kanata",
+  },
+  warpd = {
+    name = "Warpd Pointer Layer",
+    desc = "Keyboard-driven mouse pointer (Hint: 2-char labels, Normal: vi-keys, Grid: 3x6 matrix).",
+    ownership = "Warpd",
+  },
+}
+
 return M

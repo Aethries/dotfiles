@@ -1,6 +1,33 @@
-# Unified Keymap Reference
+# Unified Workstation Keymap Reference (Issue #30)
 
-> Auto-generated from `manifest.lua`. Single source of truth across Neovim, Neovide, and Antigravity IDE.
+> Auto-generated from `resources/nvim/lua/keymaps/manifest.lua`. Workstation-wide single source of truth.
+
+## 1. Universal Modal Grammar (Quy tắc bất biến toàn hệ thống)
+
+| Khái niệm (Concept) | Phím chuẩn (Key) | Phạm vi (Scope) | Hành vi đồng bộ (Unified Behavior) |
+| :--- | :--- | :--- | :--- |
+| **Instant Reset & Escape Hatch** | `Esc` | global | Release all modifiers, dismiss overlays/menus, and return immediately to NORMAL (0ms latency). |
+| **Insert / Text Entry** | `i` | modal_layers | Return directly to NORMAL typing mode (in Warpd: click and exit to normal). |
+| **Virtual Pointer (Mouse)** | `m / Shift+m` | universal | m: Warpd Hint Mode (jump & click). Shift+m (M): Warpd Movement Mode (h/j/k/l continuous movement). |
+| **Vertical Page Scroll** | `d / u` | universal | d: Scroll down (PageDown). u: Scroll up (PageUp). Synchronized across Navigate, Chromium, Terminals, Warpd. |
+| **Directional Navigation** | `h / j / k / l` | universal | Left, Down, Up, Right on all text, tabs, splits, windows, and pointer movement. |
+| **Context Jump (Index)** | `1 .. 9, 0` | universal | Switch tab / workspace / sublayer by numerical index across Niri, Chromium, and Zellij. |
+| **Modal Gateway** | `CapsLock` | universal | Normal: tap->navigate, double-tap/RShift->super, hold->chord. In all sublayers: tap 1-touch->normal. |
+
+## 2. Workstation Layer Hierarchy (Phân cấp Layer)
+
+| Layer | Tên hiển thị | Trách nhiệm chính | Phần mềm chủ quản |
+| :--- | :--- | :--- | :--- |
+| `normal` | Normal Layer | Default physical typing. CapsLock is the gateway. | Kernel/Kanata |
+| `navigate` | Navigate Layer | Vim cursor motions (h/j/k/l), word jumps (w/e/b), page scroll (d/u), mouse (m/M). | Kanata |
+| `super` | Super Layer | One-shot & chorded modifiers (a:Super, s:Shift, d:Ctrl, f:Alt), mouse (m/M). | Kanata |
+| `chromium` | Chromium Layer | Browser tabs (h/l, 1..9, t, x, r), page scroll (d/u), mouse (m/M). | Kanata -> Chrome/Vimium |
+| `terminals` | Terminals Layer | Zellij multiplexer (h/l:panes, 1..9:tabs, d/u:scrollback, s:sessions), mouse (m/M). | Kanata -> Zellij |
+| `niri` | Niri Layer | Window manager (h/l:columns, j/k:workspaces, 1..9:jump, d/u:scroll), mouse (m/M). | Kanata -> Niri |
+| `visual` | Visual Layer | Text selection & clipboard (w/e/b, h/j/k/l, y:yank, x/c:cut, p:paste, d/u:scroll). | Kanata |
+| `warpd` | Warpd Pointer Layer | Keyboard-driven mouse pointer (Hint: 2-char labels, Normal: vi-keys, Grid: 3x6 matrix). | Warpd |
+
+## 3. Editor & IDE Keymaps (Neovim / Antigravity)
 
 | Modes | Key | Group | Description | Native Action | Antigravity Action |
 | :--- | :--- | :--- | :--- | :--- | :--- |

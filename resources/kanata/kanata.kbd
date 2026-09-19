@@ -77,19 +77,14 @@
   caps_held_norm   (tap-hold-press 200 200 @caps_td_norm @caps_lwh)
   caps_to_nav      (fork @caps_held_norm caps (lsft rsft))
 
-  ;; Navigation layers:
-  ;; In navigate layer: single-tap returns directly to normal mode (@norm_preserve), double-tap to super (@to_sup).
-  caps_td_nav      (tap-dance 200 (@norm_preserve @to_sup))
-  caps_held_nav    (tap-hold-press 200 200 @caps_td_nav @caps_lwh)
-  caps_nav_direct  (fork @caps_held_nav caps (lsft rsft))
-
-  ;; In other sub-layers (niri, chromium, terminals):
-  ;; Single-tap CapsLock returns to default navigate layer (@nav_preserve).
-  ;; Double-tap CapsLock returns to normal mode (@norm_preserve).
-  ;; Hold CapsLock allows direct chords (1..3, spc, `) between layers.
-  caps_td_layers   (tap-dance 200 (@nav_preserve @norm_preserve))
-  caps_held_layers (tap-hold-press 200 200 @caps_td_layers @caps_lwh)
-  caps_nav_layer   (fork @caps_held_layers caps (lsft rsft))
+  ;; Unified CapsLock in all sub-layers:
+  ;; Single-tap returns directly to normal mode (@norm_preserve) with zero delay.
+  ;; Hold acts as chord modifier for quick layer switches (@caps_lwh).
+  ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
+  caps_held_exit   (tap-hold-press 200 200 @norm_preserve @caps_lwh)
+  caps_exit        (fork @caps_held_exit caps (lsft rsft))
+  caps_nav_direct  @caps_exit
+  caps_nav_layer   @caps_exit
 
   ;; Navigation from locked modes: double-tap CapsLock to navigate
   caps_td_slk   (tap-dance 200 (XX @to_nav_slk))
@@ -324,8 +319,8 @@
 (deflayer caps_mode
   _    _    _    _    _    _    _    _    _    _    _    _    _
   @to_nav @to_niri @to_chrom @to_term @warp_hint _ _ _ _ _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    @u_nav _    _    _    _    _    _
+  _    _    _    @d_nav _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    @m_caps _ _    _    _
   _    _    _              @to_sup        _    _    _
 )
@@ -360,9 +355,9 @@
 (deflayer visual
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @to_nav 1    2    3    @vis_4 5 6   7    8    9    @vis_0 -  =    bspc
-  @tab_nav q    @vis_w @vis_w C-y  t    @vis_y pgup @norm_preserve pgdn @vis_p [ ] \
-  @caps_nav_layer C-a s    pgdn f  @vis_g @vis_h @vis_j @vis_k @vis_l ; apos ret
-  lsft C-z  @vis_x @vis_c @to_nav @vis_b n  m    ,    .    C-f  rsft
+  @tab_nav q    @vis_w @vis_w C-y  t    @vis_y @u_nav @norm_preserve @d_nav @vis_p [ ] \
+  @caps_nav_layer C-a s    @d_nav f  @vis_g @vis_h @vis_j @vis_k @vis_l ; apos ret
+  lsft C-z  @vis_x @vis_c @to_nav @vis_b n  @m_nav ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -371,10 +366,10 @@
 ;; ----------------------------------------------------------------------------
 (deflayer super
   @esc_reset f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    @norm_preserve o p [ ]   \
+  grv  @to_niri @to_chrom @to_term 4 5 6 7 8 9 0 - = bspc
+  tab  q    w    e    r    t    y    @u_nav @norm_preserve o p [ ]   \
   @caps_nav_layer @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
-  lsft z    x    @to_arm_clk v b    n    m    ,    .    /    @norm_preserve
+  lsft z    x    @to_arm_clk v b    n    @m_nav ,    .    /    @norm_preserve
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -384,9 +379,9 @@
 (deflayer chromium
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @ch_1 @ch_2 @ch_3 @ch_4 @ch_5 @ch_6 @ch_7 @ch_8 @ch_9 @ch_0 - = bspc
-  tab  q    w    e    @ch_r @ch_t y    u    @norm_preserve o p [ ] \
-  @caps_nav_layer a s d f g @ch_h @ch_j @ch_k @ch_l ; apos ret
-  lsft z    @ch_x c    v    b    n    @ch_m ,    .    /    rsft
+  tab  q    w    e    @ch_r @ch_t y    @u_nav @norm_preserve o p [ ] \
+  @caps_nav_layer a s @d_nav f g @ch_h @ch_j @ch_k @ch_l ; apos ret
+  lsft z    @ch_x c    v    b    n    @m_nav ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -396,9 +391,9 @@
 (deflayer terminals
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @tm_1 @tm_2 @tm_3 @tm_4 @tm_5 @tm_6 @tm_7 @tm_8 @tm_9 @tm_0 - = bspc
-  tab  @tm_x @tm_w e    @tm_r @tm_t y    u    @norm_preserve o p @tm_prev @tm_next \
-  @caps_nav_layer @tm_a @tm_s @tm_d @tm_f g @tm_h @tm_j @tm_k @tm_l ; apos ret
-  lsft @tm_z @tm_x c    v    @tm_b @tm_n m    ,    .    @tm_srch rsft
+  tab  @tm_x @tm_w e    @tm_r @tm_t y    @u_nav @norm_preserve o p @tm_prev @tm_next \
+  @caps_nav_layer @tm_a @tm_s @d_nav @tm_f g @tm_h @tm_j @tm_k @tm_l ; apos ret
+  lsft @tm_z @tm_x c    v    @tm_b @tm_n @m_nav ,    .    @tm_srch rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -408,9 +403,9 @@
 (deflayer niri
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
-  @niri_over M-q w e  @niri_rec @niri_term y u @norm_preserve o @niri_proj [ ] \
+  @niri_over M-q w e  @niri_rec @niri_term y @u_nav @norm_preserve o @niri_proj [ ] \
   @caps_nav_layer a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
-  lsft z    x    @niri_center @niri_clip b n m , . / rsft
+  lsft z    x    @niri_center @niri_clip b n @m_nav , . / rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
