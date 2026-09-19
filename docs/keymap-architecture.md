@@ -184,6 +184,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 - **Thao tác Tab:**
   - `t` $\rightarrow$ Mở tab mới (`Ctrl + T`).
   - `Shift + t` $\rightarrow$ Khôi phục tab vừa đóng (`Ctrl + Shift + T`).
+  - `r` $\rightarrow$ Tải lại trang (`Ctrl + R`). `Shift + r` $\rightarrow$ Tải lại không cache (`Ctrl + Shift + R`).
   - `x` $\rightarrow$ Đóng tab hiện tại (`Ctrl + W`).
   - `m` $\rightarrow$ Toggle mute site / tab (`Alt + M` tương thích Vimium-C).
   - `h` $\rightarrow$ Tab trước (`Ctrl + Shift + Tab`).

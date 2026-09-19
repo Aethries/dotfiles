@@ -35,7 +35,7 @@ stdbuf -oL journalctl -u kanata-internal -f -n 0 -o cat | while IFS= read -r lin
                 ;;
             chromium)
                 echo "CHROM" > "$MODE_FILE"
-                send_osd "🌐 CHROMIUM" "t/S-t:Tab · x:Close · m:Mute · h/l:Tabs · j/k:Scroll · Esc:Exit" 2000
+                send_osd "🌐 CHROMIUM" "t/S-t:Tab · r:Reload · x:Close · m:Mute · h/l:Tabs · j/k:Scroll · Esc:Exit" 2000
                 ;;
             terminals)
                 echo "TERM" > "$MODE_FILE"
