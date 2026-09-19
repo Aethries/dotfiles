@@ -59,6 +59,8 @@ fi
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
+BIFROST_PORT="${BIFROST_PORT:-20130}"
+BIFROST_HOST="${BIFROST_HOST:-127.0.0.1}"
 
 echo -e "${BOLD}${CYAN}🏥 Dotfiles System Doctor${RESET}"
 echo "Running diagnostics on $(uname -s) ($(uname -m)) for user '$USER'..."
@@ -137,6 +139,7 @@ check_link "$HOME/.local/bin/init-9router" "CLI: init-9router"
 check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
 check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
 check_link "$HOME/.local/bin/sync-omniroute" "CLI: sync-omniroute"
+check_link "$HOME/.local/bin/init-bifrost" "CLI: init-bifrost"
 check_link "$HOME/.local/bin/reconcile-ai-gateways" "CLI: reconcile-ai-gateways"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
@@ -245,11 +248,14 @@ check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
 check_required_user_service "9router" "9router Local AI Gateway"
 check_required_user_service "omniroute" "OmniRoute Local AI Gateway"
+check_required_user_service "bifrost" "Bifrost AI Gateway"
 
-# Verify AI Gateway Ports (9router on $ROUTER_9_PORT, OmniRoute on $OMNIROUTE_PORT)
+# Verify AI Gateway Ports (9router on $ROUTER_9_PORT, OmniRoute on $OMNIROUTE_PORT, Bifrost on $BIFROST_PORT)
 ROUTER_9_LISTEN=false
 OMNI_LISTEN_LOOPBACK=false
 OMNI_LISTEN_PUBLIC=false
+BIFROST_LISTEN_LOOPBACK=false
+BIFROST_LISTEN_PUBLIC=false
 
 if is_port_listening "$ROUTER_9_PORT"; then
     ROUTER_9_LISTEN=true
@@ -259,6 +265,12 @@ if is_port_loopback_only "$OMNIROUTE_PORT"; then
     OMNI_LISTEN_LOOPBACK=true
 elif is_port_listening "$OMNIROUTE_PORT"; then
     OMNI_LISTEN_PUBLIC=true
+fi
+
+if is_port_loopback_only "$BIFROST_PORT"; then
+    BIFROST_LISTEN_LOOPBACK=true
+elif is_port_listening "$BIFROST_PORT"; then
+    BIFROST_LISTEN_PUBLIC=true
 fi
 
 if [ "$ROUTER_9_LISTEN" = true ]; then
@@ -275,8 +287,16 @@ else
     fail "OmniRoute is NOT listening on port $OMNIROUTE_PORT (run 'init-omniroute' to start)"
 fi
 
-if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
-    ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback)"
+if [ "$BIFROST_LISTEN_PUBLIC" = true ]; then
+    fail "Bifrost port $BIFROST_PORT is exposed to 0.0.0.0 or non-loopback interface (insecure, not bound strictly to loopback $BIFROST_HOST!)"
+elif [ "$BIFROST_LISTEN_LOOPBACK" = true ]; then
+    ok "Bifrost listening on dedicated loopback port $BIFROST_HOST:$BIFROST_PORT"
+else
+    fail "Bifrost is NOT listening on port $BIFROST_PORT (run 'init-bifrost' to start)"
+fi
+
+if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ] && [ "$BIFROST_LISTEN_LOOPBACK" = true ]; then
+    ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback, port $BIFROST_PORT: Bifrost loopback)"
 fi
 
 # Verify AI Agent Skills

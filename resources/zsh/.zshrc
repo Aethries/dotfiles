@@ -448,6 +448,72 @@ function omni() {
   esac
 }
 
+function init-bifrost() {
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/init-bifrost.sh" ]; then
+    "${DOTFILES_DIR}/scripts/init-bifrost.sh" "$@"
+  elif command -v init-bifrost >/dev/null 2>&1; then
+    command init-bifrost "$@"
+  else
+    echo "init-bifrost not found in dotfiles or PATH" >&2
+    return 1
+  fi
+}
+
+function bifrost() {
+  case "${1:-}" in
+    status)
+      systemctl --user status bifrost
+      ;;
+    restart)
+      systemctl --user restart bifrost && echo "✓ bifrost restarted (port 20130)"
+      ;;
+    stop)
+      systemctl --user stop bifrost && echo "✓ bifrost stopped"
+      ;;
+    start)
+      systemctl --user start bifrost && echo "✓ bifrost started (port 20130)"
+      ;;
+    logs)
+      journalctl --user -u bifrost -f
+      ;;
+    ui|dashboard)
+      local url="http://127.0.0.1:20130"
+      if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$url"
+      else
+        echo "Bifrost dashboard: $url"
+      fi
+      ;;
+    "")
+      if systemctl --user is-active --quiet bifrost.service; then
+        echo "✓ bifrost service is running in background (http://127.0.0.1:20130)"
+        echo "  - View status: bifrost status"
+        echo "  - Follow logs: bifrost logs"
+        echo "  - Restart:     bifrost restart"
+        echo "  - Stop:        bifrost stop"
+        echo "  - Dashboard:   bifrost ui"
+        return 0
+      fi
+      if command -v bifrost >/dev/null 2>&1; then
+        command bifrost -app-dir "$HOME/.bifrost"
+      elif [ -x "$HOME/.local/bin/bifrost" ]; then
+        "$HOME/.local/bin/bifrost" -app-dir "$HOME/.bifrost"
+      else
+        echo "bifrost binary not found. Run init-bifrost first."
+      fi
+      ;;
+    *)
+      if command -v bifrost >/dev/null 2>&1; then
+        command bifrost "$@"
+      elif [ -x "$HOME/.local/bin/bifrost" ]; then
+        "$HOME/.local/bin/bifrost" "$@"
+      else
+        echo "bifrost binary not found. Run init-bifrost first."
+      fi
+      ;;
+  esac
+}
+
 # ------------------------------------------------------------------------------
 # Cloudflare WARP (1.1.1.1) Aliases & Functions
 # ------------------------------------------------------------------------------

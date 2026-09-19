@@ -560,6 +560,7 @@ chmod +x "$RECON_HOME/.local/bin/omniroute"
 # Test M: Stopped service must be restarted by reconciliation
 echo "inactive" > "$MOCK_STATE/unit_omniroute.service"
 echo "inactive" > "$MOCK_STATE/unit_9router.service"
+echo "inactive" > "$MOCK_STATE/unit_bifrost.service"
 
 # Mock ss to simulate listening ports for reconciliation verification
 cat << 'EOS' > "$MOCK_BIN/ss"
@@ -574,17 +575,31 @@ if [ "$port" = "20128" ]; then
     echo "LISTEN 0 512 127.0.0.1:20128 0.0.0.0:*"
 elif [ "$port" = "20129" ]; then
     echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+elif [ "$port" = "20130" ]; then
+    echo "LISTEN 0 512 127.0.0.1:20130 0.0.0.0:*"
 else
     echo "LISTEN 0 512 127.0.0.1:20128 0.0.0.0:*"
     echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+    echo "LISTEN 0 512 127.0.0.1:20130 0.0.0.0:*"
 fi
 exit 0
 EOS
 chmod +x "$MOCK_BIN/ss"
 
-# Mock curl to return 200 for models endpoint
+# Mock curl to return 200 for models endpoint and handle downloads
 cat << 'EOS' > "$MOCK_BIN/curl"
 #!/usr/bin/env bash
+out=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -o) out="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+if [ -n "$out" ]; then
+    echo '#!/usr/bin/env bash' > "$out"
+    chmod +x "$out"
+fi
 echo "200"
 exit 0
 EOS
@@ -598,6 +613,7 @@ MOCK_LOG_FILE="$MOCK_LOG" \
 
 [ "$(cat "$MOCK_STATE/unit_omniroute.service")" = "active" ] || log_fail "Reconciliation did not start omniroute.service!"
 [ "$(cat "$MOCK_STATE/unit_9router.service")" = "active" ] || log_fail "Reconciliation did not start 9router.service!"
+[ "$(cat "$MOCK_STATE/unit_bifrost.service")" = "active" ] || log_fail "Reconciliation did not start bifrost.service!"
 log_ok "Reconciliation converged stopped services into active state."
 
 # Test L: Missing OmniRoute binary triggers init-omniroute
@@ -628,6 +644,8 @@ if (
     cp "$REPO_ROOT/resources/systemd/user/"*.service "$REPO_ROOT_OVERRIDE/resources/systemd/user/"
     cp "$SANDBOX_DIR/fail_init" "$REPO_ROOT_OVERRIDE/scripts/init-omniroute.sh"
     cp "$RECON_HOME/.local/bin/9router" "$REPO_ROOT_OVERRIDE/scripts/init-9router.sh"
+    cp "$REPO_ROOT/scripts/init-bifrost.sh" "$REPO_ROOT_OVERRIDE/scripts/"
+    cp -r "$REPO_ROOT/scripts/lib" "$REPO_ROOT_OVERRIDE/scripts/" 2>/dev/null || true
     cp "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$REPO_ROOT_OVERRIDE/scripts/"
 
     HOME="$RECON_HOME" \

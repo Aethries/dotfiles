@@ -352,3 +352,11 @@ if systemctl --user is-active --quiet 9router.service; then
 else
     warn "Service started but status check returned inactive. Check logs with: journalctl --user -u 9router -xe"
 fi
+
+# ------------------------------------------------------------------------------
+# 8. Reconcile / Initialize Bifrost AI Gateway
+# ------------------------------------------------------------------------------
+if [ -f "$REPO_ROOT/scripts/init-bifrost.sh" ]; then
+    info "Triggering Bifrost AI Gateway initialization..."
+    "$REPO_ROOT/scripts/init-bifrost.sh" || warn "Bifrost initialization completed with warnings."
+fi

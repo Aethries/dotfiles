@@ -56,6 +56,8 @@ OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
 OMNIROUTE_PINNED_VERSION="${OMNIROUTE_PINNED_VERSION:-3.8.50}"
+BIFROST_PORT="${BIFROST_PORT:-20130}"
+BIFROST_HOST="${BIFROST_HOST:-127.0.0.1}"
 
 FORCE=false
 while [ $# -gt 0 ]; do
@@ -96,18 +98,21 @@ ensure_user_owned() {
 ensure_user_owned "$USER_HOME/.local/bin"
 ensure_user_owned "$USER_HOME/.omniroute"
 ensure_user_owned "$USER_HOME/.9router"
+ensure_user_owned "$USER_HOME/.bifrost"
 
-info "Reconciling AI Gateways (9Router on :$ROUTER_9_PORT, OmniRoute on :$OMNIROUTE_PORT)..."
+info "Reconciling AI Gateways (9Router on :$ROUTER_9_PORT, OmniRoute on :$OMNIROUTE_PORT, Bifrost on :$BIFROST_PORT)..."
 
 # ------------------------------------------------------------------------------
 # 2. Ensure initializers exist and are executable
 # ------------------------------------------------------------------------------
 INIT_9ROUTER="$REPO_ROOT/scripts/init-9router.sh"
 INIT_OMNIROUTE="$REPO_ROOT/scripts/init-omniroute.sh"
+INIT_BIFROST="$REPO_ROOT/scripts/init-bifrost.sh"
 
 [ -f "$INIT_9ROUTER" ] || error "Missing 9router initializer: $INIT_9ROUTER"
 [ -f "$INIT_OMNIROUTE" ] || error "Missing OmniRoute initializer: $INIT_OMNIROUTE"
-chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE" 2>/dev/null || true
+[ -f "$INIT_BIFROST" ] || error "Missing Bifrost initializer: $INIT_BIFROST"
+chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE" "$INIT_BIFROST" 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
 # 3. Reconcile 9Router
@@ -151,7 +156,24 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 5. Reload systemd user manager, enable, and converge services strictly
+# 5. Reconcile Bifrost
+# ------------------------------------------------------------------------------
+SERVICE_BIFROST_SRC="$REPO_ROOT/resources/systemd/user/bifrost.service"
+SERVICE_BIFROST_DEST="$SYSTEMD_USER_DIR/bifrost.service"
+
+[ -f "$SERVICE_BIFROST_SRC" ] || error "Missing service template: $SERVICE_BIFROST_SRC"
+ln -sfn "$SERVICE_BIFROST_SRC" "$SERVICE_BIFROST_DEST"
+
+if [ "$FORCE" = true ]; then
+    info "Force-reconciling Bifrost via $INIT_BIFROST..."
+    "$INIT_BIFROST" --force || error "Failed to force-reconcile Bifrost."
+else
+    info "Ensuring Bifrost desired state via $INIT_BIFROST --ensure..."
+    "$INIT_BIFROST" --ensure || error "Failed to reconcile Bifrost desired state."
+fi
+
+# ------------------------------------------------------------------------------
+# 6. Reload systemd user manager, enable, and converge services strictly
 # ------------------------------------------------------------------------------
 if command -v systemctl >/dev/null 2>&1; then
     info "Reloading systemd user daemon and synchronizing services..."
@@ -163,6 +185,9 @@ if command -v systemctl >/dev/null 2>&1; then
 
     systemctl --user enable omniroute.service
     systemctl --user is-enabled --quiet omniroute.service || error "Failed to enable omniroute.service"
+
+    systemctl --user enable bifrost.service
+    systemctl --user is-enabled --quiet bifrost.service || error "Failed to enable bifrost.service"
 
     # Start or restart 9Router strictly
     if systemctl --user is-active --quiet 9router.service 2>/dev/null; then
@@ -177,10 +202,17 @@ if command -v systemctl >/dev/null 2>&1; then
     else
         systemctl --user start omniroute.service
     fi
+
+    # Start or restart Bifrost strictly
+    if systemctl --user is-active --quiet bifrost.service 2>/dev/null; then
+        systemctl --user restart bifrost.service
+    else
+        systemctl --user start bifrost.service
+    fi
 fi
 
 # ------------------------------------------------------------------------------
-# 6. Service & Port Verification
+# 7. Service & Port Verification
 # ------------------------------------------------------------------------------
 info "Verifying AI gateway runtime health and port isolation..."
 
@@ -195,6 +227,11 @@ if command -v systemctl >/dev/null 2>&1; then
         error "OmniRoute service failed to start or remain active. Check: journalctl --user -u omniroute -n 20"
     fi
     success "OmniRoute systemd user service is active."
+
+    if ! systemctl --user is-active --quiet bifrost.service 2>/dev/null; then
+        error "Bifrost service failed to start or remain active. Check: journalctl --user -u bifrost -n 20"
+    fi
+    success "Bifrost systemd user service is active."
 fi
 
 # Verify port listeners with retry timeout (9router Next.js startup takes a few seconds to bind socket)
@@ -215,6 +252,18 @@ fi
 OMNI_LISTENERS="$(get_port_listeners "$OMNIROUTE_PORT" | tr '\n' ' ')"
 success "OmniRoute loopback-only binding verified ($OMNI_LISTENERS)."
 
+if ! wait_for_port "$BIFROST_PORT" 20; then
+    error "Bifrost is not listening on expected port $BIFROST_PORT."
+fi
+success "Bifrost is listening on port $BIFROST_PORT."
+
+if ! is_port_loopback_only "$BIFROST_PORT"; then
+    NON_LOOPBACK="$(get_port_listeners "$BIFROST_PORT" | tr '\n' ' ')"
+    error "CRITICAL SECURITY RISK: Bifrost has non-loopback listener(s): $NON_LOOPBACK! It MUST bind to loopback 127.0.0.1 only."
+fi
+BIFROST_LISTENERS="$(get_port_listeners "$BIFROST_PORT" | tr '\n' ' ')"
+success "Bifrost loopback-only binding verified ($BIFROST_LISTENERS)."
+
 # Verify HTTP reachability
 OMNI_HTTP="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$OMNIROUTE_PORT/v1/models" 2>/dev/null || echo "000")"
 if [ "$OMNI_HTTP" != "000" ]; then
@@ -223,5 +272,12 @@ else
     warn "OmniRoute HTTP endpoint did not respond immediately, but TCP port is open."
 fi
 
+BIFROST_HTTP="$(curl -s -o /dev/null -w "%{http_code}" "http://${BIFROST_HOST}:${BIFROST_PORT}/" 2>/dev/null || echo "000")"
+if [ "$BIFROST_HTTP" = "200" ]; then
+    success "Bifrost HTTP endpoint reachable at http://${BIFROST_HOST}:${BIFROST_PORT} (HTTP $BIFROST_HTTP)."
+else
+    warn "Bifrost HTTP endpoint returned $BIFROST_HTTP, but TCP port is open."
+fi
+
 echo
-success "AI Gateways reconciled successfully! Both 9Router (:20128) and OmniRoute (:20129) are active and healthy."
+success "AI Gateways reconciled successfully! 9Router (:20128), OmniRoute (:20129), and Bifrost (:20130) are active and healthy."

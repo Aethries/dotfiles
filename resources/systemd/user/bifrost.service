@@ -1,0 +1,20 @@
+[Unit]
+Description=Bifrost High-Performance LLM Gateway Service
+After=default.target
+
+[Service]
+Type=simple
+UMask=0077
+Environment="PATH=%h/.local/bin:%h/.nix-profile/bin:/etc/profiles/per-user/%u/bin:/run/wrappers/bin:/run/current-system/sw/bin"
+Environment="BIFROST_PORT=20130"
+Environment="BIFROST_HOST=127.0.0.1"
+Environment="BIFROST_APP_DIR=%h/.bifrost"
+ExecStartPre=/bin/sh -c 'test -x "${HOME}/.local/bin/bifrost" || command -v bifrost >/dev/null 2>&1 || (echo "bifrost binary not found. Run init-bifrost first." >&2; exit 1)'
+ExecStart=/bin/sh -c 'BIN=$(command -v bifrost 2>/dev/null || echo "${HOME}/.local/bin/bifrost"); exec "$BIN" -app-dir "${HOME}/.bifrost" -port 20130 -host 127.0.0.1 -log-level info'
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

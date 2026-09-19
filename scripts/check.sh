@@ -27,6 +27,7 @@ cmp resources/zellij/layouts/default.kdl resources/zellij/layouts/dotfiles.kdl
 bash tests/vault/vault_test.sh >/dev/null
 bash tests/zellij/launcher_test.sh >/dev/null
 bash tests/ai/omniroute_test.sh >/dev/null
+bash tests/ai/bifrost_test.sh >/dev/null
 bash tests/ai/skills_test.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)

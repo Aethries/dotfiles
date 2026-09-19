@@ -353,6 +353,7 @@ safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9rout
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
 safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
 safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
+safe_link "$REPO_ROOT/scripts/init-bifrost.sh" "$USER_HOME/.local/bin/init-bifrost"
 safe_link "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$USER_HOME/.local/bin/reconcile-ai-gateways"
 safe_link "$REPO_ROOT/scripts/ai-skills.sh" "$USER_HOME/.local/bin/ai-skills"
 safe_link "$REPO_ROOT/scripts/ai-skills.sh" "$USER_HOME/.local/bin/add-skills"
