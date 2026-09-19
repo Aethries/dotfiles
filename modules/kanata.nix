@@ -1,5 +1,15 @@
 { pkgs, ... }:
 
+let
+  kanataHud = pkgs.writers.writePython3Bin "kanata-hud" {
+    libraries = with pkgs; [
+      python3Packages.pygobject3
+      python3Packages.pycairo
+      gtk3
+      gtk-layer-shell
+    ];
+  } (builtins.readFile ../scripts/kanata-hud.py);
+in
 {
   # ============================================================
   # Kanata: Keyboard Remapping Daemon & System-Wide Service
@@ -16,9 +26,10 @@
   # Enable userland input injection via uinput
   hardware.uinput.enable = true;
 
-  # Ensure Kanata binary is available system-wide for CLI & validation
+  # Ensure Kanata binary & HUD overlay are available system-wide
   environment.systemPackages = [
     pkgs.kanata
+    kanataHud
   ];
 
   # Udev rules for Kanata virtual input device and seat integration:

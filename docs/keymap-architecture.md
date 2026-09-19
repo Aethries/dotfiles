@@ -318,10 +318,10 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
     - `Mod + Alt + Escape` $\rightarrow$ Đóng cưỡng bức Warpd từ Niri compositor nếu bị vướng input grab.
 
-### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
-- **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
+### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & HUD Overlay)
+- **On-Screen Display (HUD Overlay):** Sử dụng Wayland layer-shell (`scripts/kanata-hud.py`) hiển thị một badge pill nhỏ gọn, bán trong suốt ở chính giữa mép dưới màn hình (Bottom-Center). Hiển thị liên tục khi ở bất kỳ layer đặc biệt nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, `VISUAL`, v.v.) kèm tóm tắt phím tắt chính; tự động ẩn hoàn toàn khi trở về `NORMAL`. Hỗ trợ click-through 100% (không cản trở click chuột) và không chiếm focus bàn phím.
 - **Thanh trạng thái Niri (Noctalia Status Bar):** Widget `keymap` trên thanh bar hiển thị nhãn chế độ thời gian thực (`NORMAL`, `NAV`, `CHROM`, `TERM`, `NIRI`, `SUPER`, `C-LOCK`), cho phép click để mở bảng tra cứu phím tắt.
-- **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` lắng nghe sự kiện `Entered layer` từ Kanata stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và phát thông báo OSD qua `notify-send`. Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.
+- **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` khởi chạy `kanata-hud.py`, lắng nghe sự kiện `Entered layer` từ Kanata log stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và điều khiển hiển thị HUD tức thì (0 latency). Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.
 
 ---
 
