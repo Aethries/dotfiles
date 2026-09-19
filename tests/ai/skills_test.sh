@@ -49,6 +49,7 @@ grep -Eiq '^description:' "$SKILL_FILE" || log_fail "SKILL.md missing descriptio
 grep -Fq "## Core Rules" "$SKILL_FILE" || log_fail "SKILL.md missing '## Core Rules'"
 grep -Fq "6-Step Code Filter" "$SKILL_FILE" || log_fail "SKILL.md missing '6-Step Code Filter'"
 grep -Fq "Granular Laziness Tiers" "$SKILL_FILE" || log_fail "SKILL.md missing 'Granular Laziness Tiers'"
+grep -Eiq 'Ultra.*\(Default\)' "$SKILL_FILE" || log_fail "SKILL.md missing 'Ultra (Default)'"
 grep -Fq "Safety & Quality Guardrails" "$SKILL_FILE" || log_fail "SKILL.md missing 'Safety & Quality Guardrails'"
 
 REF_FILE="$REPO_ROOT/resources/skills/ponytail/references/code-filter.md"
@@ -57,7 +58,12 @@ grep -Fq "Rung 1: YAGNI Check" "$REF_FILE" || log_fail "Missing Rung 1 in code-f
 grep -Fq "Rung 6: Minimum Working Code" "$REF_FILE" || log_fail "Missing Rung 6 in code-filter.md"
 grep -Fq "ponytail:" "$REF_FILE" || log_fail "Missing comment convention in code-filter.md"
 
-log_ok "Ponytail SKILL.md and reference schemas are valid"
+JUNIOR_FILE="$REPO_ROOT/resources/skills/junior-coding-agent/SKILL.md"
+[ -f "$JUNIOR_FILE" ] || log_fail "Missing $JUNIOR_FILE"
+grep -Eiq '^name:[[:space:]]*junior-coding-agent' "$JUNIOR_FILE" || log_fail "junior-coding-agent SKILL.md missing valid name"
+[ -f "$REPO_ROOT/resources/skills/junior-coding-agent/references/approval-and-workflow.md" ] || log_fail "Missing approval-and-workflow.md"
+
+log_ok "Ponytail and Junior Coding Agent skill schemas are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
@@ -105,8 +111,10 @@ log_ok "ai-skills.sh remove unlinks targets cleanly"
 
 # Test 2.7: sync command
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
-[ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync command failed to link gemini target"
-[ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex target"
+[ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync command failed to link gemini ponytail"
+[ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex ponytail"
+[ -L "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync command failed to link gemini junior-coding-agent"
+[ -L "$MOCK_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync command failed to link codex junior-coding-agent"
 log_ok "ai-skills.sh sync synchronizes canonical skills"
 
 # ------------------------------------------------------------------------------
@@ -120,6 +128,8 @@ mkdir -p "$MOCK_SYNC_HOME"
 HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync-editors.sh did not link ponytail skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/ponytail" ] || log_fail "sync-editors.sh did not link codex skill"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link junior-coding-agent skill"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link codex junior-coding-agent skill"
 log_ok "sync-editors.sh links skills automatically"
 
 echo

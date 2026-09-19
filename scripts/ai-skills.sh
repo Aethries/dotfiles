@@ -67,7 +67,13 @@ get_skill_desc() {
     local skill_dir="$1"
     local skill_file="$skill_dir/SKILL.md"
     if [ -f "$skill_file" ]; then
-        sed -n -e '/^description:[[:space:]]*/{ s///; p; q; }' "$skill_file"
+        local raw
+        raw="$(sed -n -e '/^description:[[:space:]]*/{ s///; p; q; }' "$skill_file")"
+        if [ "$raw" = ">-" ] || [ "$raw" = ">" ] || [ "$raw" = "|" ] || [ -z "$raw" ]; then
+            sed -n -e '/^description:[[:space:]]*[>|]/,/^[^ ]/{ /^[[:space:]]\+/{ s/^[[:space:]]\+//; p; q; } }' "$skill_file"
+        else
+            echo "$raw"
+        fi
     else
         echo "No description available"
     fi

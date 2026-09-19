@@ -28,8 +28,8 @@ Lazy means efficient, not careless. The best code is the code never written.
 ## Granular Laziness Tiers
 
 - **Lite**: Mild pruning of boilerplate, keeps standard comments and error handling.
-- **Full** (Default): Strict YAGNI, standard library first, zero unrequested abstraction.
-- **Ultra**: Radical minimalism, extreme conciseness for quick one-off scripting and surgical bug fixes.
+- **Full**: Strict YAGNI, standard library first, zero unrequested abstraction.
+- **Ultra** (Default): Radical minimalism, extreme conciseness, ship the one-liner, delete before adding, strip all speculative boilerplate and filler. Active by default.
 
 ## Safety & Quality Guardrails
 
