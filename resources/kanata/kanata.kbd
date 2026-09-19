@@ -250,28 +250,33 @@
   ;; --------------------------------------------------------------------------
   warp_hint (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
   warp_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-m)
-  m_nav     (fork @warp_hint @warp_norm (lsft rsft))
+  warp_hint_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p @to_norm)
+  warp_norm_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-m @to_norm)
+  m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
+  m_caps    (fork @warp_hint @warp_norm (lsft rsft))
 )
 
 ;; ----------------------------------------------------------------------------
 ;; Direct Sequential Key Sequences (Tap CapsLock + <key>)
 ;; ----------------------------------------------------------------------------
 (defvirtualkeys
-  v_sup   (layer-switch super)
-  v_nav   (multi (one-shot-pause-processing 100) (layer-switch navigate))
-  v_niri  (layer-switch niri)
-  v_chrom (layer-switch chromium)
-  v_term  (layer-switch terminals)
-  v_warp  (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
+  v_sup    (layer-switch super)
+  v_nav    (multi (one-shot-pause-processing 100) (layer-switch navigate))
+  v_niri   (layer-switch niri)
+  v_chrom  (layer-switch chromium)
+  v_term   (layer-switch terminals)
+  v_warp   (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
+  v_warp_m (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
 )
 
 (defseq
-  v_sup   (caps spc)
-  v_nav   (caps grv)
-  v_niri  (caps 1)
-  v_chrom (caps 2)
-  v_term  (caps 3)
-  v_warp  (caps 4)
+  v_sup    (caps spc)
+  v_nav    (caps grv)
+  v_niri   (caps 1)
+  v_chrom  (caps 2)
+  v_term   (caps 3)
+  v_warp   (caps 4)
+  v_warp_m (caps m)
 )
 
 ;; ----------------------------------------------------------------------------
@@ -282,7 +287,7 @@
   @to_nav @to_niri @to_chrom @to_term @warp_hint _ _ _ _ _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    @m_caps _ _    _    _
   _    _    _              @to_sup        _    _    _
 )
 

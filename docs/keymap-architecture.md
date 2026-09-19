@@ -262,29 +262,43 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Hold CapsLock + 1/2/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Chromium, Navigate.
 
 ### 3.7. Warpd Pointer Layer (Điều khiển chuột toàn diện bằng bàn phím - Issue #28)
-- **Kích hoạt tức thì:**
-  - Trong **Navigate Layer**: Nhấn `m` để vào **Hint Mode** (`warpd --hint`); Nhấn `Shift + m` (`M`) để vào **Normal Movement Mode** (`warpd --normal`).
-  - Hợp âm toàn cục: `CapsLock + 4` $\rightarrow$ Kích hoạt **Hint Mode** (hoàn tất chuỗi số `1: Niri`, `2: Chromium`, `3: Terminals`, `4: Mouse`).
+- **Kích hoạt tức thì & Đồng bộ phím tắt:**
+  - Trong **Navigate Layer**: Nhấn `m` vào **Hint Mode**; Nhấn `M` (`Shift + m`) vào **Normal Movement Mode** (tự động chuyển Kanata về `normal` khi Warpd kết thúc để gõ chữ ngay lập tức, không cần bấm CapsLock).
+  - Hợp âm toàn cục (`Normal Layer`):
+    - `Hold CapsLock + m` hoặc gõ chuỗi `CapsLock m` $\rightarrow$ Kích hoạt **Hint Mode**.
+    - `Hold CapsLock + Shift + m` $\rightarrow$ Kích hoạt **Normal Movement Mode**.
+    - `Hold / Tap CapsLock + 4` $\rightarrow$ Kích hoạt **Hint Mode** (chuỗi số 1..4).
   - Phím tắt Compositor Niri trực tiếp: `Mod + Alt + P` (Hint), `Mod + Alt + M` (Normal), `Mod + Alt + G` (Grid).
 - **Thao tác trong Hint Mode (Vimium-style Screen Target Selection):**
-  - Màn hình hiển thị lưới nhãn 2 ký tự trên các nút bấm, link hoặc bất kỳ vùng tương tác nào.
+  - Màn hình hiển thị lưới nhãn 2 ký tự nhỏ gọn (`hint_size: 13`), nền bán trong suốt (`#1e1e2ecc`) không che khuất chữ bên dưới.
   - Gõ 2 ký tự: Con trỏ lập tức nhảy đến vị trí đó và click chuột trái, sau đó tự động thoát mode.
   - `Esc`: Hủy và thoát hint mode.
   - `Backspace`: Xóa ký tự đầu tiên nếu gõ nhầm.
 - **Thao tác trong Normal Movement Mode (Di chuyển chuột bằng Vi-keys):**
-  - `h / j / k / l` $\rightarrow$ Rê chuột Trái / Xuống / Lên / Phải (gia tốc mượt mà, phản hồi 16ms).
-  - `H / M / L` $\rightarrow$ Nhảy nhanh con trỏ lên Đỉnh / Giữa / Đáy màn hình.
-  - `0 / $` $\rightarrow$ Nhảy nhanh con trỏ sang Cực trái / Cực phải màn hình.
-  - `Space` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay (Oneshot Click).
-  - `m` $\rightarrow$ Click chuột trái (duy trì mode để click liên tục hoặc double-click).
-  - `.` $\rightarrow$ Click chuột phải.
-  - `,` $\rightarrow$ Click chuột giữa.
-  - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode).
-  - `c` $\rightarrow$ Copy vùng chọn và thoát mode (`copy_and_exit`).
-  - `u / i` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
-  - `a` (giữ) $\rightarrow$ Tăng tốc độ rê chuột (Accelerator).
-  - `d` (giữ) $\rightarrow$ Giảm tốc độ rê chuột để căn chỉnh chính xác từng pixel (Decelerator).
-  - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
+  - **Điều hướng cơ bản & Gia tốc:**
+    - `h / j / k / l` $\rightarrow$ Rê chuột Trái / Xuống / Lên / Phải (phản hồi 10ms, tốc độ khởi điểm 700px/s).
+    - `a` (giữ) $\rightarrow$ Bứt tốc tối đa lên 4500px/s (gia tốc 9000px/s², lướt toàn màn hình trong 0.4s).
+    - `d` (giữ) $\rightarrow$ Giảm tốc độ xuống 40px/s để căn chỉnh chính xác từng pixel.
+  - **Nhảy biên & Nhảy tâm tức thì:**
+    - `H` (`Shift + h`) $\rightarrow$ Nhảy lên mép trên cùng màn hình (Top edge).
+    - `L` (`Shift + l`) $\rightarrow$ Nhảy xuống mép dưới cùng màn hình (Bottom edge).
+    - `0` $\rightarrow$ Nhảy sang mép trái cùng màn hình (Leftmost edge).
+    - `$` (`Shift + 4`) $\rightarrow$ Nhảy sang mép phải cùng màn hình (Rightmost edge).
+    - `M` (`Shift + m`) $\rightarrow$ Nhảy thẳng vào chính giữa màn hình (Center / Middle cả ngang lẫn dọc).
+  - **Nhảy mục tiêu trực tiếp trong phiên di chuyển (In-session Jump):**
+    - `f` $\rightarrow$ Kích hoạt ngay Hint Mode trong khi đang di chuyển mà không cần thoát mode!
+    - `g` $\rightarrow$ Kích hoạt ngay Grid Mode (lưới 2x2 `u i j k`).
+  - **Click chuột, Kéo thả & Bôi đen văn bản:**
+    - `Space` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay (Oneshot Click).
+    - `m` $\rightarrow$ Click chuột trái (duy trì mode để click liên tục hoặc double-click).
+    - `.` $\rightarrow$ Click chuột phải.
+    - `,` $\rightarrow$ Click chuột giữa.
+    - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode) để bôi đen văn bản. Khi bật `v`, có thể bấm tiếp `h/j/k/l` hoặc bấm `f` để nhảy thẳng đến điểm cuối vùng chọn!
+    - `c` $\rightarrow$ Copy vùng chọn và thoát mode (`copy_and_exit`).
+  - **Cuộn trang:**
+    - `u / i` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
+  - **Thoát mode:**
+    - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
 
 ### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
 - **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
