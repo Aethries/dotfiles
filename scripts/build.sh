@@ -71,6 +71,30 @@ sudo nixos-rebuild "$ACTION" \
 if [ "$ACTION" = "switch" ] || [ "$ACTION" = "test" ]; then
     info "Synchronizing editor configuration from the repository..."
     "$REPO_ROOT/scripts/sync-editors.sh"
+
+    info "Reconciling AI Gateways (9Router & OmniRoute)..."
+    SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
+    mkdir -p "$SYSTEMD_USER_DIR"
+    for srv in "$REPO_ROOT/resources/systemd/user/"*.service; do
+        if [ -f "$srv" ]; then
+            ln -sfn "$srv" "$SYSTEMD_USER_DIR/$(basename "$srv")"
+        fi
+    done
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user daemon-reload 2>/dev/null || true
+        if [ -x "$HOME/.local/bin/9router" ]; then
+            systemctl --user enable 9router.service 2>/dev/null || true
+            if systemctl --user is-active --quiet 9router.service 2>/dev/null; then
+                systemctl --user restart 9router.service 2>/dev/null || true
+            fi
+        fi
+        if [ -x "$HOME/.local/bin/omniroute" ]; then
+            systemctl --user enable omniroute.service 2>/dev/null || true
+            if systemctl --user is-active --quiet omniroute.service 2>/dev/null; then
+                systemctl --user restart omniroute.service 2>/dev/null || true
+            fi
+        fi
+    fi
 fi
 
 trap - ERR

@@ -371,12 +371,12 @@ if [ -n "${SUDO_USER:-}" ]; then
     chown -h "$SUDO_USER:" "$USER_HOME/.config/zellij" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.config/yazi" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.local/bin" 2>/dev/null || true
+    chown -R "$SUDO_USER:" "$USER_HOME/.local/lib/node_modules" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/starship.toml" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.zshrc" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/config" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/profile" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.config" 2>/dev/null || true
-    chown -R "$SUDO_USER:" "$USER_HOME/.local" 2>/dev/null || true
 fi
 
 success "Configuration files linked successfully!"
@@ -404,18 +404,18 @@ info "Initializing AI Gateways (9Router & OmniRoute)..."
 if [ -x "$REPO_ROOT/scripts/init-9router.sh" ]; then
     info "Setting up 9Router (port 20128)..."
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
-        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-9router.sh" || warn "9Router initialization failed or skipped during bootstrap."
+        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-9router.sh" || error "9Router initialization failed during bootstrap."
     else
-        "$REPO_ROOT/scripts/init-9router.sh" || warn "9Router initialization failed or skipped during bootstrap."
+        "$REPO_ROOT/scripts/init-9router.sh" || error "9Router initialization failed during bootstrap."
     fi
 fi
 
 if [ -x "$REPO_ROOT/scripts/init-omniroute.sh" ]; then
     info "Setting up OmniRoute (port 20129)..."
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
-        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-omniroute.sh" || warn "OmniRoute initialization failed or skipped during bootstrap."
+        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/init-omniroute.sh" || error "OmniRoute initialization failed during bootstrap."
     else
-        "$REPO_ROOT/scripts/init-omniroute.sh" || warn "OmniRoute initialization failed or skipped during bootstrap."
+        "$REPO_ROOT/scripts/init-omniroute.sh" || error "OmniRoute initialization failed during bootstrap."
     fi
 fi
 

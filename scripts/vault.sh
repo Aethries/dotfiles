@@ -129,20 +129,26 @@ EXCLUDE_PATTERNS=(
     "*/presence/*"
     "*/crashes/*"
     "*/webm_encoder"
-    "*/.9router/logs/*"
-    "*/.9router/runtime/*"
+    "*/.9router/logs"
+    ".9router/logs"
+    "*/.9router/runtime"
+    ".9router/runtime"
     "*/.9router/model-catalog-raw.json"
-    "*/.9router/**/*.pid"
-    "*/.omniroute/logs/*"
-    "*/.omniroute/call_logs/*"
-    "*/.omniroute/db_backups/*"
-    "*/.omniroute/mitm/*"
-    "*/.omniroute/supervisor/*"
-    "*/.omniroute/*.bak*"
-    "*/.omniroute/*.pre-*"
-    "*/.omniroute/**/*.pid"
-    "*/.omniroute/*.sock"
-    "*/.omniroute/**/*.sock"
+    ".9router/model-catalog-raw.json"
+    "*/.omniroute/logs"
+    ".omniroute/logs"
+    "*/.omniroute/call_logs"
+    ".omniroute/call_logs"
+    "*/.omniroute/db_backups"
+    ".omniroute/db_backups"
+    "*/.omniroute/mitm"
+    ".omniroute/mitm"
+    "*/.omniroute/supervisor"
+    ".omniroute/supervisor"
+    "*.bak*"
+    "*.pre-*"
+    "*.pid"
+    "*.sock"
 )
 
 ensure_user_owned() {
@@ -230,8 +236,19 @@ cmd_backup() {
     local restart_omniroute=false
     if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service 2>/dev/null; then
         info "Temporarily pausing omniroute service for consistent SQLite snapshot..."
-        systemctl --user stop omniroute.service 2>/dev/null || true
+        if ! systemctl --user stop omniroute.service; then
+            error "Failed to stop omniroute.service before backup. Aborting to avoid database snapshot corruption."
+        fi
         restart_omniroute=true
+    fi
+
+    if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+        warn "Active omniroute process detected; stopping..."
+        pkill -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
+        sleep 1
+        if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+            error "Could not terminate running omniroute process. Aborting backup to prevent database corruption."
+        fi
     fi
 
     # Checkpoint SQLite WAL if database exists and sqlite3 CLI is available
@@ -383,6 +400,14 @@ cmd_restore() {
     if [ -d "$USER_HOME/.local/share/keyrings" ]; then
         chmod 700 "$USER_HOME/.local/share/keyrings"
         chmod 600 "$USER_HOME/.local/share/keyrings"/* 2>/dev/null || true
+    fi
+
+    # OmniRoute directory & database permissions
+    if [ -d "$USER_HOME/.omniroute" ]; then
+        chmod 700 "$USER_HOME/.omniroute"
+        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true
     fi
 
     # Remove stale singleton lockfiles from Chrome, Slack, Discord, Antigravity, etc.

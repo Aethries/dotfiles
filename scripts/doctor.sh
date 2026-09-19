@@ -48,6 +48,14 @@ done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/resources/ai/gateway.env"
+fi
+OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
+OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
+ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
+
 echo -e "${BOLD}${CYAN}🏥 Dotfiles System Doctor${RESET}"
 echo "Running diagnostics on $(uname -s) ($(uname -m)) for user '$USER'..."
 
@@ -223,47 +231,47 @@ check_user_service "wireplumber" "WirePlumber Session Manager"
 check_user_service "9router" "9router Local AI Gateway"
 check_user_service "omniroute" "OmniRoute Local AI Gateway"
 
-# Verify AI Gateway Ports (9router on 20128, OmniRoute on 20129)
+# Verify AI Gateway Ports (9router on $ROUTER_9_PORT, OmniRoute on $OMNIROUTE_PORT)
 ROUTER_9_LISTEN=false
 OMNI_LISTEN_LOOPBACK=false
 OMNI_LISTEN_PUBLIC=false
 
 if command -v ss >/dev/null 2>&1; then
-    if ss -tlHn 'sport = :20128' 2>/dev/null | grep -q '20128'; then
+    if ss -tlHn "sport = :$ROUTER_9_PORT" 2>/dev/null | grep -q "$ROUTER_9_PORT"; then
         ROUTER_9_LISTEN=true
     fi
-    if ss -tlHn 'sport = :20129' 2>/dev/null | grep -E '0\.0\.0\.0:20129|\*:20129' >/dev/null; then
+    if ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E "0\.0\.0\.0:$OMNIROUTE_PORT|\*:$OMNIROUTE_PORT" >/dev/null; then
         OMNI_LISTEN_PUBLIC=true
-    elif ss -tlHn 'sport = :20129' 2>/dev/null | grep -E '127\.0\.0\.1:20129|\[::1\]:20129' >/dev/null; then
+    elif ss -tlHn "sport = :$OMNIROUTE_PORT" 2>/dev/null | grep -E "(127\.0\.0\.1|\[::1\]):$OMNIROUTE_PORT" >/dev/null; then
         OMNI_LISTEN_LOOPBACK=true
     fi
 elif command -v lsof >/dev/null 2>&1; then
-    if lsof -nP -i :20128 2>/dev/null | grep -q 'LISTEN'; then
+    if lsof -nP -i ":$ROUTER_9_PORT" 2>/dev/null | grep -q 'LISTEN'; then
         ROUTER_9_LISTEN=true
     fi
-    if lsof -nP -i :20129 2>/dev/null | grep -E '(\*|0\.0\.0\.0):20129' >/dev/null; then
+    if lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -E "(\*|0\.0\.0\.0):$OMNIROUTE_PORT" >/dev/null; then
         OMNI_LISTEN_PUBLIC=true
-    elif lsof -nP -i :20129 2>/dev/null | grep -E '(127\.0\.0\.1|\[::1\]):20129' >/dev/null; then
+    elif lsof -nP -i ":$OMNIROUTE_PORT" 2>/dev/null | grep -E "(127\.0\.0\.1|\[::1\]):$OMNIROUTE_PORT" >/dev/null; then
         OMNI_LISTEN_LOOPBACK=true
     fi
 fi
 
 if [ "$ROUTER_9_LISTEN" = true ]; then
-    ok "9router listening on port 20128"
+    ok "9router listening on port $ROUTER_9_PORT"
 else
-    warn "9router is NOT listening on port 20128 (run 'init-9router' to start)"
+    fail "9router is NOT listening on port $ROUTER_9_PORT (run 'init-9router' to start)"
 fi
 
 if [ "$OMNI_LISTEN_PUBLIC" = true ]; then
-    fail "OmniRoute port 20129 is exposed to 0.0.0.0 (insecure, not bound to loopback 127.0.0.1!)"
+    fail "OmniRoute port $OMNIROUTE_PORT is exposed to 0.0.0.0 (insecure, not bound to loopback $OMNIROUTE_HOST!)"
 elif [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
-    ok "OmniRoute listening on dedicated loopback port 127.0.0.1:20129"
+    ok "OmniRoute listening on dedicated loopback port $OMNIROUTE_HOST:$OMNIROUTE_PORT"
 else
-    warn "OmniRoute is NOT listening on port 20129 (run 'init-omniroute' to start)"
+    fail "OmniRoute is NOT listening on port $OMNIROUTE_PORT (run 'init-omniroute' to start)"
 fi
 
 if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
-    ok "AI Gateways coexistence verified (port 20128: 9router, port 20129: OmniRoute loopback)"
+    ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback)"
 fi
 
 # ------------------------------------------------------------------------------

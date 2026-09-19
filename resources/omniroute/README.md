@@ -17,11 +17,12 @@ OmniRoute coexists with **9Router** in a dual-gateway architecture:
 
 ## Key Files & Structure
 
+* `resources/ai/gateway.env`: Single source of truth for ports (`20128`, `20129`), loopback host (`127.0.0.1`), and pinned versions.
 * `resources/systemd/user/omniroute.service`: Declarative systemd user service binding OmniRoute strictly to `127.0.0.1:20129`.
 * `scripts/init-omniroute.sh`: Automated installer, pinned package manager (`omniroute@3.8.50`), loopback port configuration, key desync protection, and service bootstrapper.
-* `scripts/sync-omniroute.sh`: Declarative non-sensitive configuration bundle export/import and vault synchronization.
+* `scripts/sync-omniroute.sh`: Synchronizes authoritative OmniRoute state (SQLite database, providers, accounts, and `.env`) via encrypted `vault.sh`.
 * `resources/omniroute/.gitignore`: Excludes `bundle.json`, `*.json`, `*.sqlite*`, and `*.env` to guarantee sensitive credentials are never committed.
-* `tests/ai/omniroute_test.sh`: Integration, security, and port isolation test suite wired directly to `scripts/check.sh`.
+* `tests/ai/omniroute_test.sh`: Dynamic integration, security, and port isolation test suite wired directly to `scripts/check.sh`.
 * `~/.omniroute/`:
   * `.env`: Contains `PORT=20129`, `HOST=127.0.0.1`, `OMNIROUTE_SERVER_HOST=127.0.0.1`, `API_HOST=127.0.0.1`, `LIVE_WS_HOST=127.0.0.1`, and `STORAGE_ENCRYPTION_KEY`.
   * `storage.sqlite`: Local encrypted database containing all GUI customizations, accounts, and provider configurations (authoritative store synced safely via `vault backup`).
@@ -32,7 +33,7 @@ OmniRoute coexists with **9Router** in a dual-gateway architecture:
 
 OmniRoute state follows a strict security architecture:
 1. **Authoritative State (`vault.sh`)**: All credentials, provider accounts, encrypted SQLite records, and master encryption keys live in `~/.omniroute/` and are encrypted into `secrets.vault` using `vault backup`. During backup, the system pauses the service and checkpoints the SQLite WAL to ensure atomic, non-corrupted snapshots.
-2. **Declarative State (`bundle.json`)**: `sync-omniroute export` exports non-sensitive declarative policies, combos, and skills. Raw provider tokens and credentials are intentionally omitted, and the bundle is gitignored.
+2. **Synchronize CLI (`sync-omniroute`)**: `sync-omniroute export` and `sync-omniroute import` invoke `vault.sh` to safely backup and restore complete configuration state without plaintext bundle leakage.
 
 ---
 
@@ -57,13 +58,10 @@ omni logs       # or journalctl --user -u omniroute -f
 ### 3. Sync Settings & Providers
 ```bash
 # Sync entire database, provider accounts, and tokens into encrypted vault (authoritative)
-vault backup
+sync-omniroute export   # or: vault backup
 
 # Restore database and encryption keys on a fresh system
-vault restore
-
-# (Optional) Export non-sensitive declarative bundle
-sync-omniroute export
+sync-omniroute import   # or: vault restore
 ```
 
 ### 4. Diagnostics & Testing

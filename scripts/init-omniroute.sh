@@ -29,8 +29,15 @@ error() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OMNIROUTE_PORT="20129"
-OMNIROUTE_PINNED_VERSION="3.8.50"
+
+if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/resources/ai/gateway.env"
+fi
+
+OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
+OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
+OMNIROUTE_PINNED_VERSION="${OMNIROUTE_PINNED_VERSION:-3.8.50}"
 
 FORCE=false
 while [ $# -gt 0 ]; do
@@ -67,7 +74,9 @@ ensure_user_owned() {
     fi
 }
 
-ensure_user_owned "$HOME/.local"
+# Scope ownership repairs specifically to avoid excessive blast radius across ~/.local
+ensure_user_owned "$HOME/.local/bin"
+ensure_user_owned "$HOME/.local/lib/node_modules"
 ensure_user_owned "$HOME/.omniroute"
 
 echo -e "${BOLD}=========================================${NC}"
@@ -82,17 +91,31 @@ if command -v fnm >/dev/null 2>&1; then
     eval "$(fnm env --shell bash)"
 fi
 
-if ! command -v npm >/dev/null 2>&1 || ! command -v node >/dev/null 2>&1; then
+validate_node_version() {
+    command -v node >/dev/null 2>&1 || return 1
+    local major
+    major="$(node -e 'console.log(process.versions.node.split(".")[0])' 2>/dev/null || echo '0')"
+    if [ "$major" -lt 22 ] || [ "$major" -eq 23 ]; then
+        return 1
+    fi
+    return 0
+}
+
+if ! command -v npm >/dev/null 2>&1 || ! validate_node_version; then
     if command -v fnm >/dev/null 2>&1; then
-        info "Node.js/npm not active; installing and setting up LTS via fnm..."
-        fnm install --lts
-        fnm default lts-latest 2>/dev/null || true
+        info "Compatible Node.js not active; installing and setting up LTS via fnm..."
+        fnm install --lts 2>/dev/null || fnm install 24
+        fnm default lts-latest 2>/dev/null || fnm default 24 2>/dev/null || true
         eval "$(fnm env --shell bash)"
     fi
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
     error "npm not found! Please ensure Node.js / fnm is installed."
+fi
+
+if ! validate_node_version; then
+    error "Node.js version $(node -v 2>/dev/null || echo 'unknown') is incompatible with OmniRoute (requires Node >=22.22.2 <23 or >=24 <27)."
 fi
 
 # NixOS compatibility: Ensure npm global prefix points to user home ($HOME/.local)
@@ -125,6 +148,10 @@ for dir in "${USER_DIRS[@]}"; do
         success "Directory exists: $dir"
     fi
 done
+
+# Secure directory permissions (0700) to protect database and provider secrets
+chmod 700 "$HOME/.omniroute"
+chmod 700 "$HOME/.omniroute/logs" 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
 # 3. Configure OmniRoute Environment (.env) & Dedicated Port 20129
@@ -170,11 +197,13 @@ set_or_replace_env() {
 
 set_or_replace_env "PORT" "$OMNIROUTE_PORT"
 set_or_replace_env "DASHBOARD_PORT" "$OMNIROUTE_PORT"
-set_or_replace_env "HOST" "127.0.0.1"
-set_or_replace_env "OMNIROUTE_SERVER_HOST" "127.0.0.1"
-set_or_replace_env "API_HOST" "127.0.0.1"
-set_or_replace_env "LIVE_WS_HOST" "127.0.0.1"
-success "Dedicated loopback host (127.0.0.1) and port ($OMNIROUTE_PORT) configured in $ENV_FILE"
+set_or_replace_env "HOST" "$OMNIROUTE_HOST"
+set_or_replace_env "OMNIROUTE_SERVER_HOST" "$OMNIROUTE_HOST"
+set_or_replace_env "API_HOST" "$OMNIROUTE_HOST"
+set_or_replace_env "LIVE_WS_HOST" "$OMNIROUTE_HOST"
+chmod 600 "$ENV_FILE"
+[ -f "$DB_FILE" ] && chmod 600 "$DB_FILE"
+success "Dedicated loopback host ($OMNIROUTE_HOST) and port ($OMNIROUTE_PORT) configured in $ENV_FILE"
 
 # ------------------------------------------------------------------------------
 # 4. Install & Pin OmniRoute via npm
