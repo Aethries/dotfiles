@@ -4,8 +4,8 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
-shellcheck scripts/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh
+bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
@@ -26,6 +26,7 @@ cmp resources/zellij/layouts/default.kdl resources/zellij/layouts/dotfiles.kdl
 # Run isolated unit test suites
 bash tests/vault/vault_test.sh >/dev/null
 bash tests/zellij/launcher_test.sh >/dev/null
+bash tests/ai/omniroute_test.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)
 nixfmt --check "${nix_files[@]}"

@@ -93,6 +93,7 @@ CANDIDATE_PATHS=(
     ".antigravity-ide"
     ".antigravity"
     ".9router"
+    ".omniroute"
     ".codex"
     ".config/ChatGPT"
 )
@@ -128,10 +129,26 @@ EXCLUDE_PATTERNS=(
     "*/presence/*"
     "*/crashes/*"
     "*/webm_encoder"
-    "*/.9router/logs/*"
-    "*/.9router/runtime/*"
+    "*/.9router/logs"
+    ".9router/logs"
+    "*/.9router/runtime"
+    ".9router/runtime"
     "*/.9router/model-catalog-raw.json"
-    "*/.9router/**/*.pid"
+    ".9router/model-catalog-raw.json"
+    "*/.omniroute/logs"
+    ".omniroute/logs"
+    "*/.omniroute/call_logs"
+    ".omniroute/call_logs"
+    "*/.omniroute/db_backups"
+    ".omniroute/db_backups"
+    "*/.omniroute/mitm"
+    ".omniroute/mitm"
+    "*/.omniroute/supervisor"
+    ".omniroute/supervisor"
+    "*.bak*"
+    "*.pre-*"
+    "*.pid"
+    "*.sock"
 )
 
 ensure_user_owned() {
@@ -145,13 +162,14 @@ ensure_user_owned() {
 }
 
 prepare_restore_permissions() {
+    local scope="${1:-all}"
     local path
 
-    # These are user-owned trees. Repair them before dropping restored files into
-    # place, including parent directories that are not themselves vault entries.
-    for path in "$USER_HOME/.config" "$USER_HOME/.local"; do
-        ensure_user_owned "$path"
-    done
+    # Chỉ kiểm tra quyền sở hữu cho các thư mục nằm trong scope tương ứng
+    if [ "$scope" = "omniroute" ]; then
+        ensure_user_owned "$USER_HOME/.omniroute"
+        return 0
+    fi
 
     for path in "${CANDIDATE_PATHS[@]}"; do
         ensure_user_owned "$USER_HOME/$path"
@@ -164,6 +182,7 @@ prepare_restore_permissions() {
 RESTORE_TMP=""
 RESTORE_RESTART_KEYRING=false
 RESTORE_RESTART_9ROUTER=false
+RESTORE_RESTART_OMNIROUTE=false
 
 finish_restore_runtime() {
     local status="$1"
@@ -186,17 +205,73 @@ finish_restore_runtime() {
         fi
     fi
 
+    if [ "$RESTORE_RESTART_OMNIROUTE" = true ] && command -v systemctl >/dev/null 2>&1; then
+        info "Restarting omniroute service..."
+        if ! systemctl --user start omniroute.service; then
+            warn "omniroute could not be restarted. Run 'init-omniroute' after this restore."
+        fi
+    fi
+
     return "$status"
 }
 
-cmd_backup() {
-    local out_file="${1:-$REPO_ROOT/secrets.vault}"
+default_vault_for_scope() {
+    local scope="$1"
 
-    info "Starting Secret Vault backup for user '$TARGET_USER'..."
+    case "$scope" in
+        all)
+            printf '%s\n' "$REPO_ROOT/secrets.vault"
+            ;;
+        omniroute)
+            printf '%s\n' "$REPO_ROOT/secrets.omniroute.vault"
+            ;;
+        *)
+            error "Unknown vault scope: $scope"
+            ;;
+    esac
+}
+
+cmd_backup() {
+    local scope="all"
+    local out_file=""
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --scope)
+                scope="${2:-}"
+                shift 2
+                ;;
+            *)
+                if [ -z "$out_file" ]; then
+                    out_file="$1"
+                else
+                    error "Unexpected argument for backup: $1"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    out_file="${out_file:-$(default_vault_for_scope "$scope")}"
+
+    local candidate_paths=()
+    case "$scope" in
+        all)
+            candidate_paths=("${CANDIDATE_PATHS[@]}")
+            ;;
+        omniroute)
+            candidate_paths=(".omniroute")
+            ;;
+        *)
+            error "Unknown vault scope: $scope (valid: all, omniroute)"
+            ;;
+    esac
+
+    info "Starting Secret Vault backup (scope: $scope) for user '$TARGET_USER'..."
 
     # Find existing paths
     local existing_paths=()
-    for rel_path in "${CANDIDATE_PATHS[@]}"; do
+    for rel_path in "${candidate_paths[@]}"; do
         if [ -e "$USER_HOME/$rel_path" ]; then
             existing_paths+=("$rel_path")
             echo "  + Found: $rel_path"
@@ -204,7 +279,44 @@ cmd_backup() {
     done
 
     if [ ${#existing_paths[@]} -eq 0 ]; then
-        error "No application profiles or secrets found in $USER_HOME."
+        error "No application profiles or secrets found in $USER_HOME for scope: $scope."
+    fi
+
+    # Đặt trap EXIT trước khi dừng service để bảo đảm omniroute luôn được khởi động lại nếu backup thất bại
+    local restart_omniroute=false
+    finish_backup_runtime() {
+        local status=$?
+        if [ "$restart_omniroute" = true ] && command -v systemctl >/dev/null 2>&1; then
+            info "Resuming omniroute service..."
+            systemctl --user start omniroute.service 2>/dev/null || true
+        fi
+        return "$status"
+    }
+    trap finish_backup_runtime EXIT
+
+    # Consistent database snapshot: pause active services writing SQLite WAL
+    if [ "$scope" = "all" ] || [ "$scope" = "omniroute" ]; then
+        if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service 2>/dev/null; then
+            info "Temporarily pausing omniroute service for consistent SQLite snapshot..."
+            if ! systemctl --user stop omniroute.service; then
+                error "Failed to stop omniroute.service before backup. Aborting to avoid database snapshot corruption."
+            fi
+            restart_omniroute=true
+        fi
+
+        if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+            warn "Active omniroute process detected; stopping..."
+            pkill -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
+            sleep 1
+            if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+                error "Could not terminate running omniroute process. Aborting backup to prevent database corruption."
+            fi
+        fi
+
+        # Checkpoint SQLite WAL if database exists and sqlite3 CLI is available
+        if [ -f "$USER_HOME/.omniroute/storage.sqlite" ] && command -v sqlite3 >/dev/null 2>&1; then
+            sqlite3 "$USER_HOME/.omniroute/storage.sqlite" "PRAGMA wal_checkpoint(TRUNCATE);" 2>/dev/null || true
+        fi
     fi
 
     echo
@@ -242,22 +354,105 @@ cmd_backup() {
     local size
     size="$(du -h "$out_file" | cut -f1)"
 
+    finish_backup_runtime
+    trap - EXIT
+
     echo
-    success "Vault created successfully: $out_file ($size)"
+    success "Vault created successfully (scope: $scope): $out_file ($size)"
 }
 
 cmd_restore() {
-    local in_file="${1:-$REPO_ROOT/secrets.vault}"
+    local scope="all"
+    local in_file=""
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --scope)
+                scope="${2:-}"
+                shift 2
+                ;;
+            *)
+                if [ -z "$in_file" ]; then
+                    in_file="$1"
+                else
+                    error "Unexpected argument for restore: $1"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    in_file="${in_file:-$(default_vault_for_scope "$scope")}"
 
     if [ ! -f "$in_file" ]; then
         error "Vault file not found: $in_file"
     fi
 
-    info "Restoring Secret Vault from: $in_file..."
+    info "Restoring Secret Vault (scope: $scope) from: $in_file..."
     echo "Target home: $USER_HOME"
     echo
 
-    prepare_restore_permissions
+    prepare_restore_permissions "$scope"
+
+    # Đặt trap EXIT trước khi dừng bất kỳ service hoặc tiến trình nào
+    RESTORE_RESTART_KEYRING=false
+    RESTORE_RESTART_9ROUTER=false
+    RESTORE_RESTART_OMNIROUTE=false
+    trap 'finish_restore_runtime $?' EXIT
+
+    if [ "$scope" = "omniroute" ]; then
+        # Không được tắt các ứng dụng khác (Chrome, Slack, 9router...) khi restore với scope omniroute để tránh làm mất phiên làm việc không liên quan
+        if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service; then
+            RESTORE_RESTART_OMNIROUTE=true
+            if ! systemctl --user stop omniroute.service; then
+                error "Failed to stop omniroute.service before restore."
+            fi
+        elif pgrep -u "$UID" -f '[o]mniroute' >/dev/null 2>&1; then
+            RESTORE_RESTART_OMNIROUTE=true
+        fi
+
+        # Không được restore SQLite khi tiến trình OmniRoute vẫn còn chạy
+        # vì process cũ có thể tiếp tục ghi vào database đã được thay thế.
+        if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+            warn "Active omniroute process detected; stopping..."
+            pkill -TERM -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
+            sleep 1
+            if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
+                error "Could not stop OmniRoute before restore. Refusing unsafe database replacement."
+            fi
+        fi
+
+        RESTORE_TMP="$(mktemp -d)"
+
+        if ! decrypt_vault "$in_file" \
+            | zstd -d \
+            | tar --no-same-owner --no-same-permissions -C "$RESTORE_TMP" -xf - .omniroute; then
+            echo
+            error "Failed to decrypt or extract .omniroute from vault! Please check your Master Password or vault contents."
+        fi
+
+        if [ ! -d "$RESTORE_TMP/.omniroute" ]; then
+            error "Vault archive does not contain an .omniroute profile."
+        fi
+
+        mkdir -p "$USER_HOME/.omniroute"
+        cp -a --remove-destination --no-preserve=ownership "$RESTORE_TMP/.omniroute"/. "$USER_HOME/.omniroute"/
+        rm -rf "$RESTORE_TMP"
+        RESTORE_TMP=""
+
+        info "Securing OmniRoute permissions..."
+        chmod 700 "$USER_HOME/.omniroute"
+        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true
+
+        echo
+        success "OmniRoute Secret Vault restored successfully!"
+
+        finish_restore_runtime 0
+        trap - EXIT
+        return 0
+    fi
 
     # Preserve whether user-session services need to come back after the copy.
     if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet 9router.service; then
@@ -267,6 +462,13 @@ cmd_restore() {
         RESTORE_RESTART_9ROUTER=true
     fi
 
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet omniroute.service; then
+        RESTORE_RESTART_OMNIROUTE=true
+        systemctl --user stop omniroute.service
+    elif pgrep -u "$UID" -f '[o]mniroute' >/dev/null 2>&1; then
+        RESTORE_RESTART_OMNIROUTE=true
+    fi
+
     if pgrep -u "$UID" -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
         RESTORE_RESTART_KEYRING=true
     fi
@@ -274,7 +476,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js" "omniroute")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -335,6 +537,14 @@ cmd_restore() {
         chmod 600 "$USER_HOME/.local/share/keyrings"/* 2>/dev/null || true
     fi
 
+    # OmniRoute directory & database permissions
+    if [ -d "$USER_HOME/.omniroute" ]; then
+        chmod 700 "$USER_HOME/.omniroute"
+        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true
+    fi
+
     # Remove stale singleton lockfiles from Chrome, Slack, Discord, Antigravity, etc.
     find "$USER_HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true
     rm -f "$USER_HOME/.antigravity-ide/code.lock" 2>/dev/null || true
@@ -362,12 +572,12 @@ cmd_clean() {
                 force=true
                 shift
                 ;;
-            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|router|phone|jira)
+            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|router|omniroute|phone|jira)
                 categories+=("$1")
                 shift
                 ;;
             *)
-                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, all)"
+                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, router, omniroute, all)"
                 ;;
         esac
     done
@@ -384,6 +594,7 @@ cmd_clean() {
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
         ["router"]=".9router"
+        ["omniroute"]=".omniroute"
         ["phone"]=".config/kdeconnect"
     )
 
@@ -395,11 +606,11 @@ cmd_clean() {
         read -r -p "Enter choice [1-3] (default 1): " choice
         case "${choice:-1}" in
             1) categories=("chrome" "telegram" "git") ;;
-            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "phone") ;;
+            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone") ;;
             *) echo "Operation cancelled."; return 0 ;;
         esac
     elif [[ " ${categories[*]} " =~ " all " ]]; then
-        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "phone")
+        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone")
     fi
 
     local target_paths=()
@@ -496,10 +707,10 @@ usage() {
     echo "Usage: $0 {backup|restore|clean|list} [args]"
     echo
     echo "Commands:"
-    echo "  backup   [file]   Encrypt and bundle to local vault file (default: secrets.vault)"
-    echo "  restore  [file]   Decrypt and unpack local vault file"
-    echo "  list     [file]   List contents of encrypted vault"
-    echo "  clean    [args]   Wipe local auth sessions to test vault restore"
+    echo "  backup   [--scope scope] [file]   Encrypt and bundle to local vault file (default: secrets.vault or secrets.omniroute.vault)"
+    echo "  restore  [--scope scope] [file]   Decrypt and unpack local vault file (default: secrets.vault or secrets.omniroute.vault)"
+    echo "  list     [file]                   List contents of encrypted vault"
+    echo "  clean    [args]                   Wipe local auth sessions to test vault restore"
     echo
     exit 1
 }
@@ -507,11 +718,11 @@ usage() {
 case "${1:-}" in
     backup|export|save)
         shift
-        cmd_backup "${1:-}"
+        cmd_backup "$@"
         ;;
     restore|import|load)
         shift
-        cmd_restore "${1:-}"
+        cmd_restore "$@"
         ;;
     list|ls)
         shift

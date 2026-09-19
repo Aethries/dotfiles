@@ -246,10 +246,13 @@ function screenshot() {
 alias shot="screenshot"
 
 function doctor() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/doctor.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/doctor.sh" ]; then
     "${DOTFILES_DIR}/scripts/doctor.sh" "$@"
-  else
+  elif command -v doctor >/dev/null 2>&1; then
     command doctor "$@"
+  else
+    echo "doctor not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
@@ -259,10 +262,13 @@ if [ -f "$HOME/.9router/mitm/rootCA.crt" ]; then
 fi
 
 function init-9router() {
-  if [ -f "${DOTFILES_DIR:-}/scripts/init-9router.sh" ]; then
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/init-9router.sh" ]; then
     "${DOTFILES_DIR}/scripts/init-9router.sh" "$@"
+  elif command -v init-9router >/dev/null 2>&1; then
+    command init-9router "$@"
   else
-    echo "init-9router script not found in ${DOTFILES_DIR:-}/scripts"
+    echo "init-9router not found in dotfiles or PATH" >&2
+    return 1
   fi
 }
 
@@ -307,6 +313,58 @@ function 9router() {
       ;;
     *)
       command 9router "$@"
+      ;;
+  esac
+}
+
+function init-omniroute() {
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/init-omniroute.sh" ]; then
+    "${DOTFILES_DIR}/scripts/init-omniroute.sh" "$@"
+  elif command -v init-omniroute >/dev/null 2>&1; then
+    command init-omniroute "$@"
+  else
+    echo "init-omniroute not found in dotfiles or PATH" >&2
+    return 1
+  fi
+}
+
+function sync-omniroute() {
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/sync-omniroute.sh" ]; then
+    "${DOTFILES_DIR}/scripts/sync-omniroute.sh" "$@"
+  elif command -v sync-omniroute >/dev/null 2>&1; then
+    command sync-omniroute "$@"
+  else
+    echo "sync-omniroute not found in dotfiles or PATH" >&2
+    return 1
+  fi
+}
+
+function omni() {
+  case "${1:-}" in
+    status)
+      systemctl --user status omniroute
+      ;;
+    restart)
+      systemctl --user restart omniroute && echo "✓ omniroute restarted (port 20129)"
+      ;;
+    stop)
+      systemctl --user stop omniroute && echo "✓ omniroute stopped"
+      ;;
+    start)
+      systemctl --user start omniroute && echo "✓ omniroute started (port 20129)"
+      ;;
+    logs)
+      journalctl --user -u omniroute -f
+      ;;
+    sync)
+      sync-omniroute "${2:-status}"
+      ;;
+    *)
+      if command -v omniroute >/dev/null 2>&1; then
+        command omniroute "$@"
+      else
+        echo "omniroute CLI not found. Run init-omniroute first."
+      fi
       ;;
   esac
 }

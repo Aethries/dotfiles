@@ -347,6 +347,9 @@ safe_link "$REPO_ROOT/scripts/tunnel.sh" "$USER_HOME/.local/bin/tunnel"
 safe_link "$REPO_ROOT/scripts/cleanup.sh" "$USER_HOME/.local/bin/cleanup"
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9router"
 safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
+safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
+safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
+safe_link "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$USER_HOME/.local/bin/reconcile-ai-gateways"
 
 # Configure user-level npm global prefix to prevent writing into read-only /nix/store
 if command -v npm >/dev/null 2>&1; then
@@ -369,12 +372,12 @@ if [ -n "${SUDO_USER:-}" ]; then
     chown -h "$SUDO_USER:" "$USER_HOME/.config/zellij" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.config/yazi" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.local/bin" 2>/dev/null || true
+    chown -R "$SUDO_USER:" "$USER_HOME/.local/lib/node_modules" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/starship.toml" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.zshrc" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/config" 2>/dev/null || true
     chown -h "$SUDO_USER:" "$USER_HOME/.config/fcitx5/profile" 2>/dev/null || true
     chown -R "$SUDO_USER:" "$USER_HOME/.config" 2>/dev/null || true
-    chown -R "$SUDO_USER:" "$USER_HOME/.local" 2>/dev/null || true
 fi
 
 success "Configuration files linked successfully!"
@@ -394,6 +397,16 @@ success "NixOS configuration applied successfully!"
 info "Synchronizing editor configuration and extensions..."
 "$REPO_ROOT/scripts/sync-editors.sh"
 
+# ------------------------------------------------------------
+# AI Gateways Reconciliation (9Router & OmniRoute)
+# ------------------------------------------------------------
+info "Reconciling AI Gateways (9Router & OmniRoute)..."
+
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+    sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateway reconciliation failed during bootstrap."
+else
+    "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateway reconciliation failed during bootstrap."
+fi
 
 # ------------------------------------------------------------
 # Done

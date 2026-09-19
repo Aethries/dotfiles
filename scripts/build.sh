@@ -71,6 +71,9 @@ sudo nixos-rebuild "$ACTION" \
 if [ "$ACTION" = "switch" ] || [ "$ACTION" = "test" ]; then
     info "Synchronizing editor configuration from the repository..."
     "$REPO_ROOT/scripts/sync-editors.sh"
+
+    info "Reconciling AI Gateways (9Router & OmniRoute)..."
+    "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateways reconciliation failed."
 fi
 
 trap - ERR

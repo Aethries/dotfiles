@@ -48,6 +48,18 @@ done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+if [ -f "$REPO_ROOT/resources/ai/gateway.env" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/resources/ai/gateway.env"
+fi
+if [ -f "$REPO_ROOT/scripts/lib/ai-gateway-common.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/ai-gateway-common.sh"
+fi
+OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
+OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
+ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
+
 echo -e "${BOLD}${CYAN}🏥 Dotfiles System Doctor${RESET}"
 echo "Running diagnostics on $(uname -s) ($(uname -m)) for user '$USER'..."
 
@@ -123,6 +135,9 @@ check_link "$HOME/.local/bin/tunnel" "CLI: tunnel"
 check_link "$HOME/.local/bin/cleanup" "CLI: cleanup"
 check_link "$HOME/.local/bin/init-9router" "CLI: init-9router"
 check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
+check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
+check_link "$HOME/.local/bin/sync-omniroute" "CLI: sync-omniroute"
+check_link "$HOME/.local/bin/reconcile-ai-gateways" "CLI: reconcile-ai-gateways"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
 else
@@ -190,9 +205,9 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 4. Services & Daemons
+# 4. Systemd Services
 # ------------------------------------------------------------------------------
-section "Services & Daemons"
+section "Systemd Services"
 
 check_service() {
     local svc="$1"
@@ -214,11 +229,55 @@ check_user_service() {
     fi
 }
 
+check_required_user_service() {
+    local svc="$1"
+    local name="$2"
+    if systemctl --user is-active --quiet "$svc" 2>/dev/null; then
+        ok "$name user service is active"
+    else
+        fail "$name user service is NOT active (status: $(systemctl --user is-active "$svc" 2>/dev/null || echo "inactive"))"
+    fi
+}
+
 check_service "docker" "Docker Daemon"
 check_service "bluetooth" "Bluetooth Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
-check_user_service "9router" "9router Local AI Gateway"
+check_required_user_service "9router" "9router Local AI Gateway"
+check_required_user_service "omniroute" "OmniRoute Local AI Gateway"
+
+# Verify AI Gateway Ports (9router on $ROUTER_9_PORT, OmniRoute on $OMNIROUTE_PORT)
+ROUTER_9_LISTEN=false
+OMNI_LISTEN_LOOPBACK=false
+OMNI_LISTEN_PUBLIC=false
+
+if is_port_listening "$ROUTER_9_PORT"; then
+    ROUTER_9_LISTEN=true
+fi
+
+if is_port_loopback_only "$OMNIROUTE_PORT"; then
+    OMNI_LISTEN_LOOPBACK=true
+elif is_port_listening "$OMNIROUTE_PORT"; then
+    OMNI_LISTEN_PUBLIC=true
+fi
+
+if [ "$ROUTER_9_LISTEN" = true ]; then
+    ok "9router listening on port $ROUTER_9_PORT"
+else
+    fail "9router is NOT listening on port $ROUTER_9_PORT (run 'init-9router' to start)"
+fi
+
+if [ "$OMNI_LISTEN_PUBLIC" = true ]; then
+    fail "OmniRoute port $OMNIROUTE_PORT is exposed to 0.0.0.0 or non-loopback interface (insecure, not bound strictly to loopback $OMNIROUTE_HOST!)"
+elif [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
+    ok "OmniRoute listening on dedicated loopback port $OMNIROUTE_HOST:$OMNIROUTE_PORT"
+else
+    fail "OmniRoute is NOT listening on port $OMNIROUTE_PORT (run 'init-omniroute' to start)"
+fi
+
+if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
+    ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback)"
+fi
 
 # ------------------------------------------------------------------------------
 # 5. Disk Space & Store Health
