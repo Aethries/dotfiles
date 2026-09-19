@@ -138,6 +138,7 @@ check_link "$HOME/.local/bin/9router-init" "CLI: 9router-init"
 check_link "$HOME/.local/bin/init-omniroute" "CLI: init-omniroute"
 check_link "$HOME/.local/bin/sync-omniroute" "CLI: sync-omniroute"
 check_link "$HOME/.local/bin/reconcile-ai-gateways" "CLI: reconcile-ai-gateways"
+check_link "$HOME/.local/bin/kanata-recovery" "CLI: kanata-recovery"
 if [ -e "$HOME/.local/bin/lark" ] || command -v lark >/dev/null 2>&1; then
     ok "CLI: lark ($(command -v lark 2>/dev/null || echo "$HOME/.local/bin/lark"))"
 else
@@ -193,6 +194,24 @@ else
     warn "Niri binary not found in PATH"
 fi
 
+if [ -f "$REPO_ROOT/resources/kanata/kanata.kbd" ]; then
+    if command -v kanata >/dev/null 2>&1; then
+        if kanata --check -c "$REPO_ROOT/resources/kanata/kanata.kbd" >/dev/null 2>&1; then
+            ok "Kanata configuration syntax is valid (resources/kanata/kanata.kbd)"
+        else
+            fail "Kanata configuration has syntax errors! Run 'kanata-recovery check'"
+        fi
+    else
+        ok "Kanata configuration present (resources/kanata/kanata.kbd)"
+    fi
+fi
+
+if [ -e "/dev/uinput" ]; then
+    ok "Uinput kernel interface active (/dev/uinput)"
+else
+    warn "/dev/uinput is missing (uinput kernel module may not be loaded)"
+fi
+
 if command -v vainfo >/dev/null 2>&1; then
     if vainfo 2>&1 | grep -q "VAProfile"; then
         DRIVER=$(vainfo 2>&1 | grep "Driver version:" | sed 's/.*Driver version: //' || echo "Active")
@@ -241,6 +260,7 @@ check_required_user_service() {
 
 check_service "docker" "Docker Daemon"
 check_service "bluetooth" "Bluetooth Daemon"
+check_service "kanata-internal" "Kanata Keyboard Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
 check_required_user_service "9router" "9router Local AI Gateway"

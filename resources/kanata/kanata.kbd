@@ -1,0 +1,13 @@
+;; ==============================================================================
+;; Kanata Configuration: Default Passthrough (No Custom Remappings)
+;; Retains default keyboard behavior 100% transparently.
+;; Custom keymap implementation is deferred to dedicated issue.
+;; ==============================================================================
+
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc)
+
+(deflayer default)

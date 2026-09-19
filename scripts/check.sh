@@ -4,8 +4,8 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
-shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh
+bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
@@ -28,6 +28,7 @@ bash tests/vault/vault_test.sh >/dev/null
 bash tests/zellij/launcher_test.sh >/dev/null
 bash tests/ai/omniroute_test.sh >/dev/null
 bash tests/ai/skills_test.sh >/dev/null
+bash tests/kanata/recovery_test.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)
 nixfmt --check "${nix_files[@]}"
@@ -75,6 +76,10 @@ if command -v zellij >/dev/null; then
     ZELLIJ_CONFIG_DIR="$PWD/resources/zellij" zellij setup --dump-layout dotfiles >/dev/null
     ZELLIJ_CONFIG_DIR="$PWD/resources/zellij" zellij setup --dump-layout compact >/dev/null
     ZELLIJ_CONFIG_DIR="$PWD/resources/zellij" zellij setup --dump-layout work >/dev/null
+fi
+if command -v kanata >/dev/null; then
+    kanata --check -c resources/kanata/kanata.kbd >/dev/null
+    kanata --check -c resources/kanata/fallback.kbd >/dev/null
 fi
 
 echo "All checks passed."

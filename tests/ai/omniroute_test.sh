@@ -514,15 +514,20 @@ log_ok "Scoped restore refused to replace database when active writer process pe
 
 # Test K: Failure during backup must trigger EXIT cleanup and restart omniroute.service
 echo "active" > "$MOCK_STATE/unit_omniroute.service"
-FAIL_VAULT="/nonexistent_dir_cannot_write/fail.vault"
+UNWRITABLE_DIR="$SANDBOX_DIR/unwritable_fail_dir"
+mkdir -p "$UNWRITABLE_DIR"
+chmod 0500 "$UNWRITABLE_DIR"
+FAIL_VAULT="$UNWRITABLE_DIR/fail.vault"
 
 if HOME="$VAULT_TEST_HOME" \
    PATH="$MOCK_BIN:$ORIGINAL_PATH" \
    MOCK_STATE_DIR="$MOCK_STATE" \
    MOCK_LOG_FILE="$MOCK_LOG" \
    "$REPO_ROOT/scripts/vault.sh" backup --scope omniroute "$FAIL_VAULT" >/dev/null 2>&1; then
+    chmod 0700 "$UNWRITABLE_DIR"
     log_fail "Vault backup unexpectedly succeeded with unwritable path!"
 fi
+chmod 0700 "$UNWRITABLE_DIR"
 
 # Verify systemctl --user start omniroute.service was invoked in finish_backup_runtime
 grep -qE "systemctl.*start.*omniroute\.service" "$MOCK_LOG" || log_fail "omniroute.service was not restarted after backup failure!"

@@ -286,7 +286,7 @@ cmd_backup() {
     local restart_omniroute=false
     finish_backup_runtime() {
         local status=$?
-        if [ "$restart_omniroute" = true ] && command -v systemctl >/dev/null 2>&1; then
+        if [ "${restart_omniroute:-false}" = true ] && command -v systemctl >/dev/null 2>&1; then
             info "Resuming omniroute service..."
             systemctl --user start omniroute.service 2>/dev/null || true
         fi
