@@ -550,13 +550,22 @@ binds {
     }
     // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
     Mod+Alt+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
-        spawn "warpd" "--hint"
+        spawn-sh "pkill -x warpd 2>/dev/null; warpd --hint"
+    }
+    Mod+Alt+Shift+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
+        spawn-sh "pkill -x warpd 2>/dev/null; warpd --hint"
     }
     Mod+Alt+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
-        spawn "warpd" "--normal"
+        spawn-sh "pkill -x warpd 2>/dev/null; warpd --normal"
+    }
+    Mod+Alt+Shift+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
+        spawn-sh "pkill -x warpd 2>/dev/null; warpd --normal"
     }
     Mod+Alt+G hotkey-overlay-title="Mouse: Warpd Grid Mode" {
-        spawn "warpd" "--grid"
+        spawn-sh "pkill -x warpd 2>/dev/null; warpd --grid"
+    }
+    Mod+Alt+Escape hotkey-overlay-title="Mouse: Exit Warpd" {
+        spawn-sh "pkill -x warpd"
     }
     // Noctalia Shell keybinds
     Mod+Comma hotkey-overlay-title="Settings: Noctalia" {

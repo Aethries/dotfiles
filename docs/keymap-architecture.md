@@ -263,12 +263,14 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 
 ### 3.7. Warpd Pointer Layer (Điều khiển chuột toàn diện bằng bàn phím - Issue #28)
 - **Kích hoạt tức thì & Đồng bộ phím tắt:**
-  - Trong **Navigate Layer**: Nhấn `m` vào **Hint Mode**; Nhấn `M` (`Shift + m`) vào **Normal Movement Mode** (tự động chuyển Kanata về `normal` khi Warpd kết thúc để gõ chữ ngay lập tức, không cần bấm CapsLock).
+  - Trong **Navigate Layer**:
+    - Nhấn `m` vào **Hint Mode**; Nhấn `M` (`Shift + m`) vào **Normal Movement Mode** (tự động chuyển Kanata về `normal` ngay lập tức để khi thoát Warpd là gõ phím được ngay).
+    - `Single-tap CapsLock`: Trở về thẳng **Normal Layer** chỉ với 1 chạm (không cần bấm 2 lần).
   - Hợp âm toàn cục (`Normal Layer`):
     - `Hold CapsLock + m` hoặc gõ chuỗi `CapsLock m` $\rightarrow$ Kích hoạt **Hint Mode**.
     - `Hold CapsLock + Shift + m` $\rightarrow$ Kích hoạt **Normal Movement Mode**.
     - `Hold / Tap CapsLock + 4` $\rightarrow$ Kích hoạt **Hint Mode** (chuỗi số 1..4).
-  - Phím tắt Compositor Niri trực tiếp: `Mod + Alt + P` (Hint), `Mod + Alt + M` (Normal), `Mod + Alt + G` (Grid).
+  - Phím tắt Compositor Niri trực tiếp: `Mod + Alt + P` (Hint), `Mod + Alt + M` (Normal), `Mod + Alt + G` (Grid), `Mod + Alt + Escape` (Thoát/Kill Warpd). Hỗ trợ cả khi đang giữ Shift (`Mod + Alt + Shift + P/M`).
 - **Thao tác trong Hint Mode (Vimium-style Screen Target Selection):**
   - Màn hình hiển thị lưới nhãn 2 ký tự nhỏ gọn (`hint_size: 13`), nền bán trong suốt (`#1e1e2ecc`) không che khuất chữ bên dưới.
   - Gõ 2 ký tự: Con trỏ lập tức nhảy đến vị trí đó và click chuột trái, sau đó tự động thoát mode.
@@ -278,7 +280,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - **Điều hướng cơ bản & Gia tốc:**
     - `h / j / k / l` $\rightarrow$ Rê chuột Trái / Xuống / Lên / Phải (phản hồi 10ms, tốc độ khởi điểm 700px/s).
     - `a` (giữ) $\rightarrow$ Bứt tốc tối đa lên 4500px/s (gia tốc 9000px/s², lướt toàn màn hình trong 0.4s).
-    - `d` (giữ) $\rightarrow$ Giảm tốc độ xuống 40px/s để căn chỉnh chính xác từng pixel.
+    - `s` (giữ) $\rightarrow$ Giảm tốc độ xuống 40px/s (Decelerator - chậm lại để căn chỉnh chính xác từng pixel).
   - **Nhảy biên & Nhảy tâm tức thì:**
     - `H` (`Shift + h`) $\rightarrow$ Nhảy lên mép trên cùng màn hình (Top edge).
     - `L` (`Shift + l`) $\rightarrow$ Nhảy xuống mép dưới cùng màn hình (Bottom edge).
@@ -289,16 +291,17 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
     - `f` $\rightarrow$ Kích hoạt ngay Hint Mode trong khi đang di chuyển mà không cần thoát mode!
     - `g` $\rightarrow$ Kích hoạt ngay Grid Mode (lưới 2x2 `u i j k`).
   - **Click chuột, Kéo thả & Bôi đen văn bản:**
-    - `Space` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay (Oneshot Click).
-    - `m` $\rightarrow$ Click chuột trái (duy trì mode để click liên tục hoặc double-click).
+    - `Space` $\rightarrow$ Click chuột trái và duy trì mode (Persistent Click - dùng để click nhiều lần hoặc double-click).
+    - `i` $\rightarrow$ Click chuột trái tức thì và thoát mode ngay về chế độ gõ văn bản (Oneshot Click - theo quy ước phím `i` Insert của Vim).
     - `.` $\rightarrow$ Click chuột phải.
     - `,` $\rightarrow$ Click chuột giữa.
     - `v` $\rightarrow$ Bật/tắt chế độ kéo thả (Drag / Visual mode) để bôi đen văn bản. Khi bật `v`, có thể bấm tiếp `h/j/k/l` hoặc bấm `f` để nhảy thẳng đến điểm cuối vùng chọn!
     - `c` $\rightarrow$ Copy vùng chọn và thoát mode (`copy_and_exit`).
   - **Cuộn trang:**
-    - `u / i` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà.
-  - **Thoát mode:**
+    - `d / u` $\rightarrow$ Cuộn trang Xuống / Lên mượt mà (tương ứng Ctrl+d / Ctrl+u của Vim).
+  - **Thoát mode & Chuyển đổi:**
     - `Esc` $\rightarrow$ Thoát chế độ điều khiển chuột về gõ văn bản bình thường.
+    - `Mod + Alt + Escape` $\rightarrow$ Đóng cưỡng bức Warpd từ Niri compositor nếu bị vướng input grab.
 
 ### 3.8. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
 - **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
