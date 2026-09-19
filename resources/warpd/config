@@ -4,13 +4,14 @@
 # ==============================================================================
 
 # Core Movement & Acceleration
-speed: 300
-max_speed: 1800
-acceleration: 800
-decelerator_speed: 60
+speed: 700
+max_speed: 4500
+acceleration: 1800
+accelerator_acceleration: 9000
+decelerator_speed: 40
 decelerator: d
 accelerator: a
-repeat_interval: 16
+repeat_interval: 10
 
 # Vim-style cursor navigation
 left: h
