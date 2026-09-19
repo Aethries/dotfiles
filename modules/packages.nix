@@ -168,6 +168,7 @@ in
     swayidle
     wf-recorder
     libva-utils
+    warpd # Modal keyboard-driven mouse pointer emulation (Issue #28)
 
     # ----------------------------------------------------------
     # Keyring & Secret Management

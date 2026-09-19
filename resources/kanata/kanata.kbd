@@ -244,6 +244,13 @@
   niri_term   (multi M-ret @to_norm)
   niri_over   (multi M-o @to_norm)
   niri_clip   (multi M-v @to_norm)
+
+  ;; --------------------------------------------------------------------------
+  ;; Warpd Pointer Layer Actions (Mouse Emulation via Issue #28)
+  ;; --------------------------------------------------------------------------
+  warp_hint (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
+  warp_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-m)
+  m_nav     (fork @warp_hint @warp_norm (lsft rsft))
 )
 
 ;; ----------------------------------------------------------------------------
@@ -255,6 +262,7 @@
   v_niri  (layer-switch niri)
   v_chrom (layer-switch chromium)
   v_term  (layer-switch terminals)
+  v_warp  (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
 )
 
 (defseq
@@ -263,6 +271,7 @@
   v_niri  (caps 1)
   v_chrom (caps 2)
   v_term  (caps 3)
+  v_warp  (caps 4)
 )
 
 ;; ----------------------------------------------------------------------------
@@ -270,7 +279,7 @@
 ;; ----------------------------------------------------------------------------
 (deflayer caps_mode
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  @to_nav @to_niri @to_chrom @to_term _ _ _ _ _ _    _    _    _    _
+  @to_nav @to_niri @to_chrom @to_term @warp_hint _ _ _ _ _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
@@ -297,7 +306,7 @@
   @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
   @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
   @caps_nav_layer C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
-  lsft C-z  del  c    @to_vis @w_bwd n  m    ,    .    C-f  rsft
+  lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
