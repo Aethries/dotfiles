@@ -8,6 +8,12 @@ let
       gtk3
       gtk-layer-shell
     ];
+    flakeIgnore = [
+      "E265"
+      "E402"
+      "E501"
+      "F401"
+    ];
   } (builtins.readFile ../scripts/kanata-hud.py);
 in
 {

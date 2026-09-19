@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Kanata Mode HUD & On-Screen Layer Indicator Overlay
 
-Displays a small, sleek semi-transparent pill at bottom-center of the screen
-indicating the currently active Kanata layer. Automatically hides in NORMAL mode.
+Displays a small semi-transparent pill at bottom-center of the screen
+indicating active Kanata layer. Automatically hides in NORMAL mode.
 Input events pass through transparently without stealing focus.
 """
 
 import os
 import re
 import subprocess
-import sys
 import threading
 import time
 
@@ -37,7 +36,7 @@ LAYERS = {
     },
     "super": {
         "badge": "⚡ SUPER",
-        "desc": "a:Super · s:Shift · d:Ctrl · f:Alt · Chords: a+d, s+d... · ?:Help",
+        "desc": "a:Super · s:Shift · d:Ctrl · f:Alt · Chords · ?:Help",
         "badge_color": "#cba6f7",
     },
     "chromium": {
@@ -47,12 +46,12 @@ LAYERS = {
     },
     "terminals": {
         "badge": "📟 TERMINALS",
-        "desc": "h/l:Panes · s:Session · x:Close · 1-9:Tab · ?:Help · Esc:Exit",
+        "desc": "h/l:Panes · s:Session · x:Close · 1-9:Tab · ?:Help",
         "badge_color": "#fab387",
     },
     "niri": {
         "badge": "🪟 NIRI",
-        "desc": "h/l:Col · j/k:Ws · 1-9:Jump · c/p/s/r/d/t · ?:Help · Esc:Exit",
+        "desc": "h/l:Col · j/k:Ws · 1-9:Jump · c/p/s/r/d/t · ?:Help",
         "badge_color": "#94e2d5",
     },
     "ctrl_locked": {
@@ -169,7 +168,9 @@ class KanataHud:
         GtkLayerShell.set_layer(self.win, GtkLayerShell.Layer.OVERLAY)
         GtkLayerShell.set_anchor(self.win, GtkLayerShell.Edge.BOTTOM, True)
         GtkLayerShell.set_margin(self.win, GtkLayerShell.Edge.BOTTOM, 36)
-        GtkLayerShell.set_keyboard_mode(self.win, GtkLayerShell.KeyboardMode.NONE)
+        GtkLayerShell.set_keyboard_mode(
+            self.win, GtkLayerShell.KeyboardMode.NONE
+        )
 
         self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.box.set_name("hud-container")
@@ -224,9 +225,11 @@ class KanataHud:
             pass
 
     def _toggle_fcitx_enter(self):
-        """Disable Vietnamese IME when entering modal layers to avoid Telex accent collisions."""
+        """Disable Vietnamese IME to avoid Telex collisions in modals."""
         try:
-            out = subprocess.check_output(["fcitx5-remote"], timeout=0.15).strip()
+            out = subprocess.check_output(
+                ["fcitx5-remote"], timeout=0.15
+            ).strip()
             if out == b"2":
                 self.fcitx_was_active = True
                 subprocess.Popen(
@@ -238,7 +241,7 @@ class KanataHud:
             pass
 
     def _toggle_fcitx_exit(self):
-        """Restore Vietnamese IME if it was active prior to entering modal layers."""
+        """Restore Vietnamese IME if active before entering modal layers."""
         if getattr(self, "fcitx_was_active", False):
             self.fcitx_was_active = False
             try:
@@ -273,13 +276,18 @@ class KanataHud:
             self.lbl_badge.set_text(info["badge"])
             self.lbl_desc.set_text(info["desc"])
             color = info.get("badge_color", "#89b4fa")
-            self.lbl_badge.set_markup(f'<span foreground="{color}">{info["badge"]}</span>')
+            badge = info["badge"]
+            self.lbl_badge.set_markup(
+                f'<span foreground="{color}">{badge}</span>'
+            )
             self.win.show_all()
             self._apply_clickthrough()
         else:
             short = layer.upper()
             self._update_mode_file(short)
-            self.lbl_badge.set_markup(f'<span foreground="#89b4fa">⚡ {short}</span>')
+            self.lbl_badge.set_markup(
+                f'<span foreground="#89b4fa">⚡ {short}</span>'
+            )
             self.lbl_desc.set_text("Custom Layer Active")
             self.win.show_all()
             self._apply_clickthrough()
@@ -290,7 +298,10 @@ def stream_journal(hud):
     while True:
         try:
             proc = subprocess.Popen(
-                ["journalctl", "-u", "kanata-internal", "-f", "-n", "0", "-o", "cat"],
+                [
+                    "journalctl", "-u", "kanata-internal",
+                    "-f", "-n", "0", "-o", "cat",
+                ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 text=True,
