@@ -1,13 +1,185 @@
 ;; ==============================================================================
-;; Kanata Configuration: Default Passthrough (No Custom Remappings)
-;; Retains default keyboard behavior 100% transparently.
-;; Custom keymap implementation is deferred to dedicated issue.
+;; Kanata Configuration: Multi-Layer Modal Workstation Keymap
+;; Reference: Issue #81 & docs/keymap-architecture.md
+;;
+;; Layers:
+;;   - normal:      Default physical keyboard typing.
+;;                  Hold CapsLock (200ms) -> Switch to navigate layer.
+;;                  Hold RightShift (200ms) -> Switch to super layer.
+;;   - navigate:    Neovim cursor & word motions, tab & browser navigation.
+;;                  Press 1 -> Switch to niri layer.
+;;                  Press Esc -> Switch to normal layer.
+;;   - super:       One-shot 1s modifiers (Super, Shift, Ctrl, Alt).
+;;                  Press c -> Lock Ctrl indefinitely until Esc.
+;;                  Press Esc -> Switch to normal layer.
+;;   - niri:        Window & workspace management for Niri Wayland Compositor.
+;;                  One-shot actions (c, p, s, r, d, t, ret, o, v) -> execute & return to normal.
+;;                  Persistent actions (f, q, h, j, k, l, 1-9) -> stay in niri layer.
+;;                  Press Esc -> Switch to normal layer.
+;;   - ctrl_locked: Emits Ctrl+<key> for every key until Esc cancels back to normal.
+;;   - bypass:      Hardware pass-through (LShift + RShift chord).
 ;; ==============================================================================
 
 (defcfg
   process-unmapped-keys yes
+  concurrent-tap-hold yes
 )
 
-(defsrc)
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    apos ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
 
-(deflayer default)
+(defalias
+  ;; --------------------------------------------------------------------------
+  ;; Layer Switching Aliases
+  ;; --------------------------------------------------------------------------
+  to_norm (layer-switch normal)
+  to_nav  (layer-switch navigate)
+  to_sup  (layer-switch super)
+  to_niri (layer-switch niri)
+  to_clk  (layer-switch ctrl_locked)
+  to_bp   (layer-switch bypass)
+
+  ;; Normal mode triggers: Hold 200ms switches layer permanently until Esc
+  caps_to_nav (tap-hold-release 200 200 esc @to_nav)
+  rsft_to_sup (tap-hold-release 200 200 rsft @to_sup)
+
+  ;; --------------------------------------------------------------------------
+  ;; Navigate Layer Actions
+  ;; --------------------------------------------------------------------------
+  ;; h/j/k/l: Arrows alone; with Ctrl -> Tab/Page motions
+  h_nav (fork left (multi lctl lsft tab) (lctl rctl))
+  l_nav (fork rght (multi lctl tab) (lctl rctl))
+  j_nav (fork down C-pgdn (lctl rctl))
+  k_nav (fork up   C-pgup (lctl rctl))
+
+  ;; d/u: PageDown / PageUp (with Ctrl -> C-pgdn / C-pgup)
+  d_nav (fork pgdn C-pgdn (lctl rctl))
+  u_nav (fork pgup C-pgup (lctl rctl))
+
+  ;; o/i: Web / Jump list Backward and Forward (Alt+Left / Alt+Right)
+  o_nav (fork o A-left (lctl rctl))
+  i_nav (fork i A-rght (lctl rctl))
+
+  ;; Word & Line motions
+  w_fwd C-rght
+  w_bwd C-left
+  key_4 (fork 4 end (lsft rsft))
+
+  ;; --------------------------------------------------------------------------
+  ;; Super Layer Actions (One-Shot 1000ms Modifiers)
+  ;; --------------------------------------------------------------------------
+  os_super (one-shot 1000 lmet)
+  os_shift (one-shot 1000 lsft)
+  os_ctrl  (one-shot 1000 lctl)
+  os_alt   (one-shot 1000 lalt)
+
+  ;; --------------------------------------------------------------------------
+  ;; Niri Layer Actions
+  ;; --------------------------------------------------------------------------
+  ;; h/l: Focus column (with Ctrl -> move column, with Shift -> focus monitor, with Alt -> move to monitor)
+  h_niri (fork M-h (fork C-M-h (fork S-M-h (multi lmet lctl lsft h) (lalt ralt)) (lsft rsft)) (lctl rctl))
+  l_niri (fork M-l (fork C-M-l (fork S-M-l (multi lmet lctl lsft l) (lalt ralt)) (lsft rsft)) (lctl rctl))
+
+  ;; j/k: Focus workspace (with Ctrl -> move column to workspace)
+  j_niri (fork M-j C-M-j (lctl rctl))
+  k_niri (fork M-k C-M-k (lctl rctl))
+
+  ;; 1-9: Move to workspace 1-9 (with Ctrl -> move window to workspace 1-9)
+  n1 (fork M-1 C-M-1 (lctl rctl))
+  n2 (fork M-2 C-M-2 (lctl rctl))
+  n3 (fork M-3 C-M-3 (lctl rctl))
+  n4 (fork M-4 C-M-4 (lctl rctl))
+  n5 (fork M-5 C-M-5 (lctl rctl))
+  n6 (fork M-6 C-M-6 (lctl rctl))
+  n7 (fork M-7 C-M-7 (lctl rctl))
+  n8 (fork M-8 C-M-8 (lctl rctl))
+  n9 (fork M-9 C-M-9 (lctl rctl))
+
+  ;; One-shot actions that automatically return to normal mode
+  niri_center (multi M-c @to_norm)
+  niri_proj   (multi M-p @to_norm)
+  niri_shot   (multi M-s @to_norm)
+  niri_rec    (multi M-r @to_norm)
+  niri_menu   (multi M-d @to_norm)
+  niri_term   (multi M-ret @to_norm)
+  niri_over   (multi M-o @to_norm)
+  niri_clip   (multi M-v @to_norm)
+)
+
+;; ----------------------------------------------------------------------------
+;; 1. Normal Layer (Default Physical Typing)
+;; ----------------------------------------------------------------------------
+(deflayer normal
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @caps_to_nav a s d  f    g    h    j    k    l    ;    apos ret
+  lsft z    x    c    v    b    n    m    ,    .    /    @rsft_to_sup
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 2. Navigate Layer (Vim Motions & Tab/Word Controls)
+;; ----------------------------------------------------------------------------
+(deflayer navigate
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
+  tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
+  caps C-a  s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
+  lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 3. Super Layer (One-Shot Modifiers & Sticky Ctrl)
+;; ----------------------------------------------------------------------------
+(deflayer super
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps @os_super @os_shift @os_ctrl @os_alt g h j k l ; apos ret
+  lsft z    x    @to_clk v b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 4. Niri Layer (Window & Workspace Management)
+;; ----------------------------------------------------------------------------
+(deflayer niri
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
+  @niri_over M-q w e  @niri_rec @niri_term y u i o @niri_proj [ ]   \
+  caps a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
+  lsft z    x    @niri_center @niri_clip b n m , . / rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 5. Ctrl Locked Layer (Sticky Ctrl until Esc)
+;; ----------------------------------------------------------------------------
+(deflayer ctrl_locked
+  @to_norm f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  C-1  C-2  C-3  C-4  C-5  C-6  C-7  C-8  C-9  C-0  C--  C-=  bspc
+  tab  C-q  C-w  C-e  C-r  C-t  C-y  C-u  C-i  C-o  C-p  C-[  C-]  C-\
+  caps C-a  C-s  C-d  C-f  C-g  C-h  C-j  C-k  C-l  C-;  apos ret
+  lsft C-z  C-x  C-c  C-v  C-b  C-n  C-m  C-,  C-.  C-/  rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 6. Bypass Layer (Raw 1:1 Hardware Passthrough)
+;; ----------------------------------------------------------------------------
+(deflayer bypass
+  @to_norm f1 f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    apos ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
