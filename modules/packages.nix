@@ -86,6 +86,7 @@ let
 
   lark = pkgs.callPackage ../pkgs/lark.nix { };
   rtk = pkgs.callPackage ../pkgs/rtk.nix { };
+  codebase-memory-mcp = pkgs.callPackage ../pkgs/codebase-memory-mcp.nix { };
 
 in
 {
@@ -202,6 +203,7 @@ in
     codex
     codexDesktop
     rtk
+    codebase-memory-mcp
     fuzzel
   ];
 }

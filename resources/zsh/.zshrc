@@ -165,6 +165,76 @@ if command -v rtk >/dev/null 2>&1; then
   alias rlog="rtk log"
 fi
 
+# CodeGraph & Codebase Memory MCP CLI Workflow
+function cg() {
+  local cmd="${1:-status}"
+  shift 2>/dev/null || true
+
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || repo_root="$PWD"
+
+  local bin="codebase-memory-mcp"
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    if [ -x "$HOME/.local/bin/codebase-memory-mcp" ]; then
+      bin="$HOME/.local/bin/codebase-memory-mcp"
+    elif [ -x "/run/current-system/sw/bin/codebase-memory-mcp" ]; then
+      bin="/run/current-system/sw/bin/codebase-memory-mcp"
+    else
+      echo "codebase-memory-mcp binary not found. Please run ./scripts/build.sh or bootstrap." >&2
+      return 1
+    fi
+  fi
+
+  local project_name
+  project_name="$(echo "$repo_root" | sed 's|^/||; s|/|-|g')"
+
+  case "$cmd" in
+    init)
+      echo "==> Indexing repository AST into Codebase Memory..."
+      echo "  Repo root : $repo_root"
+      mkdir -p "$repo_root/.codegraph"
+      "$bin" cli --quiet index_repository "{\"repo_path\":\"$repo_root\"}"
+      echo "✓ AST knowledge graph indexed successfully!"
+      ;;
+    status)
+      echo "==> CodeGraph AST Status ($repo_root):"
+      "$bin" cli --quiet index_status "{\"project\":\"$project_name\"}" 2>/dev/null || \
+        echo "No index found for $repo_root. Run 'cg init' to build knowledge graph."
+      ;;
+    clean)
+      echo "==> Cleaning CodeGraph cache for $repo_root..."
+      rm -rf "$repo_root/.codegraph"
+      rm -f "$HOME/.cache/codebase-memory-mcp/${project_name}"*.db 2>/dev/null || true
+      echo "✓ CodeGraph cache cleared. Run 'cg init' to re-index."
+      ;;
+    search)
+      if [ $# -eq 0 ]; then
+        echo "Usage: cg search <symbol>" >&2
+        return 1
+      fi
+      "$bin" cli --quiet search_graph "{\"project\":\"$project_name\",\"query\":\"$1\"}"
+      ;;
+    ui)
+      echo "Opening Codebase Memory Graph UI on port 9749..."
+      xdg-open "http://localhost:9749" 2>/dev/null || echo "Navigate to http://localhost:9749"
+      ;;
+    help|--help|-h)
+      echo "CodeGraph & Codebase Memory CLI"
+      echo "Usage: cg <command> [args]"
+      echo ""
+      echo "Commands:"
+      echo "  init    - Index or refresh AST knowledge graph for current Git repository"
+      echo "  status  - Show index status, node/edge counts, and graph freshness"
+      echo "  clean   - Remove local .codegraph/ and database cache"
+      echo "  search  - Search symbols across codebase AST graph"
+      echo "  ui      - Open visual graph explorer in browser"
+      ;;
+    *)
+      "$bin" cli "$cmd" "$@"
+      ;;
+  esac
+}
+
 # Eza: Modern replacement for ls
 if command -v eza >/dev/null 2>&1; then
   alias ls='eza --icons=auto'

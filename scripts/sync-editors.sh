@@ -82,6 +82,26 @@ safe_link \
     "$REPO_ROOT/resources/gemini/mcp_config.json" \
     "$TARGET_HOME/.gemini/antigravity/mcp_config.json"
 
+if [ -f "$REPO_ROOT/resources/git/ignore" ]; then
+    safe_link "$REPO_ROOT/resources/git/ignore" "$TARGET_HOME/.config/git/ignore"
+fi
+
+if [ -f "$REPO_ROOT/resources/git/.gitconfig" ]; then
+    safe_link "$REPO_ROOT/resources/git/.gitconfig" "$TARGET_HOME/.gitconfig"
+fi
+
+if [ -d "$TARGET_HOME/.codex" ]; then
+    CODEX_TOML="$TARGET_HOME/.codex/config.toml"
+    if [ -f "$CODEX_TOML" ] && ! grep -q "codebase_memory" "$CODEX_TOML" 2>/dev/null; then
+        cat << 'EOF' >> "$CODEX_TOML"
+
+[mcp_servers.codebase_memory]
+command = "codebase-memory-mcp"
+args = []
+EOF
+    fi
+fi
+
 if [ -d "$REPO_ROOT/resources/skills" ]; then
     for skill_dir in "$REPO_ROOT/resources/skills"/*; do
         if [ -d "$skill_dir" ]; then

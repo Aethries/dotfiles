@@ -12,6 +12,7 @@
 	pager = delta
 	autocrlf = input
 	whitespace = trailing-space,space-before-tab
+	excludesfile = ~/.config/git/ignore
 
 [interactive]
 	diffFilter = delta --color-only

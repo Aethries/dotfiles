@@ -6,6 +6,14 @@
       "env": {
         "GODOT_PATH": "godot"
       }
+    },
+    "codebase-memory": {
+      "command": "codebase-memory-mcp",
+      "args": []
+    },
+    "codegraph": {
+      "command": "codebase-memory-mcp",
+      "args": []
     }
   }
 }

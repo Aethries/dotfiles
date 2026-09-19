@@ -71,17 +71,43 @@ grep -Fq "SemVer" "$RELEASE_NOTES_FILE" || log_fail "release-notes SKILL.md miss
 CAVEMAN_FILE="$REPO_ROOT/resources/skills/caveman/SKILL.md"
 [ -f "$CAVEMAN_FILE" ] || log_fail "Missing $CAVEMAN_FILE"
 grep -Eiq '^name:[[:space:]]*caveman' "$CAVEMAN_FILE" || log_fail "caveman SKILL.md missing valid name"
+grep -Eiq 'Ultra.*\(Default\)' "$CAVEMAN_FILE" || log_fail "caveman SKILL.md missing Ultra (Default)"
 [ -f "$REPO_ROOT/resources/skills/caveman/references/modes.md" ] || log_fail "Missing modes.md"
-grep -Fq "Full Mode (Default)" "$REPO_ROOT/resources/skills/caveman/references/modes.md" || log_fail "Missing Full Mode in modes.md"
+grep -Eiq 'Ultra Mode.*\(Default\)' "$REPO_ROOT/resources/skills/caveman/references/modes.md" || log_fail "Missing Ultra Mode (Default) in modes.md"
 
 RTK_FILE="$REPO_ROOT/resources/skills/rtk/SKILL.md"
 [ -f "$RTK_FILE" ] || log_fail "Missing $RTK_FILE"
 grep -Eiq '^name:[[:space:]]*rtk' "$RTK_FILE" || log_fail "rtk SKILL.md missing valid name"
 
+CBM_FILE="$REPO_ROOT/resources/skills/codebase-memory/SKILL.md"
+[ -f "$CBM_FILE" ] || log_fail "Missing $CBM_FILE"
+grep -Eiq '^name:[[:space:]]*codebase-memory' "$CBM_FILE" || log_fail "codebase-memory SKILL.md missing valid name"
+[ -f "$REPO_ROOT/resources/skills/codebase-memory/references/memory-guide.md" ] || log_fail "Missing memory-guide.md"
+
+CODEGRAPH_FILE="$REPO_ROOT/resources/skills/codegraph/SKILL.md"
+[ -f "$CODEGRAPH_FILE" ] || log_fail "Missing $CODEGRAPH_FILE"
+grep -Eiq '^name:[[:space:]]*codegraph' "$CODEGRAPH_FILE" || log_fail "codegraph SKILL.md missing valid name"
+[ -f "$REPO_ROOT/resources/skills/codegraph/references/ast-workflow.md" ] || log_fail "Missing ast-workflow.md"
+
+# Assert MCP servers registered in resources/gemini/mcp_config.json
+grep -Fq '"codebase-memory"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "mcp_config.json missing codebase-memory"
+grep -Fq '"codegraph"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "mcp_config.json missing codegraph"
+
+# Assert global gitignore has .codegraph/
+[ -f "$REPO_ROOT/resources/git/ignore" ] || log_fail "Missing resources/git/ignore"
+grep -Fq ".codegraph/" "$REPO_ROOT/resources/git/ignore" || log_fail "resources/git/ignore missing .codegraph/"
+
+# Assert Zsh CLI has cg function
+grep -Fq "function cg()" "$REPO_ROOT/resources/zsh/.zshrc" || log_fail "resources/zsh/.zshrc missing cg() function"
+
+# Assert Nix package exists
+[ -f "$REPO_ROOT/pkgs/codebase-memory-mcp.nix" ] || log_fail "Missing pkgs/codebase-memory-mcp.nix"
+grep -Fq "codebase-memory-mcp" "$REPO_ROOT/modules/packages.nix" || log_fail "modules/packages.nix missing codebase-memory-mcp"
+
 # Assert OmniRoute cavemanEnabled is false by default
 grep -Eiq '^OMNIROUTE_CAVEMAN_ENABLED="false"' "$REPO_ROOT/resources/ai/gateway.env" || log_fail "OMNIROUTE_CAVEMAN_ENABLED must be false"
 
-log_ok "Ponytail, Junior, Release Notes, Caveman, and RTK skill schemas are valid"
+log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, and CodeGraph skill schemas are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
