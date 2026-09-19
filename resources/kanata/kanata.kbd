@@ -1,82 +1,13 @@
 ;; ==============================================================================
-;; Kanata Configuration: System-Wide Vim-Style Modal Keyboard Architecture
-;; Reference: docs/keymap-architecture.md (Issue #25, #26)
+;; Kanata Configuration: Default Passthrough (No Custom Remappings)
+;; Retains default keyboard behavior 100% transparently.
+;; Custom keymap implementation is deferred to dedicated issue.
 ;; ==============================================================================
 
 (defcfg
   process-unmapped-keys yes
-  concurrent-tap-hold yes
 )
 
-(defsrc
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  caps a    s    d    f    g    h    j    k    l    ;    apos ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt rmet rctl
-)
+(defsrc)
 
-(defalias
-  ;; Dual-role CapsLock: Tap = Escape, Hold = Left Control
-  caps_esc_ctl (tap-hold-release 200 200 esc lctl)
-
-  ;; Dual-role Space: Tap = Space, Hold = Nav Layer
-  spc_nav (tap-hold-release 200 200 spc (layer-toggle nav))
-
-  ;; Home-Row Mods (HRM) - 200ms timeout with tap-hold-release
-  ;; Left hand: Meta (Super), Alt, Control, Shift
-  a_met (tap-hold-release 200 200 a lmet)
-  s_alt (tap-hold-release 200 200 s lalt)
-  d_ctl (tap-hold-release 200 200 d lctl)
-  f_sft (tap-hold-release 200 200 f lsft)
-
-  ;; Right hand: Shift, Control, Alt, Meta (Super)
-  j_sft   (tap-hold-release 200 200 j rsft)
-  k_ctl   (tap-hold-release 200 200 k rctl)
-  l_alt   (tap-hold-release 200 200 l ralt)
-  scl_met (tap-hold-release 200 200 ; rmet)
-
-  ;; Layer switches for Bypass
-  to_bp   (layer-switch bypass)
-  to_base (layer-switch base)
-
-  ;; Live reload config
-  reload  lrld
-)
-
-;; Hardware chord: LShift + RShift toggles bypass on/off
-(defchords bypass-toggle 200
-  (lsft rsft) @to_bp
-)
-
-(defchords bypass-return 200
-  (lsft rsft) @to_base
-)
-
-(deflayer base
-  esc  f1     f2     f3     f4     f5   f6   f7     f8     f9      f10      f11  f12
-  grv  1      2      3      4      5    6    7      8      9       0        -    =    bspc
-  tab  q      w      e      r      t    y    u      i      o       p        [    ]    \
-  @caps_esc_ctl @a_met @s_alt @d_ctl @f_sft g    h    @j_sft @k_ctl @l_alt @scl_met apos ret
-  (chord bypass-toggle lsft) z x c v   b    n    m      ,      .       /        (chord bypass-toggle rsft)
-  lctl lmet   lalt                  @spc_nav             ralt   rmet     rctl
-)
-
-(deflayer nav
-  _    _      _      _      _      _    _    _      _      _       _        _    _
-  _    _      _      _      _      _    _    _      _      _       _        _    _    C-bspc
-  _    _      C-rght _      @reload _   _    pgup   _      _       _        _    _    _
-  _    _      _      _      _      _    left down   up     rght    _        _    _
-  _    _      del    _      _      C-left home end   _      _       _        _
-  _    _      _                     _                    _      _        _
-)
-
-(deflayer bypass
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  caps a    s    d    f    g    h    j    k    l    ;    apos ret
-  (chord bypass-return lsft) z x c v b n m , .  /   (chord bypass-return rsft)
-  lctl lmet lalt           spc            ralt rmet rctl
-)
+(deflayer default)

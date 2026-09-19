@@ -2,17 +2,14 @@
 
 {
   # ============================================================
-  # Kanata: Keyboard Remapping Daemon & System-Wide Vim Modal Layer
+  # Kanata: Keyboard Remapping Daemon & System-Wide Service
   # ============================================================
 
-  # Enable declarative Kanata systemd service
+  # Enable declarative Kanata systemd service (default passthrough)
   services.kanata = {
     enable = true;
     keyboards.internal = {
       configFile = ../resources/kanata/kanata.kbd;
-      extraArgs = [
-        "--log-layer-changes"
-      ];
     };
   };
 
