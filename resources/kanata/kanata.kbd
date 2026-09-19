@@ -23,6 +23,7 @@
 (defcfg
   process-unmapped-keys yes
   concurrent-tap-hold yes
+  sequence-timeout 1000
 )
 
 (defsrc
@@ -46,6 +47,7 @@
   to_slk  (layer-switch super_locked)
   to_alk  (layer-switch alt_locked)
   to_shlk (layer-switch shift_locked)
+  to_chrom (layer-switch chromium)
   to_bp   (layer-switch bypass)
 
   to_arm_slk  (layer-switch super_armed_slk)
@@ -64,26 +66,53 @@
   norm_preserve (multi (one-shot-pause-processing 100) @to_norm)
 
   ;; Normal mode triggers:
-  ;; CapsLock requires holding (200ms) before switching to navigate layer.
-  ;; Quick taps (<200ms) do nothing (XX), avoiding caret loss or uppercase.
+  ;; CapsLock: double-tap enters navigate layer; hold acts as chord modifier (Space/1/2).
+  ;; Quick single tap or release without chord does nothing (XX).
   ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
-  caps_held   (tap-hold-release 200 200 XX @nav_preserve)
+  caps_lwh    (layer-while-held caps_mode)
+  caps_td     (tap-dance 200 (XX @nav_preserve))
+  caps_held   (tap-hold-press 200 200 @caps_td @caps_lwh)
   caps_to_nav (fork @caps_held caps (lsft rsft))
-  rsft_to_sup (tap-hold-release 200 200 rsft @to_sup)
 
-  ;; Navigation from locked modes: hold CapsLock 200ms to navigate and return to lock
-  caps_held_slk   (tap-hold-release 200 200 XX @to_nav_slk)
+  ;; Navigation from locked modes: double-tap CapsLock to navigate
+  caps_td_slk   (tap-dance 200 (XX @to_nav_slk))
+  caps_held_slk (tap-hold-press 200 200 @caps_td_slk @caps_lwh)
   caps_to_nav_slk (fork @caps_held_slk caps (lsft rsft))
 
-  caps_held_clk   (tap-hold-release 200 200 XX @to_nav_clk)
+  caps_td_clk   (tap-dance 200 (XX @to_nav_clk))
+  caps_held_clk (tap-hold-press 200 200 @caps_td_clk @caps_lwh)
   caps_to_nav_clk (fork @caps_held_clk caps (lsft rsft))
 
   i_to_slk (fork @to_slk A-rght (lctl rctl))
   i_to_clk (fork @to_clk A-rght (lctl rctl))
 
   ;; --------------------------------------------------------------------------
+  ;; Chromium Layer Actions (Browser Navigation via CapsLock + 2)
+  ;; --------------------------------------------------------------------------
+  ch_t (fork C-t C-S-t (lsft rsft))
+  ch_h (multi lctl lsft tab)
+  ch_l (multi lctl tab)
+  ch_j pgdn
+  ch_k pgup
+  ch_x C-w
+  ch_m A-m
+
+  ch_1 (fork 1 C-1 (lctl rctl))
+  ch_2 (fork 2 C-2 (lctl rctl))
+  ch_3 (fork 3 C-3 (lctl rctl))
+  ch_4 (fork 4 C-4 (lctl rctl))
+  ch_5 (fork 5 C-5 (lctl rctl))
+  ch_6 (fork 6 C-6 (lctl rctl))
+  ch_7 (fork 7 C-7 (lctl rctl))
+  ch_8 (fork 8 C-8 (lctl rctl))
+  ch_9 (fork 9 C-9 (lctl rctl))
+  ch_0 (fork 0 C-9 (lctl rctl))
+
+  ;; --------------------------------------------------------------------------
   ;; Navigate Layer Actions
   ;; --------------------------------------------------------------------------
+  tab_nav A-tab
+
   ;; h/j/k/l: Arrows alone; with Ctrl -> Tab/Page motions
   h_nav (fork left (multi lctl lsft tab) (lctl rctl))
   l_nav (fork rght (multi lctl tab) (lctl rctl))
@@ -153,6 +182,35 @@
 )
 
 ;; ----------------------------------------------------------------------------
+;; Direct Sequential Key Sequences (Tap CapsLock + <key>)
+;; ----------------------------------------------------------------------------
+(defvirtualkeys
+  v_sup   (layer-switch super)
+  v_nav   (multi (one-shot-pause-processing 100) (layer-switch navigate))
+  v_niri  (layer-switch niri)
+  v_chrom (layer-switch chromium)
+)
+
+(defseq
+  v_sup   (caps spc)
+  v_nav   (caps grv)
+  v_niri  (caps 1)
+  v_chrom (caps 2)
+)
+
+;; ----------------------------------------------------------------------------
+;; CapsLock Chord Layer (Active strictly while holding CapsLock)
+;; ----------------------------------------------------------------------------
+(deflayer caps_mode
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  @to_nav @to_niri @to_chrom _ _ _ _ _ _ _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              @to_sup        _    _    _
+)
+
+;; ----------------------------------------------------------------------------
 ;; 1. Normal Layer (Default Physical Typing)
 ;; ----------------------------------------------------------------------------
 (deflayer normal
@@ -160,7 +218,7 @@
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @caps_to_nav a s d  f    g    h    j    k    l    ;    apos ret
-  lsft z    x    c    v    b    n    m    ,    .    /    @rsft_to_sup
+  lsft z    x    c    v    b    n    m    ,    .    /    @to_sup
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -169,8 +227,8 @@
 ;; ----------------------------------------------------------------------------
 (deflayer navigate
   @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
-  tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
+  @to_nav @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
+  @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
   @norm_preserve C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
@@ -184,7 +242,19 @@
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    @norm_preserve o p [ ]   \
   @norm_preserve @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
-  lsft z    x    @to_arm_clk v b    n    m    ,    .    /    rsft
+  lsft z    x    @to_arm_clk v b    n    m    ,    .    /    @norm_preserve
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 4. Chromium Layer (Browser Tab & Page Navigation via CapsLock + 2)
+;; ----------------------------------------------------------------------------
+(deflayer chromium
+  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  @ch_1 @ch_2 @ch_3 @ch_4 @ch_5 @ch_6 @ch_7 @ch_8 @ch_9 @ch_0 - = bspc
+  tab  q    w    e    r    @ch_t y    u    @norm_preserve o p [ ] \
+  @norm_preserve a s d f g @ch_h @ch_j @ch_k @ch_l ; apos ret
+  lsft z    @ch_x c    v    b    n    @ch_m ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -292,8 +362,8 @@
 ;; ----------------------------------------------------------------------------
 (deflayer nav_slk
   @to_slk f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
-  tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_slk @o_nav C-v [ ] \
+  @to_slk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
+  @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_slk @o_nav C-v [ ] \
   @to_slk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
@@ -301,8 +371,8 @@
 
 (deflayer nav_clk
   @to_clk f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  @to_niri 2    3    @key_4 5  6    7    8    9    home -    =    bspc
-  tab  q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_clk @o_nav C-v [ ] \
+  @to_clk @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
+  @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_to_clk @o_nav C-v [ ] \
   @to_clk C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
