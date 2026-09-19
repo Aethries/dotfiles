@@ -160,13 +160,28 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Single-tap CapsLock` $\rightarrow$ Duy trì ở **Navigate Layer**.
   - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
 
-### 3.3. Super Layer (Lớp phím bổ trợ One-Shot & Sticky)
-- **One-Shot Modifiers (cho 1 thao tác tiếp theo, timeout 2000ms):**
-  - `a` $\rightarrow$ `Super` (Windows key).
-  - `s` $\rightarrow$ `Shift`.
-  - `d` $\rightarrow$ `Ctrl`.
-  - `f` $\rightarrow$ `Alt`.
-  *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Alt` cho phím gõ tiếp theo).*
+### 3.3. Super Layer (Lớp phím bổ trợ One-Shot, Chords & Sticky)
+- **One-Shot Modifiers & Chords trên hàng `a s d f` (timeout chập 150ms, timeout giữ 2000ms):**
+  - **Phím đơn lẻ:**
+    - `a` $\rightarrow$ `Super` (Windows key).
+    - `s` $\rightarrow$ `Shift`.
+    - `d` $\rightarrow$ `Ctrl`.
+    - `f` $\rightarrow$ `Alt`.
+  - **Chập 2 phím đồng thời (Dual Chords):**
+    - `a + d` $\rightarrow$ `Super + Ctrl`
+    - `a + s` $\rightarrow$ `Super + Shift`
+    - `a + f` $\rightarrow$ `Super + Alt`
+    - `s + d` / `d + s` $\rightarrow$ `Ctrl + Shift`
+    - `d + f` $\rightarrow$ `Ctrl + Alt`
+    - `s + f` $\rightarrow$ `Shift + Alt`
+  - **Chập 3 phím đồng thời (Triple Chords):**
+    - `a + d + f` $\rightarrow$ `Super + Ctrl + Alt`
+    - `a + s + f` $\rightarrow$ `Super + Shift + Alt`
+    - `a + s + d` $\rightarrow$ `Super + Shift + Ctrl`
+    - `s + d + f` $\rightarrow$ `Ctrl + Shift + Alt` (Meh key)
+  - **Chập 4 phím đồng thời (Quad Chord):**
+    - `a + s + d + f` $\rightarrow$ `Super + Ctrl + Shift + Alt` (Hyper key)
+  *(Có thể gõ chập đồng thời hoặc gõ dồn tuần tự; khi gõ phím mục tiêu Kanata sẽ áp đúng tổ hợp và tự động giải phóng).*
 - **Cơ chế thoát Super & Giữ phím chờ (Waiting Preserved):**
   - Trong `super`: Nhấn `RightShift`, `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
   - Trong `normal`: Chỉ khi bấm `Esc` ở `normal`, Kanata mới **hủy toàn bộ modifier đang chờ** (cancel waiting).
