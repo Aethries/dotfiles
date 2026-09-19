@@ -30,7 +30,7 @@ padding = 4
 radius = 12
 scale = 0.95000000670552254
 shadow = false
-start = [ "warp", "weather", "workspaces" ]
+start = [ "warp", "keymap", "weather", "workspaces" ]
 thickness = 32
 
 [calendar]

@@ -195,6 +195,7 @@ layout {
 // This line starts Noctalia desktop shell.
 spawn-at-startup "noctalia"
 spawn-at-startup "kdeconnect-indicator"
+spawn-at-startup "bash" "-c" "$HOME/Workspaces/dotfiles/scripts/kanata-indicator.sh"
 spawn-at-startup "swayidle" "-w" "timeout" "600" "noctalia msg session lock" "timeout" "900" "niri msg action power-off-monitors" "before-sleep" "noctalia msg session lock"
 // Noctalia settings and floating window rule
 window-rule {

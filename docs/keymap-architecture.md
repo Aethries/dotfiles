@@ -46,48 +46,68 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │        Space -> Tap: Space | Hold: NAV LAYER                    │
 │        CapsLock -> Tap: Esc | Hold: Ctrl (hoặc Mouse Layer)     │
 └─────────────────────────────────────────────────────────────────┘
-           │ (Hold Space)                     │ (Hold CapsLock / Chord)
-┌─────────────────────────────────────────────────────────────────┐
-│                        NORMAL LAYER (Default)                   │
-│        Gõ phím mặc định 100% tự nhiên không delay/alteration    │
-│        Giữ CapsLock (200ms)    ──> NAVIGATE LAYER               │
-│        Giữ RightShift (200ms)  ──> SUPER LAYER                  │
-└─────────────────────────────────────────────────────────────────┘
-           │ (Hold CapsLock 200ms)             │ (Hold RightShift 200ms)
+           │ (Hold CapsLock + Key / Tap CapsLock) │ (Press RightShift / Double-tap Caps)
+┌────────────────────────────────────────────────────────────────────────┐
+│                         NORMAL LAYER (Default)                         │
+│        Gõ phím mặc định 100% tự nhiên không delay/alteration           │
+│        Single-tap CapsLock                   ──> NAVIGATE              │
+│        Double-tap CapsLock                   ──> SUPER LAYER           │
+│        Tap/Hold CapsLock + ` ──> NAV | 1 ──> NIRI | 2 ──> CHROM        │
+│        Tap/Hold CapsLock + 3 ──> TERMINALS | Space ──> SUPER           │
+│        Bấm RightShift (instant)              ──> SUPER LAYER           │
+└────────────────────────────────────────────────────────────────────────┘
+           │ (Single-tap CapsLock / Caps+`)    │ (Double-tap Caps / RightShift)
            ▼                                   ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
 │  h/j/k/l -> Arrows      │         │  a -> One-shot Super    │
-│  Ctrl+h/l -> Prev/Next  │         │  s -> One-shot Shift    │
-│  Ctrl+j/k -> PgDn/PgUp  │         │  d -> One-shot Ctrl     │
-│  Ctrl+o/i -> Back/Fwd   │         │  f -> One-shot Alt      │
-│  w/e/b    -> Word jumps │         │  Shift + a/s/d/f ->     │
-│  x/y/p/z  -> Del/Cp/Pst │         │    Sticky Lock Modifier │
-│  Bấm 1    ──> NIRI      │         │  c -> Lock Ctrl Mode    │
-│  i / Esc  ──> NORMAL    │         │  Esc / i ──> NORMAL     │
+│  gg / G  -> Top / End   │         │  s -> One-shot Shift    │
+│  w / e   -> Next word   │         │  d -> One-shot Ctrl     │
+│  b       -> Prev word   │         │  f -> One-shot Alt      │
+│  Tab     -> Alt + Tab   │         │  Shift + a/s/d/f ->     │
+│  Ctrl+h/l -> Prev/Next  │         │    Sticky Lock Modifier │
+│  Ctrl+j/k -> PgDn/PgUp  │         │  c -> Lock Ctrl Mode    │
+│  x/y/p/z  -> Del/Cp/Pst │         │  RightShift ──> NORMAL  │
+│  1 ──> NIRI | 2 ──> CHROM│        │  Esc / i ──> NORMAL     │
+│  3 ──> TERMINALS        │         │                         │
+│  Double Caps / Esc ──> N│         │                         │
 └─────────────────────────┘         └─────────────────────────┘
-           │ Bấm 1                               │ Shift+a/s/d/f
+           │ Bấm 1 / 2 / 3                       │ Shift+a/s/d/f
            ▼                                     ▼
-┌─────────────────────────┐         ┌─────────────────────────┐
-│       NIRI LAYER        │         │   LOCKED MODIFIER MODES │
-│  h/l     -> Focus Col   │         │  (CTRL/SUPER/ALT/SHIFT) │
-│  j/k     -> Focus Ws    │         │  Mọi phím tự động kèm   │
-│  1-9     -> Jump Ws     │         │  Modifier cho đến Esc   │
-│  Ctrl+...-> Move Col/Ws │         │                         │
-│  c/p/s/r/d/t -> Actions │         │  Esc / Caps ──> NORMAL  │
-│  i / Esc ──> NORMAL     │         └─────────────────────────┘
-└─────────────────────────┘
+┌─────────────────────────────────┐ ┌─────────────────────────┐
+│ NIRI / CHROMIUM / TERMINALS     │ │   LOCKED MODIFIER MODES │
+│ 1: Niri (WM, Workspaces)        │ │  (CTRL/SUPER/ALT/SHIFT) │
+│ 2: Chromium (Tabs, Vimium-C)    │ │  Mọi phím tự động kèm   │
+│ 3: Terminals (Zellij Multiplex) │ │  Modifier cho đến Esc   │
+│ Chuyển qua lại: Hold Caps+1/2/3 │ │  Esc / Caps ──> NORMAL  │
+│ Thoát: Double Caps / Esc ──> N  │ └─────────────────────────┘
+└─────────────────────────────────┘
 ```
 
 ### 3.1. Normal Layer (Lớp cơ bản)
 - Gõ văn bản hoàn toàn nguyên bản như bàn phím phần cứng.
 - **Chuyển tầng trực tiếp & an toàn:**
-  - `CapsLock`: Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả nhanh (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
+  - `CapsLock`: 
+    - **Single-tap**: Chuyển ngay sang **Navigate Layer** (Vim motions).
+    - **Double-tap**: Chuyển sang **Super Layer** (One-shot / Sticky Modifiers).
+    - **Giữ (Hold)**: Đóng vai trò phím bổ trợ hợp âm (`caps_mode`) để chuyển nhanh sang các layer chuyên biệt mà không tạo bất kỳ delay nào khi thả ra.
+  - `Hold / Tap CapsLock + <key>` (Hợp âm hoặc gõ tuần tự):
+    - `CapsLock` + `Space` $\rightarrow$ Chuyển sang **Super Layer**.
+    - `CapsLock` + `` ` `` $\rightarrow$ Chuyển sang **Navigate Layer**.
+    - `CapsLock` + `1` $\rightarrow$ Chuyển sang **Niri Layer**.
+    - `CapsLock` + `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
+    - `CapsLock` + `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
-  - `RightShift`: Nhấn thả bình thường = `RightShift`. Giữ $\ge$ 200ms = Chuyển sang **Super Layer**.
+  - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
+- **Cơ chế thoát hiểm Double Esc toàn cục (Global Double Esc Recovery):**
+  - Áp dụng trên toàn bộ 100% các layer của hệ thống (`Normal`, `Navigate`, `Super`, `Chromium`, `Terminals`, `Niri`, `Ctrl/Super/Alt/Shift Locked`, `Bypass`).
+  - **Single-tap `Esc`**: Hủy toàn bộ modifier đang chờ/active, gửi `Esc` và chuyển ngay về `Normal Layer`.
+  - **Double-tap `Esc`** (trong vòng 250ms): Gửi tín hiệu `caps` (để gỡ bỏ ngay lập tức trạng thái CapsLock phần cứng nếu lỡ bị kẹt in hoa), giải phóng toàn bộ modifier, gửi `Esc` và đưa bàn phím về trạng thái gõ chữ thường mặc định (`Normal Layer`).
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
-- **Di chuyển con trỏ:**
+- **Di chuyển con trỏ & Ứng dụng:**
+  - `tab` $\rightarrow$ `Alt + Tab` (Chuyển nhanh qua lại giữa các cửa sổ ứng dụng).
+  - `` ` `` $\rightarrow$ Duy trì **Navigate Layer**.
   - `h / j / k / l` $\rightarrow$ Mũi tên Trái / Xuống / Lên / Phải.
   - `Ctrl + h` $\rightarrow$ `Ctrl + Shift + Tab` (Tab trước).
   - `Ctrl + l` $\rightarrow$ `Ctrl + Tab` (Tab kế tiếp).
@@ -95,9 +115,11 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Ctrl + d / u` $\rightarrow$ `PageDown / PageUp`.
   - `Ctrl + o` $\rightarrow$ `Alt + Left` (Lịch sử trình duyệt lùi).
   - `Ctrl + i` $\rightarrow$ `Alt + Right` (Lịch sử trình duyệt tiến).
-- **Nhảy từ & Biên dòng:**
-  - `w` $\rightarrow$ `Ctrl + Right` (Nhảy tới đầu từ kế).
-  - `e` / `b` $\rightarrow$ `Ctrl + Left` (Nhảy về đầu từ trước).
+- **Nhảy từ, Biên dòng & Tài liệu:**
+  - `w` hoặc `e` $\rightarrow$ `Ctrl + Right` (Nhảy tới đầu từ tiếp theo).
+  - `b` $\rightarrow$ `Ctrl + Left` (Nhảy về đầu từ trước đó).
+  - `gg` (Double-tap `g`) $\rightarrow$ `Ctrl + Home` (Lên đầu trang / file).
+  - `G` (`Shift + g`) $\rightarrow$ `Ctrl + End` (Xuống cuối trang / file).
   - `0` $\rightarrow$ `Home` (Đầu dòng).
   - `$` (`Shift + 4`) $\rightarrow$ `End` (Cuối dòng).
 - **Thao tác chỉnh sửa nhanh:**
@@ -107,10 +129,13 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `z` $\rightarrow$ `Ctrl + Z` (Hoàn tác / Undo).
   - `r` $\rightarrow$ `Ctrl + Y` (Làm lại / Redo).
   - `/` $\rightarrow$ `Ctrl + F` (Tìm kiếm).
-- **Chuyển tiếp & Thoát:**
+- **Chuyển tiếp & Thoát thông minh:**
   - `1` $\rightarrow$ Chuyển sang **Niri Layer**.
-  - `i` $\rightarrow$ Trở về **Normal Layer** (theo thói quen Insert mode của Vim).
-  - `Esc` hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer** (không kích hoạt in hoa).
+  - `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
+  - `3` $\rightarrow$ Chuyển sang **Terminals Layer**.
+  - `Hold CapsLock + 1/2/3/`` $\rightarrow$ Chuyển trực tiếp sang các layer tương ứng mà không bị thoát về Normal.
+  - `Single-tap CapsLock` $\rightarrow$ Duy trì ở **Navigate Layer**.
+  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
 
 ### 3.3. Super Layer (Lớp phím bổ trợ One-Shot & Sticky)
 - **One-Shot Modifiers (cho 1 thao tác tiếp theo, timeout 2000ms):**
@@ -120,7 +145,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `f` $\rightarrow$ `Alt`.
   *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Alt` cho phím gõ tiếp theo).*
 - **Cơ chế thoát Super & Giữ phím chờ (Waiting Preserved):**
-  - Trong `super`: Nhấn `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
+  - Trong `super`: Nhấn `RightShift`, `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
   - Trong `normal`: Chỉ khi bấm `Esc` ở `normal`, Kanata mới **hủy toàn bộ modifier đang chờ** (cancel waiting).
 - **Sticky Locking (cho thao tác lặp đi lặp lại):**
   - `Shift + a` $\rightarrow$ Khóa `Super` liên tục. Bấm `Esc` để chuyển thẳng vào chế độ gõ `super_locked` (mọi phím đều kèm Super).
@@ -141,8 +166,6 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `Ctrl + 1 - 9` $\rightarrow$ Chuyển window đang focus sang workspace tương ứng (`Mod+Ctrl+1..9`).
   - `Shift + h / l` $\rightarrow$ Chuyển focus sang màn hình trái / phải.
   - `Alt + h / l` $\rightarrow$ Chuyển window sang màn hình trái / phải.
-- **Thoát layer:**
-  - `i`, `Esc`, hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer**.
 - **Hành động One-shot (Chạy xong tự động về Normal):**
   - `c` $\rightarrow$ Căn giữa cột (`Mod+C`).
   - `p` $\rightarrow$ Mở Project launcher (`Mod+P`).
@@ -155,7 +178,70 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 - **Hành động duy trì:**
   - `f` $\rightarrow$ Fullscreen (`Mod+F`).
   - `q` $\rightarrow$ Đóng cửa sổ (`Mod+Q`).
-  - `Esc` $\rightarrow$ Trở về **Normal Layer**.
+- **Thoát layer:**
+  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
+  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
+  - `Hold CapsLock + 1/2/3/`` $\rightarrow$ Chuyển trực tiếp giữa các layer.
+
+### 3.5. Chromium Layer (Lớp thao tác trình duyệt)
+- **Kích hoạt:** Trong `Navigate Layer` (hoặc `nav_slk`/`nav_clk`), bấm `2` (tương ứng tổ hợp `CapsLock + 2`).
+- **Thao tác Tab:**
+  - `t` $\rightarrow$ Mở tab mới (`Ctrl + T`).
+  - `Shift + t` $\rightarrow$ Khôi phục tab vừa đóng (`Ctrl + Shift + T`).
+  - `r` $\rightarrow$ Tải lại trang (`Ctrl + R`). `Shift + r` $\rightarrow$ Tải lại không cache (`Ctrl + Shift + R`).
+  - `x` $\rightarrow$ Đóng tab hiện tại (`Ctrl + W`).
+  - `m` $\rightarrow$ Toggle mute site / tab (`Alt + M` tương thích Vimium-C).
+  - `h` $\rightarrow$ Tab trước (`Ctrl + Shift + Tab`).
+  - `l` $\rightarrow$ Tab kế tiếp (`Ctrl + Tab`).
+- **Cuộn trang:**
+  - `j` $\rightarrow$ Cuộn xuống 1 trang (`PageDown`).
+  - `k` $\rightarrow$ Cuộn lên 1 trang (`PageUp`).
+- **Số & Nhảy tab:**
+  - `1 - 9`, `0` $\rightarrow$ Gõ số bình thường (`1 - 9`, `0`).
+  - `Ctrl + 1 - 9` $\rightarrow$ Nhảy trực tiếp tới tab 1..9 (`Ctrl + 1..9`).
+  - `Ctrl + 0` $\rightarrow$ Nhảy tới tab cuối cùng (`Ctrl + 9`).
+- **Thoát layer:**
+  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
+  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
+  - `Hold CapsLock + 1/3/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Terminals, Navigate.
+
+### 3.6. Terminals Layer (Lớp thao tác Terminal Multiplexer Zellij)
+- **Kích hoạt:**
+  - Trong `Normal Layer`: Bấm tổ hợp hoặc gõ tuần tự `CapsLock + 3`.
+  - Trong `Navigate Layer` (hoặc `nav_slk`/`nav_clk`): Bấm phím `3`.
+  - Giữ `CapsLock` và bấm `3` từ bất kỳ layer nào.
+- **Điều hướng Panes & CLI:**
+  - `h` $\rightarrow$ Chuyển focus pane sang trái (`Ctrl + H`, tương thích Neovim split).
+  - `l` $\rightarrow$ Chuyển focus pane sang phải (`Ctrl + L`, tương thích Neovim split).
+  - `j` $\rightarrow$ Mũi tên xuống (`Down`) để cuộn lịch sử lệnh CLI / chọn menu fzf / TUI. (Khi kèm Ctrl: `Ctrl + J` để chuyển pane xuống trong Zellij).
+  - `k` $\rightarrow$ Mũi tên lên (`Up`) để cuộn lịch sử lệnh CLI / chọn menu fzf / TUI. (Khi kèm Ctrl: `Ctrl + K` để chuyển pane lên trong Zellij).
+- **Quản lý Session, Window & Pane:**
+  - `s` $\rightarrow$ Mở Zellij Session Manager (`Ctrl + Shift + S`).
+  - `x` $\rightarrow$ Đóng pane đang focus (`Ctrl + Shift + W`). `Shift + x` $\rightarrow$ Đóng cả tab (`Ctrl + Shift + Q`).
+  - `w` $\rightarrow$ Toggle Floating Panes (`Ctrl + Shift + P`). `Shift + w` $\rightarrow$ Embed/Float pane (`Ctrl + Shift + E`).
+  - `t` $\rightarrow$ Tạo tab mới trong Zellij (`Ctrl + Shift + T`).
+  - `q` $\rightarrow$ Đóng tab hiện tại (`Ctrl + Shift + Q`).
+  - `n` $\rightarrow$ Tạo pane split mới bên phải (`Ctrl + Shift + N`).
+  - `d` $\rightarrow$ Tạo pane split mới bên dưới (`Ctrl + Shift + D`).
+  - `f` $\rightarrow$ Phóng to / Thu nhỏ pane đang chọn (`Ctrl + Shift + F` - Fullscreen).
+  - `r` $\rightarrow$ Đổi tên tab (`Ctrl + Shift + R`).
+- **Scroll & Tìm kiếm:**
+  - `b` $\rightarrow$ Chế độ xem lại & cuộn trang (`Ctrl + Shift + B` - Scroll mode).
+  - `/` $\rightarrow$ Tìm kiếm log scrollback (`Ctrl + Shift + /`).
+- **Tiện ích & Plugins Zellij:**
+  - `a` $\rightarrow$ Mở Room plugin tìm nhanh tab/session (`Ctrl + Shift + A`).
+  - `z` $\rightarrow$ Mở bảng trợ giúp phím tắt Zellij (`Ctrl + Shift + Z` - Zellij forgot).
+  - `[` / `]` $\rightarrow$ Chuyển tab trước / tab kế (`Ctrl + Shift + [` / `Ctrl + Shift + ]`).
+  - `1 - 9`, `0` $\rightarrow$ Gõ số bình thường; `Ctrl + 1 - 9`: Nhảy trực tiếp tới tab 1..9 (`Ctrl + Shift + 1..9`).
+- **Thoát layer:**
+  - `Single-tap CapsLock` $\rightarrow$ Trở về **Navigate Layer** (chế độ điều hướng mặc định).
+  - `Double-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer**.
+  - `Hold CapsLock + 1/2/`` $\rightarrow$ Chuyển trực tiếp sang Niri, Chromium, Navigate.
+
+### 3.7. Hệ thống Chỉ báo trực quan (Mode Indicator & OSD Overlay)
+- **On-Screen Display (OSD Overlay):** Khi người dùng chuyển sang bất kỳ chế độ nào (`NAVIGATE`, `CHROMIUM`, `TERMINALS`, `NIRI`, `SUPER`, `CTRL_LOCKED`, v.v.), hệ thống lập tức hiển thị một popup badge nổi trên màn hình kèm tóm tắt phím tắt chính, tự động biến mất sau 1-2s và thay thế tức thì không dồn đọng thông báo.
+- **Thanh trạng thái Niri (Noctalia Status Bar):** Widget `keymap` trên thanh bar hiển thị nhãn chế độ thời gian thực (`NORMAL`, `NAV`, `CHROM`, `TERM`, `NIRI`, `SUPER`, `C-LOCK`), cho phép click để mở bảng tra cứu phím tắt.
+- **Cơ chế hoạt động:** Daemon `scripts/kanata-indicator.sh` lắng nghe sự kiện `Entered layer` từ Kanata stream, cập nhật trạng thái ra `/run/user/$UID/kanata-mode` và phát thông báo OSD qua `notify-send`. Chạy nền tự động qua systemd user service `kanata-indicator.service` và Niri autostart.
 
 ---
 
