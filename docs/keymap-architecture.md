@@ -82,7 +82,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 ### 3.1. Normal Layer (Lớp cơ bản)
 - Gõ văn bản hoàn toàn nguyên bản như bàn phím phần cứng.
 - **Chuyển tầng trực tiếp & an toàn:**
-  - `CapsLock`: Nhấn để chuyển ngay sang **Navigate Layer** (không phát phím `Esc` tránh mất dấu caret/focus trong input, không bật đèn CapsLock phần cứng).
+  - `CapsLock`: Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả nhanh (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
   - `RightShift`: Nhấn thả bình thường = `RightShift`. Giữ $\ge$ 200ms = Chuyển sang **Super Layer**.
 
@@ -123,12 +123,12 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - Trong `super`: Nhấn `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
   - Trong `normal`: Chỉ khi bấm `Esc` ở `normal`, Kanata mới **hủy toàn bộ modifier đang chờ** (cancel waiting).
 - **Sticky Locking (cho thao tác lặp đi lặp lại):**
-  - `Shift + a` $\rightarrow$ Khóa `Super` liên tục (`super_locked`).
+  - `Shift + a` $\rightarrow$ Khóa `Super` liên tục. Bấm `Esc` để chuyển thẳng vào chế độ gõ `super_locked` (mọi phím đều kèm Super).
   - `Shift + s` $\rightarrow$ Khóa `Shift` liên tục (`shift_locked`).
-  - `Shift + d` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
+  - `Shift + d` hoặc `c` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
   - `Shift + f` $\rightarrow$ Khóa `Alt` liên tục (`alt_locked`).
-  - `c` $\rightarrow$ Khóa `Ctrl` liên tục (`ctrl_locked`).
-- **Thoát các lớp Locked:** `Esc` hoặc `CapsLock` giải phóng mọi modifier và trở về **Normal Layer**.
+  - **Điều hướng trong Locked Mode:** Giữ `CapsLock` 200ms để sang `Navigate` (`nav_slk`/`nav_clk`). Nhấn `i`/`Esc`/`Caps` trở lại Locked mode mà không làm mất trạng thái khóa modifier.
+  - **Hủy chế độ khóa:** Chỉ khi nhấn `Esc` tại chế độ gõ (Normal / Locked Mode) mới giải phóng modifier và trở về `Normal` mặc định.
 
 ### 3.4. Niri Layer (Lớp điều khiển Window Manager Niri)
 - **Điều hướng cửa sổ & Workspace:**
