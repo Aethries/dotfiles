@@ -51,9 +51,9 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │                        NORMAL LAYER (Default)                   │
 │        Gõ phím mặc định 100% tự nhiên không delay/alteration    │
 │        Giữ CapsLock (200ms)    ──> NAVIGATE LAYER               │
-│        Giữ RightShift (200ms)  ──> SUPER LAYER                  │
+│        Bấm RightShift (instant)──> SUPER LAYER                  │
 └─────────────────────────────────────────────────────────────────┘
-           │ (Hold CapsLock 200ms)             │ (Hold RightShift 200ms)
+           │ (Hold CapsLock 200ms)             │ (Press RightShift)
            ▼                                   ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
 │     NAVIGATE LAYER      │         │       SUPER LAYER       │
@@ -64,19 +64,18 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 │  w/e/b    -> Word jumps │         │  Shift + a/s/d/f ->     │
 │  x/y/p/z  -> Del/Cp/Pst │         │    Sticky Lock Modifier │
 │  Bấm 1    ──> NIRI      │         │  c -> Lock Ctrl Mode    │
+│  Bấm 2    ──> CHROMIUM  │         │  RightShift ──> NORMAL  │
 │  i / Esc  ──> NORMAL    │         │  Esc / i ──> NORMAL     │
 └─────────────────────────┘         └─────────────────────────┘
-           │ Bấm 1                               │ Shift+a/s/d/f
+           │ Bấm 1 / Bấm 2                       │ Shift+a/s/d/f
            ▼                                     ▼
 ┌─────────────────────────┐         ┌─────────────────────────┐
-│       NIRI LAYER        │         │   LOCKED MODIFIER MODES │
-│  h/l     -> Focus Col   │         │  (CTRL/SUPER/ALT/SHIFT) │
-│  j/k     -> Focus Ws    │         │  Mọi phím tự động kèm   │
-│  1-9     -> Jump Ws     │         │  Modifier cho đến Esc   │
-│  Ctrl+...-> Move Col/Ws │         │                         │
-│  c/p/s/r/d/t -> Actions │         │  Esc / Caps ──> NORMAL  │
-│  i / Esc ──> NORMAL     │         └─────────────────────────┘
-└─────────────────────────┘
+│  NIRI / CHROMIUM LAYER  │         │   LOCKED MODIFIER MODES │
+│  (Window / Browser Nav) │         │  (CTRL/SUPER/ALT/SHIFT) │
+│  i / Esc ──> NORMAL     │         │  Mọi phím tự động kèm   │
+│                         │         │  Modifier cho đến Esc   │
+│                         │         │  Esc / Caps ──> NORMAL  │
+└─────────────────────────┘         └─────────────────────────┘
 ```
 
 ### 3.1. Normal Layer (Lớp cơ bản)
@@ -84,7 +83,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 - **Chuyển tầng trực tiếp & an toàn:**
   - `CapsLock`: Giữ $\ge$ 200ms để chuyển sang **Navigate Layer**. Nhấn thả nhanh (< 200ms) không thực hiện hành động nào (tránh mất caret/focus trong input và không bật đèn CapsLock phần cứng).
   - `Shift + CapsLock`: Bật/tắt CapsLock phần cứng (khi thực sự cần gõ IN HOA toàn bộ).
-  - `RightShift`: Nhấn thả bình thường = `RightShift`. Giữ $\ge$ 200ms = Chuyển sang **Super Layer**.
+  - `RightShift`: Nhấn trực tiếp = Chuyển ngay sang **Super Layer** (instant press toggle, zero latency, không cần giữ).
 
 ### 3.2. Navigate Layer (Lớp điều hướng & Chỉnh sửa)
 - **Di chuyển con trỏ:**
@@ -109,6 +108,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `/` $\rightarrow$ `Ctrl + F` (Tìm kiếm).
 - **Chuyển tiếp & Thoát:**
   - `1` $\rightarrow$ Chuyển sang **Niri Layer**.
+  - `2` $\rightarrow$ Chuyển sang **Chromium Layer**.
   - `i` $\rightarrow$ Trở về **Normal Layer** (theo thói quen Insert mode của Vim).
   - `Esc` hoặc `CapsLock` $\rightarrow$ Trở về **Normal Layer** (không kích hoạt in hoa).
 
@@ -120,7 +120,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `f` $\rightarrow$ `Alt`.
   *(Kanata hỗ trợ dồn one-shot: Bấm `a` rồi `f` sẽ tự động thành `Super + Alt` cho phím gõ tiếp theo).*
 - **Cơ chế thoát Super & Giữ phím chờ (Waiting Preserved):**
-  - Trong `super`: Nhấn `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
+  - Trong `super`: Nhấn `RightShift`, `Esc`, `CapsLock`, hoặc `i` sẽ thoát về `normal` nhưng **không làm mất modifier đang chờ** (nhờ cơ chế `one-shot-pause-processing`). Người dùng có thể quay về `normal` và bấm phím mục tiêu để áp modifier đó.
   - Trong `normal`: Chỉ khi bấm `Esc` ở `normal`, Kanata mới **hủy toàn bộ modifier đang chờ** (cancel waiting).
 - **Sticky Locking (cho thao tác lặp đi lặp lại):**
   - `Shift + a` $\rightarrow$ Khóa `Super` liên tục. Bấm `Esc` để chuyển thẳng vào chế độ gõ `super_locked` (mọi phím đều kèm Super).
@@ -156,6 +156,24 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `f` $\rightarrow$ Fullscreen (`Mod+F`).
   - `q` $\rightarrow$ Đóng cửa sổ (`Mod+Q`).
   - `Esc` $\rightarrow$ Trở về **Normal Layer**.
+
+### 3.5. Chromium Layer (Lớp thao tác trình duyệt)
+- **Kích hoạt:** Trong `Navigate Layer` (hoặc `nav_slk`/`nav_clk`), bấm `2` (tương ứng tổ hợp `CapsLock + 2`).
+- **Thao tác Tab:**
+  - `t` $\rightarrow$ Mở tab mới (`Ctrl + T`).
+  - `Shift + t` $\rightarrow$ Khôi phục tab vừa đóng (`Ctrl + Shift + T`).
+  - `x` $\rightarrow$ Đóng tab hiện tại (`Ctrl + W`).
+  - `h` $\rightarrow$ Tab trước (`Ctrl + Shift + Tab`).
+  - `l` $\rightarrow$ Tab kế tiếp (`Ctrl + Tab`).
+- **Cuộn trang:**
+  - `j` $\rightarrow$ Cuộn xuống 1 trang (`PageDown`).
+  - `k` $\rightarrow$ Cuộn lên 1 trang (`PageUp`).
+- **Số & Nhảy tab:**
+  - `1 - 9`, `0` $\rightarrow$ Gõ số bình thường (`1 - 9`, `0`).
+  - `Ctrl + 1 - 9` $\rightarrow$ Nhảy trực tiếp tới tab 1..9 (`Ctrl + 1..9`).
+  - `Ctrl + 0` $\rightarrow$ Nhảy tới tab cuối cùng (`Ctrl + 9`).
+- **Thoát layer:**
+  - `CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về **Normal Layer** (vẫn bảo toàn modifier waiting nếu có).
 
 ---
 
