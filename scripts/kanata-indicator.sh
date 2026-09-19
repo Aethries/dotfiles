@@ -31,11 +31,15 @@ stdbuf -oL journalctl -u kanata-internal -f -n 0 -o cat | while IFS= read -r lin
                 ;;
             navigate)
                 echo "NAV" > "$MODE_FILE"
-                send_osd "🧭 NAVIGATE" "h/j/k/l · w/e · Tab(Alt+Tab) · 1:Niri · 2:Chrom · Esc:Exit" 2000
+                send_osd "🧭 NAVIGATE" "h/j/k/l · w/e · gg/G · Tab(Alt+Tab) · 1:Niri · 2:Chrom · 3:Term · Esc:Exit" 2000
                 ;;
             chromium)
                 echo "CHROM" > "$MODE_FILE"
                 send_osd "🌐 CHROMIUM" "t/S-t:Tab · x:Close · m:Mute · h/l:Tabs · j/k:Scroll · Esc:Exit" 2000
+                ;;
+            terminals)
+                echo "TERM" > "$MODE_FILE"
+                send_osd "📟 TERMINALS" "h/l:Panes · j/k:Arrows · s:Session · x:Close · w:Win · Esc:Exit" 2000
                 ;;
             niri)
                 echo "NIRI" > "$MODE_FILE"

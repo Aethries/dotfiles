@@ -48,6 +48,7 @@
   to_alk  (layer-switch alt_locked)
   to_shlk (layer-switch shift_locked)
   to_chrom (layer-switch chromium)
+  to_term (layer-switch terminals)
   to_bp   (layer-switch bypass)
 
   to_arm_slk  (layer-switch super_armed_slk)
@@ -66,13 +67,21 @@
   norm_preserve (multi (one-shot-pause-processing 100) @to_norm)
 
   ;; Normal mode triggers:
-  ;; CapsLock: double-tap enters navigate layer; hold acts as chord modifier (Space/1/2).
-  ;; Quick single tap or release without chord does nothing (XX).
+  ;; CapsLock: single-tap enters navigate (@nav_preserve); double-tap enters super (@to_sup);
+  ;; hold acts as chord modifier for layers (1:niri, 2:chrom, 3:term, spc:super, `:nav).
   ;; Shift + CapsLock triggers real CapsLock hardware toggle if needed.
-  caps_lwh    (layer-while-held caps_mode)
-  caps_td     (tap-dance 200 (XX @nav_preserve))
-  caps_held   (tap-hold-press 200 200 @caps_td @caps_lwh)
-  caps_to_nav (fork @caps_held caps (lsft rsft))
+  caps_lwh         (layer-while-held caps_mode)
+  caps_td_norm     (tap-dance 200 (@nav_preserve @to_sup))
+  caps_held_norm   (tap-hold-press 200 200 @caps_td_norm @caps_lwh)
+  caps_to_nav      (fork @caps_held_norm caps (lsft rsft))
+
+  ;; Navigation layers (navigate, niri, chromium, terminals, super):
+  ;; Single-tap CapsLock returns to default navigate layer (@nav_preserve).
+  ;; Double-tap CapsLock returns to normal mode (@norm_preserve).
+  ;; Hold CapsLock allows direct chords (1..3, spc, `) between layers.
+  caps_td_layers   (tap-dance 200 (@nav_preserve @norm_preserve))
+  caps_held_layers (tap-hold-press 200 200 @caps_td_layers @caps_lwh)
+  caps_nav_layer   (fork @caps_held_layers caps (lsft rsft))
 
   ;; Navigation from locked modes: double-tap CapsLock to navigate
   caps_td_slk   (tap-dance 200 (XX @to_nav_slk))
@@ -132,6 +141,41 @@
   w_fwd C-rght
   w_bwd C-left
   key_4 (fork 4 end (lsft rsft))
+  g_td  (tap-dance 250 (XX C-home))
+  g_nav (fork @g_td C-end (lsft rsft))
+
+  ;; --------------------------------------------------------------------------
+  ;; Terminals Layer Actions (Zellij Multiplexer Navigation via CapsLock + 3)
+  ;; --------------------------------------------------------------------------
+  tm_h (fork C-h C-S-left (lsft rsft))
+  tm_l (fork C-l C-S-rght (lsft rsft))
+  tm_j (fork down C-j (lctl rctl))
+  tm_k (fork up   C-k (lctl rctl))
+  tm_s C-S-s
+  tm_x (fork C-S-w C-S-q (lsft rsft))
+  tm_w (fork C-S-p C-S-e (lsft rsft))
+  tm_t C-S-t
+  tm_n C-S-n
+  tm_d C-S-d
+  tm_f C-S-f
+  tm_r C-S-r
+  tm_b C-S-b
+  tm_srch C-S-/
+  tm_z C-S-z
+  tm_a C-S-a
+  tm_prev C-S-[
+  tm_next C-S-]
+
+  tm_1 (fork 1 C-S-1 (lctl rctl))
+  tm_2 (fork 2 C-S-2 (lctl rctl))
+  tm_3 (fork 3 C-S-3 (lctl rctl))
+  tm_4 (fork 4 C-S-4 (lctl rctl))
+  tm_5 (fork 5 C-S-5 (lctl rctl))
+  tm_6 (fork 6 C-S-6 (lctl rctl))
+  tm_7 (fork 7 C-S-7 (lctl rctl))
+  tm_8 (fork 8 C-S-8 (lctl rctl))
+  tm_9 (fork 9 C-S-9 (lctl rctl))
+  tm_0 (fork 0 C-S-9 (lctl rctl))
 
   ;; --------------------------------------------------------------------------
   ;; Super Layer Actions (One-Shot Modifiers & Sticky Locks with Shift)
@@ -189,6 +233,7 @@
   v_nav   (multi (one-shot-pause-processing 100) (layer-switch navigate))
   v_niri  (layer-switch niri)
   v_chrom (layer-switch chromium)
+  v_term  (layer-switch terminals)
 )
 
 (defseq
@@ -196,6 +241,7 @@
   v_nav   (caps grv)
   v_niri  (caps 1)
   v_chrom (caps 2)
+  v_term  (caps 3)
 )
 
 ;; ----------------------------------------------------------------------------
@@ -203,7 +249,7 @@
 ;; ----------------------------------------------------------------------------
 (deflayer caps_mode
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  @to_nav @to_niri @to_chrom _ _ _ _ _ _ _    _    _    _    _
+  @to_nav @to_niri @to_chrom @to_term _ _ _ _ _ _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
@@ -227,9 +273,9 @@
 ;; ----------------------------------------------------------------------------
 (deflayer navigate
   @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @to_nav @to_niri @to_chrom 3 @key_4 5 6 7    8    9    home -    =    bspc
-  @tab_nav q    @w_fwd @w_bwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
-  @norm_preserve C-a s    @d_nav f  g    @h_nav @j_nav @k_nav @l_nav ; apos ret
+  @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
+  @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
+  @caps_nav_layer C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    v    @w_bwd n  m    ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
@@ -241,7 +287,7 @@
   @norm_preserve f1 f2 f3 f4  f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    @norm_preserve o p [ ]   \
-  @norm_preserve @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
+  @caps_nav_layer @sup_a @sup_s @sup_d @sup_f g h j k l ; apos ret
   lsft z    x    @to_arm_clk v b    n    m    ,    .    /    @norm_preserve
   lctl lmet lalt           spc            ralt rmet rctl
 )
@@ -253,19 +299,31 @@
   @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @ch_1 @ch_2 @ch_3 @ch_4 @ch_5 @ch_6 @ch_7 @ch_8 @ch_9 @ch_0 - = bspc
   tab  q    w    e    r    @ch_t y    u    @norm_preserve o p [ ] \
-  @norm_preserve a s d f g @ch_h @ch_j @ch_k @ch_l ; apos ret
+  @caps_nav_layer a s d f g @ch_h @ch_j @ch_k @ch_l ; apos ret
   lsft z    @ch_x c    v    b    n    @ch_m ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
 ;; ----------------------------------------------------------------------------
-;; 4. Niri Layer (Window & Workspace Management)
+;; 5. Terminals Layer (Zellij Multiplexer Navigation via CapsLock + 3)
+;; ----------------------------------------------------------------------------
+(deflayer terminals
+  @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  @tm_1 @tm_2 @tm_3 @tm_4 @tm_5 @tm_6 @tm_7 @tm_8 @tm_9 @tm_0 - = bspc
+  tab  @tm_x @tm_w e    @tm_r @tm_t y    u    @norm_preserve o p @tm_prev @tm_next \
+  @caps_nav_layer @tm_a @tm_s @tm_d @tm_f g @tm_h @tm_j @tm_k @tm_l ; apos ret
+  lsft @tm_z @tm_x c    v    @tm_b @tm_n m    ,    .    @tm_srch rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; ----------------------------------------------------------------------------
+;; 6. Niri Layer (Window & Workspace Management)
 ;; ----------------------------------------------------------------------------
 (deflayer niri
   @norm_preserve f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
   @niri_over M-q w e  @niri_rec @niri_term y u @norm_preserve o @niri_proj [ ] \
-  @norm_preserve a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
+  @caps_nav_layer a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @niri_term
   lsft z    x    @niri_center @niri_clip b n m , . / rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
