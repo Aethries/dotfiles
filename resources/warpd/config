@@ -42,12 +42,16 @@ drag: v
 drag_button: 1
 copy_and_exit: c
 
+# In-session Jump Transitions (Inside Normal/Movement mode)
+hint: f
+grid: g
+
 # Hint Mode (Vimium-like screen target selection)
 hint_chars: asdfghjklqwertyuiopzxcvbnm
 hint_font: monospace
-hint_size: 22
-hint_border_radius: 4
-hint_bgcolor: #1e1e2e
+hint_size: 13
+hint_border_radius: 3
+hint_bgcolor: #1e1e2ecc
 hint_fgcolor: #cdd6f4
 hint_exit: esc
 hint_undo: backspace
