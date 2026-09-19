@@ -9,7 +9,7 @@ max_speed: 4500
 acceleration: 1800
 accelerator_acceleration: 9000
 decelerator_speed: 40
-decelerator: d
+decelerator: s
 accelerator: a
 repeat_interval: 10
 
@@ -26,18 +26,18 @@ bottom: L
 start: 0
 end: $
 
-# Scrolling (u: down, i: up)
-scroll_down: u
-scroll_up: i
+# Scrolling (d: down, u: up)
+scroll_down: d
+scroll_up: u
 scroll_speed: 350
 scroll_max_speed: 5000
 scroll_acceleration: 1600
 
 # Mouse clicks & Dragging
 # Persistent clicks (stay in warpd for multiple clicks/drags)
-buttons: m , .
+buttons: space , .
 # Oneshot clicks (click and immediately exit warpd back to typing)
-oneshot_buttons: space - /
+oneshot_buttons: i - /
 drag: v
 drag_button: 1
 copy_and_exit: c

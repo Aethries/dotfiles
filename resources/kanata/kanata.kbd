@@ -77,7 +77,13 @@
   caps_held_norm   (tap-hold-press 200 200 @caps_td_norm @caps_lwh)
   caps_to_nav      (fork @caps_held_norm caps (lsft rsft))
 
-  ;; Navigation layers (navigate, niri, chromium, terminals, super):
+  ;; Navigation layers:
+  ;; In navigate layer: single-tap returns directly to normal mode (@norm_preserve), double-tap to super (@to_sup).
+  caps_td_nav      (tap-dance 200 (@norm_preserve @to_sup))
+  caps_held_nav    (tap-hold-press 200 200 @caps_td_nav @caps_lwh)
+  caps_nav_direct  (fork @caps_held_nav caps (lsft rsft))
+
+  ;; In other sub-layers (niri, chromium, terminals):
   ;; Single-tap CapsLock returns to default navigate layer (@nav_preserve).
   ;; Double-tap CapsLock returns to normal mode (@norm_preserve).
   ;; Hold CapsLock allows direct chords (1..3, spc, `) between layers.
@@ -248,10 +254,10 @@
   ;; --------------------------------------------------------------------------
   ;; Warpd Pointer Layer Actions (Mouse Emulation via Issue #28)
   ;; --------------------------------------------------------------------------
-  warp_hint (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
-  warp_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-m)
-  warp_hint_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p @to_norm)
-  warp_norm_norm (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-m @to_norm)
+  warp_hint (multi M-A-p)
+  warp_norm (multi M-A-m)
+  warp_hint_norm (multi (macro M-A-p) @to_norm)
+  warp_norm_norm (multi (macro M-A-m) @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
 )
@@ -265,8 +271,8 @@
   v_niri   (layer-switch niri)
   v_chrom  (layer-switch chromium)
   v_term   (layer-switch terminals)
-  v_warp   (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
-  v_warp_m (multi (release-key lmet) (release-key lalt) (release-key lsft) M-A-p)
+  v_warp   (multi M-A-p)
+  v_warp_m (multi M-A-m)
 )
 
 (defseq
@@ -310,7 +316,7 @@
   @esc_reset f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @to_nav @to_niri @to_chrom @to_term @key_4 5 6 7 8 9 home - = bspc
   @tab_nav q    @w_fwd @w_fwd C-y  t    C-c  @u_nav @i_nav @o_nav C-v [   ]   \
-  @caps_nav_layer C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
+  @caps_nav_direct C-a s    @d_nav f  @g_nav @h_nav @j_nav @k_nav @l_nav ; apos ret
   lsft C-z  del  c    @to_vis @w_bwd n  @m_nav ,    .    C-f  rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
