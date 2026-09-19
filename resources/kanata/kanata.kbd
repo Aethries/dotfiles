@@ -254,10 +254,10 @@
   ;; --------------------------------------------------------------------------
   ;; Warpd Pointer Layer Actions (Mouse Emulation via Issue #28)
   ;; --------------------------------------------------------------------------
-  warp_hint (multi M-A-p)
-  warp_norm (multi M-A-m)
-  warp_hint_norm (multi (macro M-A-p) @to_norm)
-  warp_norm_norm (multi (macro M-A-m) @to_norm)
+  warp_hint (multi (release-key lsft) (release-key rsft) M-A-p)
+  warp_norm (multi (release-key lsft) (release-key rsft) M-A-m)
+  warp_hint_norm (multi (release-key lsft) (release-key rsft) M-A-p @to_norm)
+  warp_norm_norm (multi (release-key lsft) (release-key rsft) M-A-m @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
 
