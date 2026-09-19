@@ -184,9 +184,6 @@ fi
 # ------------------------------------------------------------------------------
 info "Verifying AI gateway runtime health and port isolation..."
 
-# Allow services a brief moment to bind sockets
-sleep 1
-
 # Verify systemd service state
 if command -v systemctl >/dev/null 2>&1; then
     if ! systemctl --user is-active --quiet 9router.service 2>/dev/null; then
@@ -200,13 +197,13 @@ if command -v systemctl >/dev/null 2>&1; then
     success "OmniRoute systemd user service is active."
 fi
 
-# Verify port listeners using shared helper
-if ! is_port_listening "$ROUTER_9_PORT"; then
+# Verify port listeners with retry timeout (9router Next.js startup takes a few seconds to bind socket)
+if ! wait_for_port "$ROUTER_9_PORT" 20; then
     error "9Router is not listening on expected port $ROUTER_9_PORT."
 fi
 success "9Router is listening on port $ROUTER_9_PORT."
 
-if ! is_port_listening "$OMNIROUTE_PORT"; then
+if ! wait_for_port "$OMNIROUTE_PORT" 20; then
     error "OmniRoute is not listening on expected port $OMNIROUTE_PORT."
 fi
 

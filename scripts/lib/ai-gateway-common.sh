@@ -72,3 +72,17 @@ is_port_loopback_only() {
     [ "$count" -gt 0 ] || return 1
     return 0
 }
+
+wait_for_port() {
+    local port="$1"
+    local timeout="${2:-15}"
+    local elapsed=0
+    while [ "$elapsed" -lt "$timeout" ]; do
+        if is_port_listening "$port"; then
+            return 0
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+    return 1
+}
