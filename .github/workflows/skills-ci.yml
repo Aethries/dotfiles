@@ -1,0 +1,90 @@
+name: AI Agent Skills CI
+
+on:
+  push:
+    branches:
+      - main
+      - feat/ai-ecosystem
+    paths:
+      - 'resources/skills/**'
+      - 'scripts/ai-skills.sh'
+      - 'scripts/lib/agents.sh'
+      - 'scripts/lib/curate.sh'
+      - 'scripts/lib/discovery.sh'
+      - 'tests/ai/**'
+      - '.github/workflows/skills-ci.yml'
+  pull_request:
+    paths:
+      - 'resources/skills/**'
+      - 'scripts/ai-skills.sh'
+      - 'scripts/lib/agents.sh'
+      - 'scripts/lib/curate.sh'
+      - 'scripts/lib/discovery.sh'
+      - 'tests/ai/**'
+      - '.github/workflows/skills-ci.yml'
+
+jobs:
+  validate-skills:
+    name: Validate Skills Subsystem
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq shellcheck
+
+      - name: Validate Bash syntax
+        run: |
+          bash -n scripts/ai-skills.sh
+          bash -n scripts/lib/agents.sh
+          bash -n scripts/lib/curate.sh
+          bash -n scripts/lib/discovery.sh
+          bash -n tests/ai/skills_test.sh
+
+      - name: Run Shellcheck on scripts
+        run: |
+          shellcheck scripts/ai-skills.sh
+          shellcheck scripts/lib/agents.sh
+          shellcheck scripts/lib/curate.sh
+          shellcheck scripts/lib/discovery.sh
+
+      - name: Validate JSON Registry, Schema & Sources
+        run: |
+          jq empty resources/skills/_registry.json
+          jq empty resources/skills/_agents.json
+          jq empty resources/skills/_profiles.json
+          jq empty resources/skills/_sources.json
+          jq empty resources/skills/_lock.schema.json
+          jq empty resources/skills/_agents.schema.json
+
+      - name: Run Security Audit
+        run: |
+          bash scripts/lib/curate.sh audit
+
+      - name: Run Semantic Deduplication Check
+        run: |
+          bash scripts/lib/curate.sh dedup
+
+      - name: Run Automated Test Suite
+        run: |
+          bash tests/ai/skills_test.sh
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Check Flake Evaluation
+        run: |
+          nix flake check "path:$PWD" --no-build
+
+      - name: Ensure Clean Working Directory
+        run: |
+          git diff --exit-code

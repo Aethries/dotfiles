@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "profiles": {
+    "global-core": {
+      "name": "Global Core Engineering Baseline",
+      "description": "Foundational guardrails, senior roles, and essential developer workflow tools",
+      "skills": [
+        "architecture-guardrails",
+        "security-guardrails",
+        "system-design-guardrails",
+        "source-quality",
+        "project-context",
+        "quality-gate",
+        "feature-spec-writer",
+        "technical-planner",
+        "technical-researcher",
+        "architecture-designer",
+        "api-contract-designer",
+        "data-model-architect",
+        "test-strategist",
+        "engineering-review",
+        "skill-author",
+        "senior-implementer",
+        "pixel-perfect-ui",
+        "diagram-author",
+        "migration-strategist",
+        "incident-investigator",
+        "reliability-engineer",
+        "rtk",
+        "caveman",
+        "ponytail",
+        "codegraph",
+        "codebase-memory"
+      ]
+    },
+    "core": {
+      "name": "Core Essential Agent Skills",
+      "description": "Minimal baseline skills for concise, safe, anti-overengineered development",
+      "skills": [
+        "ponytail",
+        "caveman",
+        "senior-implementer",
+        "rtk"
+      ]
+    },
+    "backend": {
+      "name": "Backend & System Architecture",
+      "description": "Codebase indexing, AST navigation, and clean semantic releases",
+      "skills": [
+        "codebase-memory",
+        "codegraph",
+        "ponytail",
+        "release-notes",
+        "nestjs",
+        "centrifugo",
+        "bullmq",
+        "postgresql",
+        "redis"
+      ]
+    },
+    "frontend": {
+      "name": "Frontend & UI Design",
+      "description": "UI, component workflow, and strict code minimalism",
+      "skills": [
+        "ponytail",
+        "pixel-perfect-ui",
+        "rtk",
+        "chrome-extension"
+      ]
+    },
+    "devops": {
+      "name": "DevOps & Infrastructure",
+      "description": "Infrastructure reliability, release notes, and token optimization",
+      "skills": [
+        "release-notes",
+        "rtk",
+        "vps-hardening",
+        "docker",
+        "cloud-infra"
+      ]
+    },
+    "core-guardrails": {
+      "name": "Core Engineering Guardrails",
+      "description": "Layer 0 essential guardrails enforced across architectural, security, and quality domains",
+      "skills": [
+        "project-context",
+        "source-quality",
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails",
+        "quality-gate"
+      ]
+    },
+    "senior-leadership": {
+      "name": "Senior Engineering Leadership",
+      "description": "Layer 1 leadership skills: feature specifications, technical planning, and skill authoring",
+      "skills": [
+        "feature-spec-writer",
+        "technical-planner",
+        "skill-author"
+      ]
+    },
+    "architecture-design": {
+      "name": "Architecture & Systems Design",
+      "description": "Layer 1 architecture, data modeling, API contracts, and test strategy",
+      "skills": [
+        "architecture-designer",
+        "data-model-architect",
+        "api-contract-designer",
+        "test-strategist"
+      ]
+    },
+    "implementation": {
+      "name": "Implementation & Coding Engine",
+      "description": "Layer 2 production-grade implementation, UI execution, and verification",
+      "skills": [
+        "senior-implementer",
+        "pixel-perfect-ui"
+      ]
+    },
+    "senior-operations": {
+      "name": "Senior Operations & Verification",
+      "description": "Layer 1 operations: engineering review, incident response, reliability, migrations, and technical research",
+      "skills": [
+        "engineering-review",
+        "incident-investigator",
+        "reliability-engineer",
+        "migration-strategist",
+        "technical-researcher"
+      ]
+    },
+    "artifacts": {
+      "name": "Visual Artifacts & Diagrams",
+      "description": "Layer 4 declarative diagram authoring across Mermaid, DBML, PlantUML, and draw.io",
+      "skills": [
+        "diagram-author"
+      ]
+    },
+    "nixos": {
+      "name": "NixOS & System Configuration",
+      "description": "NixOS flakes, modules, devShells, and Neovim Lua tooling",
+      "skills": [
+        "nixos",
+        "neovim-lua"
+      ]
+    },
+    "rust": {
+      "name": "Rust Systems Programming",
+      "description": "Idiomatic Rust, Tokio async runtime, and memory safety patterns",
+      "skills": [
+        "rust"
+      ]
+    }
+  }
+}

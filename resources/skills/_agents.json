@@ -1,0 +1,84 @@
+{
+  "$schema": "./_agents.schema.json",
+  "version": 2,
+  "agents": {
+    "antigravity-cli": {
+      "name": "Google Antigravity CLI",
+      "binary": "agy",
+      "env_var": "GEMINI_CONFIG_DIR",
+      "global": {
+        "primary": "$HOME/.gemini/config/skills",
+        "compatibility": [
+          "$HOME/.gemini/antigravity-cli/skills"
+        ]
+      },
+      "project": {
+        "primary": ".agents/skills",
+        "compatibility": []
+      },
+      "rule_file": "GEMINI.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "antigravity-ide": {
+      "name": "Google Antigravity IDE",
+      "binary": "antigravity-ide",
+      "env_var": "ANTIGRAVITY_CONFIG_DIR",
+      "global": {
+        "primary": "$HOME/.gemini/config/skills",
+        "compatibility": [
+          "$HOME/.agents/skills"
+        ]
+      },
+      "project": {
+        "primary": ".agents/skills",
+        "compatibility": []
+      },
+      "rule_file": "GEMINI.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "codex-cli": {
+      "name": "OpenAI Codex CLI",
+      "binary": "codex",
+      "env_var": "CODEX_HOME",
+      "global": {
+        "primary": "$HOME/.agents/skills",
+        "compatibility": [
+          "$HOME/.codex/skills"
+        ]
+      },
+      "project": {
+        "primary": ".agents/skills",
+        "compatibility": []
+      },
+      "rule_file": "AGENTS.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "claude-code": {
+      "name": "Anthropic Claude Code CLI",
+      "binary": "claude",
+      "env_var": "CLAUDE_CONFIG_DIR",
+      "global": {
+        "primary": "$HOME/.claude/skills",
+        "compatibility": []
+      },
+      "project": {
+        "primary": ".claude/skills",
+        "compatibility": []
+      },
+      "rule_file": "CLAUDE.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    }
+  }
+}

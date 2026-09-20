@@ -1,0 +1,1454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "skills": {
+    "caveman": {
+      "name": "caveman",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Ultra-terse, telegraphic communication style to minimize token usage.",
+      "tags": [
+        "communication",
+        "token-optimization",
+        "concise"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:c0b24c3b0d4975607671cce1fff3b31f0e21f2edfb9cac55e6356759cb5d7ef2",
+      "domain": "communication",
+      "capabilities": [
+        "ultra-terse-formatting",
+        "token-compression",
+        "telegraphic-communication"
+      ],
+      "triggers": [
+        "terse",
+        "concise-reply",
+        "compress-tokens",
+        "caveman-mode"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "codebase-memory": {
+      "name": "codebase-memory",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Persistent AST codebase memory and relationship index.",
+      "tags": [
+        "ast",
+        "indexing",
+        "memory",
+        "mcp"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:85049045767cebb953eec6d6c71a5b92932424c78f4835d8deee5c14288a85e3",
+      "domain": "ast",
+      "capabilities": [
+        "ast-indexing",
+        "relationship-graph",
+        "codebase-memory-mcp",
+        "import-hierarchy"
+      ],
+      "triggers": [
+        "codebase-memory",
+        "ast-index",
+        "symbol-graph",
+        "import-graph"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "codegraph": {
+      "name": "codegraph",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory AST knowledge graph navigation using CodeGraph / Codebase Memory MCP.",
+      "tags": [
+        "ast",
+        "graph",
+        "navigation",
+        "mcp"
+      ],
+      "dependencies": [
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:528783b7c62a53c64652af47d61cf26e1cf0d40304159a055dc8c87dd237fb24",
+      "domain": "ast",
+      "capabilities": [
+        "ast-graph-navigation",
+        "mcp-graph-query",
+        "symbol-tracing",
+        "call-hierarchy"
+      ],
+      "triggers": [
+        "codegraph",
+        "ast-navigation",
+        "call-hierarchy",
+        "trace-path"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "junior-coding-agent": {
+      "name": "junior-coding-agent",
+      "version": "1.0.0",
+      "source": "canonical",
+      "status": "deprecated",
+      "description": "[DEPRECATED in favor of senior-implementer] Careful junior developer behavior: scoped edits, approval protocols, no regressions.",
+      "tags": [
+        "workflow",
+        "safety",
+        "git",
+        "review",
+        "deprecated"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:0e9c68f1e50ee69aa15be422ed6008612c19291752cbd2f44421b386ae40b8c5",
+      "domain": "deprecated",
+      "capabilities": [
+        "scoped-edits",
+        "approval-protocol",
+        "small-commits"
+      ],
+      "triggers": [
+        "junior-dev",
+        "simple-fix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "ponytail": {
+      "name": "ponytail",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Anti-overengineering ruleset biasing agents toward minimal, standard-library-first code.",
+      "tags": [
+        "philosophy",
+        "yagni",
+        "anti-overengineering",
+        "simplification"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:8dd0c3f5e45532a9dd59dd0482ddcfad74dfe71f48b57bf46cc1f44ae6253dc4",
+      "domain": "philosophy",
+      "capabilities": [
+        "anti-overengineering",
+        "yagni-filtering",
+        "deletion-priority",
+        "code-simplification"
+      ],
+      "triggers": [
+        "refactor-simplify",
+        "ponytail-filter",
+        "yagni",
+        "remove-bloat",
+        "ship-oneliner"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "release-notes": {
+      "name": "release-notes",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Changelog and release notes guideline based on Semantic Versioning and Conventional Commits.",
+      "tags": [
+        "documentation",
+        "semver",
+        "changelog",
+        "release"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:993bcd6c723c513ced7b7c1637ae6e7691f83ee8604bb41d62ad5bdbfd5132d2",
+      "domain": "workflow",
+      "capabilities": [
+        "semver-governance",
+        "conventional-commits-changelog",
+        "release-notes-authoring"
+      ],
+      "triggers": [
+        "release-notes",
+        "changelog",
+        "semver-bump",
+        "generate-release"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rtk": {
+      "name": "rtk",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust Token Killer terminal output filter and token optimization workflow.",
+      "tags": [
+        "terminal",
+        "token-optimization",
+        "filter"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a4a8bed5dfe322bc64e468e5613ebdac00181b6f290afcfb68342165133bfff9",
+      "domain": "tooling",
+      "capabilities": [
+        "terminal-output-filtering",
+        "token-reduction",
+        "log-compression"
+      ],
+      "triggers": [
+        "rtk-filter",
+        "compress-logs",
+        "terminal-noise-filter",
+        "token-killer"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "project-context": {
+      "name": "project-context",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory codebase reconnaissance, dependency inspection, and convention adherence.",
+      "tags": [
+        "guardrail",
+        "reconnaissance",
+        "context",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:201ff9564b98ccc79a027def33f0fb93b829d9911c48f8af508beb72c131d6ba",
+      "domain": "guardrail",
+      "capabilities": [
+        "codebase-reconnaissance",
+        "dependency-inspection",
+        "convention-adherence"
+      ],
+      "triggers": [
+        "project-context",
+        "repo-conventions",
+        "dependency-discovery",
+        "reconnaissance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "source-quality": {
+      "name": "source-quality",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero tolerance for code duplication, dead code, and package manager drift.",
+      "tags": [
+        "guardrail",
+        "quality",
+        "clean-code",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:aed5ca07bd656fbbad951aa991c801f6c6d7ac426019ef248f1c5bbf1a6c45a6",
+      "domain": "guardrail",
+      "capabilities": [
+        "duplication-prevention",
+        "package-manager-integrity",
+        "ast-awareness"
+      ],
+      "triggers": [
+        "source-hygiene",
+        "code-duplication",
+        "package-lock-integrity",
+        "ast-check"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "architecture-guardrails": {
+      "name": "architecture-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Domain boundaries, clean layering, and unidirectional dependency graphs.",
+      "tags": [
+        "guardrail",
+        "architecture",
+        "layering",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:26790f784944bce857f84fef8b4b2c14187804c2a0005d80aa70d7b3a844b2ce",
+      "domain": "guardrail",
+      "capabilities": [
+        "layering-enforcement",
+        "bounded-context-validation",
+        "acyclic-dependency-verification"
+      ],
+      "triggers": [
+        "architecture-check",
+        "dependency-cycle",
+        "boundary-violation",
+        "layer-separation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "system-design-guardrails": {
+      "name": "system-design-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed systems constraints, idempotency, retry safety, and transaction boundaries.",
+      "tags": [
+        "guardrail",
+        "system-design",
+        "reliability",
+        "layer0"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:1dda9cd689b814d2c3d645df34d6313c13b4c928f5006ed078406f353987a407",
+      "domain": "guardrail",
+      "capabilities": [
+        "distributed-safety",
+        "idempotency-enforcement",
+        "retry-safety",
+        "transaction-boundaries"
+      ],
+      "triggers": [
+        "distributed-safety",
+        "idempotency-check",
+        "retry-safety",
+        "transaction-boundary"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "security-guardrails": {
+      "name": "security-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero hardcoded secrets, input validation, and authorization boundaries.",
+      "tags": [
+        "guardrail",
+        "security",
+        "zero-trust",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a514867e02370d40c2a60bc72fe28b6bd8dfa872dd5a09259386a3605d435f4b",
+      "domain": "guardrail",
+      "capabilities": [
+        "secret-leak-prevention",
+        "input-sanitization",
+        "strict-auth-boundaries"
+      ],
+      "triggers": [
+        "security-audit",
+        "secret-detection",
+        "auth-boundary",
+        "sanitization-check"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "quality-gate": {
+      "name": "quality-gate",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Non-negotiable verification sequence (lint, format, typecheck, test, build) before declaring work done.",
+      "tags": [
+        "guardrail",
+        "verification",
+        "testing",
+        "layer0"
+      ],
+      "dependencies": [
+        "source-quality"
+      ],
+      "content_hash": "sha256:163bf48b10faae42d146ffa1dcc18879a32420397fa2b053311c4c4df490764b",
+      "domain": "guardrail",
+      "capabilities": [
+        "5-step-verification",
+        "build-test-lint-audit",
+        "completion-readiness-gate"
+      ],
+      "triggers": [
+        "quality-gate",
+        "verify-completion",
+        "pre-merge-check",
+        "final-verification"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "feature-spec-writer": {
+      "name": "feature-spec-writer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate exhaustive, unambiguous product and feature specifications.",
+      "tags": [
+        "planning",
+        "specification",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:13c869e9c67e90296cbfcba31ff96270ad5c9f317db98d7697da59891c21b784",
+      "domain": "leadership",
+      "capabilities": [
+        "feature-spec-authoring",
+        "prd-formulation",
+        "user-flow-definition",
+        "requirements-engineering",
+        "spec-markdown-generation"
+      ],
+      "triggers": [
+        "write-spec",
+        "specification",
+        "author-prd",
+        "feature-requirements",
+        "user-stories",
+        "spec-document"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "technical-planner": {
+      "name": "technical-planner",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate concrete, phased technical implementation plans from approved specs.",
+      "tags": [
+        "planning",
+        "architecture",
+        "technical-plan",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "feature-spec-writer",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:a38c32fb6082f0d7db0c73c70a5248212e355265c96c509ad05c61160cc546ac",
+      "domain": "leadership",
+      "capabilities": [
+        "implementation-planning",
+        "phased-execution-breakdown",
+        "plan-markdown-generation",
+        "architectural-sequencing"
+      ],
+      "triggers": [
+        "create-plan",
+        "author-plan",
+        "technical-plan",
+        "implementation-plan",
+        "plan-phases",
+        "breakdown-tasks",
+        "how-to-build"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "skill-author": {
+      "name": "skill-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author, standardize, and package new AI agent skills for the dotfiles ecosystem.",
+      "tags": [
+        "meta",
+        "skills",
+        "authoring",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:edc02ada1bad5ad85559cdacce8a55502ed1f8edee990c40311c432692451a23",
+      "domain": "tooling",
+      "capabilities": [
+        "agent-skill-authoring",
+        "skill-packaging",
+        "skill-validation",
+        "dotfiles-skill-standards"
+      ],
+      "triggers": [
+        "create-skill",
+        "author-skill",
+        "package-skill",
+        "skill-md"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "architecture-designer": {
+      "name": "architecture-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Evaluate system topology, bounded contexts, module boundaries, and synchronous vs asynchronous communication.",
+      "tags": [
+        "architecture",
+        "adr",
+        "systems-design",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:9075e03350ddf605ed0e0385750dc9020c032ded7b8c2ed19aceffef92b6c164",
+      "domain": "architecture",
+      "capabilities": [
+        "system-topology",
+        "bounded-contexts",
+        "adr-authoring",
+        "monolith-vs-microservices",
+        "async-sync-protocols"
+      ],
+      "triggers": [
+        "system-architecture",
+        "design-system",
+        "adr",
+        "microservices-boundary",
+        "high-level-design"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "data-model-architect": {
+      "name": "data-model-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Design relational (Postgres) and document (MongoDB) schemas, indexing strategies, foreign keys, and zero-downtime migrations.",
+      "tags": [
+        "database",
+        "schema",
+        "postgres",
+        "data-modeling",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:54ac63d9fd96f3cf4bf93a912b5b1012e49a4194c69aaa871da993cf6511871e",
+      "domain": "database",
+      "capabilities": [
+        "relational-schema-design",
+        "document-schema-design",
+        "indexing-strategy",
+        "zero-downtime-migrations",
+        "concurrency-locking"
+      ],
+      "triggers": [
+        "data-model",
+        "schema-design",
+        "database-migration",
+        "erd",
+        "foreign-keys"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "api-contract-designer": {
+      "name": "api-contract-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Standardize API interfaces across REST, GraphQL, gRPC, and WebSockets with uniform error envelopes and idempotency.",
+      "tags": [
+        "api",
+        "rest",
+        "graphql",
+        "grpc",
+        "contract",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:68c23c2afb77a3b8307d7b5d878ec186d7e959eea4ef4e1ccb02e73fd0d04be7",
+      "domain": "architecture",
+      "capabilities": [
+        "api-contract-design",
+        "rest-schema",
+        "graphql-schema",
+        "grpc-contracts",
+        "idempotency-spec",
+        "pagination-contract"
+      ],
+      "triggers": [
+        "api-design",
+        "rest-endpoints",
+        "graphql-schema",
+        "grpc-proto",
+        "webhook-spec",
+        "error-envelope"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "test-strategist": {
+      "name": "test-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate comprehensive test strategies, test pyramids, and edge-case matrices across unit, integration, and E2E boundaries.",
+      "tags": [
+        "testing",
+        "qa",
+        "test-strategy",
+        "edge-cases",
+        "layer1"
+      ],
+      "dependencies": [
+        "quality-gate",
+        "source-quality"
+      ],
+      "content_hash": "sha256:1623b9c5e2ea76239687c9710f2b85d5a6fc9a40b166b85702138a0d71969493",
+      "domain": "leadership",
+      "capabilities": [
+        "test-pyramid-strategy",
+        "edge-case-matrices",
+        "mocking-boundaries",
+        "e2e-integration-design"
+      ],
+      "triggers": [
+        "test-plan",
+        "test-strategy",
+        "edge-cases",
+        "mocking-strategy",
+        "test-matrix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "senior-implementer": {
+      "name": "senior-implementer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Disciplined senior implementation engineer executing approved specs and plans with CodeGraph and RTK.",
+      "tags": [
+        "implementation",
+        "coding",
+        "refactoring",
+        "layer2"
+      ],
+      "dependencies": [
+        "project-context",
+        "source-quality",
+        "architecture-guardrails",
+        "security-guardrails",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory",
+        "rtk",
+        "caveman",
+        "ponytail"
+      ],
+      "content_hash": "sha256:d7971a17eb71ed358fdbf77af7987abcc1c718492689701e13376df410615537",
+      "domain": "implementation",
+      "capabilities": [
+        "spec-execution",
+        "ast-guided-coding",
+        "5-step-quality-gate",
+        "minimal-diff-implementation"
+      ],
+      "triggers": [
+        "implement",
+        "execute-plan",
+        "implement-plan",
+        "execute-spec",
+        "write-production-code",
+        "fix-bug"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "pixel-perfect-ui": {
+      "name": "pixel-perfect-ui",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Senior Frontend and UI implementation specialist. Builds responsive, accessible components with 100% fidelity to mockups.",
+      "tags": [
+        "frontend",
+        "ui",
+        "css",
+        "components",
+        "accessibility",
+        "layer2"
+      ],
+      "dependencies": [
+        "source-quality",
+        "quality-gate"
+      ],
+      "content_hash": "sha256:770d4a3870833d26706d6b4d66b6c24fc3f55a3d13580f4816d315e579d05fd9",
+      "domain": "frontend",
+      "capabilities": [
+        "pixel-perfect-fidelity",
+        "design-system-compliance",
+        "accessible-components",
+        "skeleton-states",
+        "responsive-layout"
+      ],
+      "triggers": [
+        "frontend-ui",
+        "build-component",
+        "implement-component",
+        "mockup-to-code",
+        "responsive-styling",
+        "css-layout",
+        "figma",
+        "screenshot"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "engineering-review": {
+      "name": "engineering-review",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rigorous pull request and code change review. Categorizes findings into Blocker, Warning, and Suggestion against specs and repo standards.",
+      "tags": [
+        "review",
+        "pull-request",
+        "code-quality",
+        "verification",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "source-quality",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:576abf435196b65c85162331462073d62d59aa858fc9a415df410e8cd779a0d3",
+      "domain": "review",
+      "capabilities": [
+        "pr-review",
+        "diff-analysis",
+        "finding-categorization",
+        "spec-compliance-verification"
+      ],
+      "triggers": [
+        "review-pr",
+        "code-review",
+        "review-diff",
+        "pull-request-review",
+        "audit-changes"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "incident-investigator": {
+      "name": "incident-investigator",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Production incident triage, live troubleshooting, and root cause analysis with 5 Whys and blameless post-mortems.",
+      "tags": [
+        "incident",
+        "postmortem",
+        "triage",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:52891cbbddad828e955b32a27a183b55a72cc019f5564ba012243df8ad046bea",
+      "domain": "operations",
+      "capabilities": [
+        "incident-triage",
+        "telemetry-inspection",
+        "5-whys-rca",
+        "blameless-postmortem"
+      ],
+      "triggers": [
+        "production-incident",
+        "investigate",
+        "outage-triage",
+        "root-cause-analysis",
+        "postmortem",
+        "live-debugging",
+        "500-errors",
+        "production-error"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "reliability-engineer": {
+      "name": "reliability-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Site reliability engineering and system resilience design: circuit breakers, jittered backoff, DLQs, and SLOs.",
+      "tags": [
+        "sre",
+        "reliability",
+        "resilience",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:070068b7d4bd8ef58ef629faa25403b988d3be686fe8ef16a08f1c9a744dd9f5",
+      "domain": "operations",
+      "capabilities": [
+        "circuit-breakers",
+        "exponential-backoff",
+        "dead-letter-queues",
+        "slo-sli-definition",
+        "bulkhead-isolation"
+      ],
+      "triggers": [
+        "system-resilience",
+        "circuit-breaker",
+        "retry-backoff",
+        "slo-sli",
+        "fault-tolerance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "migration-strategist": {
+      "name": "migration-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero-downtime database, data model, and system migrations via multi-phase expand-contract patterns.",
+      "tags": [
+        "database",
+        "migration",
+        "expand-contract",
+        "zero-downtime",
+        "layer1"
+      ],
+      "dependencies": [
+        "data-model-architect",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:acc4137b4c3e59a7e767d302064ef331fab461e7da9d8d8b9377c841e89d4e55",
+      "domain": "database",
+      "capabilities": [
+        "expand-contract-migrations",
+        "backfill-execution",
+        "zero-downtime-strategy",
+        "rollback-verification"
+      ],
+      "triggers": [
+        "database-migration",
+        "zero-downtime",
+        "schema-alteration",
+        "backfill-plan",
+        "expand-contract"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "technical-researcher": {
+      "name": "technical-researcher",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Conducts deep technical spikes, library/vendor evaluations, benchmarks, and trade-off matrices.",
+      "tags": [
+        "research",
+        "benchmarking",
+        "spikes",
+        "evaluation",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:da0d1229ac9930f34c95a64a41edab8db84de4fb1068954fc05965e613926dd4",
+      "domain": "leadership",
+      "capabilities": [
+        "technical-spikes",
+        "library-evaluation",
+        "benchmark-matrices",
+        "tradeoff-analysis"
+      ],
+      "triggers": [
+        "technical-research",
+        "evaluate-libraries",
+        "tech-spike",
+        "tradeoff-matrix",
+        "benchmark-comparison"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "diagram-author": {
+      "name": "diagram-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author declarative architecture diagrams, visual schemas, and workflow charts in Mermaid, DBML, PlantUML, and draw.io XML.",
+      "tags": [
+        "diagrams",
+        "visualization",
+        "mermaid",
+        "dbml",
+        "plantuml",
+        "drawio",
+        "layer4"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5714729c75bc18a710f7557664b43be76ef1f65ef2f22bb789822627a6ea22e4",
+      "domain": "documentation",
+      "capabilities": [
+        "mermaid-diagrams",
+        "dbml-schemas",
+        "plantuml",
+        "drawio-xml",
+        "architecture-visuals"
+      ],
+      "triggers": [
+        "diagram",
+        "mermaid",
+        "visual-architecture",
+        "flowchart",
+        "sequence-diagram",
+        "er-diagram"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nestjs": {
+      "name": "nestjs",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NestJS enterprise architecture, modular structure, dependency injection, and interceptor/pipe patterns.",
+      "tags": [
+        "backend",
+        "typescript",
+        "nestjs",
+        "architecture",
+        "layer3"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:d67ca357b8ebc0654105381d8c16fe3c98136502746b529e57c771701c31d1b7",
+      "domain": "backend",
+      "capabilities": [
+        "nestjs-modules",
+        "dependency-injection",
+        "interceptors-pipes",
+        "enterprise-backend"
+      ],
+      "triggers": [
+        "nestjs",
+        "nest-modules",
+        "nest-controller",
+        "nest-service",
+        "nest-backend"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "centrifugo": {
+      "name": "centrifugo",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Realtime messaging, WebSockets, channel permissions, and presence using Centrifugo and Centrifuge.",
+      "tags": [
+        "realtime",
+        "websockets",
+        "centrifugo",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:dbd0ebea717eeaa4ea099dc10fd59488018b60940010bb1185c713870b889058",
+      "domain": "backend",
+      "capabilities": [
+        "realtime-websockets",
+        "channel-permissions",
+        "presence-broadcast",
+        "pubsub-engine"
+      ],
+      "triggers": [
+        "centrifugo",
+        "realtime-websocket",
+        "live-updates",
+        "chat-broadcast"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "bullmq": {
+      "name": "bullmq",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed job queues, background workers, scheduled jobs, and retry policies using BullMQ and Redis.",
+      "tags": [
+        "queues",
+        "workers",
+        "bullmq",
+        "redis",
+        "layer3"
+      ],
+      "dependencies": [
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:526b8b04e4427e513303bdf5a1aaa35b28b6b7c804b219382010e16855890ea8",
+      "domain": "backend",
+      "capabilities": [
+        "job-queues",
+        "worker-concurrency",
+        "scheduled-jobs",
+        "redis-retry-policies"
+      ],
+      "triggers": [
+        "job-queue",
+        "bullmq",
+        "background-worker",
+        "delayed-tasks",
+        "redis-queue"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "postgresql": {
+      "name": "postgresql",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "PostgreSQL database performance tuning, indexing, connection pooling with PgBouncer, and query optimization.",
+      "tags": [
+        "database",
+        "postgresql",
+        "performance",
+        "pgbouncer",
+        "layer3"
+      ],
+      "dependencies": [
+        "data-model-architect"
+      ],
+      "content_hash": "sha256:6b3abe678f079fba470dabe6ddf38f69edd303d3d3e28710fa0488f23ab0420f",
+      "domain": "database",
+      "capabilities": [
+        "query-plan-analysis",
+        "indexing-strategy",
+        "vacuum-tuning",
+        "pgbouncer-pooling"
+      ],
+      "triggers": [
+        "postgres-tuning",
+        "slow-query",
+        "index-optimization",
+        "pgbouncer",
+        "explain-analyze"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "redis": {
+      "name": "redis",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Redis caching patterns, eviction policies, data structures, atomic operations, and pub/sub.",
+      "tags": [
+        "database",
+        "cache",
+        "redis",
+        "key-value",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:df2642e36c44028620f2cb253a79f020f94e9678f3b4d85af24bdde7cca8e669",
+      "domain": "backend",
+      "capabilities": [
+        "cache-patterns",
+        "eviction-policies",
+        "atomic-primitives",
+        "pubsub-messaging"
+      ],
+      "triggers": [
+        "redis-cache",
+        "cache-invalidation",
+        "distributed-lock",
+        "redis-pubsub"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "vps-hardening": {
+      "name": "vps-hardening",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Linux VPS and server hardening: SSH security, UFW firewall, Fail2ban, automatic updates, and systemd unit sandboxing.",
+      "tags": [
+        "security",
+        "devops",
+        "vps",
+        "linux",
+        "hardening",
+        "layer3"
+      ],
+      "dependencies": [
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:a1420f81877daee9c578a973a3433697d3e2b0640d9a6c05f389779f6dd92132",
+      "domain": "infrastructure",
+      "capabilities": [
+        "ssh-hardening",
+        "ufw-firewall",
+        "fail2ban-setup",
+        "systemd-sandboxing"
+      ],
+      "triggers": [
+        "vps-hardening",
+        "server-security",
+        "ufw-setup",
+        "fail2ban",
+        "ssh-security"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "docker": {
+      "name": "docker",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Docker containerization, multi-stage builds, rootless containers, layer caching, and compose architectures.",
+      "tags": [
+        "devops",
+        "containers",
+        "docker",
+        "dockerfile",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f0b30dfe703c40f4e8ad4777b6cb2ce9aa13ba18bc8360dfa34cb8adb2c1ffa9",
+      "domain": "infrastructure",
+      "capabilities": [
+        "multi-stage-dockerfile",
+        "rootless-containers",
+        "layer-caching",
+        "compose-architecture"
+      ],
+      "triggers": [
+        "docker",
+        "dockerfile",
+        "docker-compose",
+        "container-hardening",
+        "containerize"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "cloud-infra": {
+      "name": "cloud-infra",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Cloud infrastructure design, Terraform/OpenTofu, serverless architectures, and multi-cloud patterns across AWS, GCP, and Cloudflare.",
+      "tags": [
+        "devops",
+        "cloud",
+        "terraform",
+        "aws",
+        "cloudflare",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:2afa5980a947f5b8b8e35e82db331a5439464b4fc90f5e1827d0d013bdb99675",
+      "domain": "infrastructure",
+      "capabilities": [
+        "terraform-opentofu",
+        "serverless-architecture",
+        "multi-cloud-patterns",
+        "edge-workers"
+      ],
+      "triggers": [
+        "cloud-infrastructure",
+        "terraform",
+        "opentofu",
+        "aws-infra",
+        "gcp-infra",
+        "cloudflare-workers"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nixos": {
+      "name": "nixos",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NixOS module design, Flakes configuration, Home Manager integrations, and reproducible devShells.",
+      "tags": [
+        "nixos",
+        "nix",
+        "flakes",
+        "declarative",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5de12b5aace259631a1c651f4c730113a851924050e3beb10bed0b2a54b76c9c",
+      "domain": "infrastructure",
+      "capabilities": [
+        "nixos-flakes",
+        "home-manager-modules",
+        "nix-devshells",
+        "system-configuration"
+      ],
+      "triggers": [
+        "nixos",
+        "nix-flake",
+        "home-manager",
+        "devshell",
+        "nix-package"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "neovim-lua": {
+      "name": "neovim-lua",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Neovim Lua configuration, plugin development, LSP server setup, Treesitter, and keymap architecture.",
+      "tags": [
+        "editor",
+        "neovim",
+        "lua",
+        "lsp",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f423e5ef37fc6c9ffbfb4f05b50a7e920a035e073f7113ae9dcacef03553444c",
+      "domain": "tooling",
+      "capabilities": [
+        "neovim-lua-config",
+        "lsp-configuration",
+        "treesitter-setup",
+        "keymap-architecture"
+      ],
+      "triggers": [
+        "neovim-config",
+        "lua-plugin",
+        "treesitter",
+        "lsp-setup",
+        "nvim-keymaps"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rust": {
+      "name": "rust",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust systems programming: memory safety, ownership/borrowing, Tokio async runtime, error handling, and Clippy hygiene.",
+      "tags": [
+        "rust",
+        "systems",
+        "tokio",
+        "async",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:3b638e5738c0498049327de6b1852baca9ec3068cf18436e8abf94f4cb1b5d4a",
+      "domain": "backend",
+      "capabilities": [
+        "rust-idioms",
+        "tokio-async",
+        "borrow-checker",
+        "clippy-hygiene",
+        "memory-safety"
+      ],
+      "triggers": [
+        "rust-code",
+        "cargo",
+        "tokio",
+        "clippy",
+        "borrow-checker"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "chrome-extension": {
+      "name": "chrome-extension",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Chrome Extension development using Manifest V3: service workers, content scripts, popup/options UI, and WebExtension APIs.",
+      "tags": [
+        "frontend",
+        "browser",
+        "chrome",
+        "extension",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:03dfd1469d511f30c3f825674496bcd0606452feec96a97b8de50a8c1c298028",
+      "domain": "frontend",
+      "capabilities": [
+        "manifest-v3",
+        "service-worker",
+        "content-scripts",
+        "extension-permissions"
+      ],
+      "triggers": [
+        "chrome-extension",
+        "manifest-v3",
+        "browser-extension",
+        "content-script"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    }
+  }
+}

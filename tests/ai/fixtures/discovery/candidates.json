@@ -1,0 +1,68 @@
+[
+  {
+    "name": "bullmq-worker",
+    "source": "official-vendor",
+    "upstream_url": "https://github.com/taskforcesh/bullmq",
+    "skill_path": "skills/bullmq-worker",
+    "revision": "4f9d2a1b",
+    "description": "Distributed job processing and concurrency patterns for BullMQ with Redis.",
+    "trust": "vendor",
+    "license": "MIT",
+    "discovered_via": "official-vendor"
+  },
+  {
+    "name": "prisma-transactions",
+    "source": "official-vendor",
+    "upstream_url": "https://github.com/prisma/prisma",
+    "skill_path": "skills/prisma-transactions",
+    "revision": "8a3e1c9d",
+    "description": "Interactive transactions, concurrency locking, and batching patterns with Prisma ORM.",
+    "trust": "vendor",
+    "license": "Apache-2.0",
+    "discovered_via": "official-vendor"
+  },
+  {
+    "name": "github-actions-ci",
+    "source": "anthropic-skills",
+    "upstream_url": "https://github.com/anthropics/skills",
+    "skill_path": "skills/github-actions",
+    "revision": "c71e2f90",
+    "description": "GitHub Actions CI/CD workflows, matrix testing, and reusable job pipelines.",
+    "trust": "official",
+    "license": "MIT",
+    "discovered_via": "anthropic-skills"
+  },
+  {
+    "name": "nestjs-database-transaction-best-practices",
+    "source": "agentic-awesome-skills",
+    "upstream_url": "https://github.com/sickn33/agentic-awesome-skills",
+    "skill_path": "skills/backend/nestjs-database-transaction-best-practices",
+    "revision": "e190b4d1",
+    "description": "NestJS transaction management, entity manager propagation, and commit/rollback hooks.",
+    "trust": "community",
+    "license": "MIT",
+    "discovered_via": "agentic-awesome-skills"
+  },
+  {
+    "name": "browser-debugging",
+    "source": "skills-sh",
+    "upstream_url": "https://github.com/puppeteer/puppeteer",
+    "skill_path": "skills/browser-debugging",
+    "revision": "d2e4f6a8",
+    "description": "Headless browser automation and DOM inspection patterns.",
+    "trust": "community",
+    "license": "Apache-2.0",
+    "discovered_via": "skills-sh"
+  },
+  {
+    "name": "nextjs-runtime-debugging",
+    "source": "skills-sh",
+    "upstream_url": "https://github.com/vercel/next.js",
+    "skill_path": "skills/nextjs-runtime-debugging",
+    "revision": "b5c7e9a0",
+    "description": "Next.js server-side rendering, RSC payload, and hydration error debugging.",
+    "trust": "community",
+    "license": "MIT",
+    "discovered_via": "skills-sh"
+  }
+]

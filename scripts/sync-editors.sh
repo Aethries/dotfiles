@@ -22,13 +22,29 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOCK_FILE="$REPO_ROOT/resources/antigravity/extensions.lock.json"
 SYNC_EXTENSIONS=true
+FORCE_REPLACE=false
+ALLOW_BACKUP=false
 
-if [ "${1:-}" = "--no-extensions" ]; then
-    SYNC_EXTENSIONS=false
-elif [ "$#" -gt 0 ]; then
-    echo "Usage: $0 [--no-extensions]" >&2
-    exit 2
-fi
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --no-extensions)
+            SYNC_EXTENSIONS=false
+            shift
+            ;;
+        --replace|--force|-f)
+            FORCE_REPLACE=true
+            shift
+            ;;
+        --backup|-b)
+            ALLOW_BACKUP=true
+            shift
+            ;;
+        *)
+            echo "Usage: $0 [--no-extensions] [--replace|--force] [--backup]" >&2
+            exit 2
+            ;;
+    esac
+done
 
 TARGET_USER="$(id -un)"
 TARGET_HOME="$HOME"
@@ -46,10 +62,19 @@ safe_link() {
 
     mkdir -p "$(dirname "$dest")"
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        local backup
-        backup="${dest}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
-        mv -- "$dest" "$backup"
-        warn "Moved existing $dest to $backup"
+        if [ "$FORCE_REPLACE" != true ] && [ "$ALLOW_BACKUP" != true ]; then
+            warn "Unmanaged non-symlink file/directory exists at '$dest'. Skipping to prevent silent mutation. Use --replace or --backup to update."
+            return 0
+        fi
+        if [ "$ALLOW_BACKUP" = true ]; then
+            local backup
+            backup="${dest}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+            mv -- "$dest" "$backup"
+            warn "Moved existing $dest to $backup"
+        else
+            rm -rf -- "$dest"
+            warn "Replaced unmanaged $dest (--replace/--force specified)"
+        fi
     fi
     ln -sfn "$src" "$dest"
 }
@@ -102,14 +127,43 @@ EOF
     fi
 fi
 
-if [ -d "$REPO_ROOT/resources/skills" ]; then
-    for skill_dir in "$REPO_ROOT/resources/skills"/*; do
-        if [ -d "$skill_dir" ]; then
-            skill_name="$(basename "$skill_dir")"
-            safe_link "$skill_dir" "$TARGET_HOME/.gemini/config/skills/$skill_name"
-            safe_link "$skill_dir" "$TARGET_HOME/.codex/skills/$skill_name"
+if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
+    info "Synchronizing global-core AI agent skills"
+    "$REPO_ROOT/scripts/ai-skills.sh" sync --profile global-core
+
+    info "Exporting baseline AI orchestration rules for editors"
+    RULES_CONTENT="$("$REPO_ROOT/scripts/ai-skills.sh" export-rules)"
+
+    write_rule_file() {
+        local target_file="$1"
+        mkdir -p "$(dirname "$target_file")"
+        if [ -f "$target_file" ] && ! grep -q "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$target_file" 2>/dev/null; then
+            if [ "$FORCE_REPLACE" != true ] && [ "$ALLOW_BACKUP" != true ]; then
+                warn "Unmanaged rule file exists at '$target_file'. Skipping write to prevent overwriting user edits. Pass --replace or --backup to update."
+                return 0
+            fi
+            if [ "$ALLOW_BACKUP" = true ]; then
+                local backup
+                backup="${target_file}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+                mv "$target_file" "$backup"
+                warn "Backed up unmanaged existing rule file $target_file to $backup"
+            fi
         fi
-    done
+        echo "$RULES_CONTENT" > "$target_file"
+    }
+
+    # 1. Claude Code (CLAUDE.md)
+    write_rule_file "$TARGET_HOME/.claude/CLAUDE.md"
+
+    # 2. Neovim (AGENTS.md)
+    write_rule_file "$TARGET_HOME/.config/nvim/AGENTS.md"
+
+    # 3. Zed
+    write_rule_file "$TARGET_HOME/.config/zed/prompts/AGENTS.md"
+
+    # 4. VSCode / Antigravity IDE
+    write_rule_file "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md"
+    write_rule_file "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"
 fi
 
 TEMPLATE_SOURCE="${GODOT_EXPORT_TEMPLATES_SOURCE:-/run/current-system/sw/share/godot/export_templates}"
@@ -126,11 +180,16 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.antigravity-ide/User/settings.json" \
         "$TARGET_HOME/.antigravity-ide/User/keybindings.json" \
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
-        "$TARGET_HOME/.gemini/antigravity/mcp_config.json" 2>/dev/null || true
+        "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
+        "$TARGET_HOME/.claude/CLAUDE.md" \
+        "$TARGET_HOME/.config/nvim/AGENTS.md" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/zed" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/Code" 2>/dev/null || true
 fi
 success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 
