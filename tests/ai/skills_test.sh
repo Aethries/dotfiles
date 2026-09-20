@@ -527,6 +527,34 @@ jq -e '.profiles["rust"].skills | index("rust")' "$REPO_ROOT/resources/skills/_p
 
 log_ok "All 12 Layer 3 Domain Skills verified (security audit, dedup, frontmatter, registry & profiles)"
 
+# ------------------------------------------------------------------------------
+# 1.8 Validate Trigger Boundary Fixtures
+# ------------------------------------------------------------------------------
+log_info "Validating Trigger Boundary Fixtures from JSON..."
+
+FIXTURE_FILE="$REPO_ROOT/tests/ai/fixtures/trigger_boundaries.json"
+[ -f "$FIXTURE_FILE" ] || log_fail "Missing $FIXTURE_FILE"
+jq empty "$FIXTURE_FILE" || log_fail "Invalid JSON in trigger_boundaries.json"
+
+fixture_count=$(jq '. | length' "$FIXTURE_FILE")
+for ((i=0; i<fixture_count; i++)); do
+    inp=$(jq -r ".[$i].input" "$FIXTURE_FILE")
+    expected=$(jq -r ".[$i].expected_skill" "$FIXTURE_FILE")
+    
+    exp_desc=$(jq -r --arg s "$expected" '.skills[$s].description // empty' "$REPO_ROOT/resources/skills/_registry.json")
+    [ -n "$exp_desc" ] || log_fail "Expected skill '$expected' missing description in registry for input: $inp"
+    
+    forbidden_count=$(jq ".[$i].forbidden_skills | length" "$FIXTURE_FILE")
+    for ((f=0; f<forbidden_count; f++)); do
+        forb=$(jq -r ".[$i].forbidden_skills[$f]" "$FIXTURE_FILE")
+        forb_desc=$(jq -r --arg s "$forb" '.skills[$s].description // empty' "$REPO_ROOT/resources/skills/_registry.json")
+        [ -n "$forb_desc" ] || continue
+    done
+done
+
+log_ok "All $fixture_count trigger boundary fixtures verified against skill registry"
+
+
 
 
 

@@ -1,0 +1,69 @@
+[
+  {
+    "input": "Write a specification for authentication.",
+    "expected_skill": "feature-spec-writer",
+    "forbidden_skills": [
+      "technical-planner",
+      "senior-implementer"
+    ]
+  },
+  {
+    "input": "Create implementation plan from docs/specs/auth.md.",
+    "expected_skill": "technical-planner",
+    "forbidden_skills": [
+      "feature-spec-writer",
+      "senior-implementer"
+    ]
+  },
+  {
+    "input": "Implement docs/plans/auth.md according to the approved plan.",
+    "expected_skill": "senior-implementer",
+    "forbidden_skills": [
+      "technical-planner",
+      "feature-spec-writer"
+    ]
+  },
+  {
+    "input": "Review PR 42 against the auth spec.",
+    "expected_skill": "engineering-review",
+    "forbidden_skills": [
+      "feature-spec-writer",
+      "technical-planner"
+    ]
+  },
+  {
+    "input": "Create a custom project skill for release automation.",
+    "expected_skill": "skill-author",
+    "forbidden_skills": [
+      "feature-spec-writer"
+    ]
+  },
+  {
+    "input": "Design database schema and migration strategy for subscriptions.",
+    "expected_skill": "data-model-architect",
+    "forbidden_skills": [
+      "diagram-author"
+    ]
+  },
+  {
+    "input": "Generate an architecture sequence diagram and DBML schema.",
+    "expected_skill": "diagram-author",
+    "forbidden_skills": [
+      "technical-planner"
+    ]
+  },
+  {
+    "input": "Build this card component from the Figma screenshot.",
+    "expected_skill": "pixel-perfect-ui",
+    "forbidden_skills": [
+      "senior-implementer"
+    ]
+  },
+  {
+    "input": "Production API is throwing 500 errors on checkout, investigate immediately.",
+    "expected_skill": "incident-investigator",
+    "forbidden_skills": [
+      "engineering-review"
+    ]
+  }
+]
