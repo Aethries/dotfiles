@@ -8,6 +8,7 @@
       "skills": [
         "ponytail",
         "caveman",
+        "senior-implementer",
         "junior-coding-agent",
         "rtk"
       ]
@@ -27,6 +28,7 @@
       "description": "UI, component workflow, and strict code minimalism",
       "skills": [
         "ponytail",
+        "pixel-perfect-ui",
         "junior-coding-agent",
         "rtk"
       ]
@@ -69,6 +71,14 @@
         "data-model-architect",
         "api-contract-designer",
         "test-strategist"
+      ]
+    },
+    "implementation": {
+      "name": "Implementation & Coding Engine",
+      "description": "Layer 2 production-grade implementation, UI execution, and verification",
+      "skills": [
+        "senior-implementer",
+        "pixel-perfect-ui"
       ]
     }
   }

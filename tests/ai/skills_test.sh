@@ -302,6 +302,69 @@ done
 
 log_ok "All 4 Layer 1 Architecture & Systems Design skills verified (templates, invariants, trigger boundaries & registry)"
 
+# ------------------------------------------------------------------------------
+# 1.4 Validate Layer 2 Implementation Engine Skills
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 2 Implementation Engine skills & deprecation mapping..."
+
+L2_SKILLS=(
+    "senior-implementer"
+    "pixel-perfect-ui"
+)
+
+for l2 in "${L2_SKILLS[@]}"; do
+    l2_file="$REPO_ROOT/resources/skills/$l2/SKILL.md"
+    [ -f "$l2_file" ] || log_fail "Missing layer 2 skill: $l2_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$l2_file")
+    [ "$head_line" = "---" ] || log_fail "$l2/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$l2" "$l2_file" || log_fail "$l2/SKILL.md missing valid name"
+    grep -Eiq '^description:' "$l2_file" || log_fail "$l2/SKILL.md missing description"
+
+    # Registry integrity
+    jq -e --arg s "$l2" '.skills[$s]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $l2"
+done
+
+# Check reference templates
+[ -f "$REPO_ROOT/resources/skills/senior-implementer/references/implementation-checklist.md" ] || log_fail "Missing implementation-checklist.md"
+[ -f "$REPO_ROOT/resources/skills/pixel-perfect-ui/references/ui-states-checklist.md" ] || log_fail "Missing ui-states-checklist.md"
+
+# Deprecation verification for junior-coding-agent
+grep -Fq "DEPRECATED" "$REPO_ROOT/resources/skills/junior-coding-agent/SKILL.md" || log_fail "junior-coding-agent missing DEPRECATED warning"
+grep -Fq "senior-implementer" "$REPO_ROOT/resources/skills/junior-coding-agent/SKILL.md" || log_fail "junior-coding-agent missing pointer to senior-implementer"
+jq -r '.skills["junior-coding-agent"].description' "$REPO_ROOT/resources/skills/_registry.json" | grep -Fq "DEPRECATED" || log_fail "_registry.json junior-coding-agent missing DEPRECATED tag"
+
+# Toolchain integration invariants in senior-implementer
+grep -Fq "Codebase Memory & CodeGraph" "$REPO_ROOT/resources/skills/senior-implementer/SKILL.md" || log_fail "senior-implementer missing CodeGraph/Codebase Memory rule"
+grep -Fq "RTK (Rust Token Killer)" "$REPO_ROOT/resources/skills/senior-implementer/SKILL.md" || log_fail "senior-implementer missing RTK rule"
+grep -Fq "Ponytail Minimalism" "$REPO_ROOT/resources/skills/senior-implementer/SKILL.md" || log_fail "senior-implementer missing Ponytail rule"
+grep -Fq "quality-gate" "$REPO_ROOT/resources/skills/senior-implementer/SKILL.md" || log_fail "senior-implementer missing quality-gate rule"
+
+# Invariants in pixel-perfect-ui
+grep -Fq "Design System & Token Fidelity" "$REPO_ROOT/resources/skills/pixel-perfect-ui/SKILL.md" || log_fail "pixel-perfect-ui missing token fidelity rule"
+grep -Fq "Exhaustive UI State Coverage" "$REPO_ROOT/resources/skills/pixel-perfect-ui/SKILL.md" || log_fail "pixel-perfect-ui missing UI state coverage rule"
+
+# Trigger Boundary Fixtures
+IMPL_DESC=$(jq -r '.skills["senior-implementer"].description' "$REPO_ROOT/resources/skills/_registry.json")
+PLAN_DESC=$(jq -r '.skills["technical-planner"].description' "$REPO_ROOT/resources/skills/_registry.json")
+UI_DESC=$(jq -r '.skills["pixel-perfect-ui"].description' "$REPO_ROOT/resources/skills/_registry.json")
+
+# Input: "Implement docs/plans/auth.md according to the plan." -> triggers senior-implementer, NOT technical-planner
+echo "$IMPL_DESC" | grep -Eiq "implement|execut" || log_fail "senior-implementer description fails to match implementation query"
+echo "$PLAN_DESC" | grep -Eiq "^(Implement docs/plans|implementation engineer)" && log_fail "technical-planner description falsely matched implementation query"
+
+# Input: "Build this card component from the Figma screenshot." -> triggers pixel-perfect-ui
+echo "$UI_DESC" | grep -Eiq "ui|component" || log_fail "pixel-perfect-ui description fails to match UI component query"
+
+# Profile check
+jq -e '.profiles["implementation"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'implementation' profile"
+jq -e '.profiles["core"].skills | index("senior-implementer")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "core profile missing senior-implementer"
+jq -e '.profiles["frontend"].skills | index("pixel-perfect-ui")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "frontend profile missing pixel-perfect-ui"
+
+log_ok "All Layer 2 Implementation Engine skills verified (templates, invariants, deprecation & registry)"
+
+
 
 
 # ------------------------------------------------------------------------------

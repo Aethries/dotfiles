@@ -49,15 +49,16 @@
       "name": "junior-coding-agent",
       "version": "1.0.0",
       "source": "canonical",
-      "description": "Careful junior developer behavior: scoped edits, approval protocols, no regressions.",
+      "description": "[DEPRECATED in favor of senior-implementer] Careful junior developer behavior: scoped edits, approval protocols, no regressions.",
       "tags": [
         "workflow",
         "safety",
         "git",
-        "review"
+        "review",
+        "deprecated"
       ],
       "dependencies": [],
-      "content_hash": "sha256:3ba8b06234cb66b156032ad154f9271372939d3ae10450d26de9e0454f364532"
+      "content_hash": "sha256:0e9c68f1e50ee69aa15be422ed6008612c19291752cbd2f44421b386ae40b8c5"
     },
     "ponytail": {
       "name": "ponytail",
@@ -313,6 +314,45 @@
         "source-quality"
       ],
       "content_hash": "sha256:1623b9c5e2ea76239687c9710f2b85d5a6fc9a40b166b85702138a0d71969493"
+    },
+    "senior-implementer": {
+      "name": "senior-implementer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Disciplined senior implementation engineer executing approved specs and plans with CodeGraph and RTK.",
+      "tags": [
+        "implementation",
+        "coding",
+        "refactoring",
+        "layer2"
+      ],
+      "dependencies": [
+        "source-quality",
+        "security-guardrails",
+        "quality-gate",
+        "codegraph",
+        "rtk"
+      ],
+      "content_hash": "sha256:eccd5abcacd2e80778ad83d0dd328919a8d09eed43f60568f8737684e2f7fb7c"
+    },
+    "pixel-perfect-ui": {
+      "name": "pixel-perfect-ui",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Senior Frontend and UI implementation specialist. Builds responsive, accessible components with 100% fidelity to mockups.",
+      "tags": [
+        "frontend",
+        "ui",
+        "css",
+        "components",
+        "accessibility",
+        "layer2"
+      ],
+      "dependencies": [
+        "source-quality",
+        "quality-gate"
+      ],
+      "content_hash": "sha256:21002041c82633d4f27ce55d697a0a8fd63adefc2664777cf328c28c6104b85d"
     }
   }
 }
