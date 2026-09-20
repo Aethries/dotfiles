@@ -441,6 +441,23 @@
       ],
       "dependencies": [],
       "content_hash": "sha256:da0d1229ac9930f34c95a64a41edab8db84de4fb1068954fc05965e613926dd4"
+    },
+    "diagram-author": {
+      "name": "diagram-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author declarative architecture diagrams, visual schemas, and workflow charts in Mermaid, DBML, PlantUML, and draw.io XML.",
+      "tags": [
+        "diagrams",
+        "visualization",
+        "mermaid",
+        "dbml",
+        "plantuml",
+        "drawio",
+        "layer4"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5714729c75bc18a710f7557664b43be76ef1f65ef2f22bb789822627a6ea22e4"
     }
   }
 }

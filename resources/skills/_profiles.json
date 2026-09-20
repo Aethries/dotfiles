@@ -91,6 +91,13 @@
         "migration-strategist",
         "technical-researcher"
       ]
+    },
+    "artifacts": {
+      "name": "Visual Artifacts & Diagrams",
+      "description": "Layer 4 declarative diagram authoring across Mermaid, DBML, PlantUML, and draw.io",
+      "skills": [
+        "diagram-author"
+      ]
     }
   }
 }

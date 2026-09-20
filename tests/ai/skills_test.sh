@@ -423,6 +423,47 @@ done
 
 log_ok "All 5 Layer 1 Operations & Verification skills verified (templates, invariants, trigger boundaries & registry)"
 
+# ------------------------------------------------------------------------------
+# 1.6 Validate Layer 4 Artifact & Diagram Authoring Skills
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 4 Artifact & Diagram Authoring skills..."
+
+DIAGRAM_SKILL="diagram-author"
+d_file="$REPO_ROOT/resources/skills/$DIAGRAM_SKILL/SKILL.md"
+[ -f "$d_file" ] || log_fail "Missing diagram skill: $d_file"
+
+# Frontmatter check
+head_line=$(head -n 1 "$d_file")
+[ "$head_line" = "---" ] || log_fail "$DIAGRAM_SKILL/SKILL.md missing frontmatter start '---'"
+grep -Eiq "^name:[[:space:]]*$DIAGRAM_SKILL" "$d_file" || log_fail "$DIAGRAM_SKILL/SKILL.md missing valid name"
+grep -Eiq '^description:' "$d_file" || log_fail "$DIAGRAM_SKILL/SKILL.md missing description"
+
+# Registry integrity
+jq -e --arg s "$DIAGRAM_SKILL" '.skills[$s]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $DIAGRAM_SKILL"
+
+# Reference guides
+[ -f "$REPO_ROOT/resources/skills/diagram-author/references/dbml-guide.md" ] || log_fail "Missing dbml-guide.md"
+[ -f "$REPO_ROOT/resources/skills/diagram-author/references/mermaid-guide.md" ] || log_fail "Missing mermaid-guide.md"
+[ -f "$REPO_ROOT/resources/skills/diagram-author/references/plantuml-guide.md" ] || log_fail "Missing plantuml-guide.md"
+[ -f "$REPO_ROOT/resources/skills/diagram-author/references/drawio-guide.md" ] || log_fail "Missing drawio-guide.md"
+
+# Invariants & format coverage
+grep -Fq "Mermaid.js" "$REPO_ROOT/resources/skills/diagram-author/SKILL.md" || log_fail "diagram-author missing Mermaid rule"
+grep -Fq "DBML" "$REPO_ROOT/resources/skills/diagram-author/SKILL.md" || log_fail "diagram-author missing DBML rule"
+grep -Fq "PlantUML" "$REPO_ROOT/resources/skills/diagram-author/SKILL.md" || log_fail "diagram-author missing PlantUML rule"
+grep -Fq "draw.io XML" "$REPO_ROOT/resources/skills/diagram-author/SKILL.md" || log_fail "diagram-author missing draw.io rule"
+
+# Trigger Boundary Fixture
+DIAG_DESC=$(jq -r '.skills["diagram-author"].description' "$REPO_ROOT/resources/skills/_registry.json")
+echo "$DIAG_DESC" | grep -Eiq "diagram|visual|mermaid|dbml" || log_fail "diagram-author description fails to match diagramming query"
+
+# Profile check
+jq -e '.profiles["artifacts"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'artifacts' profile"
+jq -e '.profiles["artifacts"].skills | index("diagram-author")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "artifacts profile missing diagram-author"
+
+log_ok "Layer 4 Artifact & Diagram Authoring skills verified (templates, invariants, trigger boundaries & registry)"
+
+
 
 
 
