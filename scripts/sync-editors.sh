@@ -174,22 +174,22 @@ else
 fi
 
 if [ "$TARGET_USER" != "$(id -un)" ]; then
-    chown -h "$TARGET_USER:" \
+    for managed_path in \
         "$TARGET_HOME/.config/nvim" \
         "$TARGET_HOME/.config/antigravity" \
         "$TARGET_HOME/.antigravity-ide/User/settings.json" \
         "$TARGET_HOME/.antigravity-ide/User/keybindings.json" \
+        "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md" \
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
         "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
         "$TARGET_HOME/.claude/CLAUDE.md" \
-        "$TARGET_HOME/.config/nvim/AGENTS.md" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/zed" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/Code" 2>/dev/null || true
+        "$TARGET_HOME/.config/nvim/AGENTS.md" \
+        "$TARGET_HOME/.config/zed/prompts/AGENTS.md" \
+        "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"; do
+        [ -e "$managed_path" ] || [ -L "$managed_path" ] || continue
+        # REQUIRED: these exact files/symlinks are written by this synchronization run.
+        chown -h "$TARGET_USER:" "$managed_path"
+    done
 fi
 success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 
@@ -214,10 +214,11 @@ info "Synchronizing pinned Antigravity extensions"
 EXTENSION_CACHE="$TARGET_CACHE/dotfiles/antigravity-extensions"
 mkdir -p "$EXTENSION_CACHE"
 if [ "$TARGET_USER" != "$(id -un)" ]; then
+    # REQUIRED: this cache subtree is created exclusively by the extension synchronizer.
     chown -R "$TARGET_USER:" "$EXTENSION_CACHE"
 fi
 
-INSTALLED="$(run_as_target antigravity-ide --list-extensions --show-versions 2>/dev/null || true)"
+INSTALLED="$(run_as_target antigravity-ide --list-extensions --show-versions 2>/dev/null || true)" # OPTIONAL_FEATURE: extension listing is unavailable when the IDE CLI is not ready.
 while IFS=$'\t' read -r extension_id version expected_sha download_url; do
     [ -n "$extension_id" ] || continue
     if printf '%s\n' "$INSTALLED" | grep -Fqx "$extension_id@$version"; then

@@ -6,9 +6,9 @@
 #
 # Steps:
 # 1. Wi-Fi & Network Connection Wizard (interactive selection)
-# 2. Disk Selection, Partitioning & Formatting (EFI, Swap, Root)
-# 3. Mount filesystem to /mnt
-# 4. Generate NixOS hardware configuration & Clone dotfiles
+# 2. Collect and validate the complete installation plan
+# 3. Disk Selection, Partitioning & Formatting (EFI, Swap, Root)
+# 4. Generate final hardware configuration and validate it again
 # 5. Execute nixos-install and finalize
 # ============================================================
 
@@ -22,6 +22,9 @@ BLUE="\033[1;34m"
 CYAN="\033[1;36m"
 BOLD="\033[1m"
 RESET="\033[0m"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${DOTFILES_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+INSTALLER_MOUNT_ROOT="${INSTALLER_MOUNT_ROOT:-/mnt}"
 
 info() { echo -e "${BLUE}==>${RESET} ${BOLD}$1${RESET}"; }
 success() { echo -e "${GREEN}✓${RESET} $1"; }
@@ -55,11 +58,6 @@ EOF
     echo
 }
 
-# Ensure root
-if [ "$(id -u)" -ne 0 ]; then
-    error "This installer must be run as root (or via 'sudo $0')."
-fi
-
 check_connection() {
     if ! ping -c 1 -W 2 "${CHECK_HOST:-1.1.1.1}" >/dev/null 2>&1; then
         warn "No active internet connection detected!"
@@ -70,45 +68,239 @@ check_connection() {
     fi
 }
 
+require_root() {
+    if [ "$(id -u)" -ne 0 ]; then
+        error "This installer must be run as root (or via 'sudo $0')."
+    fi
+}
+
+preflight() {
+    bash "$SCRIPT_DIR/preflight.sh" installer
+}
+
+disk_path() {
+    printf '%s/%s\n' "${INSTALLER_DEVICE_DIR:-/dev}" "$1"
+}
+
+bootloader_config() {
+    case "$1" in
+        systemd-boot)
+            cat <<'EOF'
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.grub.enable = false;
+  boot.loader.efi.canTouchEfiVariables = true;
+EOF
+            ;;
+        grub)
+            cat <<'EOF'
+  boot.loader.systemd-boot.enable = false;
+  boot.loader.grub.enable = true;
+  boot.loader.grub.device = "nodev";
+  boot.loader.grub.efiSupport = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+EOF
+            ;;
+        *)
+            error "Unsupported bootloader: $1 (choose systemd-boot or grub)"
+            ;;
+    esac
+}
+
+validate_state_version() {
+    [[ "$1" =~ ^[0-9]{2}\.[0-9]{2}$ ]] \
+        || error "Invalid NixOS stateVersion: $1 (expected YY.MM)"
+}
+
+collect_install_config() {
+    local suggested_user="${SUDO_USER:-${USER:-loc}}"
+    local suggested_host
+    suggested_host="$(hostname)"
+    [ "$suggested_host" = "nixos" ] && suggested_host="nixos-workstation"
+
+    read -r -p "Enter primary user account name [default: $suggested_user]: " INSTALL_USER
+    INSTALL_USER="${INSTALL_USER:-$suggested_user}"
+    [[ "$INSTALL_USER" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] \
+        || error "Invalid user name: $INSTALL_USER"
+
+    read -r -p "Enter system hostname [default: $suggested_host]: " INSTALL_HOSTNAME
+    INSTALL_HOSTNAME="${INSTALL_HOSTNAME:-$suggested_host}"
+    [[ "$INSTALL_HOSTNAME" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]] \
+        || error "Invalid hostname: $INSTALL_HOSTNAME"
+
+    local suggested_disk
+    suggested_disk="$(lsblk -d -e 7,11 -n -o NAME | grep -E 'nvme0n1|sda|vda' | head -n 1 || true)" # BEST_EFFORT: no conventional disk name is a valid state; the user can enter it explicitly.
+    read -r -p "Enter disk name to install NixOS (e.g. nvme0n1, sda) [default: $suggested_disk]: " INSTALL_DISK
+    INSTALL_DISK="${INSTALL_DISK:-$suggested_disk}"
+    [[ "$INSTALL_DISK" =~ ^[a-zA-Z0-9._-]+$ ]] || error "Invalid target disk name: $INSTALL_DISK"
+    local target_disk_path
+    target_disk_path="$(disk_path "$INSTALL_DISK")"
+    [ -b "$target_disk_path" ] || error "Device $target_disk_path does not exist."
+
+    echo
+    echo -e "${RED}${BOLD}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${RESET}"
+    echo -e "${RED}${BOLD}  WARNING: ALL DATA ON $target_disk_path WILL BE PERMANENTLY ERASED!${RESET}"
+    echo -e "${RED}${BOLD}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${RESET}"
+    echo
+    read -r -p "Type 'YES' (in capital letters) to confirm formatting $target_disk_path: " INSTALL_WIPE_CONFIRMATION
+    [ "$INSTALL_WIPE_CONFIRMATION" = "YES" ] || error "Installation aborted by user."
+
+    read -r -p "EFI partition size (default: 1024MiB): " INSTALL_EFI_SIZE
+    INSTALL_EFI_SIZE="${INSTALL_EFI_SIZE:-1024MiB}"
+    size_to_mib "$INSTALL_EFI_SIZE" >/dev/null
+
+    read -r -p "Swap partition size (e.g. 16GiB, 8GiB, or 0 for none) [default: 16GiB]: " INSTALL_SWAP_SIZE
+    INSTALL_SWAP_SIZE="${INSTALL_SWAP_SIZE:-16GiB}"
+    if [ "$INSTALL_SWAP_SIZE" != "0" ] && [ "$INSTALL_SWAP_SIZE" != "none" ]; then
+        size_to_mib "$INSTALL_SWAP_SIZE" >/dev/null
+    fi
+
+    local default_repo="${DOTFILES_REPO:-https://github.com/Aethries/dotfiles.git}"
+    read -r -p "Enter dotfiles Git repository URL [default: $default_repo]: " INSTALL_REPO
+    INSTALL_REPO="${INSTALL_REPO:-$default_repo}"
+
+    local default_bootloader="${NIXOS_BOOTLOADER:-systemd-boot}"
+    read -r -p "Bootloader (systemd-boot/grub) [default: $default_bootloader]: " INSTALL_BOOTLOADER
+    INSTALL_BOOTLOADER="${INSTALL_BOOTLOADER:-$default_bootloader}"
+    case "$INSTALL_BOOTLOADER" in
+        systemd-boot|grub) ;;
+        *) error "Invalid bootloader: $INSTALL_BOOTLOADER" ;;
+    esac
+
+    local default_state_version="${NIXOS_STATE_VERSION:-26.05}"
+    read -r -p "NixOS stateVersion for this new installation [default: $default_state_version]: " INSTALL_STATE_VERSION
+    INSTALL_STATE_VERSION="${INSTALL_STATE_VERSION:-$default_state_version}"
+    validate_state_version "$INSTALL_STATE_VERSION"
+
+    if [ -n "${NIXOS_INSTALLER_PASSWORD_HASH:-}" ]; then
+        INSTALL_PASSWORD_HASH="$NIXOS_INSTALLER_PASSWORD_HASH"
+    else
+        local user_pass="" user_pass_confirm=""
+        info "Set password for user '$INSTALL_USER':"
+        while [ -z "$user_pass" ]; do
+            read -r -s -p "Enter password: " user_pass
+            echo
+            read -r -s -p "Confirm password: " user_pass_confirm
+            echo
+            if [ "$user_pass" != "$user_pass_confirm" ]; then
+                warn "Passwords do not match. Please try again."
+                user_pass=""
+            fi
+        done
+        INSTALL_PASSWORD_HASH="$(printf '%s\n' "$user_pass" | nix-shell -p whois --run 'mkpasswd -m sha-512 -s')"
+        unset user_pass user_pass_confirm
+    fi
+}
+
+prepare_candidate_repository() {
+    if [ "$INSTALL_REPO" = "$REPO_ROOT" ] || [ "$INSTALL_REPO" = "path:$REPO_ROOT" ]; then
+        VALIDATED_REPO_ROOT="$REPO_ROOT"
+        return 0
+    fi
+
+    VALIDATED_REPO_ROOT="$INSTALLER_WORK_DIR/repository"
+    info "Preparing a temporary copy of the selected dotfiles repository..."
+    # shellcheck disable=SC2016
+    DOTFILES_REPO_SOURCE="$INSTALL_REPO" DOTFILES_REPO_DEST="$VALIDATED_REPO_ROOT" \
+        nix-shell -p git --run 'git clone --depth=1 "$DOTFILES_REPO_SOURCE" "$DOTFILES_REPO_DEST"'
+}
+
+prepare_candidate_machine_config() {
+    INSTALLER_WORK_DIR="${INSTALLER_WORK_DIR:-$(mktemp -d -t dotfiles-installer-preflight-XXXXXX)}"
+    CANDIDATE_MACHINE_CONFIG="$INSTALLER_WORK_DIR/configuration.nix"
+    CANDIDATE_HARDWARE_CONFIG="$INSTALLER_WORK_DIR/hardware-configuration.nix"
+    CANDIDATE_HARDWARE_EXTRA="$INSTALLER_WORK_DIR/hardware-extra.nix"
+
+    cat > "$CANDIDATE_HARDWARE_CONFIG" <<'EOF'
+{
+  fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
+}
+EOF
+    cat > "$CANDIDATE_HARDWARE_EXTRA" <<'EOF'
+{ }
+EOF
+    {
+        printf '%s\n' '{'
+        printf '  imports = [ %s/configuration.nix %s/hardware-configuration.nix %s/hardware-extra.nix ];\n' \
+            "$VALIDATED_REPO_ROOT" "$INSTALLER_WORK_DIR" "$INSTALLER_WORK_DIR"
+        printf '  networking.hostName = "%s";\n' "$INSTALL_HOSTNAME"
+        printf '  dotfiles.primaryUser = "%s";\n' "$INSTALL_USER"
+        bootloader_config "$INSTALL_BOOTLOADER"
+        printf '  system.stateVersion = "%s";\n' "$INSTALL_STATE_VERSION"
+        cat <<EOF
+  users.users."$INSTALL_USER" = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" "input" "uinput" "docker" "video" ];
+  };
+EOF
+        printf '}\n'
+    } > "$CANDIDATE_MACHINE_CONFIG"
+}
+
+validate_candidate_machine_config() {
+    info "Validating the candidate NixOS configuration before touching the target disk..."
+    nix flake check "path:$VALIDATED_REPO_ROOT" --no-build
+    DOTFILES_MACHINE_CONFIG="$CANDIDATE_MACHINE_CONFIG" \
+        nix build "path:$VALIDATED_REPO_ROOT#nixosConfigurations.check.config.system.build.toplevel" \
+            --dry-run --impure
+    success "Candidate configuration validated; destructive disk operations are now allowed."
+}
+
+mounted_target_partition() {
+    findmnt -rn -S "$1" >/dev/null 2>&1
+}
+
+unmount_target_partitions() {
+    local disk_path="$1"
+    local partition
+    local active_swaps
+
+    if findmnt -rn --mountpoint "$INSTALLER_MOUNT_ROOT" >/dev/null 2>&1; then
+        umount -R "$INSTALLER_MOUNT_ROOT" || error "Could not unmount $INSTALLER_MOUNT_ROOT; refusing to wipe $disk_path."
+    fi
+
+    active_swaps="$(swapon --noheadings --show=NAME)" \
+        || error "Could not inspect active swap devices; refusing to wipe $disk_path."
+    while IFS= read -r partition; do
+        [ -n "$partition" ] || continue
+        case "$partition" in
+            "$disk_path"*)
+                swapoff "$partition" \
+                    || error "Could not disable target swap $partition; refusing to wipe $disk_path."
+                ;;
+        esac
+    done <<< "$active_swaps"
+
+    for partition in "${disk_path}"?*; do
+        [ -b "$partition" ] || continue
+        if mounted_target_partition "$partition"; then
+            umount "$partition" \
+                || error "Could not unmount target partition $partition; refusing to wipe $disk_path."
+        fi
+        mounted_target_partition "$partition" \
+            && error "Target partition $partition is still mounted; refusing to wipe $disk_path."
+    done
+}
+
 # ============================================================
 # STEP 1: Disk Selection & Partitioning
 # ============================================================
 setup_disk() {
+    [ "$#" -eq 3 ] || error "setup_disk requires target disk, EFI size, and swap size"
+    local target_disk="$1"
+    local efi_size="$2"
+    local swap_size="$3"
     echo
     info "Step 1: Detecting storage drives..."
     echo
     lsblk -d -e 7,11 -o NAME,SIZE,MODEL,TYPE,TRAN
     echo
 
-    # Prompt user for disk
-    local default_disk
-    default_disk="$(lsblk -d -e 7,11 -n -o NAME | grep -E 'nvme0n1|sda|vda' | head -n 1 || true)"
-
-    read -r -p "Enter disk name to install NixOS (e.g. nvme0n1, sda) [default: $default_disk]: " target_disk
-    target_disk="${target_disk:-$default_disk}"
-
-    [ -n "$target_disk" ] || error "No disk selected."
-    [ -b "/dev/$target_disk" ] || error "Device /dev/$target_disk does not exist."
-
-    local disk_path="/dev/$target_disk"
-
-    echo
-    echo -e "${RED}${BOLD}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${RESET}"
-    echo -e "${RED}${BOLD}  WARNING: ALL DATA ON $disk_path WILL BE PERMANENTLY ERASED!${RESET}"
-    echo -e "${RED}${BOLD}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!${RESET}"
-    echo
-    read -r -p "Type 'YES' (in capital letters) to confirm formatting $disk_path: " confirm_wipe
-    if [ "$confirm_wipe" != "YES" ]; then
-        error "Installation aborted by user."
-    fi
-
-    echo
-    info "Partition sizing options:"
-    read -r -p "  EFI partition size (default: 1024MiB): " efi_size
-    efi_size="${efi_size:-1024MiB}"
-
-    read -r -p "  Swap partition size (e.g. 16GiB, 8GiB, or 0 for none) [default: 16GiB]: " swap_size
-    swap_size="${swap_size:-16GiB}"
+    local disk_path
+    disk_path="$(disk_path "$target_disk")"
+    [ -b "$disk_path" ] || error "Device $disk_path does not exist."
 
     local efi_mib efi_end_mib swap_mib=0 swap_end_mib
     efi_mib="$(size_to_mib "$efi_size")"
@@ -119,11 +311,7 @@ setup_disk() {
     swap_end_mib=$((efi_end_mib + swap_mib))
 
     info "Unmounting any existing partitions on $disk_path..."
-    swapoff -a 2>/dev/null || true
-    umount -R /mnt 2>/dev/null || true
-    for p in "${disk_path}"*; do
-        umount "$p" 2>/dev/null || true
-    done
+    unmount_target_partitions "$disk_path"
 
     info "Wiping existing partition table and signatures on $disk_path..."
     wipefs -a -f "$disk_path"
@@ -159,9 +347,9 @@ setup_disk() {
     fi
 
     # Wait for kernel to register partitions
-    sleep 2
-    partprobe "$disk_path" 2>/dev/null || true
-    sleep 2
+    sleep "${INSTALLER_PARTITION_SETTLE_SECONDS:-2}"
+    partprobe "$disk_path"
+    sleep "${INSTALLER_PARTITION_SETTLE_SECONDS:-2}"
 
     info "Formatting partitions..."
     echo "  -> Formatting EFI: $efi_part (FAT32, label: NIXBOOT)"
@@ -177,164 +365,162 @@ setup_disk() {
     mkfs.ext4 -F -L NIXROOT "$root_part"
 
     # Mounting
-    info "Mounting filesystems to /mnt..."
-    mount "$root_part" /mnt
-    mkdir -p /mnt/boot
-    mount "$efi_part" /mnt/boot
+    info "Mounting filesystems to $INSTALLER_MOUNT_ROOT..."
+    mount "$root_part" "$INSTALLER_MOUNT_ROOT"
+    mkdir -p "$INSTALLER_MOUNT_ROOT/boot"
+    mount "$efi_part" "$INSTALLER_MOUNT_ROOT/boot"
 
     success "Filesystems mounted successfully:"
     lsblk -f "$disk_path"
+
 }
 
 # ============================================================
-# STEP 2: Config Generation & Dotfiles Integration
+# STEP 2: Final Config Generation & Dotfiles Integration
 # ============================================================
-setup_config() {
+generate_hardware_config() {
     echo
-    info "Step 2: Generating NixOS configuration..."
-    nixos-generate-config --root /mnt
+    info "Generating NixOS hardware configuration..."
+    nixos-generate-config --root "$INSTALLER_MOUNT_ROOT"
+}
 
-    local suggested_user
-    suggested_user="${SUDO_USER:-${USER:-loc}}"
-    read -r -p "Enter primary user account name [default: $suggested_user]: " install_user
-    install_user="${install_user:-$suggested_user}"
-    [[ "$install_user" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] \
-        || error "Invalid user name: $install_user"
+finalize_machine_config() {
+    [ "$#" -eq 6 ] || error "finalize_machine_config requires user, hostname, repository, bootloader, stateVersion, and password hash"
+    local install_user="$1"
+    local chosen_host="$2"
+    local chosen_repo="$3"
+    local bootloader="$4"
+    local state_version="$5"
+    local pass_hash="$6"
 
-    local user_home="/mnt/home/$install_user"
+    local user_home="$INSTALLER_MOUNT_ROOT/home/$install_user"
     local dotfiles_dir="$user_home/dotfiles"
+    local machine_dir="$dotfiles_dir/.machine"
 
     mkdir -p "$user_home"
-
-    local default_repo="${DOTFILES_REPO:-https://github.com/Aethries/dotfiles.git}"
-    read -r -p "Enter dotfiles Git repository URL [default: $default_repo]: " chosen_repo
-    chosen_repo="${chosen_repo:-$default_repo}"
-
     info "Cloning dotfiles repository from $chosen_repo..."
     if [ -d "$dotfiles_dir" ]; then
         info "Dotfiles already present at $dotfiles_dir."
     else
-        nix-shell -p git --run "git clone \"$chosen_repo\" $dotfiles_dir"
+        # shellcheck disable=SC2016
+        DOTFILES_REPO_SOURCE="$chosen_repo" DOTFILES_REPO_DEST="$dotfiles_dir" \
+            nix-shell -p git --run 'git clone "$DOTFILES_REPO_SOURCE" "$DOTFILES_REPO_DEST"'
     fi
 
-    # Inject generated hardware config into .machine
-    local machine_dir="$dotfiles_dir/.machine"
     mkdir -p "$machine_dir"
-    cp /mnt/etc/nixos/hardware-configuration.nix "$machine_dir/hardware-configuration.nix"
+    cp "$INSTALLER_MOUNT_ROOT/etc/nixos/hardware-configuration.nix" "$machine_dir/hardware-configuration.nix"
+    if [ ! -f "$machine_dir/hardware-extra.nix" ]; then
+        cat > "$machine_dir/hardware-extra.nix" <<'EOF'
+# Machine-local hardware opt-ins. Add imports only for hardware present here.
+{
+  imports = [
+    # ../modules/hardware/intel-graphics.nix
+    # ../modules/hardware/weikav-nut75.nix
+  ];
+}
+EOF
+    fi
 
-    # Create machine-specific configuration.nix
-    local hostname
-    hostname="$(hostname)"
-    [ "$hostname" = "nixos" ] && hostname="nixos-workstation"
-
-    read -r -p "Enter system hostname [default: $hostname]: " chosen_host
-    chosen_host="${chosen_host:-$hostname}"
-    [[ "$chosen_host" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]] \
-        || error "Invalid hostname: $chosen_host"
-
-    echo
-    info "Set password for user '$install_user':"
-    local user_pass="" user_pass_confirm=""
-    while [ -z "$user_pass" ]; do
-        read -r -s -p "Enter password: " user_pass
-        echo
-        read -r -s -p "Confirm password: " user_pass_confirm
-        echo
-        if [ "$user_pass" != "$user_pass_confirm" ]; then
-            warn "Passwords do not match. Please try again."
-            user_pass=""
-        fi
-    done
-
-    local pass_hash
-    pass_hash="$(printf '%s\n' "$user_pass" | nix-shell -p whois --run 'mkpasswd -m sha-512 -s')"
-    unset user_pass user_pass_confirm
-
-    cat > "$machine_dir/configuration.nix" << EOF
+    {
+        cat <<'EOF'
 # ============================================================
 # AUTO-GENERATED MACHINE CONFIGURATION
 # ============================================================
 {
-  imports = [
-    ../configuration.nix
-    ./hardware-configuration.nix
-  ];
-
-  networking.hostName = "$chosen_host";
-
-  users.users."$install_user" = {
-    isNormalUser = true;
-    initialHashedPassword = "$pass_hash";
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "input"
-      "uinput"
-      "docker"
+    imports = [
+      ../configuration.nix
+      ./hardware-configuration.nix
+      ./hardware-extra.nix
     ];
-  };
-  users.users.root.initialHashedPassword = "!";
+
+EOF
+        printf '    networking.hostName = "%s";\n' "$chosen_host"
+        printf '    dotfiles.primaryUser = "%s";\n' "$install_user"
+        bootloader_config "$bootloader"
+        printf '    system.stateVersion = "%s";\n\n' "$state_version"
+        cat <<EOF
+    users.users."$install_user" = {
+      isNormalUser = true;
+      initialHashedPassword = "$pass_hash";
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+        "input"
+        "uinput"
+        "docker"
+        "video"
+      ];
+    };
+    users.users.root.initialHashedPassword = "!";
 }
 EOF
+    } > "$machine_dir/configuration.nix"
 
-    success "Machine configuration generated in $machine_dir"
-
-    # Apply initial configuration to /mnt/etc/nixos/configuration.nix
-    info "Applying initial configuration to /mnt/etc/nixos..."
-    mkdir -p /mnt/etc/nixos
-    cat > /mnt/etc/nixos/configuration.nix << EOF
-# ============================================================
-# NixOS System Configuration
-# Auto-generated by nixos-installer.sh
-# Imports machine-specific dotfiles configuration
-# ============================================================
+    info "Applying initial configuration to $INSTALLER_MOUNT_ROOT/etc/nixos..."
+    mkdir -p "$INSTALLER_MOUNT_ROOT/etc/nixos"
+    cat > "$INSTALLER_MOUNT_ROOT/etc/nixos/configuration.nix" <<EOF
+# Auto-generated by nixos-installer.sh; machine policy lives in the dotfiles repository.
 {
-  imports = [
-    /home/$install_user/dotfiles/.machine/configuration.nix
-  ];
+  imports = [ /home/$install_user/dotfiles/.machine/configuration.nix ];
 }
 EOF
 
-    # Configure Nix experimental features and substituters in /mnt/etc/nix/nix.conf
-    info "Configuring Nix experimental features and Cachix cache in /mnt..."
-    mkdir -p /mnt/etc/nix
-    cat > /mnt/etc/nix/nix.conf << EOF
+    info "Configuring Nix experimental features and Cachix cache in $INSTALLER_MOUNT_ROOT..."
+    mkdir -p "$INSTALLER_MOUNT_ROOT/etc/nix"
+    cat > "$INSTALLER_MOUNT_ROOT/etc/nix/nix.conf" <<'EOF'
 experimental-features = nix-command flakes
 auto-optimise-store = true
 extra-substituters = https://noctalia.cachix.org https://cache.nixos.org
 extra-trusted-public-keys = noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
 EOF
 
-    # Also enable experimental features in the live environment if running on Live ISO
     mkdir -p ~/.config/nix
     if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
         echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
     fi
 
-    # Fix ownership of cloned files in target home
-    chown -R "${install_user}:users" "$user_home" 2>/dev/null || true
+    # The repository clone is created by this installer; do not recurse through the user's home.
+    chown -R "${install_user}:users" "$dotfiles_dir"
+
+    FINAL_DOTFILES_DIR="$dotfiles_dir"
+    FINAL_MACHINE_CONFIG="$machine_dir/configuration.nix"
+}
+
+validate_final_machine_config() {
+    [ "$#" -eq 1 ] || error "validate_final_machine_config requires the final dotfiles directory"
+    local dotfiles_dir="$1"
+
+    info "Validating the final hardware-backed NixOS configuration before installation..."
+    DOTFILES_MACHINE_CONFIG="$FINAL_MACHINE_CONFIG" \
+        nix build "path:$dotfiles_dir#nixosConfigurations.check.config.system.build.toplevel" \
+            --dry-run --impure
+    success "Final machine configuration validated."
 }
 
 # ============================================================
 # STEP 3: Installation Execution
 # ============================================================
 run_install() {
+    [ "$#" -eq 2 ] || error "run_install requires install_user and dotfiles directory"
+    local install_user="$1"
+    local dotfiles_dir="$2"
+
     echo
     info "Step 3: Ready to install NixOS!"
     echo "This will build and install the entire system using your dotfiles."
     read -r -p "Start nixos-install now? [Y/n]: " start_inst
     case "$start_inst" in
         [nN][oO]|[nN])
-            warn "Skipped nixos-install. Configuration is ready at /mnt."
+            warn "Skipped nixos-install. Configuration is ready at $INSTALLER_MOUNT_ROOT."
             return 0
             ;;
     esac
 
-    local dotfiles_dir="/mnt/home/$install_user/dotfiles"
     local machine_config="$dotfiles_dir/.machine/configuration.nix"
 
     info "Running nixos-install (this may take several minutes)..."
-    nixos-install --root /mnt -I "nixos-config=$machine_config" --no-root-password
+    DOTFILES_MACHINE_CONFIG="$machine_config" \
+        nixos-install --root "$INSTALLER_MOUNT_ROOT" --flake "$dotfiles_dir#check" --impure --no-root-password
 
     echo
     echo -e "${GREEN}${BOLD}============================================================${RESET}"
@@ -350,7 +536,7 @@ run_install() {
     read -r -p "Do you want to reboot the system now? [y/N]: " reboot_ans
     case "$reboot_ans" in
         [yY][eE][sS]|[yY])
-            umount -R /mnt 2>/dev/null || true
+            umount -R "$INSTALLER_MOUNT_ROOT" || error "Could not unmount $INSTALLER_MOUNT_ROOT before reboot."
             reboot
             ;;
         *)
@@ -359,9 +545,31 @@ run_install() {
     esac
 }
 
-# Main flow
-banner
-check_connection
-setup_disk
-setup_config
-run_install
+main() {
+    require_root
+    preflight
+
+    banner
+    check_connection
+    collect_install_config
+    INSTALLER_WORK_DIR="$(mktemp -d -t dotfiles-installer-preflight-XXXXXX)"
+    trap 'rm -rf -- "$INSTALLER_WORK_DIR"' EXIT
+    prepare_candidate_repository
+    prepare_candidate_machine_config
+    validate_candidate_machine_config
+    setup_disk "$INSTALL_DISK" "$INSTALL_EFI_SIZE" "$INSTALL_SWAP_SIZE"
+    generate_hardware_config
+    finalize_machine_config \
+        "$INSTALL_USER" \
+        "$INSTALL_HOSTNAME" \
+        "$INSTALL_REPO" \
+        "$INSTALL_BOOTLOADER" \
+        "$INSTALL_STATE_VERSION" \
+        "$INSTALL_PASSWORD_HASH"
+    validate_final_machine_config "$FINAL_DOTFILES_DIR"
+    run_install "$INSTALL_USER" "$FINAL_DOTFILES_DIR"
+}
+
+if [ "${NIXOS_INSTALLER_SOURCE_ONLY:-0}" -ne 1 ]; then
+    main "$@"
+fi

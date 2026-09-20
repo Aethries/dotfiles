@@ -92,8 +92,9 @@ ensure_user_owned() {
     fi
 }
 
-# Giới hạn phạm vi chown chính xác vào các thư mục liên quan, không chown đệ quy ~/.local
-ensure_user_owned "$USER_HOME/.local/bin"
+# The gateway links are created by this script; do not recurse through ~/.local.
+ensure_user_owned "$USER_HOME/.local/bin/9router"
+ensure_user_owned "$USER_HOME/.local/bin/omniroute"
 ensure_user_owned "$USER_HOME/.omniroute"
 ensure_user_owned "$USER_HOME/.9router"
 
@@ -107,7 +108,7 @@ INIT_OMNIROUTE="$REPO_ROOT/scripts/init-omniroute.sh"
 
 [ -f "$INIT_9ROUTER" ] || error "Missing 9router initializer: $INIT_9ROUTER"
 [ -f "$INIT_OMNIROUTE" ] || error "Missing OmniRoute initializer: $INIT_OMNIROUTE"
-chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE" 2>/dev/null || true
+chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE"
 
 # ------------------------------------------------------------------------------
 # 3. Reconcile 9Router

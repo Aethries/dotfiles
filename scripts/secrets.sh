@@ -93,7 +93,7 @@ cmd_encrypt() {
 
         echo
         success "Secrets encrypted successfully -> $ENC_FILE ($size)"
-        info "You can now safely commit or sync $ENC_FILE to another machine."
+        info "Portable archive created. It remains ignored by default; use 'git add -f $ENC_FILE' only when intentional."
     else
         rm -f "$tmp_out"
         echo
@@ -145,8 +145,8 @@ usage() {
     echo "Usage: $(basename "$0") {encrypt|decrypt}"
     echo
     echo "Commands:"
-    echo "  encrypt   Encrypt all files in 'secrets/' into 'secrets.enc' with a Master Password"
-    echo "  decrypt   Decrypt 'secrets.enc' back into 'secrets/'"
+    echo "  encrypt   Encrypt plaintext secrets/ into ignored secrets.enc"
+    echo "  decrypt   Decrypt secrets.enc back into plaintext secrets/"
     echo
     exit 1
 }

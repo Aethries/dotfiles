@@ -24,8 +24,6 @@ let
     else
       getLockedFlake "noctalia-greeter";
 
-  normalUsers = builtins.attrNames (lib.filterAttrs (_: u: u.isNormalUser) config.users.users);
-
 in
 {
   imports = [
@@ -45,19 +43,10 @@ in
   # GPU Screen Recorder (cho Noctalia screen_recorder plugin)
   programs.gpu-screen-recorder.enable = true;
 
-  # ⚠️  Intel-specific — override in .machine/configuration.nix for AMD/NVIDIA
-  # Hardware Video Acceleration & Graphics (Intel VA-API / QSV)
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      intel-media-driver
-      intel-vaapi-driver
-      vpl-gpu-rt
-    ];
-  };
+  # Hardware graphics is common; vendor drivers are selected in machine-local modules.
+  hardware.graphics.enable = true;
 
   environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "iHD";
     XCURSOR_THEME = "Bibata-Modern-Ice";
     XCURSOR_SIZE = "24";
   };
@@ -66,7 +55,9 @@ in
   programs.noctalia-greeter = {
     enable = true;
     # Tự động cấp quyền sync giao diện cho tất cả user thông thường mà không cần gõ mật khẩu root
-    passwordless-sync-users = if normalUsers != [ ] then [ (builtins.head normalUsers) ] else [ ];
+    passwordless-sync-users = lib.optional (
+      config.dotfiles.primaryUser != null
+    ) config.dotfiles.primaryUser;
     settings = {
       session = {
         default = "Niri";

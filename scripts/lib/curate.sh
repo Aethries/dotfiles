@@ -615,7 +615,7 @@ perform_semantic_review() {
 
     local cand_name=""
     if [ -d "$cand_dir" ] && [ -f "$cand_dir/SKILL.md" ]; then
-        cand_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$cand_dir/SKILL.md" | tr -d '\r"' || true)"
+        cand_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$cand_dir/SKILL.md" | tr -d '\r"' || true)" # OPTIONAL_FEATURE: candidate metadata is optional during skill discovery.
     fi
     [ -z "$cand_name" ] && cand_name="$(basename "$cand_dir")"
 

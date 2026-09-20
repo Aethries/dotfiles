@@ -90,7 +90,7 @@ if command -v niri >/dev/null 2>&1; then
 fi
 
 info "Tóm tắt các thay đổi trong dotfiles:"
-git -C "$REPO_ROOT" status --short "$REPO_ROOT/resources/noctalia" "$REPO_ROOT/resources/niri" "$REPO_ROOT/resources/kitty" "$REPO_ROOT/resources/starship" "$REPO_ROOT/resources/nvim" || true
+git -C "$REPO_ROOT" status --short "$REPO_ROOT/resources/noctalia" "$REPO_ROOT/resources/niri" "$REPO_ROOT/resources/kitty" "$REPO_ROOT/resources/starship" "$REPO_ROOT/resources/nvim" || true # BEST_EFFORT: the final status display is informational after theme synchronization.
 
 echo
 success "Đồng bộ Noctalia hoàn tất! Bạn có thể git commit các thay đổi này."

@@ -33,15 +33,15 @@ else
     if [ -n "$WAYFREEZE_CMD" ]; then
         # Freeze screen, select geometry with slurp, capture with grim, then immediately unfreeze
         $WAYFREEZE_CMD --hide-cursor --after-freeze-cmd "
-            GEOM=\"\$(slurp 2>/dev/null || true)\"
+            GEOM=\"\$(slurp 2>/dev/null || true)\" # BEST_EFFORT: cancelling the interactive selection returns an empty geometry.
             if [ -n \"\$GEOM\" ]; then
                 grim -g \"\$GEOM\" \"$TEMP_FILE\"
             fi
-            pkill -x wayfreeze 2>/dev/null || true
-        " 2>/dev/null || true
+            pkill -x wayfreeze 2>/dev/null || true # BEST_EFFORT: the freeze helper may already have exited after capture.
+        " 2>/dev/null || true # BEST_EFFORT: screen capture is optional and cancellation should not produce a shell error.
     else
         # Fallback without freeze
-        GEOM="$(slurp 2>/dev/null || true)"
+        GEOM="$(slurp 2>/dev/null || true)" # BEST_EFFORT: cancelling the interactive selection returns an empty geometry.
         if [ -n "$GEOM" ]; then
             grim -g "$GEOM" "$TEMP_FILE"
         fi

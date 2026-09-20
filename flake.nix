@@ -29,32 +29,49 @@
     { self, nixpkgs, ... }@inputs:
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      machineConfigPath = builtins.getEnv "DOTFILES_MACHINE_CONFIG";
+      machineConfig =
+        if machineConfigPath != "" && builtins.pathExists machineConfigPath then
+          builtins.toPath machineConfigPath
+        else
+          null;
+      fixtureModules = [
+        ./configuration.nix
+        ({ lib, ... }: {
+          fileSystems."/" = lib.mkDefault {
+            device = "none";
+            fsType = "tmpfs";
+          };
+          users.users.testuser = {
+            isNormalUser = true;
+            group = "testuser";
+          };
+          users.groups.testuser = { };
+          dotfiles.primaryUser = "testuser";
+          boot.loader.systemd-boot.enable = true;
+          boot.loader.efi.canTouchEfiVariables = true;
+          boot.kernelParams = [ ];
+          system.stateVersion = "26.05";
+        })
+      ];
+      checkModules = if machineConfig != null then [ machineConfig ] else fixtureModules;
     in
     {
       # Evaluation target for common modules. Real hardware stays in .machine/.
       nixosConfigurations.check = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
-        modules = [
-          ./configuration.nix
-          ({ lib, ... }: {
-            fileSystems."/" = lib.mkDefault {
-              device = "none";
-              fsType = "tmpfs";
-            };
-            users.users.loc = {
-              isNormalUser = true;
-              group = "loc";
-            };
-            users.groups.loc = { };
-          })
-        ];
+        modules = checkModules;
       };
 
       formatter.x86_64-linux = pkgs.nixfmt;
       devShells.x86_64-linux.default = pkgs.mkShellNoCC {
         packages = [
+          pkgs.bashInteractive
+          pkgs.jq
+          pkgs.neovim
           pkgs.nixfmt
+          pkgs.ripgrep
           pkgs.shellcheck
         ];
       };

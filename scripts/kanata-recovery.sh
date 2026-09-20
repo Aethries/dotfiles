@@ -108,7 +108,7 @@ cmd_logs() {
 }
 
 COMMAND="${1:-help}"
-shift || true
+shift || true # BEST_EFFORT: recovery mode accepts an optional trailing argument list.
 
 case "$COMMAND" in
     status)

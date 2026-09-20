@@ -150,7 +150,7 @@ in
     yq-go
     trash-cli
     cloudflared
-    lsof # Required by 9router MITM proxy (also symlinked to /usr/bin/lsof by init-9router.sh)
+    lsof # Required by the 9router MITM proxy
     nssTools # Provides certutil for 9router browser trust store registration
 
     # ----------------------------------------------------------

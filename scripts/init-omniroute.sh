@@ -88,9 +88,8 @@ ensure_user_owned() {
     fi
 }
 
-# Scope ownership repairs specifically to avoid excessive blast radius across ~/.local
-ensure_user_owned "$HOME/.local/bin"
-ensure_user_owned "$HOME/.local/lib/node_modules"
+# npm owns its user-local prefix; only repair the exact gateway binary and state tree.
+ensure_user_owned "$HOME/.local/bin/omniroute"
 ensure_user_owned "$HOME/.omniroute"
 
 echo -e "${BOLD}=========================================${NC}"
@@ -113,7 +112,7 @@ if ! command -v npm >/dev/null 2>&1 || ! validate_node_version; then
     if command -v fnm >/dev/null 2>&1; then
         info "Compatible Node.js not active; installing and setting up LTS via fnm..."
         fnm install --lts 2>/dev/null || fnm install 24
-        fnm default lts-latest 2>/dev/null || fnm default 24 2>/dev/null || true
+        fnm default lts-latest 2>/dev/null || fnm default 24 2>/dev/null || true # OPTIONAL_FEATURE: a persistent fnm default is not required when the current runtime is valid.
         eval "$(fnm env --shell bash)"
     fi
 fi
@@ -159,7 +158,7 @@ done
 
 # Secure directory permissions (0700) to protect database and provider secrets
 chmod 700 "$HOME/.omniroute"
-chmod 700 "$HOME/.omniroute/logs" 2>/dev/null || true
+chmod 700 "$HOME/.omniroute/logs" 2>/dev/null || true # BEST_EFFORT: the optional log directory may not exist until the service starts.
 
 # ------------------------------------------------------------------------------
 # 3. Configure OmniRoute Environment (.env) & Dedicated Port 20129
@@ -241,7 +240,7 @@ SERVICE_DEST="$SYSTEMD_USER_DIR/omniroute.service"
 
 [ -f "$SERVICE_SRC" ] || error "Missing service template: $SERVICE_SRC"
 
-if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then
+if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then # BEST_EFFORT: an unreadable absent service link is treated as drift and replaced.
     if [ -e "$SERVICE_DEST" ] && [ ! -L "$SERVICE_DEST" ]; then
         mv "$SERVICE_DEST" "$SERVICE_DEST.pre-init-omniroute.$(date +%Y%m%d%H%M%S)"
     fi
@@ -260,16 +259,16 @@ if command -v loginctl >/dev/null 2>&1; then
     CURRENT_LINGER=$(loginctl show-user "$USER" -p Linger 2>/dev/null | cut -d= -f2 || echo "no")
     if [ "$CURRENT_LINGER" != "yes" ]; then
         info "Enabling user lingering for $USER (so omniroute starts on boot without login)..."
-        sudo loginctl enable-linger "$USER" 2>/dev/null || true
+        sudo loginctl enable-linger "$USER" 2>/dev/null || true # OPTIONAL_FEATURE: lingering is only needed for user services after logout.
     fi
 fi
 
 # Stop any rogue omniroute process not managed by systemd
-systemctl --user stop omniroute.service 2>/dev/null || true
-mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true)
+systemctl --user stop omniroute.service 2>/dev/null || true # BEST_EFFORT: stopping an already-stopped service is safe before restart.
+mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true) # BEST_EFFORT: no matching process is a valid clean state.
 if [ "${#RUNNING_PIDS[@]}" -gt 0 ]; then
     info "Stopping running manual omniroute process (PID: ${RUNNING_PIDS[*]})..."
-    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true
+    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true # BEST_EFFORT: a process may exit between discovery and termination.
     sleep 1
 fi
 

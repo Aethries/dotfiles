@@ -4,8 +4,13 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
-shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+
+if rg -n '^[^#]*\|\| true' scripts/*.sh scripts/lib/*.sh | grep -vE '(BEST_EFFORT|OPTIONAL_FEATURE):'; then
+    echo "Error: every non-comment fallback must include a BEST_EFFORT or OPTIONAL_FEATURE rationale" >&2
+    exit 1
+fi
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
@@ -29,6 +34,9 @@ bash tests/zellij/launcher_test.sh >/dev/null
 bash tests/ai/omniroute_test.sh >/dev/null
 bash tests/ai/skills_test.sh >/dev/null
 bash tests/kanata/recovery_test.sh >/dev/null
+bash tests/bootstrap/test-bootstrap.sh >/dev/null
+bash tests/installer/test-installer-mock.sh >/dev/null
+bash tests/gh/test-aliases.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)
 nixfmt --check "${nix_files[@]}"
@@ -53,10 +61,17 @@ jq -e '
 # (for example ~/.local/bin/9router) to exist on the checking machine.
 service_check_dir="$(mktemp -d -t dotfiles-systemd-check-XXXXXX)"
 trap 'rm -rf "$service_check_dir"' EXIT
+true_bin="$(type -P true)"
+for target in default.target graphical-session.target sysinit.target; do
+    cat > "$service_check_dir/$target" <<EOF
+[Unit]
+Description=QA stub for $target
+EOF
+done
 for service in resources/systemd/user/*.service; do
     sed \
-        -e 's|^ExecStartPre=.*|ExecStartPre=/run/current-system/sw/bin/true|' \
-        -e 's|^ExecStart=.*|ExecStart=/run/current-system/sw/bin/true|' \
+        -e "s|^ExecStartPre=.*|ExecStartPre=$true_bin|" \
+        -e "s|^ExecStart=.*|ExecStart=$true_bin|" \
         "$service" > "$service_check_dir/$(basename "$service")"
 done
 SYSTEMD_UNIT_PATH="$service_check_dir:/nix/var/nix/profiles/system/etc/systemd/system:/run/current-system/sw/lib/systemd/system" systemd-analyze verify "$service_check_dir"/*.service

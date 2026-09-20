@@ -9,11 +9,20 @@ set -euo pipefail
 # Mode configuration
 MODE="picker"
 FALLBACK_ON_EMPTY_LATEST="picker" # "picker" or a stable name such as "main"
+LAYOUT=""
 
-for arg in "$@"; do
-    case "$arg" in
+while [ $# -gt 0 ]; do
+    case "$1" in
         --latest)
             MODE="latest"
+            ;;
+        --layout)
+            if [ $# -lt 2 ] || [ -z "$2" ]; then
+                echo "launcher: --layout requires a layout name or path" >&2
+                exit 1
+            fi
+            LAYOUT="$2"
+            shift
             ;;
         --help|-h)
             cat << 'EOS'
@@ -21,15 +30,18 @@ Usage: launcher.sh [OPTIONS]
 
 Options:
   --latest    Attach directly to the newest created session (or launch picker if none)
+  --layout LAYOUT
+              Opt into a Zellij layout for newly created sessions (default: none)
   -h, --help  Show this help message
 EOS
             exit 0
             ;;
         *)
-            echo "launcher: unknown argument: $arg" >&2
+            echo "launcher: unknown argument: $1" >&2
             exit 1
             ;;
     esac
+    shift
 done
 
 # 1. Dependency check
@@ -54,6 +66,14 @@ validate_session_name() {
         return 1
     fi
     return 0
+}
+
+start_session() {
+    local session_name="$1"
+    if [ -n "$LAYOUT" ]; then
+        exec zellij --session "$session_name" --layout "$LAYOUT"
+    fi
+    exec zellij --session "$session_name"
 }
 
 # 3. Obtain existing sessions without starting a Zellij server
@@ -110,7 +130,7 @@ if [ "$MODE" = "latest" ]; then
         MODE="picker"
     else
         validate_session_name "$FALLBACK_ON_EMPTY_LATEST"
-        exec zellij --session "$FALLBACK_ON_EMPTY_LATEST"
+        start_session "$FALLBACK_ON_EMPTY_LATEST"
     fi
 fi
 
@@ -182,7 +202,7 @@ run_picker() {
                 read -r -p "Enter name for new session: " new_name
             fi
             if validate_session_name "$new_name"; then
-                exec zellij --session "$new_name"
+                start_session "$new_name"
             fi
             exit 1
             ;;
@@ -201,12 +221,12 @@ run_picker() {
                 done
                 # Otherwise, treat as new session name
                 if validate_session_name "$query"; then
-                    exec zellij --session "$query"
+                    start_session "$query"
                 fi
                 exit 1
             else
                 # Empty enter on empty list -> start default "main" session
-                exec zellij --session "main"
+                start_session "main"
             fi
             ;;
     esac
