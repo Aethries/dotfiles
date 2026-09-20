@@ -504,7 +504,7 @@ binds {
         spawn "kitty"
     }
     Mod+P hotkey-overlay-title="Projects Launcher: fzf & zellij" {
-        spawn-sh "PATH=\"$HOME/.local/bin:$PATH\" kitty --class kitty-pj -e pj"
+        spawn-sh "kitty --class kitty-pj -e \"$HOME/.local/bin/pj\""
     }
     Mod+G hotkey-overlay-title="Git Client: lazygit" {
         spawn "kitty" "--class" "kitty-lazygit" "-e" "lazygit"

@@ -42,6 +42,7 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
 | **Nhảy ngữ cảnh (Index)** | `1` ... `9`, `0` | Luôn là số thứ tự Tab / Workspace / Sub-layer (`Ctrl+1..9` trong Chromium, `Ctrl+Shift+1..9` trong Zellij, `Mod+1..9` trong Niri, `1..3` trong Navigate). |
 | **Tra cứu phím tắt (Help)** | `?` (`Shift+/`) | Mở / Đóng bảng tra cứu phím tắt tương tác Noctalia Cheatsheet (`kenn/keybind-cheatsheet:cheatsheet`) trên mọi modal layer. Ở normal mode: `Mod+Shift+/`. |
 | **Cổng chuyển đổi (Gateway)** | `CapsLock` | Trong `normal`: Tap $\rightarrow$ `navigate`, Double-tap/RShift $\rightarrow$ `super`, Giữ $\rightarrow$ hợp âm. Trong **mọi sub-layer khác**: Tap `CapsLock` 1 chạm duy nhất là về thẳng `normal` (zero delay). |
+| **Hoàn tất / Gợi ý (Commit)** | `Tab` / `Enter` | Luôn gửi phím `Tab` / `Enter` gốc (chấp nhận code suggestion, completion, submit) và lập tức đưa bàn phím về `NORMAL` mode để gõ tiếp (Issue #101). |
 
 ---
 
@@ -221,15 +222,17 @@ Bảng phân cấp xác định rõ phần mềm nào chịu trách nhiệm cho 
   - `s` $\rightarrow$ Chụp ảnh màn hình (`Mod+S`).
   - `r` $\rightarrow$ Quay màn hình (`Mod+R`).
   - `d` $\rightarrow$ Mở Menu ứng dụng (`Mod+D`).
-  - `t` / `Enter` $\rightarrow$ Mở Terminal (`Mod+T` / `Mod+Return`).
+  - `t` $\rightarrow$ Mở Terminal (`Mod+T`).
   - `o` $\rightarrow$ Toggle Overview (`Mod+O`).
   - `v` $\rightarrow$ Mở Clipboard (`Mod+V`).
 - **Hành động duy trì:**
   - `f` $\rightarrow$ Fullscreen (`Mod+F`).
   - `q` $\rightarrow$ Đóng cửa sổ (`Mod+Q`).
 - **Thoát layer:**
+  - `Tab` / `Enter` $\rightarrow$ Gửi phím `Tab` / `Enter` chuẩn và trở về ngay **Normal Layer** (Issue #101).
   - `m` $\rightarrow$ Kích hoạt **Warpd Hint Mode** (nhảy nhanh & click bằng bàn phím).
   - `M` (`Shift + m`) $\rightarrow$ Kích hoạt **Warpd Movement Mode** (rê chuột bằng `h/j/k/l`).
+  - Khi chuyển từ chế độ chuột (Warpd) sang bất kỳ mode phím nào (`niri`, `super`, `terminals`, `navigate`), hệ thống tự động tắt ngay chế độ chuột (Issue #100).
   - `Single-tap CapsLock`, `Esc`, hoặc `i` $\rightarrow$ Trở về thẳng **Normal Layer** (1 chạm tức thì, zero delay).
   - `Hold CapsLock + 1/2/3/m` $\rightarrow$ Chuyển trực tiếp giữa các layer.
 
