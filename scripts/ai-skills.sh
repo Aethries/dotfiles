@@ -1739,38 +1739,52 @@ import_skill() {
     log_ok "Successfully imported skill '$target_skill_name' into $target_dir (hash: $hash)"
 }
 
-select_skills_interactive() {
+select_skill_names() {
     if [ ! -d "$SKILLS_SRC" ]; then
         log_fail "No skills repository found at $SKILLS_SRC"
         return 1
     fi
 
+    local -a skills=()
     mapfile -t skills < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
     if [ "${#skills[@]}" -eq 0 ]; then
-        echo "No skills available in $SKILLS_SRC."
+        echo "No skills available in $SKILLS_SRC." >&2
         return 0
     fi
 
     local selected_skills=()
+    local selected_output=""
     if command -v fzf >/dev/null 2>&1; then
         # shellcheck disable=SC2016
-        mapfile -t selected_skills < <(printf '%s\n' "${skills[@]}" | fzf \
+        set +e
+        selected_output="$(printf '%s\n' "${skills[@]}" | fzf \
             --multi \
             --prompt="Select AI Skill(s) [TAB=Multi-select, ENTER=Confirm]: " \
             --header="[TAB] Toggle Selection | [Enter] Confirm | [ESC] Exit" \
             --preview "$REPO_ROOT/scripts/ai-skills.sh preview {}" \
-            --preview-window="right:65%:wrap")
+            --preview-window="right:65%:wrap")"
+        local fzf_rc=$?
+        set -e
+        if [ "$fzf_rc" -eq 130 ]; then
+            return 0
+        fi
+        if [ "$fzf_rc" -ne 0 ]; then
+            log_fail "Skill selector failed with exit code $fzf_rc"
+            return 1
+        fi
     else
-        echo -e "${BOLD}${CYAN}Available AI Skills:${RESET}"
+        echo -e "${BOLD}${CYAN}Available AI Skills:${RESET}" >&2
         local i=1
         for s in "${skills[@]}"; do
-            echo "  $i) $s"
+            echo "  $i) $s" >&2
             i=$((i + 1))
         done
-        read -r -p "Enter number(s) (e.g. 1,3 or 'all'): " choices
+        local choices=""
+        read -r -p "Enter number(s) (e.g. 1,3 or 'all'): " choices || choices=""
         if [ "$choices" = "all" ] || [ "$choices" = "*" ]; then
             selected_skills=("${skills[@]}")
         else
+            local -a nums=()
             IFS=', ' read -r -a nums <<< "$choices"
             for n in "${nums[@]}"; do
                 if [[ "$n" =~ ^[0-9]+$ ]] && [ "$n" -ge 1 ] && [ "$n" -le "${#skills[@]}" ]; then
@@ -1778,8 +1792,26 @@ select_skills_interactive() {
                 fi
             done
         fi
+        if [ "${#selected_skills[@]}" -gt 0 ]; then
+            selected_output="$(printf '%s\n' "${selected_skills[@]}")"
+        fi
     fi
 
+    if [ -n "$selected_output" ]; then
+        printf '%s\n' "$selected_output"
+    fi
+}
+
+select_skills_interactive() {
+    local selected_output=""
+    if ! selected_output="$(select_skill_names)"; then
+        return 1
+    fi
+
+    local selected_skills=()
+    if [ -n "$selected_output" ]; then
+        mapfile -t selected_skills <<< "$selected_output"
+    fi
     if [ "${#selected_skills[@]}" -eq 0 ]; then
         return 0
     fi
@@ -1932,8 +1964,16 @@ cmd_add() {
     done
 
     if [ "${#skills[@]}" -eq 0 ]; then
-        log_fail "Missing skill name. Usage: $(basename "$0") add <skill...> [--global <agent>] [--project [path]] [--target <agent>] [--force|--replace|--backup]"
-        return 1
+        local selected_output=""
+        if ! selected_output="$(select_skill_names)"; then
+            return 1
+        fi
+        if [ -n "$selected_output" ]; then
+            mapfile -t skills <<< "$selected_output"
+        fi
+        if [ "${#skills[@]}" -eq 0 ]; then
+            return 0
+        fi
     fi
 
     if [ "$MODE" = "project" ]; then
@@ -2089,8 +2129,8 @@ show_usage() {
     echo "                                          --preview: Preview metadata, security, and overlap (default)"
     echo "                                          --approve: Approve import and save to canonical library"
     echo "                                          --replace: Force replace if skill or duplicate exists"
-    echo "  add <skill...> [--global <agent>]     Link skill canonically to agent config (default: all)"
-    echo "  add <skill...> --project [path]       Physically copy skill bundle into project and update lockfile"
+    echo "  add [skill...] [--global <agent>]     Select interactively when names are omitted; otherwise link globally"
+    echo "  add [skill...] --project [path]       Select interactively when names are omitted; otherwise copy to project"
     echo "  remove <skill...> [--global <agent>]  Unlink skill from global agent config (default scope: global)"
     echo "  remove <skill...> --project [path]    Remove physical skill from project and lockfile"
     echo "  remove <skill...> --all-scopes        Remove skill from both global agent configs and project"
@@ -2115,8 +2155,11 @@ show_usage() {
     echo "  ai-skills import https://github.com/anthropics/skills --path skills/github-actions --preview"
     echo "  ai-skills import https://github.com/anthropics/skills --path skills/github-actions --approve"
     echo "  ai-skills sync --profile global-core"
-    echo "  ai-skills add ponytail caveman --global claude"
-    echo "  ai-skills add ponytail caveman --project"
+    echo "  ai-skills add                                # Interactive global selection"
+    echo "  ai-skills add --project                      # Interactive project selection"
+    echo "  ai-skills add --global codex-cli             # Interactive selection for one agent"
+    echo "  ai-skills add ponytail caveman --global claude  # Explicit, non-interactive"
+    echo "  ai-skills add ponytail caveman --project        # Explicit project install"
     echo "  ai-skills diff ponytail"
     echo "  ai-skills update ponytail"
     echo "  ai-skills remove ponytail --project"

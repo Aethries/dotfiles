@@ -68,15 +68,51 @@ Lists all available skills in the canonical registry, displaying name, version, 
 ai-skills list
 ```
 
-### `add <skill> [--project] [--all|--target <agent>]`
-Installs a skill globally (symlink) or into the current project (physical copy + lockfile).
+### `add [skill...] [--global <agent>] [--project [path]]`
+Installs skills globally (symlink) or into a project (physical copy + lockfile).
+Skill names are optional. When no names are supplied, the command opens the
+existing interactive selector and then continues through the same add workflow
+used by explicit names. Command-line options are parsed first, so the scope,
+project path, and target agent remain in effect for the selected skills.
+
+The selector enumerates canonical skill directories containing `SKILL.md`,
+ignores metadata entries beginning with `_`, sorts names deterministically, and
+supports multi-select with `fzf`. Without `fzf`, it uses the numbered fallback.
+Pressing `Esc`, cancelling, or submitting no valid fallback selections exits
+successfully without changing symlinks, project copies, or lockfiles.
+
+Interactive examples:
+
 ```bash
-# Install globally to all agents
+# Select skills, then link them globally to all configured agents
+ai-skills add
+
+# Select skills, then install physical project copies for all project targets
+ai-skills add --project
+
+# Select skills, then link only into Codex's global target
+ai-skills add --global codex-cli
+
+# Select skills for a project path while preserving the existing project logic
+ai-skills add --project ~/Workspaces/example
+```
+
+Explicit names remain non-interactive and use the same install semantics:
+
+```bash
+# Global installs are absolute symlinks to resources/skills/<name>
 ai-skills add senior-implementer
 
-# Install into current project
+# Project installs are physical copies and update .agent-skills.lock.json
 ai-skills add data-model-architect --project
+
+# Select the target agent explicitly
+ai-skills add nestjs postgresql --global codex-cli
 ```
+
+`--target <agent>` is an equivalent target selector. `--force`/`--replace`
+and `--backup` retain their existing overwrite and backup semantics. Unknown
+skill names still fail through the normal explicit add path.
 
 ### `remove <skill> [--project] [--all|--target <agent>]`
 Removes a skill from global agent directories or cleans the project directory and updates the lockfile.
@@ -158,13 +194,24 @@ ai-skills import https://github.com/anthropics/skills --path skills/github-actio
 ai-skills import https://github.com/anthropics/skills --path skills/github-actions --approve
 ```
 
-### `add <skill...> [--global <agent>] [--project [path]]`
+### `add [skill...] [--global <agent>] [--project [path]]`
 Installs skills globally via symlinks or into a project via physical standalone copy.
+Omit the skill names to open the interactive selector; explicit names bypass
+the selector and remain suitable for scripts and automation.
 ```bash
-# Install globally to all agents (symlinks)
+# Interactive global selection
+ai-skills add
+
+# Interactive project selection
+ai-skills add --project
+
+# Interactive selection for one global target
+ai-skills add --target antigravity-cli
+
+# Explicit global install (non-interactive symlink)
 ai-skills add senior-implementer
 
-# Install into current project (physical copy + lockfile)
+# Explicit project install (non-interactive physical copy + lockfile)
 ai-skills add data-model-architect --project
 ```
 
