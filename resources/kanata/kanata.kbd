@@ -39,30 +39,33 @@
   ;; --------------------------------------------------------------------------
   ;; Layer Switching Aliases
   ;; --------------------------------------------------------------------------
+  ;; Kill Warpd pointer emulation synchronously when entering any keyboard mode
+  kill_warpd (multi (release-key lsft) (release-key rsft) M-A-esc)
+
   to_norm (layer-switch normal)
-  to_nav  (layer-switch navigate)
-  to_sup  (layer-switch super)
-  to_niri (layer-switch niri)
-  to_clk  (layer-switch ctrl_locked)
-  to_slk  (layer-switch super_locked)
-  to_alk  (layer-switch alt_locked)
-  to_shlk (layer-switch shift_locked)
-  to_chrom (layer-switch chromium)
-  to_term (layer-switch terminals)
-  to_vis  (layer-switch visual)
-  to_bp   (layer-switch bypass)
+  to_nav  (multi @kill_warpd (layer-switch navigate))
+  to_sup  (multi @kill_warpd (layer-switch super))
+  to_niri (multi @kill_warpd (layer-switch niri))
+  to_clk  (multi @kill_warpd (layer-switch ctrl_locked))
+  to_slk  (multi @kill_warpd (layer-switch super_locked))
+  to_alk  (multi @kill_warpd (layer-switch alt_locked))
+  to_shlk (multi @kill_warpd (layer-switch shift_locked))
+  to_chrom (multi @kill_warpd (layer-switch chromium))
+  to_term (multi @kill_warpd (layer-switch terminals))
+  to_vis  (multi @kill_warpd (layer-switch visual))
+  to_bp   (multi @kill_warpd (layer-switch bypass))
 
-  to_arm_slk  (layer-switch super_armed_slk)
-  to_arm_clk  (layer-switch super_armed_clk)
-  to_arm_alk  (layer-switch super_armed_alk)
-  to_arm_shlk (layer-switch super_armed_shlk)
+  to_arm_slk  (multi @kill_warpd (layer-switch super_armed_slk))
+  to_arm_clk  (multi @kill_warpd (layer-switch super_armed_clk))
+  to_arm_alk  (multi @kill_warpd (layer-switch super_armed_alk))
+  to_arm_shlk (multi @kill_warpd (layer-switch super_armed_shlk))
 
-  to_nav_slk  (layer-switch nav_slk)
-  to_nav_clk  (layer-switch nav_clk)
+  to_nav_slk  (multi @kill_warpd (layer-switch nav_slk))
+  to_nav_clk  (multi @kill_warpd (layer-switch nav_clk))
 
   ;; Esc definition:
   ;; Zero-latency immediate reset: releases all modifiers, sends Esc, and switches to normal mode.
-  esc_reset (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) esc @to_norm)
+  esc_reset (multi (release-key lmet) (release-key lctl) (release-key lalt) (release-key lsft) @kill_warpd esc @to_norm)
 
   ;; Transitions that switch layer without consuming waiting one-shot modifiers
   nav_preserve  (multi (one-shot-pause-processing 100) @to_nav)
@@ -259,8 +262,8 @@
   ;; --------------------------------------------------------------------------
   warp_hint (multi (release-key lsft) (release-key rsft) M-A-p)
   warp_norm (multi (release-key lsft) (release-key rsft) M-A-m)
-  warp_hint_norm (multi (release-key lsft) (release-key rsft) M-A-p @to_norm)
-  warp_norm_norm (multi (release-key lsft) (release-key rsft) M-A-m @to_norm)
+  warp_hint_norm (multi (release-key lsft) (release-key rsft) M-A-p (one-shot-pause-processing 50) @to_norm)
+  warp_norm_norm (multi (release-key lsft) (release-key rsft) M-A-m (one-shot-pause-processing 50) @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
 
@@ -306,11 +309,11 @@
 ;; Direct Sequential Key Sequences (Tap CapsLock + <key>)
 ;; ----------------------------------------------------------------------------
 (defvirtualkeys
-  v_sup    (layer-switch super)
-  v_nav    (multi (one-shot-pause-processing 100) (layer-switch navigate))
-  v_niri   (layer-switch niri)
-  v_chrom  (layer-switch chromium)
-  v_term   (layer-switch terminals)
+  v_sup    (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch super))
+  v_nav    (multi (release-key lsft) (release-key rsft) M-A-esc (one-shot-pause-processing 100) (layer-switch navigate))
+  v_niri   (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch niri))
+  v_chrom  (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch chromium))
+  v_term   (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch terminals))
   v_warp   (multi M-A-p)
   v_warp_m (multi M-A-m)
 )

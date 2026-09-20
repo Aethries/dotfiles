@@ -253,17 +253,6 @@ class KanataHud:
             except Exception:
                 pass
 
-    def _kill_mouse_mode(self):
-        """Terminate warpd (mouse mode) when switching to keyboard modes (Issue #100)."""
-        try:
-            subprocess.Popen(
-                ["pkill", "-x", "warpd"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            pass
-
     def set_layer(self, layer):
         if layer == "caps_mode":
             # Transient chord layer; do not alter HUD or IME state
@@ -277,10 +266,6 @@ class KanataHud:
             self.win.hide()
             self._toggle_fcitx_exit()
             return
-
-        # Turn off mouse mode (warpd) when switching to any keyboard modal layer (Issue #100)
-        if layer in ("navigate", "super", "terminals", "niri", "chromium", "visual", "nav_slk", "nav_clk"):
-            self._kill_mouse_mode()
 
         if prev_layer == "normal":
             self._toggle_fcitx_enter()
