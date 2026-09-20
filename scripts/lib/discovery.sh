@@ -22,7 +22,7 @@ log_warn() { echo -e "  [${YELLOW}!${RESET}] $1"; }
 log_err() { echo -e "  [${RED}✗${RESET}] $1" >&2; }
 
 # ------------------------------------------------------------------------------
-# Normalize Candidate JSON Schema (Section 4)
+# Normalize Candidate JSON Schema
 # ------------------------------------------------------------------------------
 normalize_candidate() {
     local name="$1"
@@ -59,33 +59,138 @@ normalize_candidate() {
 }
 
 # ------------------------------------------------------------------------------
+# Candidate Verification Engine (Phase 6)
+# Validates repository reachability, revision, skill path, and SKILL.md existence.
+# ------------------------------------------------------------------------------
+verify_candidate() {
+    local upstream_url="$1"
+    local skill_path="${2:-.}"
+    local revision="${3:-HEAD}"
+
+    # 1. Local filesystem path or test fixture
+    if [ -d "$upstream_url" ]; then
+        local target_dir="$upstream_url"
+        [ "$skill_path" != "." ] && [ -n "$skill_path" ] && target_dir="$upstream_url/$skill_path"
+
+        if [ ! -d "$target_dir" ] || [ ! -f "$target_dir/SKILL.md" ]; then
+            jq -n --arg reason "SKILL.md not found at path '$skill_path'" '{verified: false, reason: $reason}'
+            return 0
+        fi
+
+        if ! head -n 1 "$target_dir/SKILL.md" | grep -q '^---'; then
+            jq -n --arg reason "SKILL.md missing valid YAML frontmatter delimiter" '{verified: false, reason: $reason}'
+            return 0
+        fi
+
+        local resolved_commit="local"
+        if [ -d "$upstream_url/.git" ]; then
+            resolved_commit="$(cd "$upstream_url" && git rev-parse "${revision:-HEAD}" 2>/dev/null || echo "HEAD")"
+        fi
+
+        jq -n \
+            --arg commit "$resolved_commit" \
+            --arg path "$skill_path" \
+            '{verified: true, resolved_commit: $commit, resolved_path: $path, reason: null}'
+        return 0
+    fi
+
+    # 2. Remote git repository
+    if [[ "$upstream_url" =~ ^https?:// ]] || [[ "$upstream_url" =~ ^git@ ]]; then
+        local ls_out
+        if ! ls_out="$(git ls-remote "$upstream_url" 2>/dev/null)"; then
+            jq -n --arg reason "Repository unreachable or network unavailable: $upstream_url" '{verified: false, reason: $reason}'
+            return 0
+        fi
+
+        local resolved_sha
+        resolved_sha="$(echo "$ls_out" | awk '{print $1}' | head -n 1)"
+        if [ -z "$resolved_sha" ]; then
+            jq -n --arg reason "Unable to resolve commit SHA for $upstream_url" '{verified: false, reason: $reason}'
+            return 0
+        fi
+
+        local check_dir
+        check_dir="$(mktemp -d "/tmp/verify-cand.XXXXXX")"
+        if git clone --depth 1 "$upstream_url" "$check_dir" >/dev/null 2>&1; then
+            local check_skill_dir="$check_dir"
+            [ "$skill_path" != "." ] && [ -n "$skill_path" ] && check_skill_dir="$check_dir/$skill_path"
+
+            if [ -f "$check_skill_dir/SKILL.md" ] && head -n 1 "$check_skill_dir/SKILL.md" | grep -q '^---'; then
+                resolved_sha="$(cd "$check_dir" && git rev-parse HEAD 2>/dev/null || echo "$resolved_sha")"
+                rm -rf "$check_dir"
+                jq -n --arg commit "$resolved_sha" --arg path "$skill_path" '{verified: true, resolved_commit: $commit, resolved_path: $path, reason: null}'
+                return 0
+            else
+                rm -rf "$check_dir"
+                jq -n --arg reason "SKILL.md not found at upstream path '$skill_path'" '{verified: false, reason: $reason}'
+                return 0
+            fi
+        else
+            rm -rf "$check_dir"
+            jq -n --arg reason "Failed to clone repository for verification: $upstream_url" '{verified: false, reason: $reason}'
+            return 0
+        fi
+    fi
+
+    jq -n --arg reason "Unsupported upstream location format: $upstream_url" '{verified: false, reason: $reason}'
+}
+
+# ------------------------------------------------------------------------------
+# Fixture Loader (Phase 1)
+# Strictly active only when DISCOVERY_FIXTURE_DIR is explicitly configured.
+# ------------------------------------------------------------------------------
+load_fixture_candidates() {
+    local query="${1:-}"
+
+    if [ -z "${DISCOVERY_FIXTURE_DIR:-}" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    local fixture_file="$DISCOVERY_FIXTURE_DIR/candidates.json"
+    if [ ! -f "$fixture_file" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    if [ -n "$query" ]; then
+        jq -c --arg q "$query" '[ .[] | select(
+            ((.name // "") | ascii_downcase | contains($q | ascii_downcase)) or
+            ((.description // "") | ascii_downcase | contains($q | ascii_downcase)) or
+            ((.skill_path // "") | ascii_downcase | contains($q | ascii_downcase))
+        ) ]' "$fixture_file"
+    else
+        jq -c '.' "$fixture_file"
+    fi
+}
+
+# ------------------------------------------------------------------------------
 # Provider Discovery Functions
 # Priority:
-# 1. official-vendor
+# 1. official-vendor (policy: verified vendor first-party)
 # 2. anthropic-skills
 # 3. skills-sh
 # 4. agentic-awesome-skills
 # 5. github-search fallback
 # ------------------------------------------------------------------------------
 
-load_fixture_candidates() {
-    local query="${1:-}"
-    local fixture_file="${DISCOVERY_FIXTURE_DIR:-$REPO_ROOT/tests/ai/fixtures/discovery}/candidates.json"
-    if [ -f "$fixture_file" ]; then
-        if [ -n "$query" ]; then
-            jq -c --arg q "$query" '[ .[] | select((.name | test($q; "i")) or (.description | test($q; "i")) or (.skill_path | test($q; "i"))) ]' "$fixture_file"
-        else
-            jq -c '.' "$fixture_file"
-        fi
+discover_from_official_vendor() {
+    local query="$1"
+    local fixture_data
+    fixture_data="$(load_fixture_candidates "$query")"
+    local filtered
+    filtered="$(echo "$fixture_data" | jq -c '[ .[] | select(.source == "official-vendor") ]')"
+    if [ "$(echo "$filtered" | jq 'length')" -gt 0 ]; then
+        echo "$filtered"
         return 0
     fi
+
+    # In production without fixtures, do not fabricate unverified vendor candidates
     echo "[]"
 }
 
 discover_from_anthropic() {
     local query="$1"
-
-    # 1. Check offline fixtures first
     local fixture_data
     fixture_data="$(load_fixture_candidates "$query")"
     local filtered
@@ -95,24 +200,8 @@ discover_from_anthropic() {
         return 0
     fi
 
-    # 2. Known high-value Anthropic official skills catalog
-    local known=(
-        "github-actions:https://github.com/anthropics/skills:skills/github-actions:GitHub Actions CI/CD workflows:official:MIT"
-        "browser-tools:https://github.com/anthropics/skills:skills/browser-tools:Browser automation and web testing:official:MIT"
-    )
-    local results=()
-    for item in "${known[@]}"; do
-        IFS=":" read -r k_name k_url k_path k_desc k_trust k_lic <<< "$item"
-        if [[ "$k_name $k_desc $k_path" =~ $query ]]; then
-            results+=("$(normalize_candidate "$k_name" "anthropic-skills" "$k_url" "$k_path" "HEAD" "$k_desc" "$k_trust" "$k_lic" "anthropic-skills")")
-        fi
-    done
-
-    if [ "${#results[@]}" -gt 0 ]; then
-        printf '%s\n' "${results[@]}" | jq -s .
-    else
-        echo "[]"
-    fi
+    # In production without fixtures, do not fabricate unverified candidates
+    echo "[]"
 }
 
 discover_from_skills_sh() {
@@ -126,24 +215,8 @@ discover_from_skills_sh() {
         return 0
     fi
 
-    # Curated known index for skills.sh
-    local known=(
-        "browser-debugging:https://github.com/puppeteer/puppeteer:skills/browser-debugging:Headless browser automation and DOM inspection:community:Apache-2.0"
-        "nextjs-runtime-debugging:https://github.com/vercel/next.js:skills/nextjs-runtime-debugging:Next.js App Router and hydration debugging:community:MIT"
-    )
-    local results=()
-    for item in "${known[@]}"; do
-        IFS=":" read -r k_name k_url k_path k_desc k_trust k_lic <<< "$item"
-        if [[ "$k_name $k_desc $k_path" =~ $query ]]; then
-            results+=("$(normalize_candidate "$k_name" "skills-sh" "$k_url" "$k_path" "HEAD" "$k_desc" "$k_trust" "$k_lic" "skills-sh")")
-        fi
-    done
-
-    if [ "${#results[@]}" -gt 0 ]; then
-        printf '%s\n' "${results[@]}" | jq -s .
-    else
-        echo "[]"
-    fi
+    # In production without fixtures, do not fabricate unverified candidates
+    echo "[]"
 }
 
 discover_from_agentic_awesome() {
@@ -157,64 +230,36 @@ discover_from_agentic_awesome() {
         return 0
     fi
 
-    # Curated known index for agentic-awesome-skills
-    local known=(
-        "nestjs-database-transaction-best-practices:https://github.com/sickn33/agentic-awesome-skills:skills/backend/nestjs-database-transaction-best-practices:NestJS database transaction management and rollback patterns:community:MIT"
-    )
-    local results=()
-    for item in "${known[@]}"; do
-        IFS=":" read -r k_name k_url k_path k_desc k_trust k_lic <<< "$item"
-        if [[ "$k_name $k_desc $k_path" =~ $query ]]; then
-            results+=("$(normalize_candidate "$k_name" "agentic-awesome-skills" "$k_url" "$k_path" "HEAD" "$k_desc" "$k_trust" "$k_lic" "agentic-awesome-skills")")
-        fi
-    done
-
-    if [ "${#results[@]}" -gt 0 ]; then
-        printf '%s\n' "${results[@]}" | jq -s .
-    else
-        echo "[]"
-    fi
-}
-
-discover_from_official_vendor() {
-    local query="$1"
-    local fixture_data
-    fixture_data="$(load_fixture_candidates "$query")"
-    local filtered
-    filtered="$(echo "$fixture_data" | jq -c '[ .[] | select(.source == "official-vendor") ]')"
-    if [ "$(echo "$filtered" | jq 'length')" -gt 0 ]; then
-        echo "$filtered"
-        return 0
-    fi
-
-    # Curated vendor first-party index
-    local known=(
-        "bullmq-worker:https://github.com/taskforcesh/bullmq:skills/bullmq-worker:Distributed job processing and concurrency patterns for BullMQ with Redis:vendor:MIT"
-        "prisma-transactions:https://github.com/prisma/prisma:skills/prisma-transactions:Interactive transactions and concurrency locking with Prisma ORM:vendor:Apache-2.0"
-    )
-    local results=()
-    for item in "${known[@]}"; do
-        IFS=":" read -r k_name k_url k_path k_desc k_trust k_lic <<< "$item"
-        if [[ "$k_name $k_desc $k_path" =~ $query ]]; then
-            results+=("$(normalize_candidate "$k_name" "official-vendor" "$k_url" "$k_path" "HEAD" "$k_desc" "$k_trust" "$k_lic" "official-vendor")")
-        fi
-    done
-
-    if [ "${#results[@]}" -gt 0 ]; then
-        printf '%s\n' "${results[@]}" | jq -s .
-    else
-        echo "[]"
-    fi
+    # In production without fixtures, do not fabricate unverified candidates
+    echo "[]"
 }
 
 discover_from_github() {
     local query="$1"
-    # General fallback instructions or search URL
+    # Live fallback query via GitHub CLI if available and authenticated
+    if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+        local raw_repos
+        raw_repos="$(gh search repos "topic:agent-skills $query" --limit 3 --json fullName,url,description 2>/dev/null || echo "[]")"
+        if [ "$(echo "$raw_repos" | jq 'length')" -gt 0 ]; then
+            echo "$raw_repos" | jq -c '[ .[] | {
+                name: (.fullName | split("/")[1]),
+                source: "github-search",
+                upstream_url: .url,
+                skill_path: ".",
+                revision: null,
+                description: (.description // ""),
+                trust: "unverified",
+                license: "unknown",
+                discovered_via: "github-search"
+            } ]'
+            return 0
+        fi
+    fi
     echo "[]"
 }
 
 # ------------------------------------------------------------------------------
-# Aggregate External Candidate Discovery
+# Aggregate External Candidate Discovery (Phases 5, 8, 10)
 # ------------------------------------------------------------------------------
 discover_candidates() {
     local query="${1:-}"
@@ -238,20 +283,40 @@ discover_candidates() {
         return 1
     fi
 
-    local c_vendor
+    local c_vendor c_anthropic c_skills_sh c_aas c_gh
     c_vendor="$(discover_from_official_vendor "$query")"
-    local c_anthropic
     c_anthropic="$(discover_from_anthropic "$query")"
-    local c_skills_sh
     c_skills_sh="$(discover_from_skills_sh "$query")"
-    local c_aas
     c_aas="$(discover_from_agentic_awesome "$query")"
-    local c_gh
     c_gh="$(discover_from_github "$query")"
 
-    # Merge candidates in strict priority order and deduplicate by name
+    # Merge candidates and group by name to preserve alternate source evidence (Phase 10)
     local all_candidates
-    all_candidates="$(jq -s 'add | unique_by(.name)' <(echo "$c_vendor") <(echo "$c_anthropic") <(echo "$c_skills_sh") <(echo "$c_aas") <(echo "$c_gh"))"
+    all_candidates="$(jq -s '
+        add |
+        group_by(.name) |
+        map(
+            sort_by(
+                if .trust == "vendor" then 1
+                elif .trust == "official" then 2
+                elif .trust == "verified" then 3
+                elif .trust == "community" then 4
+                else 5 end
+            ) |
+            {
+                name: .[0].name,
+                source: .[0].source,
+                upstream_url: .[0].upstream_url,
+                skill_path: .[0].skill_path,
+                revision: .[0].revision,
+                description: .[0].description,
+                trust: .[0].trust,
+                license: .[0].license,
+                discovered_via: .[0].discovered_via,
+                alternates: (if length > 1 then [ .[1:][] | { source: .source, upstream_url: .upstream_url, skill_path: .skill_path } ] else [] end)
+            }
+        )
+    ' <(echo "$c_vendor") <(echo "$c_anthropic") <(echo "$c_skills_sh") <(echo "$c_aas") <(echo "$c_gh"))"
 
     if [ "$output_json" = true ]; then
         echo "$all_candidates"
@@ -263,8 +328,14 @@ discover_candidates() {
 
     echo -e "${BOLD}${CYAN}=== External AI Skills Discovery: '${query}' ===${RESET}"
     if [ "$total" -eq 0 ]; then
-        echo -e "  No external candidates found for '${query}' in trusted catalogs."
-        echo -e "  Search directly via GitHub topic: https://github.com/search?q=topic%3Aagent-skills+${query}"
+        echo -e "  No verified deterministic candidate found for '${query}' in trusted catalogs.\n"
+        echo -e "  Recommended research sources:"
+        echo -e "  - Official vendor repository"
+        echo -e "  - Anthropic Skills (https://github.com/anthropics/skills)"
+        echo -e "  - skills.sh registry (https://skills.sh)"
+        echo -e "  - Agentic Awesome Skills (https://github.com/sickn33/agentic-awesome-skills)"
+        echo -e "  - GitHub topic search (https://github.com/search?q=topic%3Aagent-skills+${query})\n"
+        echo -e "  Use 'technical-researcher' or 'skill-author' to research and resolve an authoritative upstream."
         return 0
     fi
 
@@ -289,6 +360,13 @@ discover_candidates() {
         echo -e "     ${BOLD}Upstream:${RESET}  ${c_upstream}"
         echo -e "     ${BOLD}Path:${RESET}      ${c_path}"
         echo -e "     ${BOLD}License:${RESET}   ${c_lic}"
+        local alts_len
+        alts_len="$(echo "$cand" | jq '.alternates | length')"
+        if [ "$alts_len" -gt 0 ]; then
+            local alt_sources
+            alt_sources="$(echo "$cand" | jq -r '[ .alternates[].source ] | join(", ")')"
+            echo -e "     ${BOLD}Alternates:${RESET} Also indexed by: ${alt_sources}"
+        fi
         echo -e "     ${BOLD}Preview:${RESET}   ai-skills import ${c_upstream} --path ${c_path} --preview"
         echo
         idx=$((idx + 1))
@@ -296,7 +374,8 @@ discover_candidates() {
 }
 
 # ------------------------------------------------------------------------------
-# Project-Aware Skill Recommendation (Section 11)
+# Project-Aware Skill Recommendation Engine (Phases 18, 19)
+# Dynamic, registry-driven coverage analysis against project tech stack.
 # ------------------------------------------------------------------------------
 recommend_project_skills() {
     local proj_dir="${1:-$PWD}"
@@ -375,47 +454,76 @@ recommend_project_skills() {
 
     if [ "${#detected_techs[@]}" -eq 0 ]; then
         echo -e "  No specialized tech stack detected from standard project descriptors."
-        echo -e "  Recommended baseline: ${GREEN}global-core${RESET} (Ponytail, Junior, Caveman, RTK, Senior Implementer)"
+        echo -e "  Recommended baseline: ${GREEN}global-core${RESET} (Ponytail, Senior Implementer, Caveman, RTK, CodeGraph, Codebase Memory)"
         return 0
     fi
 
     echo -e "${BOLD}Detected Technologies:${RESET} ${detected_techs[*]}\n"
 
-    # 2. Compare against local canonical library
+    # 2. Dynamic, registry-driven coverage comparison (Phase 18)
+    local reg_file="${SKILLS_SRC:-$REPO_ROOT/resources/skills}/_registry.json"
+    [ ! -f "$reg_file" ] && reg_file="$REPO_ROOT/resources/skills/_registry.json"
     local covered=()
     local partial=()
     local missing=()
 
     for tech in "${detected_techs[@]}"; do
+        local match_info="[]"
+        if [ -f "$reg_file" ]; then
+            match_info="$(jq -c --arg tech "$tech" '
+                .skills as $s |
+                [
+                    $s | to_entries[] |
+                    select(.value.status != "deprecated") |
+                    select(
+                        .key == $tech or
+                        any(.value.triggers[]? // empty; ascii_downcase == ($tech | ascii_downcase)) or
+                        any(.value.capabilities[]? // empty; ascii_downcase | contains($tech | ascii_downcase)) or
+                        any(.value.tags[]? // empty; ascii_downcase == ($tech | ascii_downcase))
+                    ) |
+                    {
+                        name: .key,
+                        is_exact: (.key == $tech or any(.value.triggers[]? // empty; ascii_downcase == ($tech | ascii_downcase)))
+                    }
+                ]
+            ' "$reg_file" 2>/dev/null || echo "[]")"
+        fi
+
+        local label
         case "$tech" in
-            nestjs)
-                covered+=("NestJS (local: nestjs)")
-                ;;
-            bullmq)
-                covered+=("BullMQ (local: bullmq)")
-                ;;
-            postgresql)
-                covered+=("PostgreSQL (local: postgresql)")
-                ;;
-            redis)
-                covered+=("Redis (local: redis)")
-                ;;
-            docker)
-                covered+=("Docker (local: docker)")
-                ;;
-            nixos)
-                covered+=("NixOS (local: nixos)")
-                ;;
-            rust)
-                covered+=("Rust (local: rust)")
-                ;;
-            cloudflare|terraform|kubernetes)
-                partial+=("$tech (partially addressed by local: cloud-infra)")
-                ;;
-            *)
-                missing+=("$tech")
-                ;;
+            nestjs) label="NestJS" ;;
+            bullmq) label="BullMQ" ;;
+            postgresql) label="PostgreSQL" ;;
+            redis) label="Redis" ;;
+            docker) label="Docker" ;;
+            nixos) label="NixOS" ;;
+            rust) label="Rust" ;;
+            nextjs) label="Next.js" ;;
+            react) label="React" ;;
+            github-actions) label="GitHub Actions" ;;
+            cloudflare) label="Cloudflare" ;;
+            terraform) label="Terraform" ;;
+            kubernetes) label="Kubernetes" ;;
+            *) label="$tech" ;;
         esac
+
+        local match_count
+        match_count="$(echo "$match_info" | jq 'length')"
+        if [ "$match_count" -gt 0 ]; then
+            local has_exact
+            has_exact="$(echo "$match_info" | jq '[ .[] | select(.is_exact == true) ] | length')"
+            local first_name
+            first_name="$(echo "$match_info" | jq -r '.[0].name')"
+            if [ "$has_exact" -gt 0 ]; then
+                local exact_name
+                exact_name="$(echo "$match_info" | jq -r '[ .[] | select(.is_exact == true) ][0].name')"
+                covered+=("$label (local: $exact_name)")
+            else
+                partial+=("$label (partially addressed by local: $first_name)")
+            fi
+        else
+            missing+=("$tech")
+        fi
     done
 
     echo -e "${BOLD}Coverage Analysis:${RESET}"
@@ -440,19 +548,16 @@ recommend_project_skills() {
             local count
             count="$(echo "$cands" | jq 'length')"
             if [ "$count" -gt 0 ]; then
-                local first
+                local first up path desc
                 first="$(echo "$cands" | jq -r '.[0].name')"
-                local up
                 up="$(echo "$cands" | jq -r '.[0].upstream_url')"
-                local path
                 path="$(echo "$cands" | jq -r '.[0].skill_path')"
-                local desc
                 desc="$(echo "$cands" | jq -r '.[0].description')"
                 echo -e "    Candidate: ${GREEN}${first}${RESET} (${desc})"
                 echo -e "    Upstream:  ${up} (path: ${path})"
                 echo -e "    Inspect:   ai-skills import ${up} --path ${path} --preview"
             else
-                echo -e "    No immediate trusted catalog candidate. Consider authoring a tailored skill: 'ai-skills author ${m}'."
+                echo -e "    No verified candidate found. Consider authoring a tailored skill: 'ai-skills author ${m}'."
             fi
         done
         echo
@@ -468,6 +573,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     CMD="${1:-help}"
     shift || true
     case "$CMD" in
+        verify)
+            verify_candidate "$@"
+            ;;
         discover)
             discover_candidates "$@"
             ;;
@@ -475,7 +583,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             recommend_project_skills "${1:-$PWD}"
             ;;
         help|--help|-h)
-            echo "Usage: $0 {discover <query> [--json]|recommend [project_dir]}"
+            echo "Usage: $0 {verify <url> [path] [rev]|discover <query> [--json]|recommend [project_dir]}"
             ;;
         *)
             echo "Unknown command: $CMD" >&2

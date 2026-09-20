@@ -836,10 +836,14 @@ SOURCES_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sources)
 echo "$SOURCES_OUT" | grep -Fq "official-vendor" || log_fail "ai-skills sources missing official-vendor"
 echo "$SOURCES_OUT" | grep -Fq "anthropic-skills" || log_fail "ai-skills sources missing anthropic-skills"
 
-# Discover queries external catalog
-DISCOVER_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" discover nextjs)
+# In production mode (DISCOVERY_FIXTURE_DIR unset), discovery must enforce fixture isolation
+DISCOVER_PROD=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" discover nextjs)
+echo "$DISCOVER_PROD" | grep -Fq "No verified deterministic candidate found" || log_fail "Production discovery leaked fixture data"
+
+# When DISCOVERY_FIXTURE_DIR is set, discovery uses fixture candidates
+DISCOVER_OUT=$(DISCOVERY_FIXTURE_DIR="$REPO_ROOT/tests/ai/fixtures/discovery" HOME="$MOCK_HOME" "$AI_SKILLS_BIN" discover nextjs)
 echo "$DISCOVER_OUT" | grep -Fq "nextjs-runtime-debugging" || log_fail "ai-skills discover failed to find nextjs candidate"
-log_ok "search is local only, sources lists sources, discover queries external catalogs"
+log_ok "search is local only, sources lists sources, discover enforces fixture isolation"
 
 # Test 2.17: Multi-skill repo import with --path and preview mode
 log_info "Testing multi-skill repo import with --path..."
@@ -966,7 +970,7 @@ cat << 'EOF' > "$REC_PROJ/package.json"
 }
 EOF
 
-REC_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" recommend --project "$REC_PROJ")
+REC_OUT=$(DISCOVERY_FIXTURE_DIR="$REPO_ROOT/tests/ai/fixtures/discovery" HOME="$MOCK_HOME" "$AI_SKILLS_BIN" recommend --project "$REC_PROJ")
 CLEAN_OUT=$(echo "$REC_OUT" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
 if ! echo "$CLEAN_OUT" | grep -q "NestJS (local: nestjs)"; then
     log_fail "recommendation missed covered NestJS"
@@ -985,6 +989,131 @@ if ! echo "$CLEAN_OUT" | grep -q "Recommendation is advisory only"; then
 fi
 rm -rf "$REC_PROJ"
 log_ok "Project-aware recommendation engine accurately analyzes stack and proposes advisory candidates"
+
+# Test 2.22: Candidate verification engine (verify_candidate)
+log_info "Testing candidate verification engine (verify_candidate)..."
+VERIFY_VALID=$(bash -c "source '$REPO_ROOT/scripts/lib/discovery.sh' && verify_candidate '$REPO_ROOT/tests/ai/fixtures/import-repos/single-skill-repo'")
+echo "$VERIFY_VALID" | jq -e '.verified == true' >/dev/null || log_fail "verify_candidate rejected valid local skill bundle: $VERIFY_VALID"
+
+VERIFY_MISSING=$(bash -c "source '$REPO_ROOT/scripts/lib/discovery.sh' && verify_candidate '$SANDBOX_DIR'")
+echo "$VERIFY_MISSING" | jq -e '.verified == false and (.reason | contains("SKILL.md not found"))' >/dev/null || log_fail "verify_candidate did not reject missing SKILL.md: $VERIFY_MISSING"
+
+BAD_SKILL_DIR="$SANDBOX_DIR/bad-skill"
+mkdir -p "$BAD_SKILL_DIR"
+echo "# Bad Skill Without Frontmatter" > "$BAD_SKILL_DIR/SKILL.md"
+VERIFY_BAD=$(bash -c "source '$REPO_ROOT/scripts/lib/discovery.sh' && verify_candidate '$BAD_SKILL_DIR'")
+echo "$VERIFY_BAD" | jq -e '.verified == false and (.reason | contains("YAML frontmatter"))' >/dev/null || log_fail "verify_candidate did not reject missing frontmatter: $VERIFY_BAD"
+rm -rf "$BAD_SKILL_DIR"
+log_ok "verify_candidate accurately verifies valid bundles and rejects invalid/unformatted candidates"
+
+# Test 2.23: .git and VCS exclusion during copy_skill_bundle and import
+log_info "Testing .git and VCS cache exclusion during skill bundle copy..."
+VCS_TEST_DIR="$SANDBOX_DIR/vcs-source-skill"
+mkdir -p "$VCS_TEST_DIR/.git/objects" "$VCS_TEST_DIR/.cache" "$VCS_TEST_DIR/node_modules"
+cat << 'EOF' > "$VCS_TEST_DIR/SKILL.md"
+---
+name: vcs-clean-skill
+description: Skill testing VCS exclusion during import
+---
+## Usage
+Test body
+EOF
+touch "$VCS_TEST_DIR/.git/HEAD" "$VCS_TEST_DIR/.cache/temp.log" "$VCS_TEST_DIR/node_modules/dummy.js"
+
+VCS_DEST_DIR="$SANDBOX_DIR/vcs-copied-skill"
+bash -c "source '$REPO_ROOT/scripts/ai-skills.sh' && copy_skill_bundle '$VCS_TEST_DIR' '$VCS_DEST_DIR'"
+
+[ -f "$VCS_DEST_DIR/SKILL.md" ] || log_fail "copy_skill_bundle failed to copy SKILL.md"
+[ ! -d "$VCS_DEST_DIR/.git" ] || log_fail "copy_skill_bundle leaked .git directory"
+[ ! -d "$VCS_DEST_DIR/.cache" ] || log_fail "copy_skill_bundle leaked .cache directory"
+[ ! -d "$VCS_DEST_DIR/node_modules" ] || log_fail "copy_skill_bundle leaked node_modules directory"
+rm -rf "$VCS_TEST_DIR" "$VCS_DEST_DIR"
+log_ok "copy_skill_bundle strictly excludes VCS internals, caches, and dependency directories"
+
+# Test 2.24: Provenance schema validation and multi-overlap review
+log_info "Testing provenance schema validation and multi-overlap review..."
+IMPORT_PROV_HOME="$SANDBOX_DIR/prov_home"
+mkdir -p "$IMPORT_PROV_HOME"
+
+MOCK_REG_DIR="$SANDBOX_DIR/mock_registry"
+mkdir -p "$MOCK_REG_DIR"
+cp "$REPO_ROOT/resources/skills/_registry.json" "$MOCK_REG_DIR/_registry.json"
+
+IMPORT_OUT=$(HOME="$IMPORT_PROV_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$MOCK_REG_DIR" "$AI_SKILLS_BIN" import "$SINGLE_REPO" test-imported-skill --approve 2>&1)
+echo "$IMPORT_OUT" | grep -Fq "Successfully imported skill" || log_fail "ai-skills import failed to approve import: $IMPORT_OUT"
+
+IMPORTED_ENTRY=$(jq '.skills["test-imported-skill"]' "$MOCK_REG_DIR/_registry.json")
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.upstream_url != null' >/dev/null || log_fail "Provenance missing upstream_url"
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.license != null' >/dev/null || log_fail "Provenance missing license"
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.security_review.status == "passed"' >/dev/null || log_fail "Provenance missing security_review.status"
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.security_review.checked_by == "curate.sh-security-audit"' >/dev/null || log_fail "Provenance missing security_review.checked_by"
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.semantic_review.decision != null' >/dev/null || log_fail "Provenance missing semantic_review.decision"
+echo "$IMPORTED_ENTRY" | jq -e '.provenance.imported_at != null' >/dev/null || log_fail "Provenance missing imported_at"
+
+MULTI_OVERLAP_CAND="$SANDBOX_DIR/multi-overlap-candidate"
+mkdir -p "$MULTI_OVERLAP_CAND"
+cat << 'EOF' > "$MULTI_OVERLAP_CAND/SKILL.md"
+---
+name: redis-queue-worker
+description: Redis caching patterns, eviction policies, atomic primitives, pubsub messaging, distributed job queues, background workers, scheduled jobs, and BullMQ retry policies with distributed locks.
+capabilities:
+  - cache-patterns
+  - eviction-policies
+  - atomic-primitives
+  - pubsub-messaging
+  - job-queues
+  - worker-concurrency
+  - scheduled-jobs
+  - redis-retry-policies
+triggers:
+  - redis-cache
+  - distributed-lock
+  - redis-pubsub
+  - job-queue
+  - bullmq
+  - redis-queue
+---
+## Background Workers
+Combines Redis and BullMQ.
+EOF
+
+OVERLAPS_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" overlaps-review "$MULTI_OVERLAP_CAND" "$REPO_ROOT/resources/skills/_registry.json")
+echo "$OVERLAPS_REV" | jq -e 'map(.existing) | contains(["redis"]) and contains(["bullmq"])' >/dev/null || log_fail "overlaps-review failed to review both redis and bullmq: $OVERLAPS_REV"
+rm -rf "$MOCK_REG_DIR" "$MULTI_OVERLAP_CAND" "$IMPORT_PROV_HOME"
+log_ok "Import records expanded provenance schema and multi-overlap review evaluates all colliding skills"
+
+# Test 2.25: Registry-driven recommendation coverage analysis
+log_info "Testing registry-driven recommendation coverage..."
+REG_PROJ="$SANDBOX_DIR/reg_proj"
+mkdir -p "$REG_PROJ"
+cat << 'EOF' > "$REG_PROJ/package.json"
+{
+  "name": "registry-driven-test",
+  "dependencies": {
+    "bullmq": "^5.0.0"
+  }
+}
+EOF
+
+REC_CANONICAL=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" recommend --project "$REG_PROJ")
+CLEAN_CANONICAL=$(echo "$REC_CANONICAL" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
+echo "$CLEAN_CANONICAL" | grep -Fq "BullMQ (local: bullmq)" || log_fail "Canonical recommendation missed bullmq coverage"
+
+MOCK_EMPTY_REG="$SANDBOX_DIR/empty_reg"
+mkdir -p "$MOCK_EMPTY_REG"
+cat << 'EOF' > "$MOCK_EMPTY_REG/_registry.json"
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "skills": {}
+}
+EOF
+
+REC_MISSING=$(HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$MOCK_EMPTY_REG" "$AI_SKILLS_BIN" recommend --project "$REG_PROJ")
+CLEAN_MISSING=$(echo "$REC_MISSING" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
+echo "$CLEAN_MISSING" | grep -Fq "Missing Coverage: bullmq" || log_fail "Mock empty registry failed to detect missing bullmq"
+rm -rf "$REG_PROJ" "$MOCK_EMPTY_REG"
+log_ok "Recommendation engine coverage is dynamically driven by registry state"
 
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration

@@ -269,8 +269,9 @@ console.log(JSON.stringify({
 }
 
 # ------------------------------------------------------------------------------
-# Metadata Overlap Detection (Phase 5)
+# Metadata Overlap Detection (Phase 5 / Phase 11)
 # Returns JSON array of { existing, score, classification }
+# Symmetric weighted scoring: capabilities (40%), triggers (30%), domain (10%), tokens (20%)
 # ------------------------------------------------------------------------------
 detect_metadata_overlap() {
     local cand_dir="$1"
@@ -289,21 +290,79 @@ const candDir = process.argv[1];
 const regFile = process.argv[2];
 
 const reg = JSON.parse(fs.readFileSync(regFile, "utf8"));
-const candContent = fs.readFileSync(path.join(candDir, "SKILL.md"), "utf8").toLowerCase();
+const candContent = fs.readFileSync(path.join(candDir, "SKILL.md"), "utf8");
 
 function wordTokens(str) {
   return new Set((str || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(w => w.length > 3));
 }
 
-const candWords = wordTokens(candContent);
+let candName = path.basename(candDir);
+let candDesc = "";
+const candCaps = new Set();
+const candTrigs = new Set();
+
+const fmM = candContent.match(/^---\s*\n([\s\S]*?)\n---/);
+if (fmM) {
+  const nm = fmM[1].match(/^name:\s*(.+)$/m);
+  if (nm) candName = nm[1].trim().replace(/^["'\''"]|["'\''"]$/g, "");
+  const dm = fmM[1].match(/^description:\s*(.+)$/m);
+  if (dm) candDesc = dm[1].trim().replace(/^["'\''"]|["'\''"]$/g, "");
+
+  const capMatches = fmM[1].match(/capabilities:\s*\n((?:\s*-[^\n]+\n?)+)/);
+  if (capMatches) {
+    capMatches[1].split("\n").map(l => l.replace(/^\s*-\s*/, "").trim().toLowerCase()).filter(Boolean).forEach(c => candCaps.add(c));
+  }
+  const trigMatches = fmM[1].match(/triggers:\s*\n((?:\s*-[^\n]+\n?)+)/);
+  if (trigMatches) {
+    trigMatches[1].split("\n").map(l => l.replace(/^\s*-\s*/, "").trim().toLowerCase()).filter(Boolean).forEach(t => candTrigs.add(t));
+  }
+}
+
+const headings = (candContent.match(/^##+\s+(.+)$/gm) || []).map(h => h.replace(/^##+\s+/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+headings.forEach(h => candCaps.add(h));
+[candName, ...candName.split("-")].filter(w => w.length > 2).forEach(t => candTrigs.add(t.toLowerCase()));
+
+let candDomain = "general";
+if (candContent.match(/react|vue|dom|css|ui|component|html/i)) candDomain = "frontend";
+else if (candContent.match(/sql|postgres|database|prisma|typeorm|redis/i)) candDomain = "backend";
+else if (candContent.match(/docker|k8s|kubernetes|cloud|nix|terraform/i)) candDomain = "devops";
+
+const candWords = wordTokens(candContent + " " + candDesc);
 const overlaps = [];
 
 for (const [name, skill] of Object.entries(reg.skills || {})) {
   if (skill.status === "deprecated") continue;
-  const existingWords = wordTokens((skill.description || "") + " " + (skill.capabilities || []).join(" ") + " " + (skill.triggers || []).join(" "));
-  const union = new Set([...candWords, ...existingWords]);
-  const inter = [...candWords].filter(w => existingWords.has(w));
-  const score = union.size > 0 ? (inter.length / union.size) : 0;
+
+  const existCaps = new Set((skill.capabilities || []).map(c => String(c).toLowerCase()));
+  const existTrigs = new Set((skill.triggers || []).map(t => String(t).toLowerCase()));
+  const existDomain = skill.domain || "general";
+  const existWords = wordTokens((skill.description || "") + " " + (skill.capabilities || []).join(" ") + " " + (skill.triggers || []).join(" "));
+
+  // Jaccard for capabilities (40%)
+  const capUnion = new Set([...candCaps, ...existCaps]);
+  const capInter = [...candCaps].filter(x => existCaps.has(x));
+  const capJaccard = capUnion.size > 0 ? (capInter.length / capUnion.size) : 0;
+
+  // Jaccard for triggers (30%)
+  const trigUnion = new Set([...candTrigs, ...existTrigs]);
+  const trigInter = [...candTrigs].filter(x => existTrigs.has(x));
+  const trigJaccard = trigUnion.size > 0 ? (trigInter.length / trigUnion.size) : 0;
+
+  // Domain match (10%)
+  let domainScore = 0.0;
+  if (candDomain === existDomain && candDomain !== "general") {
+    domainScore = 1.0;
+  } else if (candDomain === existDomain) {
+    domainScore = 0.5;
+  }
+
+  // Token Jaccard (20%)
+  const wordUnion = new Set([...candWords, ...existWords]);
+  const wordInter = [...candWords].filter(w => existWords.has(w));
+  const wordJaccard = wordUnion.size > 0 ? (wordInter.length / wordUnion.size) : 0;
+
+  // Weighted total score
+  const score = (0.40 * capJaccard) + (0.30 * trigJaccard) + (0.10 * domainScore) + (0.20 * wordJaccard);
 
   if (score >= 0.40) {
     overlaps.push({
@@ -320,15 +379,14 @@ console.log(JSON.stringify(overlaps));
 }
 
 # ------------------------------------------------------------------------------
-# AI Semantic Review Contract (Phase 6)
-# Compares candidate vs existing skill and yields structured review object
+# Heuristic Review & Textual Overlap Classification (Phase 12)
+# Performs lexical similarity analysis, signal extraction, and action heuristics.
 # ------------------------------------------------------------------------------
-perform_semantic_review() {
+perform_heuristic_review() {
     local cand_dir="$1"
     local existing_target="$2"
     local reg_file="${3:-$REPO_ROOT/resources/skills/_registry.json}"
 
-    # Resolve existing target to file if skill name is passed
     local existing_path="$existing_target"
     if [ ! -f "$existing_path" ] && [ ! -d "$existing_path" ]; then
         if [ -d "$REPO_ROOT/resources/skills/$existing_target" ]; then
@@ -368,12 +426,16 @@ if (!cand || !exist) {
     candidate: cand ? cand.name : "unknown",
     existing: exist ? exist.name : "unknown",
     decision: "KEEP_BOTH",
+    recommended_action: "CREATE",
+    heuristic_decision: "KEEP_BOTH",
+    heuristic_action: "CREATE",
+    similarity_score: 0.0,
+    signals: ["unresolved_skill_path"],
     reason: "Skill details could not be resolved for comparison.",
     shared_capabilities: [],
     candidate_unique: [],
-    existing_unique: [],
-    recommended_action: "CREATE"
-  }));
+    existing_unique: []
+  }, null, 2));
   process.exit(0);
 }
 
@@ -390,6 +452,11 @@ const jaccard = union.size > 0 ? (inter.length / union.size) : 0;
 const cNameParts = cand.name.toLowerCase().split("-");
 const eNameParts = exist.name.toLowerCase().split("-");
 const nameShared = cNameParts.filter(p => eNameParts.includes(p) && p.length > 3);
+
+const signals = [];
+if (nameShared.length > 0) signals.push(`shared_name_tokens: ${nameShared.join(", ")}`);
+if (jaccard >= 0.40) signals.push(`high_token_overlap: ${(jaccard * 100).toFixed(0)}%`);
+if (cand.name === exist.name) signals.push("exact_name_match");
 
 let decision = "KEEP_BOTH";
 let action = "CREATE";
@@ -409,13 +476,100 @@ console.log(JSON.stringify({
   candidate: cand.name,
   existing: exist.name,
   decision,
+  recommended_action: action,
+  heuristic_decision: decision,
+  heuristic_action: action,
+  similarity_score: Number(jaccard.toFixed(2)),
+  signals,
   reason,
   shared_capabilities: inter.slice(0, 5),
   candidate_unique: [...cWords].filter(w => !eWords.has(w)).slice(0, 5),
-  existing_unique: [...eWords].filter(w => !cWords.has(w)).slice(0, 5),
-  recommended_action: action
+  existing_unique: [...eWords].filter(w => !cWords.has(w)).slice(0, 5)
 }, null, 2));
 ' "$cand_dir" "$existing_path"
+}
+
+classify_textual_overlap() {
+    perform_heuristic_review "$@"
+}
+
+# ------------------------------------------------------------------------------
+# AI Semantic Review Contract (Phase 6 / Phase 13)
+# Wrapper supporting external model review payload with heuristic fallback.
+# ------------------------------------------------------------------------------
+perform_semantic_review() {
+    local cand_dir="$1"
+    local existing_target="$2"
+    local reg_file="${3:-$REPO_ROOT/resources/skills/_registry.json}"
+
+    if [ -n "${SEMANTIC_REVIEW_FILE:-}" ] && [ -f "$SEMANTIC_REVIEW_FILE" ]; then
+        cat "$SEMANTIC_REVIEW_FILE"
+        return 0
+    fi
+    if [ -n "${SEMANTIC_REVIEW_JSON:-}" ]; then
+        echo "$SEMANTIC_REVIEW_JSON"
+        return 0
+    fi
+
+    perform_heuristic_review "$cand_dir" "$existing_target" "$reg_file"
+}
+
+# ------------------------------------------------------------------------------
+# Multi-Overlap Review Evaluator (Phase 14)
+# Evaluates candidate against all strong_review_candidate + top 3 review_candidate.
+# ------------------------------------------------------------------------------
+review_candidate_overlaps() {
+    local cand_dir="$1"
+    local reg_file="${2:-$REPO_ROOT/resources/skills/_registry.json}"
+
+    if [ ! -f "$reg_file" ] || [ ! -f "$cand_dir/SKILL.md" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    local overlaps
+    overlaps="$(detect_metadata_overlap "$cand_dir" "$reg_file" 2>/dev/null || echo "[]")"
+
+    if [ -z "$overlaps" ] || [ "$overlaps" = "[]" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    # Select all strong_review_candidate and up to top 3 review_candidate
+    # shellcheck disable=SC2016
+    local targets_json
+    targets_json="$(echo "$overlaps" | jq -c '
+        ( [ .[] | select(.classification == "strong_review_candidate") ] ) as $strong |
+        ( [ .[] | select(.classification == "review_candidate") ] | .[0:3] ) as $normal |
+        ($strong + $normal) | unique_by(.existing)
+    ')"
+
+    local count
+    count="$(echo "$targets_json" | jq 'length')"
+    if [ "$count" -eq 0 ]; then
+        echo "[]"
+        return 0
+    fi
+
+    local results="[]"
+    for (( i=0; i<count; i++ )); do
+        local target_name target_score target_class
+        target_name="$(echo "$targets_json" | jq -r ".[$i].existing")"
+        target_score="$(echo "$targets_json" | jq -r ".[$i].score")"
+        target_class="$(echo "$targets_json" | jq -r ".[$i].classification")"
+
+        local rev
+        rev="$(perform_semantic_review "$cand_dir" "$target_name" "$reg_file")"
+
+        results="$(echo "$results" | jq --arg name "$target_name" \
+                                       --argjson score "$target_score" \
+                                       --arg cls "$target_class" \
+                                       --argjson rev "$rev" \
+            '. + [{ existing: $name, score: $score, classification: $cls, review: $rev }]'
+        )"
+    done
+
+    echo "$results"
 }
 
 # ------------------------------------------------------------------------------
@@ -447,11 +601,17 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         overlap)
             detect_metadata_overlap "${2:-$PWD}" "${3:-$REPO_ROOT/resources/skills/_registry.json}"
             ;;
+        heuristic)
+            perform_heuristic_review "${2:-}" "${3:-}" "${4:-$REPO_ROOT/resources/skills/_registry.json}"
+            ;;
         review)
             perform_semantic_review "${2:-}" "${3:-}" "${4:-$REPO_ROOT/resources/skills/_registry.json}"
             ;;
+        overlaps-review)
+            review_candidate_overlaps "${2:-$PWD}" "${3:-$REPO_ROOT/resources/skills/_registry.json}"
+            ;;
         help|--help|-h)
-            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|review <cand_dir> <existing>}"
+            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|heuristic <cand_dir> <existing>|review <cand_dir> <existing>|overlaps-review <cand_dir> [registry]}"
             ;;
         *)
             echo "Unknown command: $CMD" >&2

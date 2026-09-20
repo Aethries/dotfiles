@@ -21,21 +21,30 @@ log_warn() { echo -e "  [${YELLOW}!${RESET}] ${YELLOW}$1${RESET}"; }
 log_fail() { echo -e "  [${RED}✗${RESET}] ${RED}$1${RESET}" >&2; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS_SRC="$REPO_ROOT/resources/skills"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+SKILLS_SRC="${SKILLS_SRC:-$REPO_ROOT/resources/skills}"
 
 # Load agent adapter library
-if [ -f "$REPO_ROOT/scripts/lib/agents.sh" ]; then
+if [ -f "$SCRIPT_DIR/lib/agents.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/lib/agents.sh"
+elif [ -f "$REPO_ROOT/scripts/lib/agents.sh" ]; then
     # shellcheck disable=SC1091
     source "$REPO_ROOT/scripts/lib/agents.sh"
 fi
 
-if [ -f "$REPO_ROOT/scripts/lib/curate.sh" ]; then
+if [ -f "$SCRIPT_DIR/lib/curate.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/lib/curate.sh"
+elif [ -f "$REPO_ROOT/scripts/lib/curate.sh" ]; then
     # shellcheck disable=SC1091
     source "$REPO_ROOT/scripts/lib/curate.sh"
 fi
 
-if [ -f "$REPO_ROOT/scripts/lib/discovery.sh" ]; then
+if [ -f "$SCRIPT_DIR/lib/discovery.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/lib/discovery.sh"
+elif [ -f "$REPO_ROOT/scripts/lib/discovery.sh" ]; then
     # shellcheck disable=SC1091
     source "$REPO_ROOT/scripts/lib/discovery.sh"
 fi
@@ -256,6 +265,21 @@ assert_path_inside_project() {
     return 0
 }
 
+copy_skill_bundle() {
+    local src="$1"
+    local dest="$2"
+    mkdir -p "$dest"
+    tar -C "$src" \
+        --exclude='.git' \
+        --exclude='.git*' \
+        --exclude='.hg' \
+        --exclude='.svn' \
+        --exclude='node_modules' \
+        --exclude='.cache' \
+        --exclude='__pycache__' \
+        -cf - . | tar -C "$dest" -xf -
+}
+
 is_managed_project_target() {
     local proj_root="$1"
     local skill_name="$2"
@@ -304,9 +328,11 @@ EOF
 
     # Match which agents share this target_rel_path
     local matched_agents=()
+    local agents_file
+    agents_file="$(get_agents_json_path)"
     for aid in $(get_all_agent_ids); do
         local p
-        p="$(jq -r --arg id "$aid" '.agents[$id].project.primary // empty' "$AGENTS_JSON" 2>/dev/null || true)"
+        p="$(jq -r --arg id "$aid" '.agents[$id].project.primary // empty' "$agents_file" 2>/dev/null || true)"
         if [ -n "$p" ] && [[ "$target_rel_path" == "$p"* ]]; then
             matched_agents+=("$aid")
         fi
@@ -493,8 +519,8 @@ install_project() {
     }
     trap cleanup_staging EXIT ERR
 
-    # Full copy (never whitelist)
-    cp -a "$skill_src/." "$staging/"
+    # Full copy (excluding VCS and cache files)
+    copy_skill_bundle "$skill_src" "$staging"
 
     # Verify staging copy
     if [ ! -f "$staging/SKILL.md" ]; then
@@ -1434,42 +1460,51 @@ import_skill() {
     skill_caps="$(echo "$metadata_json" | jq -c '.capabilities // []')"
     skill_trigs="$(echo "$metadata_json" | jq -c '.triggers // []')"
 
-    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local reg_file="$SKILLS_SRC/_registry.json"
+    [ ! -f "$reg_file" ] && reg_file="$REPO_ROOT/resources/skills/_registry.json"
     local target_dir="$SKILLS_SRC/$skill_name"
 
-    # Overlap detection & semantic review
-    local overlaps="[]"
+    # Multi-overlap review (Phase 14 & 15)
+    local overlap_reviews="[]"
     if [ -f "$reg_file" ]; then
-        overlaps="$(detect_metadata_overlap "$skill_bundle_dir" "$reg_file" 2>/dev/null || echo "[]")"
+        overlap_reviews="$(review_candidate_overlaps "$skill_bundle_dir" "$reg_file" 2>/dev/null || echo "[]")"
     fi
 
-    local top_overlap=""
-    local top_score="0"
-    local top_class=""
-    if [ "$(echo "$overlaps" | jq 'length')" -gt 0 ]; then
-        top_overlap="$(echo "$overlaps" | jq -r '.[0].existing // empty')"
-        top_score="$(echo "$overlaps" | jq -r '.[0].score // 0')"
-        top_class="$(echo "$overlaps" | jq -r '.[0].classification // empty')"
-    fi
+    local rev_count=0
+    rev_count="$(echo "$overlap_reviews" | jq 'length' 2>/dev/null || echo 0)"
 
     local decision="KEEP_BOTH"
     local action="CREATE"
     local reason="Complementary capabilities with minimal overlap."
-    local shared_caps="[]"
+    local top_overlap=""
+    local duplicate_matches=()
 
-    if [ -n "$top_overlap" ]; then
-        local review_json
-        review_json="$(perform_semantic_review "$skill_bundle_dir" "$top_overlap" "$reg_file" 2>/dev/null || echo "{}")"
-        decision="$(echo "$review_json" | jq -r '.decision // "KEEP_BOTH"')"
-        action="$(echo "$review_json" | jq -r '.recommended_action // "CREATE"')"
-        reason="$(echo "$review_json" | jq -r '.reason // ""')"
-        shared_caps="$(echo "$review_json" | jq -c '.shared_capabilities // []')"
+    if [ "$rev_count" -gt 0 ]; then
+        top_overlap="$(echo "$overlap_reviews" | jq -r '.[0].existing // empty')"
+
+        # Check if any reviewed candidate is DUPLICATE
+        local dup_entries
+        dup_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "DUPLICATE" or .review.heuristic_decision == "DUPLICATE") ]')"
+        if [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
+            decision="DUPLICATE"
+            action="REUSE"
+            reason="$(echo "$dup_entries" | jq -r '.[0].review.reason // "Duplicate of existing skill"')"
+            mapfile -t duplicate_matches < <(echo "$dup_entries" | jq -r '.[].existing')
+        else
+            local partial_entries
+            partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP" or .review.heuristic_decision == "PARTIAL_OVERLAP") ]')"
+            if [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
+                decision="PARTIAL_OVERLAP"
+                action="COMPANION"
+                reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
+            fi
+        fi
     fi
 
     # Check for duplicate rejection
     if [ "$decision" = "DUPLICATE" ]; then
         if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
-            log_fail "Import rejected: Skill '$skill_name' is a DUPLICATE of existing skill '$top_overlap'."
+            log_fail "Import rejected: Skill '$skill_name' is a DUPLICATE of existing skill(s): ${duplicate_matches[*]:-$top_overlap}."
             echo -e "  Semantic Review Reason: ${reason}"
             echo -e "  Recommended Action:     ${action}"
             echo -e "  Pass --replace with --approve to override."
@@ -1499,13 +1534,20 @@ import_skill() {
         echo -e "  ${BOLD}Security:${RESET}      ${GREEN}PASSED${RESET} (no malicious patterns)"
         echo
         echo -e "${BOLD}Semantic Overlap & Catalog Alignment:${RESET}"
-        if [ -n "$top_overlap" ]; then
-            echo -e "  Top Match:           ${BOLD}${top_overlap}${RESET} (overlap score: ${top_score})"
-            echo -e "  Classification:      ${top_class}"
-            echo -e "  Semantic Decision:   ${BOLD}${decision}${RESET}"
-            echo -e "  Recommended Action:  ${BOLD}${action}${RESET}"
-            echo -e "  Review Reason:       ${reason}"
-            echo -e "  Shared Capabilities: $(echo "$shared_caps" | jq -r 'join(", ")')"
+        if [ "$rev_count" -gt 0 ]; then
+            echo -e "  Reviewed Overlaps ($rev_count total):"
+            for (( i=0; i<rev_count; i++ )); do
+                local r_name r_score r_class r_dec r_act r_reason
+                r_name="$(echo "$overlap_reviews" | jq -r ".[$i].existing")"
+                r_score="$(echo "$overlap_reviews" | jq -r ".[$i].score")"
+                r_class="$(echo "$overlap_reviews" | jq -r ".[$i].classification")"
+                r_dec="$(echo "$overlap_reviews" | jq -r ".[$i].review.decision // .[$i].review.heuristic_decision")"
+                r_act="$(echo "$overlap_reviews" | jq -r ".[$i].review.recommended_action // .[$i].review.heuristic_action")"
+                r_reason="$(echo "$overlap_reviews" | jq -r ".[$i].review.reason")"
+                echo -e "  - ${BOLD}${r_name}${RESET} (score: ${r_score}, class: ${r_class})"
+                echo -e "    Decision: ${BOLD}${r_dec}${RESET} | Action: ${BOLD}${r_act}${RESET}"
+                echo -e "    Reason:   ${r_reason}"
+            done
         else
             echo -e "  No significant overlap with existing canonical skills."
             echo -e "  Semantic Decision:   ${BOLD}KEEP_BOTH${RESET}"
@@ -1544,7 +1586,7 @@ import_skill() {
     fi
 
     mkdir -p "$target_dir"
-    cp -a "$skill_bundle_dir/." "$target_dir/"
+    copy_skill_bundle "$skill_bundle_dir" "$target_dir"
     if [ ! -f "$target_dir/LICENSE" ] && [ -f "$tmp_dir/LICENSE" ]; then
         cp "$tmp_dir/LICENSE" "$target_dir/LICENSE"
     fi
@@ -1557,13 +1599,20 @@ import_skill() {
         tmp_reg="$(mktemp "$reg_file.tmp.XXXXXX")"
         local now
         now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+        local reviewed_against
+        reviewed_against="$(echo "$overlap_reviews" | jq -c '[ .[] | { existing: .existing, score: .score, classification: .classification, decision: (.review.decision // .review.heuristic_decision) } ]')"
+
         jq --arg s "$skill_name" \
            --arg hash "$hash" \
            --arg desc "$skill_desc" \
            --arg domain "$skill_domain" \
            --arg url "$src_location" \
+           --arg subpath "$subpath" \
            --arg commit "$commit_sha" \
            --arg license "$license" \
+           --arg decision "$decision" \
+           --arg action "$action" \
+           --argjson reviewed "$reviewed_against" \
            --arg now "$now" \
            --argjson caps "$skill_caps" \
            --argjson trigs "$skill_trigs" \
@@ -1580,9 +1629,20 @@ import_skill() {
                triggers: $trigs,
                provenance: {
                    upstream_url: $url,
-                   commit: (if $commit == "null" then null else $commit end),
+                   upstream_path: (if $subpath == "" then null else $subpath end),
+                   commit: (if $commit == "null" or $commit == "" then null else $commit end),
+                   catalog_url: null,
                    license: $license,
-                   verified_by: "curate.sh-security-audit",
+                   security_review: {
+                       status: "passed",
+                       checked_by: "curate.sh-security-audit",
+                       timestamp: $now
+                   },
+                   semantic_review: {
+                       decision: $decision,
+                       recommended_action: $action,
+                       reviewed_against: $reviewed
+                   },
                    imported_at: $now
                },
                content_hash: $hash

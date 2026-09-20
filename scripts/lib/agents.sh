@@ -15,6 +15,10 @@ get_agents_config_path() {
     echo "$AGENTS_JSON"
 }
 
+get_agents_json_path() {
+    echo "$AGENTS_JSON"
+}
+
 get_all_agent_ids() {
     if [ ! -f "$AGENTS_JSON" ]; then
         echo "antigravity-cli antigravity-ide codex-cli claude-code"

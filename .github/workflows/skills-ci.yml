@@ -35,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install system dependencies
         run: |
@@ -78,3 +78,14 @@ jobs:
       - name: Run Automated Test Suite
         run: |
           bash tests/ai/skills_test.sh
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Check Flake Evaluation
+        run: |
+          nix flake check "path:$PWD" --no-build
+
+      - name: Ensure Clean Working Directory
+        run: |
+          git diff --exit-code
