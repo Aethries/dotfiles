@@ -12,5 +12,5 @@ if command -v kanata-hud >/dev/null 2>&1; then
     exec kanata-hud
 fi
 
-exec nix-shell -p python3 python3Packages.pygobject3 python3Packages.pycairo gtk3 gtk-layer-shell --run "python3 $HUD_SCRIPT"
+exec nix-shell -p wrapGAppsHook3 gobject-introspection gtk3 gtk-layer-shell python3Packages.pygobject3 python3Packages.pycairo --run "python3 $HUD_SCRIPT"
 

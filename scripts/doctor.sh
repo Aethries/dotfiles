@@ -263,6 +263,7 @@ check_service "bluetooth" "Bluetooth Daemon"
 check_service "kanata-internal" "Kanata Keyboard Daemon"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
+check_user_service "kanata-indicator" "Kanata Indicator & OSD Daemon"
 check_required_user_service "9router" "9router Local AI Gateway"
 check_required_user_service "omniroute" "OmniRoute Local AI Gateway"
 
