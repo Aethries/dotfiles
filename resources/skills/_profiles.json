@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "profiles": {
+    "core": {
+      "name": "Core Essential Agent Skills",
+      "description": "Minimal baseline skills for concise, safe, anti-overengineered development",
+      "skills": [
+        "ponytail",
+        "caveman",
+        "junior-coding-agent",
+        "rtk"
+      ]
+    },
+    "backend": {
+      "name": "Backend & System Architecture",
+      "description": "Codebase indexing, AST navigation, and clean semantic releases",
+      "skills": [
+        "codebase-memory",
+        "codegraph",
+        "ponytail",
+        "release-notes"
+      ]
+    },
+    "frontend": {
+      "name": "Frontend & UI Design",
+      "description": "UI, component workflow, and strict code minimalism",
+      "skills": [
+        "ponytail",
+        "junior-coding-agent",
+        "rtk"
+      ]
+    },
+    "devops": {
+      "name": "DevOps & Infrastructure",
+      "description": "Infrastructure reliability, release notes, and token optimization",
+      "skills": [
+        "release-notes",
+        "rtk",
+        "junior-coding-agent"
+      ]
+    }
+  }
+}

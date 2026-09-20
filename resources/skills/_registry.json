@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "skills": {
+    "caveman": {
+      "name": "caveman",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Ultra-terse, telegraphic communication style to minimize token usage.",
+      "tags": [
+        "communication",
+        "token-optimization",
+        "concise"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:c0b24c3b0d4975607671cce1fff3b31f0e21f2edfb9cac55e6356759cb5d7ef2"
+    },
+    "codebase-memory": {
+      "name": "codebase-memory",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Persistent AST codebase memory and relationship index.",
+      "tags": [
+        "ast",
+        "indexing",
+        "memory",
+        "mcp"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:85049045767cebb953eec6d6c71a5b92932424c78f4835d8deee5c14288a85e3"
+    },
+    "codegraph": {
+      "name": "codegraph",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory AST knowledge graph navigation using CodeGraph / Codebase Memory MCP.",
+      "tags": [
+        "ast",
+        "graph",
+        "navigation",
+        "mcp"
+      ],
+      "dependencies": [
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:528783b7c62a53c64652af47d61cf26e1cf0d40304159a055dc8c87dd237fb24"
+    },
+    "junior-coding-agent": {
+      "name": "junior-coding-agent",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Careful junior developer behavior: scoped edits, approval protocols, no regressions.",
+      "tags": [
+        "workflow",
+        "safety",
+        "git",
+        "review"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:3ba8b06234cb66b156032ad154f9271372939d3ae10450d26de9e0454f364532"
+    },
+    "ponytail": {
+      "name": "ponytail",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Anti-overengineering ruleset biasing agents toward minimal, standard-library-first code.",
+      "tags": [
+        "philosophy",
+        "yagni",
+        "anti-overengineering",
+        "simplification"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:8dd0c3f5e45532a9dd59dd0482ddcfad74dfe71f48b57bf46cc1f44ae6253dc4"
+    },
+    "release-notes": {
+      "name": "release-notes",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Changelog and release notes guideline based on Semantic Versioning and Conventional Commits.",
+      "tags": [
+        "documentation",
+        "semver",
+        "changelog",
+        "release"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:993bcd6c723c513ced7b7c1637ae6e7691f83ee8604bb41d62ad5bdbfd5132d2"
+    },
+    "rtk": {
+      "name": "rtk",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust Token Killer terminal output filter and token optimization workflow.",
+      "tags": [
+        "terminal",
+        "token-optimization",
+        "filter"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a4a8bed5dfe322bc64e468e5613ebdac00181b6f290afcfb68342165133bfff9"
+    }
+  }
+}

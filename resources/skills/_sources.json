@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "sources": {
+    "canonical": {
+      "name": "Dotfiles Canonical Skills",
+      "type": "local",
+      "path": "resources/skills",
+      "url": "https://github.com/Aethries/dotfiles"
+    }
+  }
+}

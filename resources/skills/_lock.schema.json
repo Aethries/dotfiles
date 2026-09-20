@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentSkillsLockfile",
+  "description": "Schema for project-local .agent-skills.lock.json lockfile",
+  "type": "object",
+  "required": [
+    "version",
+    "generated_at",
+    "skills"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "version",
+          "source",
+          "content_hash",
+          "target_path"
+        ],
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "content_hash": {
+            "type": "string"
+          },
+          "target_path": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

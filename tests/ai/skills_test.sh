@@ -107,6 +107,16 @@ grep -Fq "codebase-memory-mcp" "$REPO_ROOT/modules/packages.nix" || log_fail "mo
 # Assert OmniRoute cavemanEnabled is false by default
 grep -Eiq '^OMNIROUTE_CAVEMAN_ENABLED="false"' "$REPO_ROOT/resources/ai/gateway.env" || log_fail "OMNIROUTE_CAVEMAN_ENABLED must be false"
 
+# Assert metadata registry seeds and lockfile schema validity
+[ -f "$REPO_ROOT/resources/skills/_sources.json" ] || log_fail "Missing _sources.json"
+[ -f "$REPO_ROOT/resources/skills/_registry.json" ] || log_fail "Missing _registry.json"
+[ -f "$REPO_ROOT/resources/skills/_profiles.json" ] || log_fail "Missing _profiles.json"
+[ -f "$REPO_ROOT/resources/skills/_lock.schema.json" ] || log_fail "Missing _lock.schema.json"
+jq empty "$REPO_ROOT/resources/skills/_sources.json" || log_fail "Invalid _sources.json JSON"
+jq empty "$REPO_ROOT/resources/skills/_registry.json" || log_fail "Invalid _registry.json JSON"
+jq empty "$REPO_ROOT/resources/skills/_profiles.json" || log_fail "Invalid _profiles.json JSON"
+jq empty "$REPO_ROOT/resources/skills/_lock.schema.json" || log_fail "Invalid _lock.schema.json JSON"
+
 # Assert agent adapter configuration and schema validity
 [ -f "$REPO_ROOT/resources/skills/_agents.schema.json" ] || log_fail "Missing _agents.schema.json"
 [ -f "$REPO_ROOT/resources/skills/_agents.json" ] || log_fail "Missing _agents.json"
@@ -128,7 +138,7 @@ GEMINI_TEST_PATH="$(resolve_agent_global_path antigravity-cli "/test/home")"
 # Assert Claude Code package in packages.nix
 grep -Fq "claudeCode" "$REPO_ROOT/modules/packages.nix" || log_fail "modules/packages.nix missing claudeCode"
 
-log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, CodeGraph, and Agent Adapters schemas are valid"
+log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, CodeGraph, and Metadata Registries are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
@@ -141,14 +151,16 @@ AI_SKILLS_BIN="$REPO_ROOT/scripts/ai-skills.sh"
 # Test 2.1: list command
 LIST_OUTPUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" list)
 echo "$LIST_OUTPUT" | grep -Fq "ponytail" || log_fail "list command did not include 'ponytail'"
-log_ok "ai-skills.sh list outputs available skills"
+# Ensure metadata files prefixed with _ are never listed as skills
+echo "$LIST_OUTPUT" | grep -Eq '^[[:space:]]*_[a-zA-Z0-9]+' && log_fail "list command included metadata file prefixed with _"
+log_ok "ai-skills.sh list outputs available skills and filters metadata files"
 
 # Test 2.2: preview command
 PREVIEW_OUTPUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" preview ponytail)
 echo "$PREVIEW_OUTPUT" | grep -Fq "name: ponytail" || log_fail "preview command did not display skill content"
 log_ok "ai-skills.sh preview works"
 
-# Test 2.3: add command (gemini and codex)
+# Test 2.3: add command (global symlinks for gemini, codex, claude)
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "Failed to link ponytail to gemini"
 [ -f "$MOCK_HOME/.gemini/config/skills/ponytail/SKILL.md" ] || log_fail "Linked skill file not accessible"
@@ -156,20 +168,29 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini >/dev/null
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target codex >/dev/null
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "Failed to link ponytail to codex"
 
-HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target claude >/dev/null
-[ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "Failed to link ponytail to claude"
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --global claude >/dev/null
+[ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "Failed to link ponytail to claude via --global"
 
-# Test 2.4: add command (project target)
-(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target project >/dev/null)
-[ -L "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Failed to link ponytail to project .agents/skills"
-log_ok "ai-skills.sh add links correctly across gemini, codex, claude, and project"
+# Test 2.4: add command (project target: physical copy + lockfile)
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --project >/dev/null)
+[ ! -L "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Project skill must NOT be a symlink (invariant violation)"
+[ -d "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Project skill directory missing"
+[ -f "$MOCK_PROJECT/.agents/skills/ponytail/SKILL.md" ] || log_fail "Project skill SKILL.md missing"
+[ -f "$MOCK_PROJECT/.agents/skills/ponytail/references/code-filter.md" ] || log_fail "Project skill references/ not copied intact"
+
+# Assert lockfile generation
+[ -f "$MOCK_PROJECT/.agent-skills.lock.json" ] || log_fail "Missing .agent-skills.lock.json"
+jq empty "$MOCK_PROJECT/.agent-skills.lock.json" || log_fail "Invalid lockfile JSON"
+jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Lockfile missing ponytail entry"
+jq -e '.skills["ponytail"].content_hash' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Lockfile missing content_hash"
+log_ok "ai-skills.sh add enforces global=symlink, project=physical copy and writes lockfile"
 
 # Test 2.5: export command
 EXPORT_OUTPUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" export ponytail)
 echo "$EXPORT_OUTPUT" | grep -Fq "Ponytail Anti-Overengineering Rule Snippet" || log_fail "export failed"
 log_ok "ai-skills.sh export produces markdown snippet"
 
-# Test 2.6: remove command
+# Test 2.6: remove command (global and project)
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target gemini >/dev/null
 [ ! -e "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "remove command failed to unlink gemini target"
 
@@ -178,7 +199,12 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target claude >/dev/null
 
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target all >/dev/null
 [ ! -e "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "remove command failed to unlink codex target"
-log_ok "ai-skills.sh remove unlinks targets cleanly"
+
+# Remove project skill and check lockfile update
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --project >/dev/null)
+[ ! -e "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "remove command failed to remove project skill directory"
+jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null && log_fail "Lockfile still has ponytail after removal"
+log_ok "ai-skills.sh remove cleans global targets and project directories with lockfile update"
 
 # Test 2.7: sync command
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
