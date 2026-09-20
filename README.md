@@ -54,11 +54,13 @@ The flake separates declarative Nix configurations from user-specific dotfiles a
 ├── configuration.nix       # Top-level NixOS system entry point
 ├── flake.nix               # Flake inputs, outputs, checks, and devShells
 ├── modules/                # Composable NixOS system modules
-│   ├── base.nix            # Core boot, kernel, locale, nix settings
+│   ├── base.nix            # Core Nix settings and machine-user option contract
 │   ├── desktop.nix         # Wayland, Niri, portals, audio, display
 │   ├── godot.nix           # Godot 4 package, tooling, and editor sync
 │   ├── packages.nix        # System-wide CLI & GUI package definitions
-│   ├── services.nix        # Systemd user services, daemons, background tasks
+│   ├── services.nix        # General peripherals; imports domain service modules
+│   ├── services/            # Containers, audio, and AI gateway modules
+│   ├── hardware/            # Opt-in GPU and device-specific modules
 │   └── zellij.nix          # Multiplexer configuration module
 ├── resources/              # User configuration files linked to $HOME
 │   ├── kitty/              # Kitty terminal configuration & themes
@@ -66,10 +68,11 @@ The flake separates declarative Nix configurations from user-specific dotfiles a
 │   ├── noctalia/           # Noctalia theme definitions & palettes
 │   ├── nvim/               # Neovim lua configuration & plugins
 │   ├── starship/           # Starship prompt configuration
-│   ├── systemd/            # Validated systemd user unit templates
+│   ├── systemd/             # Validated systemd user unit templates
+│   ├── gh/                  # GitHub CLI aliases
 │   └── zellij/             # Layouts, status bar, and launcher scripts
 ├── scripts/                # Bootstrapping, installer, checking & test scripts
-└── tests/                  # Automated test suites (vault, zellij launcher)
+└── tests/                  # Automated bootstrap, installer, vault, and Zellij suites
 ```
 
 ---

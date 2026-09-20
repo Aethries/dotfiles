@@ -128,6 +128,17 @@ mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
 [ "${args[1]}" = "my-new-project" ] || log_fail "Case 3: expected name 'my-new-project', got '${args[1]}'"
 log_ok "Case 3 passed"
 
+log_info "Case 3b: layout is opt-in for named session creation"
+reset_records
+export FAKE_ZELLIJ_LIST_OUTPUT="$FIXTURES_DIR/list_sessions_empty.txt"
+export FAKE_ZELLIJ_LIST_EXIT=1
+export FAKE_FZF_OUTPUT=$'layout-project\nctrl-n\n'
+"$LAUNCHER" --layout work
+mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
+[ "${args[0]}" = "--session" ] && [ "${args[1]}" = "layout-project" ] || log_fail "Case 3b: named session argv mismatch"
+[ "${args[2]}" = "--layout" ] && [ "${args[3]}" = "work" ] || log_fail "Case 3b: opt-in layout argv mismatch"
+log_ok "Case 3b passed"
+
 log_info "Case 4: Existing active session selected -> exact attach argv"
 reset_records
 export FAKE_ZELLIJ_LIST_OUTPUT="$FIXTURES_DIR/list_sessions_multiple.txt"

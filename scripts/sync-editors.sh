@@ -182,14 +182,14 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
         "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
         "$TARGET_HOME/.claude/CLAUDE.md" \
-        "$TARGET_HOME/.config/nvim/AGENTS.md" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/zed" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/Code" 2>/dev/null || true
+        "$TARGET_HOME/.config/nvim/AGENTS.md" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/zed" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/Code" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 fi
 success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 
@@ -217,7 +217,7 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
     chown -R "$TARGET_USER:" "$EXTENSION_CACHE"
 fi
 
-INSTALLED="$(run_as_target antigravity-ide --list-extensions --show-versions 2>/dev/null || true)"
+INSTALLED="$(run_as_target antigravity-ide --list-extensions --show-versions 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 while IFS=$'\t' read -r extension_id version expected_sha download_url; do
     [ -n "$extension_id" ] || continue
     if printf '%s\n' "$INSTALLED" | grep -Fqx "$extension_id@$version"; then

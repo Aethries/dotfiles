@@ -4,8 +4,13 @@ set -euo pipefail
 
 cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 
-bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
-shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
+
+if rg -n '^[^#]*\|\| true' scripts/*.sh scripts/lib/*.sh | grep -v 'BEST_EFFORT:'; then
+    echo "Error: every non-comment best-effort fallback must include a BEST_EFFORT rationale" >&2
+    exit 1
+fi
 
 # Assert Kitty does not launch welcome layout directly
 if grep -q "zellij -l welcome" resources/kitty/kitty.conf; then
@@ -29,6 +34,9 @@ bash tests/zellij/launcher_test.sh >/dev/null
 bash tests/ai/omniroute_test.sh >/dev/null
 bash tests/ai/skills_test.sh >/dev/null
 bash tests/kanata/recovery_test.sh >/dev/null
+bash tests/bootstrap/test-bootstrap.sh >/dev/null
+bash tests/installer/test-installer-mock.sh >/dev/null
+bash tests/gh/test-aliases.sh >/dev/null
 
 mapfile -t nix_files < <(find . -name '*.nix' -not -path './.machine/*' -print)
 nixfmt --check "${nix_files[@]}"

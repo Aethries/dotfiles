@@ -267,6 +267,9 @@ alias docs="tldr"
 
 # GitHub CLI & Kubernetes TUI
 alias ghd="gh-dash"
+alias ghi="gh issue"
+alias ghpr="gh pr"
+alias ghml="gh ml"
 alias k="kubectl"
 alias kns="k9s"
 
@@ -289,6 +292,10 @@ if [ -z "${DOTFILES_DIR:-}" ]; then
   fi
 fi
 export DOTFILES_DIR
+
+if [ -f "$DOTFILES_DIR/resources/ai/gateway.env" ]; then
+  source "$DOTFILES_DIR/resources/ai/gateway.env"
+fi
 
 alias dots="cd \"$DOTFILES_DIR\""
 alias rebuild="\"$DOTFILES_DIR/scripts/build.sh\""
@@ -373,9 +380,9 @@ function 9router() {
       if [ -f "${DOTFILES_DIR:-}/scripts/init-9router.sh" ]; then
         "${DOTFILES_DIR}/scripts/init-9router.sh"
       else
-        npm i -g 9router@latest
+        npm i -g "9router@${ROUTER_9_PINNED_VERSION:?ROUTER_9_PINNED_VERSION is not configured}"
         systemctl --user restart 9router
-        echo "✓ 9router updated to latest and service restarted"
+        echo "✓ 9router updated to pinned version $ROUTER_9_PINNED_VERSION and service restarted"
       fi
       ;;
     "")

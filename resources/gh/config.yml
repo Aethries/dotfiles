@@ -1,0 +1,18 @@
+version: "1"
+aliases:
+  il: issue list --state open
+  ila: issue list --state all
+  iv: issue view --comments
+  ic: issue create
+  icl: issue close
+  ire: issue reopen
+  prl: pr list
+  prv: pr view --comments
+  prd: pr diff
+  prc: pr create
+  co: pr checkout
+  prm: pr merge --squash --delete-branch
+  ml: '!gh api repos/:owner/:repo/milestones --jq ".[] | {number, title, open_issues, closed_issues, state}"'
+  mli: issue list --state all --milestone
+  d: '!gh-dash'
+  browse-here: browse

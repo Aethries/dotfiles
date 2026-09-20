@@ -18,16 +18,15 @@ Thư mục `.machine/` nằm ở thư mục gốc của repository và được 
 .machine/
 ├── configuration.nix           # Entrypoint cấu hình máy cục bộ (nixos-rebuild import)
 ├── hardware-configuration.nix  # File sinh tự động từ nixos-generate-config
-├── hardware-extra.nix          # Khai báo driver GPU, kernel params, udev rules riêng
-└── identity.nix                # Định danh máy: hostname, primary user, stateVersion
+└── hardware-extra.nix          # Khai báo driver GPU, kernel params, udev rules riêng
 ```
 
 ---
 
 ## 3. Chi tiết các file cấu hình
 
-### 3.1. `identity.nix`
-Chứa thông tin định danh và tài khoản máy:
+### 3.1. `configuration.nix`
+Chứa thông tin định danh và tài khoản máy được bootstrap/installer sinh ra:
 ```nix
 { ... }:
 {
@@ -48,7 +47,7 @@ Chứa thông tin định danh và tài khoản máy:
   };
 
   # Khai báo user chính cho Desktop Greeter (tự động đồng bộ không cần gõ mật khẩu nếu cấu hình)
-  # dotfiles.primaryUser = "myuser";
+  dotfiles.primaryUser = "myuser";
 }
 ```
 
@@ -89,7 +88,6 @@ Cầu nối tổng hợp giữa repository và máy cục bộ:
     ../configuration.nix
     ./hardware-configuration.nix
     ./hardware-extra.nix
-    ./identity.nix
   ];
 
   # Cấu hình Bootloader riêng của máy (UEFI hoặc BIOS)
@@ -105,6 +103,6 @@ Cầu nối tổng hợp giữa repository và máy cục bộ:
 Khi chạy `./scripts/bootstrap.sh` hoặc `./scripts/nixos-installer.sh`:
 1. Script kiểm tra sự tồn tại của `.machine/`.
 2. Nếu chưa có, script tự động sinh `hardware-configuration.nix` (thông qua `nixos-generate-config`).
-3. Tự động lấy username và hostname hiện tại để điền vào `identity.nix`.
-4. Phát hiện GPU để tạo `hardware-extra.nix` phù hợp.
+3. Tự động lấy username và hostname hiện tại để điền vào `configuration.nix`.
+4. Tạo template `hardware-extra.nix`; người dùng chọn module GPU/thiết bị phù hợp trước khi rebuild.
 5. Tạo `configuration.nix` liên kết toàn bộ cấu hình.

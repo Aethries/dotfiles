@@ -119,8 +119,8 @@ fi
 # ------------------------------------------------------------------------------
 log_info "Testing Neovim headless startup in isolated environment..."
 
-# Link resources/nvim to sandbox ~/.config/nvim for true runtimepath emulation
-ln -sfn "$REPO_ROOT/resources/nvim" "$XDG_CONFIG_HOME/nvim"
+# Copy resources/nvim before startup so lazy.nvim cannot rewrite the tracked lockfile.
+cp -a "$REPO_ROOT/resources/nvim" "$XDG_CONFIG_HOME/nvim"
 
 # Test 5A: Native Neovim headless startup
 nvim --headless -c "q"
@@ -138,6 +138,7 @@ log_ok "Native Neovim modules and Godot LSP/DAP specs loaded OK"
 # Test 5C: repo-managed editor links without touching the real user profile.
 TEST_TEMPLATES="$SANDBOX_DIR/system-path/share/godot/export_templates"
 mkdir -p "$TEST_TEMPLATES/4.test"
+rm -rf "$XDG_CONFIG_HOME/nvim"
 GODOT_EXPORT_TEMPLATES_SOURCE="$TEST_TEMPLATES" \
     "$REPO_ROOT/scripts/sync-editors.sh" --no-extensions
 test "$(readlink "$XDG_CONFIG_HOME/nvim")" = "$REPO_ROOT/resources/nvim"

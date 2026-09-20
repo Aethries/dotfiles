@@ -55,11 +55,6 @@ EOF
     echo
 }
 
-# Ensure root
-if [ "$(id -u)" -ne 0 ]; then
-    error "This installer must be run as root (or via 'sudo $0')."
-fi
-
 check_connection() {
     if ! ping -c 1 -W 2 "${CHECK_HOST:-1.1.1.1}" >/dev/null 2>&1; then
         warn "No active internet connection detected!"
@@ -68,6 +63,16 @@ check_connection() {
     else
         success "Internet connection verified."
     fi
+}
+
+require_root() {
+    if [ "$(id -u)" -ne 0 ]; then
+        error "This installer must be run as root (or via 'sudo $0')."
+    fi
+}
+
+preflight() {
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/preflight.sh" installer
 }
 
 # ============================================================
@@ -82,7 +87,7 @@ setup_disk() {
 
     # Prompt user for disk
     local default_disk
-    default_disk="$(lsblk -d -e 7,11 -n -o NAME | grep -E 'nvme0n1|sda|vda' | head -n 1 || true)"
+    default_disk="$(lsblk -d -e 7,11 -n -o NAME | grep -E 'nvme0n1|sda|vda' | head -n 1 || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
     read -r -p "Enter disk name to install NixOS (e.g. nvme0n1, sda) [default: $default_disk]: " target_disk
     target_disk="${target_disk:-$default_disk}"
@@ -119,10 +124,10 @@ setup_disk() {
     swap_end_mib=$((efi_end_mib + swap_mib))
 
     info "Unmounting any existing partitions on $disk_path..."
-    swapoff -a 2>/dev/null || true
-    umount -R /mnt 2>/dev/null || true
+    swapoff -a 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    umount -R /mnt 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     for p in "${disk_path}"*; do
-        umount "$p" 2>/dev/null || true
+        umount "$p" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     done
 
     info "Wiping existing partition table and signatures on $disk_path..."
@@ -160,7 +165,7 @@ setup_disk() {
 
     # Wait for kernel to register partitions
     sleep 2
-    partprobe "$disk_path" 2>/dev/null || true
+    partprobe "$disk_path" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     sleep 2
 
     info "Formatting partitions..."
@@ -190,11 +195,14 @@ setup_disk() {
 # STEP 2: Config Generation & Dotfiles Integration
 # ============================================================
 setup_config() {
+    [ "$#" -eq 1 ] || error "setup_config requires an output variable name"
+    local install_user_out_name="$1"
+
     echo
     info "Step 2: Generating NixOS configuration..."
     nixos-generate-config --root /mnt
 
-    local suggested_user
+    local suggested_user install_user
     suggested_user="${SUDO_USER:-${USER:-loc}}"
     read -r -p "Enter primary user account name [default: $suggested_user]: " install_user
     install_user="${install_user:-$suggested_user}"
@@ -217,10 +225,27 @@ setup_config() {
         nix-shell -p git --run "git clone \"$chosen_repo\" $dotfiles_dir"
     fi
 
-    # Inject generated hardware config into .machine
-    local machine_dir="$dotfiles_dir/.machine"
-    mkdir -p "$machine_dir"
-    cp /mnt/etc/nixos/hardware-configuration.nix "$machine_dir/hardware-configuration.nix"
+      # Inject generated hardware config into .machine
+      local machine_dir="$dotfiles_dir/.machine"
+      mkdir -p "$machine_dir"
+      if [ ! -f "$machine_dir/hardware-extra.nix" ]; then
+          cat > "$machine_dir/hardware-extra.nix" <<'EOF'
+# Machine-local hardware opt-ins. Add imports only for hardware present here.
+{
+  imports = [
+    # ../modules/hardware/intel-graphics.nix
+    # ../modules/hardware/weikav-nut75.nix
+  ];
+
+  # Optional machine-specific kernel parameters.
+  # boot.kernelParams = [
+  #   "usbcore.autosuspend=-1"
+  #   "hid_apple.fnmode=0"
+  # ];
+}
+EOF
+      fi
+      cp /mnt/etc/nixos/hardware-configuration.nix "$machine_dir/hardware-configuration.nix"
 
     # Create machine-specific configuration.nix
     local hostname
@@ -255,12 +280,18 @@ setup_config() {
 # AUTO-GENERATED MACHINE CONFIGURATION
 # ============================================================
 {
-  imports = [
-    ../configuration.nix
-    ./hardware-configuration.nix
-  ];
+    imports = [
+      ../configuration.nix
+      ./hardware-configuration.nix
+      ./hardware-extra.nix
+    ];
 
-  networking.hostName = "$chosen_host";
+    networking.hostName = "$chosen_host";
+    dotfiles.primaryUser = "$install_user";
+
+    boot.loader.systemd-boot.enable = true;
+    boot.loader.efi.canTouchEfiVariables = true;
+    system.stateVersion = "${NIXOS_STATE_VERSION:-26.05}";
 
   users.users."$install_user" = {
     isNormalUser = true;
@@ -268,10 +299,12 @@ setup_config() {
     extraGroups = [
       "wheel"
       "networkmanager"
-      "input"
-      "uinput"
-      "docker"
-    ];
+        "input"
+        "uinput"
+        "docker"
+        "seat"
+        "video"
+      ];
   };
   users.users.root.initialHashedPassword = "!";
 }
@@ -312,13 +345,18 @@ EOF
     fi
 
     # Fix ownership of cloned files in target home
-    chown -R "${install_user}:users" "$user_home" 2>/dev/null || true
+    chown -R "${install_user}:users" "$user_home" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+
+    printf -v "$install_user_out_name" '%s' "$install_user"
 }
 
 # ============================================================
 # STEP 3: Installation Execution
 # ============================================================
 run_install() {
+    [ "$#" -eq 1 ] || error "run_install requires install_user"
+    local install_user="$1"
+
     echo
     info "Step 3: Ready to install NixOS!"
     echo "This will build and install the entire system using your dotfiles."
@@ -334,7 +372,8 @@ run_install() {
     local machine_config="$dotfiles_dir/.machine/configuration.nix"
 
     info "Running nixos-install (this may take several minutes)..."
-    nixos-install --root /mnt -I "nixos-config=$machine_config" --no-root-password
+    DOTFILES_MACHINE_CONFIG="$machine_config" \
+        nixos-install --root /mnt --flake "$dotfiles_dir#check" --impure --no-root-password
 
     echo
     echo -e "${GREEN}${BOLD}============================================================${RESET}"
@@ -350,7 +389,7 @@ run_install() {
     read -r -p "Do you want to reboot the system now? [y/N]: " reboot_ans
     case "$reboot_ans" in
         [yY][eE][sS]|[yY])
-            umount -R /mnt 2>/dev/null || true
+            umount -R /mnt 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
             reboot
             ;;
         *)
@@ -359,9 +398,20 @@ run_install() {
     esac
 }
 
-# Main flow
-banner
-check_connection
-setup_disk
-setup_config
-run_install
+main() {
+    # Ensure root
+    require_root
+    preflight
+
+    local install_user=""
+
+    banner
+    check_connection
+    setup_disk
+    setup_config install_user
+    run_install "$install_user"
+}
+
+if [ "${NIXOS_INSTALLER_SOURCE_ONLY:-0}" -ne 1 ]; then
+    main "$@"
+fi

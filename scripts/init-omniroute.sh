@@ -113,7 +113,7 @@ if ! command -v npm >/dev/null 2>&1 || ! validate_node_version; then
     if command -v fnm >/dev/null 2>&1; then
         info "Compatible Node.js not active; installing and setting up LTS via fnm..."
         fnm install --lts 2>/dev/null || fnm install 24
-        fnm default lts-latest 2>/dev/null || fnm default 24 2>/dev/null || true
+        fnm default lts-latest 2>/dev/null || fnm default 24 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         eval "$(fnm env --shell bash)"
     fi
 fi
@@ -159,7 +159,7 @@ done
 
 # Secure directory permissions (0700) to protect database and provider secrets
 chmod 700 "$HOME/.omniroute"
-chmod 700 "$HOME/.omniroute/logs" 2>/dev/null || true
+chmod 700 "$HOME/.omniroute/logs" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
 # ------------------------------------------------------------------------------
 # 3. Configure OmniRoute Environment (.env) & Dedicated Port 20129
@@ -241,7 +241,7 @@ SERVICE_DEST="$SYSTEMD_USER_DIR/omniroute.service"
 
 [ -f "$SERVICE_SRC" ] || error "Missing service template: $SERVICE_SRC"
 
-if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then
+if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     if [ -e "$SERVICE_DEST" ] && [ ! -L "$SERVICE_DEST" ]; then
         mv "$SERVICE_DEST" "$SERVICE_DEST.pre-init-omniroute.$(date +%Y%m%d%H%M%S)"
     fi
@@ -260,16 +260,16 @@ if command -v loginctl >/dev/null 2>&1; then
     CURRENT_LINGER=$(loginctl show-user "$USER" -p Linger 2>/dev/null | cut -d= -f2 || echo "no")
     if [ "$CURRENT_LINGER" != "yes" ]; then
         info "Enabling user lingering for $USER (so omniroute starts on boot without login)..."
-        sudo loginctl enable-linger "$USER" 2>/dev/null || true
+        sudo loginctl enable-linger "$USER" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 fi
 
 # Stop any rogue omniroute process not managed by systemd
-systemctl --user stop omniroute.service 2>/dev/null || true
-mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true)
+systemctl --user stop omniroute.service 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 if [ "${#RUNNING_PIDS[@]}" -gt 0 ]; then
     info "Stopping running manual omniroute process (PID: ${RUNNING_PIDS[*]})..."
-    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true
+    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     sleep 1
 fi
 

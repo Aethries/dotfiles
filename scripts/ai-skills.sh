@@ -79,7 +79,7 @@ safe_link() {
     fi
     ln -sfn "$src" "$dest"
     if [ "$TARGET_USER" != "$(id -un)" ]; then
-        chown -h "$TARGET_USER:" "$dest" 2>/dev/null || true
+        chown -h "$TARGET_USER:" "$dest" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 }
 
@@ -120,11 +120,11 @@ list_skills() {
     proj_root="$(find_project_root "$PWD")"
 
     local g_gemini
-    g_gemini="$(get_agent_global_primary antigravity-cli "$TARGET_HOME" 2>/dev/null || true)"
+    g_gemini="$(get_agent_global_primary antigravity-cli "$TARGET_HOME" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     local g_codex
-    g_codex="$(get_agent_global_primary codex-cli "$TARGET_HOME" 2>/dev/null || true)"
+    g_codex="$(get_agent_global_primary codex-cli "$TARGET_HOME" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     local g_claude
-    g_claude="$(get_agent_global_primary claude-code "$TARGET_HOME" 2>/dev/null || true)"
+    g_claude="$(get_agent_global_primary claude-code "$TARGET_HOME" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
     local found=0
     for skill_dir in "$SKILLS_SRC"/*; do
@@ -332,7 +332,7 @@ EOF
     agents_file="$(get_agents_json_path)"
     for aid in $(get_all_agent_ids); do
         local p
-        p="$(jq -r --arg id "$aid" '.agents[$id].project.primary // empty' "$agents_file" 2>/dev/null || true)"
+        p="$(jq -r --arg id "$aid" '.agents[$id].project.primary // empty' "$agents_file" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         if [ -n "$p" ] && [[ "$target_rel_path" == "$p"* ]]; then
             matched_agents+=("$aid")
         fi
@@ -869,9 +869,9 @@ cmd_diff() {
 
     if [ "${#skills_to_diff[@]}" -eq 0 ]; then
         if [ -f "$lock_file" ]; then
-            mapfile -t skills_to_diff < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)
+            mapfile -t skills_to_diff < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         elif [ -d "$proj_root/.agents/skills" ]; then
-            mapfile -t skills_to_diff < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true)
+            mapfile -t skills_to_diff < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         fi
     fi
 
@@ -961,9 +961,9 @@ cmd_update() {
 
     if [ "${#skills_to_update[@]}" -eq 0 ]; then
         if [ -f "$lock_file" ]; then
-            mapfile -t skills_to_update < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)
+            mapfile -t skills_to_update < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         elif [ -d "$proj_root/.agents/skills" ]; then
-            mapfile -t skills_to_update < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true)
+            mapfile -t skills_to_update < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         fi
     fi
 
@@ -1017,7 +1017,7 @@ cmd_update() {
             local_hash="$(compute_skill_hash "$local_dir")"
             local recorded_hash=""
             if [ -f "$lock_file" ]; then
-                recorded_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file" 2>/dev/null || true)"
+                recorded_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
             fi
             local canonical_hash
             canonical_hash="$(compute_skill_hash "$canonical_dir")"
@@ -1096,7 +1096,7 @@ cmd_doctor() {
     if [ -f "$lock_file" ]; then
         echo -e "  Lockfile: $lock_file"
         local locked_skills
-        locked_skills="$(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)"
+        locked_skills="$(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         for s in $locked_skills; do
             local expected_hash
             expected_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file")"
@@ -1415,7 +1415,7 @@ import_skill() {
                 local rel_p
                 rel_p="$(dirname "${fs#"$tmp_dir"/}")"
                 local s_title
-                s_title="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$fs" | tr -d '\r"' || true)"
+                s_title="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$fs" | tr -d '\r"' || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
                 echo -e "  - ${BOLD}$rel_p${RESET} (name: ${s_title:-unknown})"
             done
             return 1
@@ -1428,7 +1428,7 @@ import_skill() {
     fi
 
     if [ -z "$skill_name" ]; then
-        skill_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$skill_bundle_dir/SKILL.md" | tr -d '\r"' || true)"
+        skill_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$skill_bundle_dir/SKILL.md" | tr -d '\r"' || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         if [ -z "$skill_name" ]; then
             if [ -n "$subpath" ]; then
                 skill_name="$(basename "$subpath")"
@@ -2126,7 +2126,7 @@ show_usage() {
 # Main command dispatch
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     CMD="${1:-interactive}"
-    shift || true
+    shift || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
     case "$CMD" in
     list|--list|-l)

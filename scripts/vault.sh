@@ -174,7 +174,7 @@ prepare_restore_permissions() {
     for path in "${CANDIDATE_PATHS[@]}"; do
         ensure_user_owned "$USER_HOME/$path"
         if [ -d "$USER_HOME/$path" ]; then
-            find "$USER_HOME/$path" -type d ! -perm -u=w -exec chmod u+w {} + 2>/dev/null || true
+            find "$USER_HOME/$path" -type d ! -perm -u=w -exec chmod u+w {} + 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         fi
     done
 }
@@ -288,7 +288,7 @@ cmd_backup() {
         local status=$?
         if [ "${restart_omniroute:-false}" = true ] && command -v systemctl >/dev/null 2>&1; then
             info "Resuming omniroute service..."
-            systemctl --user start omniroute.service 2>/dev/null || true
+            systemctl --user start omniroute.service 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         fi
         return "$status"
     }
@@ -306,7 +306,7 @@ cmd_backup() {
 
         if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
             warn "Active omniroute process detected; stopping..."
-            pkill -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
+            pkill -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
             sleep 1
             if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
                 error "Could not terminate running omniroute process. Aborting backup to prevent database corruption."
@@ -315,7 +315,7 @@ cmd_backup() {
 
         # Checkpoint SQLite WAL if database exists and sqlite3 CLI is available
         if [ -f "$USER_HOME/.omniroute/storage.sqlite" ] && command -v sqlite3 >/dev/null 2>&1; then
-            sqlite3 "$USER_HOME/.omniroute/storage.sqlite" "PRAGMA wal_checkpoint(TRUNCATE);" 2>/dev/null || true
+            sqlite3 "$USER_HOME/.omniroute/storage.sqlite" "PRAGMA wal_checkpoint(TRUNCATE);" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         fi
     fi
 
@@ -415,7 +415,7 @@ cmd_restore() {
         # vì process cũ có thể tiếp tục ghi vào database đã được thay thế.
         if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
             warn "Active omniroute process detected; stopping..."
-            pkill -TERM -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true
+            pkill -TERM -u "$UID" -f '[o]mniroute serve' 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
             sleep 1
             if pgrep -u "$UID" -f '[o]mniroute serve' >/dev/null 2>&1; then
                 error "Could not stop OmniRoute before restore. Refusing unsafe database replacement."
@@ -442,9 +442,9 @@ cmd_restore() {
 
         info "Securing OmniRoute permissions..."
         chmod 700 "$USER_HOME/.omniroute"
-        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true
-        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true
-        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true
+        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
         echo
         success "OmniRoute Secret Vault restored successfully!"
@@ -481,26 +481,26 @@ cmd_restore() {
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
             info "Terminating running process before restore: $proc..."
-            pkill -TERM -u "$UID" -f "$proc" 2>/dev/null || true
+            pkill -TERM -u "$UID" -f "$proc" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
             closed_any=true
         fi
     done
 
     if pgrep -u "$UID" -x codex >/dev/null 2>&1 || pgrep -u "$UID" -f '[c]hatgpt' >/dev/null 2>&1 || pgrep -u "$UID" -f '[C]hatGPT' >/dev/null 2>&1; then
         info "Terminating running Codex / ChatGPT process before restoring vault..."
-        pkill -TERM -u "$UID" -x codex 2>/dev/null || true
-        pkill -TERM -u "$UID" -f '[c]hatgpt' 2>/dev/null || true
-        pkill -TERM -u "$UID" -f '[C]hatGPT' 2>/dev/null || true
+        pkill -TERM -u "$UID" -x codex 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        pkill -TERM -u "$UID" -f '[c]hatgpt' 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        pkill -TERM -u "$UID" -f '[C]hatGPT' 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         closed_any=true
     fi
     if [ "$closed_any" = true ]; then
         sleep 2
-        pkill -9 -u "$UID" -f "chrome" 2>/dev/null || true
+        pkill -9 -u "$UID" -f "chrome" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 
     if [ "$RESTORE_RESTART_KEYRING" = true ]; then
         info "Stopping GNOME Keyring before replacing its database..."
-        pkill -TERM -u "$UID" -f '[g]nome-keyring-daemon' 2>/dev/null || true
+        pkill -TERM -u "$UID" -f '[g]nome-keyring-daemon' 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
         sleep 1
     fi
 
@@ -522,8 +522,8 @@ cmd_restore() {
     # SSH key permissions
     if [ -d "$USER_HOME/.ssh" ]; then
         chmod 700 "$USER_HOME/.ssh"
-        chmod 600 "$USER_HOME/.ssh/id_*" 2>/dev/null || true
-        chmod 644 "$USER_HOME/.ssh/*.pub" 2>/dev/null || true
+        chmod 600 "$USER_HOME/.ssh/id_*" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        chmod 644 "$USER_HOME/.ssh/*.pub" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 
     # GPG permissions
@@ -534,25 +534,25 @@ cmd_restore() {
     # Keyring permissions
     if [ -d "$USER_HOME/.local/share/keyrings" ]; then
         chmod 700 "$USER_HOME/.local/share/keyrings"
-        chmod 600 "$USER_HOME/.local/share/keyrings"/* 2>/dev/null || true
+        chmod 600 "$USER_HOME/.local/share/keyrings"/* 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 
     # OmniRoute directory & database permissions
     if [ -d "$USER_HOME/.omniroute" ]; then
         chmod 700 "$USER_HOME/.omniroute"
-        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true
-        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true
-        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true
+        chmod 700 "$USER_HOME/.omniroute/logs" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        chmod 600 "$USER_HOME/.omniroute/.env" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     fi
 
     # Remove stale singleton lockfiles from Chrome, Slack, Discord, Antigravity, etc.
-    find "$USER_HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true
-    rm -f "$USER_HOME/.antigravity-ide/code.lock" 2>/dev/null || true
-    rm -f "$USER_HOME/.gemini/antigravity-cli/knowledge/knowledge.lock" 2>/dev/null || true
-    rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true
-    rm -f "$USER_HOME/.gemini/antigravity/knowledge/knowledge.lock" 2>/dev/null || true
-    rm -f "$USER_HOME/.gemini/antigravity/presence"/*.lock 2>/dev/null || true
-    rm -f "$USER_HOME/.codex/thread-writer-locks"/* 2>/dev/null || true
+    find "$USER_HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.antigravity-ide/code.lock" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.gemini/antigravity-cli/knowledge/knowledge.lock" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.gemini/antigravity/knowledge/knowledge.lock" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.gemini/antigravity/presence"/*.lock 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    rm -f "$USER_HOME/.codex/thread-writer-locks"/* 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
     echo
     success "Secret Vault restored successfully!"
@@ -651,10 +651,10 @@ cmd_clean() {
     info "Terminating active applications..."
     local procs=("chrome" "google-chrome" "jira-app" "telegram-desktop" "slack" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian")
     for proc in "${procs[@]}"; do
-        pkill -TERM -f "$proc" 2>/dev/null || true
+        pkill -TERM -f "$proc" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     done
     sleep 1
-    pkill -9 -f "chrome" 2>/dev/null || true
+    pkill -9 -f "chrome" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
     info "Removing credential paths..."
     for p in "${target_paths[@]}"; do

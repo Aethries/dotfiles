@@ -107,7 +107,7 @@ INIT_OMNIROUTE="$REPO_ROOT/scripts/init-omniroute.sh"
 
 [ -f "$INIT_9ROUTER" ] || error "Missing 9router initializer: $INIT_9ROUTER"
 [ -f "$INIT_OMNIROUTE" ] || error "Missing OmniRoute initializer: $INIT_OMNIROUTE"
-chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE" 2>/dev/null || true
+chmod +x "$INIT_9ROUTER" "$INIT_OMNIROUTE" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
 # ------------------------------------------------------------------------------
 # 3. Reconcile 9Router

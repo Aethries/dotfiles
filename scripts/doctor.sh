@@ -59,6 +59,7 @@ fi
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
+ROUTER_9_PINNED_VERSION="${ROUTER_9_PINNED_VERSION:-}"
 
 echo -e "${BOLD}${CYAN}🏥 Dotfiles System Doctor${RESET}"
 echo "Running diagnostics on $(uname -s) ($(uname -m)) for user '$USER'..."
@@ -75,7 +76,7 @@ else
 fi
 
 if command -v nix >/dev/null 2>&1; then
-    ok "Nix is installed ($(nix --version 2>/dev/null || true))"
+    ok "Nix is installed ($(nix --version 2>/dev/null || true))" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 else
     fail "Nix is not found in PATH"
 fi
@@ -171,7 +172,7 @@ else
 fi
 
 if command -v antigravity-ide >/dev/null 2>&1; then
-    ANTIGRAVITY_EXTENSIONS="$(antigravity-ide --list-extensions --show-versions 2>/dev/null || true)"
+    ANTIGRAVITY_EXTENSIONS="$(antigravity-ide --list-extensions --show-versions 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
     while IFS=$'\t' read -r extension_id extension_version; do
         if printf '%s\n' "$ANTIGRAVITY_EXTENSIONS" | grep -Fqx "$extension_id@$extension_version"; then
             ok "Antigravity extension: $extension_id@$extension_version"
@@ -291,6 +292,20 @@ if [ "$ROUTER_9_LISTEN" = true ]; then
     ok "9router listening on port $ROUTER_9_PORT"
 else
     fail "9router is NOT listening on port $ROUTER_9_PORT (run 'init-9router' to start)"
+fi
+
+if [ -n "$ROUTER_9_PINNED_VERSION" ]; then
+    ROUTER_9_BIN="${ROUTER_9_BIN:-$HOME/.local/bin/9router}"
+    if [ -x "$ROUTER_9_BIN" ]; then
+        ROUTER_9_VERSION_OUTPUT="$("$ROUTER_9_BIN" -v 2>/dev/null || echo '')"
+        if [[ "$ROUTER_9_VERSION_OUTPUT" == *"$ROUTER_9_PINNED_VERSION"* ]]; then
+            ok "9router version pinned at $ROUTER_9_PINNED_VERSION"
+        else
+            fail "9router version mismatch: expected $ROUTER_9_PINNED_VERSION, got $ROUTER_9_VERSION_OUTPUT"
+        fi
+    else
+        fail "Pinned 9router binary is missing at $ROUTER_9_BIN"
+    fi
 fi
 
 if [ "$OMNI_LISTEN_PUBLIC" = true ]; then

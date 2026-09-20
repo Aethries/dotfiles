@@ -77,7 +77,7 @@ sudo ./scripts/nixos-installer.sh
 - Tự động phục hồi drift, không bao giờ ghi đè làm mất dữ liệu người dùng (`safe_link` phải kiểm tra nguồn trước khi symlink).
 
 ### 3.4. An toàn bảo mật tuyệt đối (Zero-Leak Security)
-- Mọi dữ liệu nhạy cảm được mã hóa qua Age (`secrets.vault` hoặc `secrets.enc`).
+- Mọi dữ liệu nhạy cảm được mã hóa qua Age: `secrets.vault` là backup local luôn ignored; `secrets.enc` là portable archive ignored mặc định và chỉ track khi force-add có chủ đích.
 - Tuyệt đối không để lọt plaintext secret, private keys vào commit lịch sử của git.
 
 ---
@@ -105,7 +105,6 @@ dotfiles/
 │   ├── services/
 │   │   ├── containers.nix
 │   │   ├── audio.nix
-│   │   ├── desktop-services.nix
 │   │   └── ai-gateways.nix
 │   │
 │   └── hardware/
@@ -129,9 +128,10 @@ dotfiles/
 │   ├── init-omniroute.sh
 │   └── lib/
 │       ├── common.sh
-│       ├── target-user.sh
 │       ├── machine.sh
-│       └── links.sh
+│       ├── links.sh
+│       ├── ownership.sh
+│       └── ai-gateway-common.sh
 │
 ├── tests/
 │   ├── bootstrap/
@@ -143,8 +143,7 @@ dotfiles/
 └── .machine/                    # GITIGNORED - Machine Local State
     ├── configuration.nix
     ├── hardware-configuration.nix
-    ├── hardware-extra.nix
-    └── identity.nix
+    └── hardware-extra.nix
 ```
 
 ---

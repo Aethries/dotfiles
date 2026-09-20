@@ -108,7 +108,7 @@ cmd_logs() {
 }
 
 COMMAND="${1:-help}"
-shift || true
+shift || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
 
 case "$COMMAND" in
     status)
