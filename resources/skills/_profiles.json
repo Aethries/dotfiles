@@ -2,6 +2,38 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": 1,
   "profiles": {
+    "global-core": {
+      "name": "Global Core Engineering Baseline",
+      "description": "Foundational guardrails, senior roles, and essential developer workflow tools",
+      "skills": [
+        "architecture-guardrails",
+        "security-guardrails",
+        "system-design-guardrails",
+        "source-quality",
+        "project-context",
+        "quality-gate",
+        "feature-spec-writer",
+        "technical-planner",
+        "technical-researcher",
+        "architecture-designer",
+        "api-contract-designer",
+        "data-model-architect",
+        "test-strategist",
+        "engineering-review",
+        "skill-author",
+        "senior-implementer",
+        "pixel-perfect-ui",
+        "diagram-author",
+        "migration-strategist",
+        "incident-investigator",
+        "reliability-engineer",
+        "rtk",
+        "caveman",
+        "ponytail",
+        "codegraph",
+        "codebase-memory"
+      ]
+    },
     "core": {
       "name": "Core Essential Agent Skills",
       "description": "Minimal baseline skills for concise, safe, anti-overengineered development",
@@ -9,7 +41,6 @@
         "ponytail",
         "caveman",
         "senior-implementer",
-        "junior-coding-agent",
         "rtk"
       ]
     },
@@ -34,7 +65,6 @@
       "skills": [
         "ponytail",
         "pixel-perfect-ui",
-        "junior-coding-agent",
         "rtk",
         "chrome-extension"
       ]
@@ -45,7 +75,6 @@
       "skills": [
         "release-notes",
         "rtk",
-        "junior-coding-agent",
         "vps-hardening",
         "docker",
         "cloud-infra"

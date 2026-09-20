@@ -102,39 +102,37 @@ EOF
     fi
 fi
 
-if [ -d "$REPO_ROOT/resources/skills" ]; then
-    for skill_dir in "$REPO_ROOT/resources/skills"/*; do
-        if [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ]; then
-            skill_name="$(basename "$skill_dir")"
-            [[ "$skill_name" == _* ]] && continue
-            safe_link "$skill_dir" "$TARGET_HOME/.gemini/config/skills/$skill_name"
-            safe_link "$skill_dir" "$TARGET_HOME/.codex/skills/$skill_name"
-            safe_link "$skill_dir" "$TARGET_HOME/.claude/skills/$skill_name"
-        fi
-    done
-fi
-
 if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
-    info "Exporting consolidated AI rules and instructions for editors"
-    RULES_CONTENT="$("$REPO_ROOT/scripts/ai-skills.sh" export --all)"
+    info "Synchronizing global-core AI agent skills"
+    "$REPO_ROOT/scripts/ai-skills.sh" sync --profile global-core
+
+    info "Exporting baseline AI orchestration rules for editors"
+    RULES_CONTENT="$("$REPO_ROOT/scripts/ai-skills.sh" export-rules)"
+
+    write_rule_file() {
+        local target_file="$1"
+        mkdir -p "$(dirname "$target_file")"
+        if [ -f "$target_file" ] && ! grep -q "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$target_file" 2>/dev/null; then
+            local backup
+            backup="${target_file}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+            mv "$target_file" "$backup"
+            warn "Backed up unmanaged existing rule file $target_file to $backup"
+        fi
+        echo "$RULES_CONTENT" > "$target_file"
+    }
 
     # 1. Claude Code (CLAUDE.md)
-    mkdir -p "$TARGET_HOME/.claude"
-    echo "$RULES_CONTENT" > "$TARGET_HOME/.claude/CLAUDE.md"
+    write_rule_file "$TARGET_HOME/.claude/CLAUDE.md"
 
     # 2. Neovim (AGENTS.md)
-    mkdir -p "$TARGET_HOME/.config/nvim"
-    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/nvim/AGENTS.md"
+    write_rule_file "$TARGET_HOME/.config/nvim/AGENTS.md"
 
     # 3. Zed
-    mkdir -p "$TARGET_HOME/.config/zed/prompts"
-    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/zed/prompts/AGENTS.md"
+    write_rule_file "$TARGET_HOME/.config/zed/prompts/AGENTS.md"
 
     # 4. VSCode / Antigravity IDE
-    mkdir -p "$TARGET_HOME/.antigravity-ide/User/prompts"
-    echo "$RULES_CONTENT" > "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md"
-    mkdir -p "$TARGET_HOME/.config/Code/User/prompts"
-    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"
+    write_rule_file "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md"
+    write_rule_file "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"
 fi
 
 TEMPLATE_SOURCE="${GODOT_EXPORT_TEMPLATES_SOURCE:-/run/current-system/sw/share/godot/export_templates}"

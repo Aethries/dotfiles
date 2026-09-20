@@ -56,6 +56,12 @@ audit_skill_security() {
         violations=$((violations + 1))
     fi
 
+    # 5. Check for reverse shell and base64 encoded pipe executions
+    if grep -rEi '(/dev/tcp/|nc[[:space:]]+-[ecl]|mkfifo.*sh|base64[[:space:]]+-[dD][[:space:]]*\|[[:space:]]*(sh|bash))' "$skill_dir" 2>/dev/null; then
+        log_err "Security violation in $(basename "$skill_dir"): Reverse shell or base64 decoded execution detected."
+        violations=$((violations + 1))
+    fi
+
     return "$violations"
 }
 
@@ -75,7 +81,7 @@ audit_all_skills() {
 }
 
 # ------------------------------------------------------------------------------
-# Semantic Deduplication & Name Integrity (Section 49)
+# Semantic Deduplication & Capability Overlap Analysis (Section 49)
 # ------------------------------------------------------------------------------
 check_semantic_dedup() {
     local reg_file="${1:-$REPO_ROOT/resources/skills/_registry.json}"
@@ -84,7 +90,7 @@ check_semantic_dedup() {
         return 1
     fi
 
-    # Ensure no duplicate skill names registered
+    # 1. Unique keys check
     local count
     count="$(jq '.skills | keys | length' "$reg_file")"
     local unique_count
@@ -93,6 +99,51 @@ check_semantic_dedup() {
     if [ "$count" -ne "$unique_count" ]; then
         log_err "Registry contains duplicate keys ($count total vs $unique_count unique)"
         return 1
+    fi
+
+    # 2. Capability and Trigger Overlap Analysis (Jaccard similarity threshold: 0.70)
+    if command -v node >/dev/null 2>&1; then
+        local overlap_report
+        # shellcheck disable=SC2016
+        overlap_report="$(node -e '
+const fs = require("fs");
+const reg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const skills = reg.skills || {};
+const entries = Object.entries(skills).filter(([_, s]) => s.status !== "deprecated");
+
+let violations = 0;
+for (let i = 0; i < entries.length; i++) {
+  for (let j = i + 1; j < entries.length; j++) {
+    const [name1, s1] = entries[i];
+    const [name2, s2] = entries[j];
+    if (s1.domain !== s2.domain) continue;
+
+    const caps1 = new Set(s1.capabilities || []);
+    const caps2 = new Set(s2.capabilities || []);
+    const capUnion = new Set([...caps1, ...caps2]);
+    const capInter = [...caps1].filter(x => caps2.has(x));
+    const capJaccard = capUnion.size > 0 ? (capInter.length / capUnion.size) : 0;
+
+    const trigs1 = new Set(s1.triggers || []);
+    const trigs2 = new Set(s2.triggers || []);
+    const trigUnion = new Set([...trigs1, ...trigs2]);
+    const trigInter = [...trigs1].filter(x => trigs2.has(x));
+    const trigJaccard = trigUnion.size > 0 ? (trigInter.length / trigUnion.size) : 0;
+
+    const isDep = (s1.dependencies && s1.dependencies.includes(name2)) ||
+                  (s2.dependencies && s2.dependencies.includes(name1));
+
+    if ((capJaccard >= 0.7 || trigJaccard >= 0.7) && !isDep) {
+      console.error(`Conflict: high semantic overlap between "${name1}" and "${name2}" in domain "${s1.domain}" (capabilities: ${(capJaccard*100).toFixed(0)}%, triggers: ${(trigJaccard*100).toFixed(0)}%)`);
+      violations++;
+    }
+  }
+}
+process.exit(violations > 0 ? 1 : 0);
+' "$reg_file" 2>&1)" || {
+            log_err "Semantic overlap detected in registry:\n$overlap_report"
+            return 1
+        }
     fi
 
     return 0

@@ -48,7 +48,7 @@ get_agent_rule_file() {
     fi
 }
 
-resolve_agent_global_path() {
+get_agent_global_primary() {
     local agent_id="$1"
     local base_home="${2:-${TARGET_HOME:-$HOME}}"
 
@@ -72,12 +72,6 @@ resolve_agent_global_path() {
                 return 0
             fi
             ;;
-        codex-gui)
-            if [ -n "${CODEX_HOME:-}" ]; then
-                echo "$CODEX_HOME/gui/skills"
-                return 0
-            fi
-            ;;
         claude-code)
             if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
                 echo "$CLAUDE_CONFIG_DIR/skills"
@@ -89,9 +83,8 @@ resolve_agent_global_path() {
     # 2. Configured template resolution from _agents.json
     if [ -f "$AGENTS_JSON" ]; then
         local raw_path
-        raw_path="$(jq -r --arg id "$agent_id" '.agents[$id].global_path // ""' "$AGENTS_JSON")"
-        if [ -n "$raw_path" ] && [ "$raw_path" != "null" ]; then
-            # Replace literal $HOME or ~ with base_home
+        raw_path="$(jq -r --arg id "$agent_id" '.agents[$id].global.primary // empty' "$AGENTS_JSON")"
+        if [ -n "$raw_path" ]; then
             raw_path="${raw_path//\$HOME/$base_home}"
             raw_path="${raw_path/#\~/$base_home}"
             echo "$raw_path"
@@ -99,40 +92,104 @@ resolve_agent_global_path() {
         fi
     fi
 
-    # 3. Fallback defaults
-    case "$agent_id" in
-        antigravity-cli) echo "$base_home/.gemini/config/skills" ;;
-        antigravity-ide) echo "$base_home/.gemini/antigravity-cli/skills" ;;
-        antigravity-desktop) echo "$base_home/.gemini/skills" ;;
-        codex-cli) echo "$base_home/.codex/skills" ;;
-        codex-gui) echo "$base_home/.codex/gui/skills" ;;
-        claude-code) echo "$base_home/.claude/skills" ;;
-        *) echo "$base_home/.$agent_id/skills" ;;
-    esac
+    echo "Unknown or unconfigured agent ID: $agent_id" >&2
+    return 1
 }
 
-resolve_agent_project_path() {
+get_agent_global_compatibility_paths() {
+    local agent_id="$1"
+    local base_home="${2:-${TARGET_HOME:-$HOME}}"
+
+    if [ -f "$AGENTS_JSON" ]; then
+        local compat_paths
+        compat_paths="$(jq -r --arg id "$agent_id" '.agents[$id].global.compatibility[]? // empty' "$AGENTS_JSON")"
+        if [ -n "$compat_paths" ]; then
+            while IFS= read -r line; do
+                [ -n "$line" ] || continue
+                line="${line//\$HOME/$base_home}"
+                line="${line/#\~/$base_home}"
+                echo "$line"
+            done <<< "$compat_paths"
+        fi
+    fi
+}
+
+get_agent_global_paths() {
+    local agent_id="$1"
+    local base_home="${2:-${TARGET_HOME:-$HOME}}"
+
+    local primary
+    primary="$(get_agent_global_primary "$agent_id" "$base_home")" || return 1
+    local all_paths=("$primary")
+
+    while IFS= read -r line; do
+        [ -n "$line" ] && all_paths+=("$line")
+    done < <(get_agent_global_compatibility_paths "$agent_id" "$base_home")
+
+    printf '%s\n' "${all_paths[@]}" | LC_ALL=C sort -u
+}
+
+get_agent_project_primary() {
     local agent_id="$1"
     local proj_root="${2:-${PROJECT_ROOT:-$PWD}}"
 
     if [ -f "$AGENTS_JSON" ]; then
         local rel_path
-        rel_path="$(jq -r --arg id "$agent_id" '.agents[$id].project_path // ""' "$AGENTS_JSON")"
-        if [ -n "$rel_path" ] && [ "$rel_path" != "null" ]; then
+        rel_path="$(jq -r --arg id "$agent_id" '.agents[$id].project.primary // empty' "$AGENTS_JSON")"
+        if [ -n "$rel_path" ]; then
             echo "$proj_root/$rel_path"
             return 0
         fi
     fi
 
-    echo "$proj_root/.agents/skills"
+    echo "Unknown or unconfigured agent ID: $agent_id" >&2
+    return 1
+}
+
+get_agent_project_compatibility_paths() {
+    local agent_id="$1"
+    local proj_root="${2:-${PROJECT_ROOT:-$PWD}}"
+
+    if [ -f "$AGENTS_JSON" ]; then
+        local compat_paths
+        compat_paths="$(jq -r --arg id "$agent_id" '.agents[$id].project.compatibility[]? // empty' "$AGENTS_JSON")"
+        if [ -n "$compat_paths" ]; then
+            while IFS= read -r line; do
+                [ -n "$line" ] || continue
+                echo "$proj_root/$line"
+            done <<< "$compat_paths"
+        fi
+    fi
+}
+
+get_agent_project_paths() {
+    local agent_id="$1"
+    local proj_root="${2:-${PROJECT_ROOT:-$PWD}}"
+
+    local primary
+    primary="$(get_agent_project_primary "$agent_id" "$proj_root")" || return 1
+    local all_paths=("$primary")
+
+    while IFS= read -r line; do
+        [ -n "$line" ] && all_paths+=("$line")
+    done < <(get_agent_project_compatibility_paths "$agent_id" "$proj_root")
+
+    printf '%s\n' "${all_paths[@]}" | LC_ALL=C sort -u
+}
+
+resolve_agent_global_path() {
+    get_agent_global_primary "$@"
+}
+
+resolve_agent_project_path() {
+    get_agent_project_primary "$@"
 }
 
 map_target_to_agent_ids() {
     local target="$1"
     case "$target" in
         all)
-            # Default active ecosystem targets
-            echo "antigravity-cli antigravity-ide codex-cli claude-code"
+            get_all_agent_ids | tr '\n' ' '
             ;;
         gemini|antigravity)
             echo "antigravity-cli antigravity-ide"
@@ -143,20 +200,13 @@ map_target_to_agent_ids() {
         antigravity-ide)
             echo "antigravity-ide"
             ;;
-        antigravity-desktop)
-            echo "antigravity-desktop"
-            ;;
         codex|codex-cli)
             echo "codex-cli"
-            ;;
-        codex-gui)
-            echo "codex-gui"
             ;;
         claude|claude-code)
             echo "claude-code"
             ;;
         *)
-            # Check if target is a known agent ID
             local known_ids
             known_ids="$(get_all_agent_ids)"
             if echo "$known_ids" | grep -qw "$target"; then
@@ -180,19 +230,20 @@ resolve_target_paths() {
         local agent_ids
         agent_ids="$(map_target_to_agent_ids "$t")"
         if [ -z "$agent_ids" ]; then
-            agent_ids="$t"
+            echo "Unknown target agent or alias: $t" >&2
+            return 1
         fi
 
         for aid in $agent_ids; do
-            local p=""
+            local paths=()
             if [ "$mode" = "project" ]; then
-                p="$(resolve_agent_project_path "$aid" "$base_dir")"
+                mapfile -t paths < <(get_agent_project_paths "$aid" "$base_dir")
             else
-                p="$(resolve_agent_global_path "$aid" "$base_dir")"
+                mapfile -t paths < <(get_agent_global_paths "$aid" "$base_dir")
             fi
-            if [ -n "$p" ]; then
-                resolved_paths+=("$p")
-            fi
+            for p in "${paths[@]}"; do
+                [ -n "$p" ] && resolved_paths+=("$p")
+            done
         done
     done
 

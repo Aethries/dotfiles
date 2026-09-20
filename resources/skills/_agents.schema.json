@@ -19,8 +19,8 @@
         "type": "object",
         "required": [
           "name",
-          "global_path",
-          "project_path",
+          "global",
+          "project",
           "rule_file",
           "supported_install_modes"
         ],
@@ -34,11 +34,41 @@
           "env_var": {
             "type": "string"
           },
-          "global_path": {
-            "type": "string"
+          "global": {
+            "type": "object",
+            "required": [
+              "primary",
+              "compatibility"
+            ],
+            "properties": {
+              "primary": {
+                "type": "string"
+              },
+              "compatibility": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
-          "project_path": {
-            "type": "string"
+          "project": {
+            "type": "object",
+            "required": [
+              "primary",
+              "compatibility"
+            ],
+            "properties": {
+              "primary": {
+                "type": "string"
+              },
+              "compatibility": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "rule_file": {
             "type": "string"

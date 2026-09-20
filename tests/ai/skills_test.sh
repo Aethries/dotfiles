@@ -537,22 +537,69 @@ FIXTURE_FILE="$REPO_ROOT/tests/ai/fixtures/trigger_boundaries.json"
 jq empty "$FIXTURE_FILE" || log_fail "Invalid JSON in trigger_boundaries.json"
 
 fixture_count=$(jq '. | length' "$FIXTURE_FILE")
-for ((i=0; i<fixture_count; i++)); do
-    inp=$(jq -r ".[$i].input" "$FIXTURE_FILE")
-    expected=$(jq -r ".[$i].expected_skill" "$FIXTURE_FILE")
-    
-    exp_desc=$(jq -r --arg s "$expected" '.skills[$s].description // empty' "$REPO_ROOT/resources/skills/_registry.json")
-    [ -n "$exp_desc" ] || log_fail "Expected skill '$expected' missing description in registry for input: $inp"
-    
-    forbidden_count=$(jq ".[$i].forbidden_skills | length" "$FIXTURE_FILE")
-    for ((f=0; f<forbidden_count; f++)); do
-        forb=$(jq -r ".[$i].forbidden_skills[$f]" "$FIXTURE_FILE")
-        forb_desc=$(jq -r --arg s "$forb" '.skills[$s].description // empty' "$REPO_ROOT/resources/skills/_registry.json")
-        [ -n "$forb_desc" ] || continue
-    done
-done
+# shellcheck disable=SC2016
+ROUTING_TEST_RESULT=$(node -e '
+const fs = require("fs");
+const reg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const fixtures = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 
-log_ok "All $fixture_count trigger boundary fixtures verified against skill registry"
+function routeSkill(input, skills) {
+  const normInput = input.toLowerCase();
+  let bestSkill = null;
+  let bestScore = -1;
+
+  for (const [name, skill] of Object.entries(skills)) {
+    if (skill.status === "deprecated") continue;
+    let score = 0;
+    
+    for (const t of (skill.triggers || [])) {
+      const tNorm = t.toLowerCase().replace(/-/g, " ");
+      if (normInput.includes(tNorm) || normInput.includes(t.toLowerCase())) {
+        score += 10;
+      } else {
+        const words = t.toLowerCase().split("-");
+        if (words.length > 1 && words.every(w => normInput.includes(w))) {
+          score += 8;
+        } else {
+          score += words.filter(w => w.length > 3 && normInput.includes(w)).length * 2;
+        }
+      }
+    }
+
+    for (const c of (skill.capabilities || [])) {
+      const cNorm = c.toLowerCase().replace(/-/g, " ");
+      if (normInput.includes(cNorm) || normInput.includes(c.toLowerCase())) {
+        score += 5;
+      } else {
+        const words = c.toLowerCase().split("-");
+        if (words.length > 1 && words.every(w => normInput.includes(w))) {
+          score += 4;
+        }
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestSkill = name;
+    }
+  }
+  return { bestSkill, bestScore };
+}
+
+let failed = 0;
+for (const f of fixtures) {
+  const { bestSkill } = routeSkill(f.input, reg.skills);
+  const isExpected = (bestSkill === f.expected_skill);
+  const isForbidden = (f.forbidden_skills || []).includes(bestSkill);
+  if (!isExpected || isForbidden) {
+    console.error(`Route mismatch for "${f.input}": got ${bestSkill}, expected ${f.expected_skill}`);
+    failed++;
+  }
+}
+process.exit(failed > 0 ? 1 : 0);
+' "$REPO_ROOT/resources/skills/_registry.json" "$FIXTURE_FILE" 2>&1) || log_fail "Trigger boundary behavioral routing failed: $ROUTING_TEST_RESULT"
+
+log_ok "All $fixture_count trigger boundary fixtures verified behaviorally (router accurately selects expected role and rejects forbidden roles)"
 
 
 
@@ -627,24 +674,27 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target all >/dev/null
 jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null && log_fail "Lockfile still has ponytail after removal"
 log_ok "ai-skills.sh remove cleans global targets and project directories with lockfile update"
 
-# Test 2.7: sync command
+# Test 2.7: sync command (default: global-core profile)
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync command failed to link gemini ponytail"
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex ponytail"
 [ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "sync command failed to link claude ponytail"
-[ -L "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync command failed to link gemini junior-coding-agent"
-[ -L "$MOCK_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync command failed to link codex junior-coding-agent"
-[ -L "$MOCK_HOME/.claude/skills/junior-coding-agent" ] || log_fail "sync command failed to link claude junior-coding-agent"
-[ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync command failed to link gemini release-notes"
-[ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync command failed to link codex release-notes"
-[ -L "$MOCK_HOME/.claude/skills/release-notes" ] || log_fail "sync command failed to link claude release-notes"
+[ -L "$MOCK_HOME/.gemini/config/skills/senior-implementer" ] || log_fail "sync command failed to link gemini senior-implementer"
 [ -L "$MOCK_HOME/.gemini/config/skills/caveman" ] || log_fail "sync command failed to link gemini caveman"
 [ -L "$MOCK_HOME/.codex/skills/caveman" ] || log_fail "sync command failed to link codex caveman"
 [ -L "$MOCK_HOME/.claude/skills/caveman" ] || log_fail "sync command failed to link claude caveman"
 [ -L "$MOCK_HOME/.gemini/config/skills/rtk" ] || log_fail "sync command failed to link gemini rtk"
 [ -L "$MOCK_HOME/.codex/skills/rtk" ] || log_fail "sync command failed to link codex rtk"
 [ -L "$MOCK_HOME/.claude/skills/rtk" ] || log_fail "sync command failed to link claude rtk"
-log_ok "ai-skills.sh sync synchronizes canonical skills across all agents"
+# Verify junior-coding-agent is NOT linked in default global-core sync
+[ ! -e "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "default sync should not install deprecated junior-coding-agent"
+
+# Test 2.7b: sync --all-canonical links entire registry
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync --all-canonical >/dev/null
+[ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync --all-canonical failed to link release-notes"
+[ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync --all-canonical failed to link codex release-notes"
+[ -L "$MOCK_HOME/.claude/skills/release-notes" ] || log_fail "sync --all-canonical failed to link claude release-notes"
+log_ok "ai-skills.sh sync synchronizes global-core by default and supports --all-canonical"
 
 # Test 2.8: Batch selection & collision deduplication
 log_info "Testing batch skill installation and path deduplication..."
@@ -708,15 +758,14 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync-editors.sh did not link ponytail skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/ponytail" ] || log_fail "sync-editors.sh did not link codex skill"
 [ -L "$MOCK_SYNC_HOME/.claude/skills/ponytail" ] || log_fail "sync-editors.sh did not link claude skill"
-[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link junior-coding-agent skill"
-[ -L "$MOCK_SYNC_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link codex junior-coding-agent skill"
-[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync-editors.sh did not link release-notes skill"
-[ -L "$MOCK_SYNC_HOME/.codex/skills/release-notes" ] || log_fail "sync-editors.sh did not link codex release-notes skill"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/senior-implementer" ] || log_fail "sync-editors.sh did not link senior-implementer skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/caveman" ] || log_fail "sync-editors.sh did not link caveman skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/caveman" ] || log_fail "sync-editors.sh did not link codex caveman skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/rtk" ] || log_fail "sync-editors.sh did not link rtk skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/rtk" ] || log_fail "sync-editors.sh did not link codex rtk skill"
 [ -L "$MOCK_SYNC_HOME/.claude/skills/rtk" ] || log_fail "sync-editors.sh did not link claude rtk skill"
+# Verify junior-coding-agent is NOT linked by sync-editors.sh (uses global-core profile)
+[ ! -e "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh linked deprecated junior-coding-agent"
 
 # Verify Editor Export Integration (CLAUDE.md, Neovim AGENTS.md, Zed AGENTS.md, VSCode/Antigravity AGENTS.md)
 [ -f "$MOCK_SYNC_HOME/.claude/CLAUDE.md" ] || log_fail "Missing .claude/CLAUDE.md"
@@ -726,6 +775,7 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -f "$MOCK_SYNC_HOME/.config/Code/User/prompts/AGENTS.md" ] || log_fail "Missing .config/Code/User/prompts/AGENTS.md"
 grep -Fq "AI Agent Guidelines" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing header"
 grep -Fq "ponytail" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ponytail rule"
+grep -Fq "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ownership marker"
 
 log_ok "sync-editors.sh links skills and exports editor rules automatically"
 

@@ -38,12 +38,6 @@ if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
     TARGET_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
 fi
 
-GEMINI_SKILLS_DIR="$(resolve_agent_global_path antigravity-cli "$TARGET_HOME")"
-GEMINI_IDE_SKILLS_DIR="$(resolve_agent_global_path antigravity-ide "$TARGET_HOME")"
-CODEX_SKILLS_DIR="$(resolve_agent_global_path codex-cli "$TARGET_HOME")"
-CLAUDE_SKILLS_DIR="$(resolve_agent_global_path claude-code "$TARGET_HOME")"
-PROJECT_SKILLS_DIR="$PWD/.agents/skills"
-
 safe_link() {
     local src="$1"
     local dest="$2"
@@ -94,6 +88,16 @@ list_skills() {
         return 0
     fi
 
+    local proj_root
+    proj_root="$(find_project_root "$PWD")"
+
+    local g_gemini
+    g_gemini="$(get_agent_global_primary antigravity-cli "$TARGET_HOME" 2>/dev/null || true)"
+    local g_codex
+    g_codex="$(get_agent_global_primary codex-cli "$TARGET_HOME" 2>/dev/null || true)"
+    local g_claude
+    g_claude="$(get_agent_global_primary claude-code "$TARGET_HOME" 2>/dev/null || true)"
+
     local found=0
     for skill_dir in "$SKILLS_SRC"/*; do
         [ -d "$skill_dir" ] || continue
@@ -110,16 +114,16 @@ list_skills() {
         local status_claude="${RED}○${RESET}"
         local status_project="${RED}○${RESET}"
 
-        if [ -L "$GEMINI_SKILLS_DIR/$name" ] && [ -e "$GEMINI_SKILLS_DIR/$name" ]; then
+        if [ -n "$g_gemini" ] && [ -L "$g_gemini/$name" ] && [ -e "$g_gemini/$name" ]; then
             status_gemini="${GREEN}●${RESET}"
         fi
-        if [ -L "$CODEX_SKILLS_DIR/$name" ] && [ -e "$CODEX_SKILLS_DIR/$name" ]; then
+        if [ -n "$g_codex" ] && [ -L "$g_codex/$name" ] && [ -e "$g_codex/$name" ]; then
             status_codex="${GREEN}●${RESET}"
         fi
-        if [ -L "$CLAUDE_SKILLS_DIR/$name" ] && [ -e "$CLAUDE_SKILLS_DIR/$name" ]; then
+        if [ -n "$g_claude" ] && [ -L "$g_claude/$name" ] && [ -e "$g_claude/$name" ]; then
             status_claude="${GREEN}●${RESET}"
         fi
-        if [ -L "$PROJECT_SKILLS_DIR/$name" ] && [ -e "$PROJECT_SKILLS_DIR/$name" ]; then
+        if [ -d "$proj_root/.agents/skills/$name" ] && [ ! -L "$proj_root/.agents/skills/$name" ]; then
             status_project="${GREEN}●${RESET}"
         fi
 
@@ -211,6 +215,28 @@ find_project_root() {
     echo "$PWD"
 }
 
+assert_path_inside_project() {
+    local target_path="$1"
+    local proj_root="$2"
+
+    local real_root
+    real_root="$(cd "$proj_root" 2>/dev/null && pwd -P || echo "$proj_root")"
+
+    local check_dir="$target_path"
+    while [ ! -d "$check_dir" ] && [ "$check_dir" != "/" ] && [ "$check_dir" != "." ]; do
+        check_dir="$(dirname "$check_dir")"
+    done
+
+    local real_target_dir
+    real_target_dir="$(cd "$check_dir" 2>/dev/null && pwd -P || echo "$check_dir")"
+
+    if [[ "$real_target_dir" != "$real_root"* ]]; then
+        log_fail "Path escape violation: '$target_path' resolves outside project root '$real_root'"
+        return 1
+    fi
+    return 0
+}
+
 update_project_lockfile() {
     local proj_root="$1"
     local skill_name="$2"
@@ -225,7 +251,7 @@ update_project_lockfile() {
         cat << 'EOF' > "$lock_file"
 {
   "$schema": "https://raw.githubusercontent.com/Aethries/dotfiles/main/resources/skills/_lock.schema.json",
-  "version": 1,
+  "version": 2,
   "generated_at": "",
   "skills": {}
 }
@@ -236,6 +262,22 @@ EOF
     iso_timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     local tmp_lock
     tmp_lock="$(mktemp "$proj_root/.agent-skills.lock.tmp.XXXXXX")"
+
+    # Match which agents share this target_rel_path
+    local matched_agents=()
+    for aid in $(get_all_agent_ids); do
+        local p
+        p="$(jq -r --arg id "$aid" '.agents[$id].project.primary // empty' "$AGENTS_JSON" 2>/dev/null || true)"
+        if [ -n "$p" ] && [[ "$target_rel_path" == "$p"* ]]; then
+            matched_agents+=("$aid")
+        fi
+    done
+    local agents_json
+    if [ "${#matched_agents[@]}" -gt 0 ]; then
+        agents_json="$(printf '%s\n' "${matched_agents[@]}" | jq -R . | jq -s .)"
+    else
+        agents_json="[]"
+    fi
 
     if [ "$action" = "add" ]; then
         local ver
@@ -250,27 +292,52 @@ EOF
            --arg src "$src" \
            --arg hash "$hash" \
            --arg path "$target_rel_path" \
+           --argjson agents "$agents_json" \
            --arg time "$iso_timestamp" \
            '
+           .version = 2 |
            .generated_at = $time |
+           .skills[$skill] as $existing |
+           (
+               if $existing and ($existing.targets | type == "array") then
+                   [ $existing.targets[] | select(.path != $path) ] + [ { path: $path, agents: $agents } ]
+               else
+                   [ { path: $path, agents: $agents } ]
+               end
+           ) as $new_targets |
            .skills[$skill] = {
                version: $ver,
                source: $src,
                content_hash: $hash,
-               target_path: $path
+               target_path: $path,
+               targets: $new_targets
            }
            ' "$lock_file" > "$tmp_lock"
         mv -f "$tmp_lock" "$lock_file"
-        log_ok "Updated lockfile: $lock_file (recorded $skill_name@$ver)"
+        log_ok "Updated lockfile: $lock_file (recorded $skill_name@$ver in $target_rel_path)"
     elif [ "$action" = "remove" ]; then
         jq --arg skill "$skill_name" \
+           --arg path "$target_rel_path" \
            --arg time "$iso_timestamp" \
            '
            .generated_at = $time |
-           del(.skills[$skill])
+           if .skills[$skill] then
+               if (.skills[$skill].targets | type == "array") and ($path != "") then
+                   .skills[$skill].targets |= [ .[] | select(.path != $path) ] |
+                   if (.skills[$skill].targets | length == 0) then
+                       del(.skills[$skill])
+                   else
+                       .skills[$skill].target_path = .skills[$skill].targets[0].path
+                   end
+               else
+                   del(.skills[$skill])
+               end
+           else
+               .
+           end
            ' "$lock_file" > "$tmp_lock"
         mv -f "$tmp_lock" "$lock_file"
-        log_ok "Updated lockfile: $lock_file (removed $skill_name)"
+        log_ok "Updated lockfile: $lock_file (updated $skill_name)"
     else
         rm -f "$tmp_lock"
     fi
@@ -288,61 +355,65 @@ install_global() {
 
     log_info "Installing skill '$name' globally (target: $target)..."
 
-    case "$target" in
-        all)
-            safe_link "$skill_dir" "$GEMINI_SKILLS_DIR/$name"
-            log_ok "Linked globally to Gemini/Antigravity CLI: $GEMINI_SKILLS_DIR/$name"
-            safe_link "$skill_dir" "$CODEX_SKILLS_DIR/$name"
-            log_ok "Linked globally to Codex CLI: $CODEX_SKILLS_DIR/$name"
-            safe_link "$skill_dir" "$CLAUDE_SKILLS_DIR/$name"
-            log_ok "Linked globally to Claude Code: $CLAUDE_SKILLS_DIR/$name"
-            ;;
-        gemini|antigravity)
-            safe_link "$skill_dir" "$GEMINI_SKILLS_DIR/$name"
-            log_ok "Linked globally to Gemini/Antigravity CLI: $GEMINI_SKILLS_DIR/$name"
-            ;;
-        antigravity-ide)
-            safe_link "$skill_dir" "$GEMINI_IDE_SKILLS_DIR/$name"
-            log_ok "Linked globally to Antigravity IDE: $GEMINI_IDE_SKILLS_DIR/$name"
-            ;;
-        codex|codex-cli)
-            safe_link "$skill_dir" "$CODEX_SKILLS_DIR/$name"
-            log_ok "Linked globally to Codex CLI: $CODEX_SKILLS_DIR/$name"
-            ;;
-        claude|claude-code)
-            safe_link "$skill_dir" "$CLAUDE_SKILLS_DIR/$name"
-            log_ok "Linked globally to Claude Code: $CLAUDE_SKILLS_DIR/$name"
-            ;;
-        *)
-            local custom_path
-            custom_path="$(resolve_agent_global_path "$target" "$TARGET_HOME")"
-            if [ -n "$custom_path" ] && [ "$custom_path" != "$TARGET_HOME/.$target/skills" ]; then
-                safe_link "$skill_dir" "$custom_path/$name"
-                log_ok "Linked globally to $(get_agent_name "$target"): $custom_path/$name"
-            else
-                log_fail "Unknown global target: $target (choose: all, gemini, codex, claude, or agent id)"
-                return 1
-            fi
-            ;;
-    esac
+    local target_paths=()
+    mapfile -t target_paths < <(resolve_target_paths "global" "$TARGET_HOME" "$target")
+    if [ "${#target_paths[@]}" -eq 0 ]; then
+        log_fail "No valid global target paths resolved for target: $target"
+        return 1
+    fi
+
+    for tpath in "${target_paths[@]}"; do
+        safe_link "$skill_dir" "$tpath/$name"
+        log_ok "Linked globally: $tpath/$name"
+    done
 }
 
 install_project() {
     local name="$1"
-    local dest_base="${2:-$PROJECT_SKILLS_DIR}"
-    [ "$dest_base" = "project" ] && dest_base="$PROJECT_SKILLS_DIR"
+    local dest_base="${2:-}"
     local skill_src="$SKILLS_SRC/$name"
+
+    local proj_root
+    if [ -n "$dest_base" ] && [ "$dest_base" != "project" ]; then
+        proj_root="$(find_project_root "$dest_base")"
+    else
+        proj_root="$(find_project_root "$PWD")"
+        dest_base="$proj_root/.agents/skills"
+    fi
 
     if [ ! -d "$skill_src" ] || [ ! -f "$skill_src/SKILL.md" ]; then
         log_fail "Skill '$name' does not exist in $SKILLS_SRC"
         return 1
     fi
 
-    log_info "Installing skill '$name' into project (path: $dest_base)..."
-
     local dest="$dest_base/$name"
 
-    # Strict invariant: Project = physical copy, NOT symlink
+    # Confinement assertion
+    assert_path_inside_project "$dest" "$proj_root" || return 1
+
+    log_info "Installing skill '$name' into project (path: $dest)..."
+
+    # Staging directory on same filesystem
+    mkdir -p "$dest_base"
+    local staging
+    staging="$(mktemp -d "$dest_base/.staging.${name}.XXXXXX")"
+
+    cleanup_staging() {
+        [ -d "$staging" ] && rm -rf "$staging"
+    }
+    trap cleanup_staging EXIT ERR
+
+    # Full copy (never whitelist)
+    cp -a "$skill_src/." "$staging/"
+
+    # Verify staging copy
+    if [ ! -f "$staging/SKILL.md" ]; then
+        rm -rf "$staging"
+        log_fail "Physical staging copy assertion failed for skill: $name"
+        return 1
+    fi
+
+    # Replace destination cleanly
     if [ -L "$dest" ]; then
         log_warn "Replacing existing symlink $dest with true directory copy"
         rm -f "$dest"
@@ -350,25 +421,23 @@ install_project() {
         rm -rf "$dest"
     fi
 
-    mkdir -p "$dest"
-    cp -f "$skill_src/SKILL.md" "$dest/"
+    mv "$staging" "$dest"
+    trap - EXIT ERR
 
-    for subdir in references scripts assets; do
-        if [ -d "$skill_src/$subdir" ]; then
-            cp -a "$skill_src/$subdir" "$dest/"
-        fi
-    done
-
-    # Verify storage invariant
+    # Strict invariant: Project = physical directory, NOT symlink
     if [ -L "$dest" ] || [ ! -d "$dest" ] || [ ! -f "$dest/SKILL.md" ]; then
         log_fail "Physical copy assertion failed for project skill: $dest"
         return 1
     fi
 
-    local proj_root
-    proj_root="$(find_project_root "$dest_base")"
     local rel_path
-    if [[ "$dest" == "$proj_root/"* ]]; then
+    local real_root
+    real_root="$(cd "$proj_root" 2>/dev/null && pwd -P || echo "$proj_root")"
+    local real_dest
+    real_dest="$(cd "$dest" 2>/dev/null && pwd -P || echo "$dest")"
+    if [[ "$real_dest" == "$real_root/"* ]]; then
+        rel_path="${real_dest#"$real_root"/}"
+    elif [[ "$dest" == "$proj_root/"* ]]; then
         rel_path="${dest#"$proj_root"/}"
     else
         rel_path=".agents/skills/$name"
@@ -384,42 +453,34 @@ remove_global() {
 
     log_info "Removing skill '$name' globally (target: $target)..."
 
-    case "$target" in
-        all)
-            safe_unlink "$GEMINI_SKILLS_DIR/$name"
-            safe_unlink "$CODEX_SKILLS_DIR/$name"
-            safe_unlink "$CLAUDE_SKILLS_DIR/$name"
-            ;;
-        gemini|antigravity)
-            safe_unlink "$GEMINI_SKILLS_DIR/$name"
-            ;;
-        antigravity-ide)
-            safe_unlink "$GEMINI_IDE_SKILLS_DIR/$name"
-            ;;
-        codex|codex-cli)
-            safe_unlink "$CODEX_SKILLS_DIR/$name"
-            ;;
-        claude|claude-code)
-            safe_unlink "$CLAUDE_SKILLS_DIR/$name"
-            ;;
-        *)
-            local custom_path
-            custom_path="$(resolve_agent_global_path "$target" "$TARGET_HOME")"
-            if [ -n "$custom_path" ]; then
-                safe_unlink "$custom_path/$name"
-            else
-                log_fail "Unknown global target: $target"
-                return 1
-            fi
-            ;;
-    esac
+    local target_paths=()
+    mapfile -t target_paths < <(resolve_target_paths "global" "$TARGET_HOME" "$target")
+    if [ "${#target_paths[@]}" -eq 0 ]; then
+        log_fail "No valid global target paths resolved for target: $target"
+        return 1
+    fi
+
+    for tpath in "${target_paths[@]}"; do
+        safe_unlink "$tpath/$name"
+    done
 }
 
 remove_project() {
     local name="$1"
-    local dest_base="${2:-$PROJECT_SKILLS_DIR}"
-    [ "$dest_base" = "project" ] && dest_base="$PROJECT_SKILLS_DIR"
+    local dest_base="${2:-}"
+    local proj_root
+
+    if [ -n "$dest_base" ] && [ "$dest_base" != "project" ]; then
+        proj_root="$(find_project_root "$dest_base")"
+    else
+        proj_root="$(find_project_root "$PWD")"
+        dest_base="$proj_root/.agents/skills"
+    fi
+
     local dest="$dest_base/$name"
+
+    # Confinement assertion
+    assert_path_inside_project "$dest" "$proj_root" || return 1
 
     log_info "Removing project skill '$name' from $dest_base..."
 
@@ -430,9 +491,18 @@ remove_project() {
         log_warn "Project skill $dest does not exist"
     fi
 
-    local proj_root
-    proj_root="$(find_project_root "$dest_base")"
-    update_project_lockfile "$proj_root" "$name" "remove" ""
+    local rel_path
+    local real_root
+    real_root="$(cd "$proj_root" 2>/dev/null && pwd -P || echo "$proj_root")"
+    if [[ "$dest" == "$real_root/"* ]]; then
+        rel_path="${dest#"$real_root"/}"
+    elif [[ "$dest" == "$proj_root/"* ]]; then
+        rel_path="${dest#"$proj_root"/}"
+    else
+        rel_path=".agents/skills/$name"
+    fi
+
+    update_project_lockfile "$proj_root" "$name" "remove" "$rel_path"
 }
 
 add_skill() {
@@ -442,7 +512,7 @@ add_skill() {
 
     case "$mode_or_target" in
         project)
-            install_project "$name" "${path_or_agent:-$PROJECT_SKILLS_DIR}"
+            install_project "$name" "${path_or_agent:-}"
             ;;
         global)
             install_global "$name" "${path_or_agent:-all}"
@@ -460,15 +530,17 @@ remove_skill() {
 
     case "$mode_or_target" in
         project)
-            remove_project "$name" "${path_or_agent:-$PROJECT_SKILLS_DIR}"
+            remove_project "$name" "${path_or_agent:-}"
             ;;
         global)
             remove_global "$name" "${path_or_agent:-all}"
             ;;
         all)
             remove_global "$name" "all"
-            if [ -e "${path_or_agent:-$PROJECT_SKILLS_DIR}/$name" ]; then
-                remove_project "$name" "${path_or_agent:-$PROJECT_SKILLS_DIR}"
+            local proj_root
+            proj_root="$(find_project_root "$PWD")"
+            if [ -e "${path_or_agent:-$proj_root/.agents/skills}/$name" ]; then
+                remove_project "$name" "${path_or_agent:-$proj_root/.agents/skills}"
             fi
             ;;
         *)
@@ -478,18 +550,53 @@ remove_skill() {
 }
 
 sync_skills() {
-    log_info "Synchronizing canonical skills from _registry.json to user agents..."
+    local profile="global-core"
+    local all_canonical=false
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --profile|-p)
+                profile="$2"
+                shift 2
+                ;;
+            --all-canonical)
+                all_canonical=true
+                shift 1
+                ;;
+            *)
+                shift 1
+                ;;
+        esac
+    done
+
+    if [ "$all_canonical" = true ]; then
+        log_info "Synchronizing ALL canonical skills to user agents..."
+    else
+        log_info "Synchronizing profile '$profile' skills to user agents..."
+    fi
+
     if [ ! -d "$SKILLS_SRC" ]; then
         log_warn "No skills directory at $SKILLS_SRC"
         return 0
     fi
 
-    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
     local skill_names=()
-    if [ -f "$reg_file" ]; then
-        mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file" | LC_ALL=C sort)
+    if [ "$all_canonical" = true ]; then
+        local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+        if [ -f "$reg_file" ]; then
+            mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file" | LC_ALL=C sort)
+        else
+            mapfile -t skill_names < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
+        fi
     else
-        mapfile -t skill_names < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
+        local prof_file="$REPO_ROOT/resources/skills/_profiles.json"
+        if [ -f "$prof_file" ]; then
+            mapfile -t skill_names < <(jq -r --arg p "$profile" '.profiles[$p].skills[]? // empty' "$prof_file" | LC_ALL=C sort -u)
+        fi
+        if [ "${#skill_names[@]}" -eq 0 ]; then
+            log_fail "Profile '$profile' not found or contains no skills in $prof_file"
+            return 1
+        fi
     fi
 
     for name in "${skill_names[@]}"; do
@@ -498,24 +605,26 @@ sync_skills() {
         install_global "$name" "all"
     done
 
-    # Reconcile and clean up broken symlinks across agent global directories
+    # Reconcile and clean up broken symlinks across agent global directories (both primary and compatibility)
     local agent_ids
     agent_ids="$(get_all_agent_ids)"
     for agent in $agent_ids; do
-        local gpath
-        gpath="$(resolve_agent_global_path "$agent" "$TARGET_HOME")"
-        if [ -d "$gpath" ]; then
-            for link in "$gpath"/*; do
-                [ -L "$link" ] || continue
-                if [ ! -e "$link" ]; then
-                    log_warn "Removing broken global symlink: $link"
-                    rm -f "$link"
-                fi
-            done
-        fi
+        local gpaths=()
+        mapfile -t gpaths < <(get_agent_global_paths "$agent" "$TARGET_HOME")
+        for gpath in "${gpaths[@]}"; do
+            if [ -d "$gpath" ]; then
+                for link in "$gpath"/*; do
+                    [ -L "$link" ] || continue
+                    if [ ! -e "$link" ]; then
+                        log_warn "Removing broken global symlink: $link"
+                        rm -f "$link"
+                    fi
+                done
+            fi
+        done
     done
 
-    log_ok "All skills synchronized successfully against _registry.json"
+    log_ok "Skills synchronized successfully (profile: ${profile})"
 }
 
 export_skill() {
@@ -531,30 +640,62 @@ export_skill() {
     sed -e '1{/^---$/!q;};1,/^---$/d' "$skill_file"
 }
 
-export_all_rules() {
-    echo "<!-- Consolidated AI Rules & Instructions -->"
-    echo "# AI Agent Guidelines & Engineering Standards"
-    echo
-    echo "> Generated automatically from canonical AI skills registry."
-    echo
-    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
-    local skill_names=()
-    if [ -f "$reg_file" ]; then
-        mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file" | LC_ALL=C sort)
-    else
-        mapfile -t skill_names < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
-    fi
+export_rules() {
+    cat << 'EOF'
+<!-- managed-by: Aethries/dotfiles ai-skills -->
+# AI Agent Guidelines & Senior Engineering Standards
 
-    for s in "${skill_names[@]}"; do
-        local skill_file="$SKILLS_SRC/$s/SKILL.md"
-        [ -f "$skill_file" ] || continue
-        echo "## $s"
-        echo
-        sed -e '1{/^---$/!q;};1,/^---$/d' "$skill_file"
-        echo
-        echo "---"
-        echo
-    done
+> System-level orchestration rules generated by Aethries/dotfiles ai-skills.
+> Progressive loading policy: Specialized domain skills are loaded on-demand from your skills directory. Do NOT preload all skills into context.
+
+## 1. Core Operating Philosophy
+- **Anti-Overengineering (ponytail)**: YAGNI extremist. Deletion over addition. Smallest working diff wins.
+- **Ultra-Terse Communication (Caveman)**: Maximum compression, telegraphic tone, zero fluff.
+- **AST Navigation (CodeGraph & Codebase Memory)**: Never do brute-force whole-repo scans when AST indexing can pinpoint symbols and hierarchies.
+- **Token Efficiency (RTK)**: Filter noisy build, diff, and test output through RTK filters before context ingestion.
+
+## 2. Senior Engineering Workflow Sequence
+1. **Guardrails (Layer 0)**:
+   - `architecture-guardrails`: Module boundaries, clean layering, acyclic dependency graph.
+   - `security-guardrails`: Zero hardcoded credentials, input validation, strict auth boundaries.
+   - `system-design-guardrails`: Distributed safety, idempotency, retry safety, transactional integrity.
+   - `source-quality`: Zero duplication, package manager integrity, AST hygiene.
+   - `project-context`: Reconnaissance first, adhere to existing patterns.
+2. **Analysis & Specification (Layer 1 - Senior Leadership)**:
+   - `feature-spec-writer`: Author exhaustive WHAT/WHY product specifications (`docs/specs/<feature>.md`). No code.
+   - `technical-planner`: Formulate concrete phased execution plans (`docs/plans/<feature>.md`). Strictly analytical.
+   - `architecture-designer`: Evaluate topology, bounded contexts, synchronous vs asynchronous models. Authors ADRs (`docs/architecture/adr/`).
+   - `api-contract-designer`: Standardize REST/gRPC/WebSocket payloads, error envelopes, idempotency contracts.
+   - `data-model-architect`: Design relational (PostgreSQL) / document schemas, zero-downtime migrations.
+   - `test-strategist`: Define test pyramid and edge-case matrices before implementation.
+3. **Execution & Implementation (Layer 2)**:
+   - `senior-implementer`: Disciplined execution of approved specs/plans with 5-step quality verification.
+   - `pixel-perfect-ui`: Frontend implementation with 100% fidelity to design systems and mockups.
+4. **Operations & Verification (Layer 3 & 4)**:
+   - `engineering-review`: Rigorous PR review (Blocker, Warning, Suggestion). Never merge without approval.
+   - `incident-investigator`: Triage live failures, telemetry inspection, 5 Whys analysis under `docs/incidents/`.
+   - `quality-gate`: Enforces verification sequence before declaring work complete.
+
+## 3. Dynamic Skill On-Demand Triggers
+When encountering specialized tasks, inspect the corresponding `SKILL.md` from your agent skills directory:
+- **Rust Systems Programming**: `rust` (Tokio, borrow checker, Clippy, memory safety)
+- **Containerization**: `docker` (Multi-stage builds, rootless, compose architectures)
+- **Nix & System Config**: `nixos` (Flakes, devShells, modules)
+- **Editor Tooling**: `neovim-lua` (Treesitter, LSP, keymaps, Lua plugins)
+- **PostgreSQL Optimization**: `postgresql` (Query plans, indexing, vacuum, connection pooling)
+- **Redis Patterns**: `redis` (Cache eviction, atomic primitives, Pub/Sub)
+- **Job Queues**: `bullmq` (Concurrency, retries, delayed jobs)
+- **Realtime WebSockets**: `centrifugo` (Channels, permissions, presence)
+- **Chrome Extensions**: `chrome-extension` (Manifest V3, service workers, content scripts)
+- **Cloud Infrastructure**: `cloud-infra` (Terraform/OpenTofu, multi-cloud, serverless)
+- **Server Hardening**: `vps-hardening` (SSH, UFW, fail2ban, systemd sandboxing)
+- **Skill Authoring**: `skill-author` (Creating standardized agent skills packages)
+EOF
+}
+
+export_all_rules() {
+    log_warn "'export --all' is deprecated to prevent startup context bloat. Outputting compact baseline rules."
+    export_rules
 }
 
 cmd_diff() {
@@ -603,38 +744,41 @@ cmd_diff() {
             continue
         fi
 
-        local local_dir=""
+        local target_rel_paths=()
         if [ -f "$lock_file" ]; then
-            local rel_path
-            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file" 2>/dev/null || true)"
-            if [ -n "$rel_path" ] && [ -d "$proj_root/$rel_path" ]; then
-                local_dir="$proj_root/$rel_path"
-            fi
+            mapfile -t target_rel_paths < <(jq -r --arg s "$s" '(.skills[$s].targets[]?.path // empty), (.skills[$s].target_path // empty)' "$lock_file" 2>/dev/null | LC_ALL=C sort -u)
         fi
 
-        if [ -z "$local_dir" ]; then
-            if [ -d "$proj_root/.agents/skills/$s" ]; then
-                local_dir="$proj_root/.agents/skills/$s"
-            elif [ -d "$proj_root/.codex/skills/$s" ]; then
-                local_dir="$proj_root/.codex/skills/$s"
-            elif [ -d "$proj_root/.claude/skills/$s" ]; then
-                local_dir="$proj_root/.claude/skills/$s"
-            fi
+        if [ "${#target_rel_paths[@]}" -eq 0 ]; then
+            for candidate in ".agents/skills/$s" ".codex/skills/$s" ".claude/skills/$s"; do
+                if [ -d "$proj_root/$candidate" ]; then
+                    target_rel_paths+=("$candidate")
+                fi
+            done
         fi
 
-        if [ -z "$local_dir" ] || [ ! -d "$local_dir" ]; then
+        if [ "${#target_rel_paths[@]}" -eq 0 ]; then
             log_fail "Project skill '$s' not found on disk in $proj_root"
             has_diff=1
             continue
         fi
 
-        echo -e "${BOLD}${CYAN}Diffing skill '$s': canonical ($canonical_dir) <-> local ($local_dir)${RESET}"
-        if ! diff -u -r "$canonical_dir" "$local_dir"; then
-            has_diff=1
-        else
-            log_ok "Skill '$s' matches canonical version"
-        fi
-        echo
+        for rel_p in "${target_rel_paths[@]}"; do
+            local local_dir="$proj_root/$rel_p"
+            if [ ! -d "$local_dir" ]; then
+                log_fail "Project skill target '$local_dir' missing on disk"
+                has_diff=1
+                continue
+            fi
+
+            echo -e "${BOLD}${CYAN}Diffing skill '$s': canonical ($canonical_dir) <-> local ($local_dir)${RESET}"
+            if ! diff -u -r "$canonical_dir" "$local_dir"; then
+                has_diff=1
+            else
+                log_ok "Skill '$s' at $rel_p matches canonical version"
+            fi
+            echo
+        done
     done
 
     return "$has_diff"
@@ -691,74 +835,63 @@ cmd_update() {
             continue
         fi
 
-        local local_dir=""
-        local rel_path=""
+        local target_rel_paths=()
         if [ -f "$lock_file" ]; then
-            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file" 2>/dev/null || true)"
-            if [ -n "$rel_path" ] && [ -d "$proj_root/$rel_path" ]; then
-                local_dir="$proj_root/$rel_path"
-            fi
+            mapfile -t target_rel_paths < <(jq -r --arg s "$s" '(.skills[$s].targets[]?.path // empty), (.skills[$s].target_path // empty)' "$lock_file" 2>/dev/null | LC_ALL=C sort -u)
         fi
 
-        if [ -z "$local_dir" ]; then
-            if [ -d "$proj_root/.agents/skills/$s" ]; then
-                rel_path=".agents/skills/$s"
-                local_dir="$proj_root/$rel_path"
-            elif [ -d "$proj_root/.codex/skills/$s" ]; then
-                rel_path=".codex/skills/$s"
-                local_dir="$proj_root/$rel_path"
-            elif [ -d "$proj_root/.claude/skills/$s" ]; then
-                rel_path=".claude/skills/$s"
-                local_dir="$proj_root/$rel_path"
-            fi
+        if [ "${#target_rel_paths[@]}" -eq 0 ]; then
+            for candidate in ".agents/skills/$s" ".codex/skills/$s" ".claude/skills/$s"; do
+                if [ -d "$proj_root/$candidate" ]; then
+                    target_rel_paths+=("$candidate")
+                fi
+            done
         fi
 
-        if [ -z "$local_dir" ] || [ ! -d "$local_dir" ]; then
+        if [ "${#target_rel_paths[@]}" -eq 0 ]; then
             log_fail "Project skill '$s' not found on disk to update"
             continue
         fi
 
-        local local_hash
-        local_hash="$(compute_skill_hash "$local_dir")"
-        local recorded_hash=""
-        if [ -f "$lock_file" ]; then
-            recorded_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file" 2>/dev/null || true)"
-        fi
-        local canonical_hash
-        canonical_hash="$(compute_skill_hash "$canonical_dir")"
+        for rel_p in "${target_rel_paths[@]}"; do
+            local local_dir="$proj_root/$rel_p"
+            if [ ! -d "$local_dir" ]; then
+                log_fail "Project skill path '$local_dir' not found"
+                continue
+            fi
 
-        # Check for local modifications
-        if [ -n "$recorded_hash" ] && [ "$local_hash" != "$recorded_hash" ] && [ "$local_hash" != "$canonical_hash" ]; then
-            if [ "$force" != true ]; then
-                if [ -t 0 ]; then
-                    read -r -p "Skill '$s' has local modifications. Overwrite with canonical? [y/N]: " confirm
-                    if [[ ! "$confirm" =~ ^[yY] ]]; then
-                        log_warn "Skipped '$s' (local modifications preserved)"
+            local local_hash
+            local_hash="$(compute_skill_hash "$local_dir")"
+            local recorded_hash=""
+            if [ -f "$lock_file" ]; then
+                recorded_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file" 2>/dev/null || true)"
+            fi
+            local canonical_hash
+            canonical_hash="$(compute_skill_hash "$canonical_dir")"
+
+            # Check for local modifications
+            if [ -n "$recorded_hash" ] && [ "$local_hash" != "$recorded_hash" ] && [ "$local_hash" != "$canonical_hash" ]; then
+                if [ "$force" != true ]; then
+                    if [ -t 0 ]; then
+                        read -r -p "Skill '$s' at $rel_p has local modifications. Overwrite with canonical? [y/N]: " confirm
+                        if [[ ! "$confirm" =~ ^[yY] ]]; then
+                            log_warn "Skipped '$s' (local modifications preserved)"
+                            continue
+                        fi
+                    else
+                        log_warn "Skill '$s' has local modifications. Skipping (use --force to overwrite)."
                         continue
                     fi
-                else
-                    log_warn "Skill '$s' has local modifications. Skipping (use --force to overwrite)."
-                    continue
                 fi
             fi
-        fi
 
-        # Safely copy canonical bundle
-        rm -rf "$local_dir"
-        mkdir -p "$local_dir"
-        cp -f "$canonical_dir/SKILL.md" "$local_dir/"
-        for subdir in references scripts assets; do
-            if [ -d "$canonical_dir/$subdir" ]; then
-                cp -a "$canonical_dir/$subdir" "$local_dir/"
-            fi
+            install_project "$s" "$(dirname "$local_dir")"
+            log_ok "Updated skill '$s' in project: $local_dir (content hash: $canonical_hash)"
+            update_count=$((update_count + 1))
         done
-
-        update_project_lockfile "$proj_root" "$s" "add" "$rel_path"
-        log_ok "Updated skill '$s' in project: $local_dir (content hash: $canonical_hash)"
-        update_count=$((update_count + 1))
     done
 
-    log_ok "Updated $update_count skill(s) in $proj_root"
+    log_ok "Updated $update_count target(s) across project skills in $proj_root"
 }
 
 cmd_doctor() {
@@ -775,28 +908,30 @@ cmd_doctor() {
     local agent_ids
     agent_ids="$(get_all_agent_ids)"
     for agent in $agent_ids; do
-        local gpath
-        gpath="$(resolve_agent_global_path "$agent" "$TARGET_HOME")"
-        if [ -d "$gpath" ]; then
-            for link in "$gpath"/*; do
-                [ -e "$link" ] || [ -L "$link" ] || continue
-                local link_name
-                link_name="$(basename "$link")"
-                [[ "$link_name" == _* ]] && continue
-                if [ -L "$link" ]; then
-                    if [ -e "$link" ]; then
-                        echo -e "  [${GREEN}✓${RESET}] $agent: $link_name -> $(readlink "$link")"
-                        doctor_ok=$((doctor_ok + 1))
-                    else
-                        echo -e "  [${RED}✗${RESET}] $agent: BROKEN symlink: $link -> $(readlink "$link")"
-                        doctor_errors=$((doctor_errors + 1))
+        local gpaths=()
+        mapfile -t gpaths < <(get_agent_global_paths "$agent" "$TARGET_HOME")
+        for gpath in "${gpaths[@]}"; do
+            if [ -d "$gpath" ]; then
+                for link in "$gpath"/*; do
+                    [ -e "$link" ] || [ -L "$link" ] || continue
+                    local link_name
+                    link_name="$(basename "$link")"
+                    [[ "$link_name" == _* ]] && continue
+                    if [ -L "$link" ]; then
+                        if [ -e "$link" ]; then
+                            echo -e "  [${GREEN}✓${RESET}] $agent ($gpath): $link_name -> $(readlink "$link")"
+                            doctor_ok=$((doctor_ok + 1))
+                        else
+                            echo -e "  [${RED}✗${RESET}] $agent ($gpath): BROKEN symlink: $link -> $(readlink "$link")"
+                            doctor_errors=$((doctor_errors + 1))
+                        fi
+                    elif [ -d "$link" ]; then
+                        echo -e "  [${YELLOW}!${RESET}] $agent ($gpath): $link_name is a physical directory, not a symlink"
+                        doctor_warns=$((doctor_warns + 1))
                     fi
-                elif [ -d "$link" ]; then
-                    echo -e "  [${YELLOW}!${RESET}] $agent: $link_name is a directory, not a symlink"
-                    doctor_warns=$((doctor_warns + 1))
-                fi
-            done
-        fi
+                done
+            fi
+        done
     done
 
     # 2. Project locks & integrity
@@ -812,25 +947,31 @@ cmd_doctor() {
         for s in $locked_skills; do
             local expected_hash
             expected_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file")"
-            local rel_path
-            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file")"
-            [ -z "$rel_path" ] && rel_path=".agents/skills/$s"
-            local full_path="$proj_root/$rel_path"
+            local rel_paths=()
+            mapfile -t rel_paths < <(jq -r --arg s "$s" '(.skills[$s].targets[]?.path // empty), (.skills[$s].target_path // empty)' "$lock_file" 2>/dev/null | LC_ALL=C sort -u)
+            [ "${#rel_paths[@]}" -eq 0 ] && rel_paths=(".agents/skills/$s")
 
-            if [ ! -d "$full_path" ]; then
-                echo -e "  [${RED}✗${RESET}] Skill '$s': missing on disk at $full_path"
-                doctor_errors=$((doctor_errors + 1))
-            else
-                local actual_hash
-                actual_hash="$(compute_skill_hash "$full_path")"
-                if [ "$actual_hash" = "$expected_hash" ]; then
-                    echo -e "  [${GREEN}✓${RESET}] Skill '$s': hash verified ($actual_hash)"
-                    doctor_ok=$((doctor_ok + 1))
+            for rel_path in "${rel_paths[@]}"; do
+                local full_path="$proj_root/$rel_path"
+
+                if [ -L "$full_path" ]; then
+                    echo -e "  [${RED}✗${RESET}] Skill '$s' at $full_path is a SYMLINK (violates project physical copy invariant)"
+                    doctor_errors=$((doctor_errors + 1))
+                elif [ ! -d "$full_path" ]; then
+                    echo -e "  [${RED}✗${RESET}] Skill '$s': missing on disk at $full_path"
+                    doctor_errors=$((doctor_errors + 1))
                 else
-                    echo -e "  [${YELLOW}!${RESET}] Skill '$s': modified/drifted (lock: $expected_hash, local: $actual_hash)"
-                    doctor_warns=$((doctor_warns + 1))
+                    local actual_hash
+                    actual_hash="$(compute_skill_hash "$full_path")"
+                    if [ "$actual_hash" = "$expected_hash" ]; then
+                        echo -e "  [${GREEN}✓${RESET}] Skill '$s' ($rel_path): hash verified ($actual_hash)"
+                        doctor_ok=$((doctor_ok + 1))
+                    else
+                        echo -e "  [${YELLOW}!${RESET}] Skill '$s' ($rel_path): modified/drifted (lock: $expected_hash, local: $actual_hash)"
+                        doctor_warns=$((doctor_warns + 1))
+                    fi
                 fi
-            fi
+            done
         done
     else
         echo -e "  No project lockfile found in $proj_root"
@@ -868,6 +1009,242 @@ cmd_doctor() {
         return 1
     fi
     return 0
+}
+
+search_skills() {
+    local query="${1:-}"
+    if [ -z "$query" ]; then
+        log_fail "Usage: $(basename "$0") search <keyword>"
+        return 1
+    fi
+
+    echo -e "${BOLD}${CYAN}Searching AI Skills for '${query}'...${RESET}"
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    if [ ! -f "$reg_file" ]; then
+        log_fail "Registry file not found at $reg_file"
+        return 1
+    fi
+
+    local matched=0
+    local skill_names=()
+    mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file")
+
+    for name in "${skill_names[@]}"; do
+        local desc
+        desc="$(jq -r --arg s "$name" '.skills[$s].description // ""' "$reg_file")"
+        local tags
+        tags="$(jq -r --arg s "$name" '.skills[$s].tags // [] | join(" ")' "$reg_file")"
+        local triggers
+        triggers="$(jq -r --arg s "$name" '.skills[$s].triggers // [] | join(" ")' "$reg_file")"
+        local caps
+        caps="$(jq -r --arg s "$name" '.skills[$s].capabilities // [] | join(" ")' "$reg_file")"
+        local domain
+        domain="$(jq -r --arg s "$name" '.skills[$s].domain // ""' "$reg_file")"
+
+        local haystack="$name $desc $tags $triggers $caps $domain"
+        if echo "$haystack" | grep -qi "$query"; then
+            matched=$((matched + 1))
+            echo
+            echo -e "  ${BOLD}${GREEN}${name}${RESET} [domain: ${domain:-general}]"
+            echo -e "    ${desc}"
+            [ -n "$triggers" ] && echo -e "    ${BOLD}Triggers:${RESET} ${triggers}"
+        fi
+    done
+
+    if [ "$matched" -eq 0 ]; then
+        echo "  No local skills matched '${query}'."
+        echo "  Use 'ai-skills discover' to inspect external trusted sources."
+    else
+        echo
+        echo -e "Found ${matched} matching skill(s)."
+    fi
+}
+
+inspect_skill() {
+    local name="${1:-}"
+    if [ -z "$name" ]; then
+        log_fail "Usage: $(basename "$0") inspect <skill>"
+        return 1
+    fi
+
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local skill_dir="$SKILLS_SRC/$name"
+    if [ ! -d "$skill_dir" ]; then
+        log_fail "Skill '$name' not found at $skill_dir"
+        return 1
+    fi
+
+    local ver="1.0.0"
+    local src="canonical"
+    local domain="general"
+    local status="active"
+    local tags="none"
+    local deps="none"
+    local triggers="none"
+    local caps="none"
+    local provenance="Dotfiles Internal Canonical"
+
+    if [ -f "$reg_file" ]; then
+        ver="$(jq -r --arg s "$name" '.skills[$s].version // "1.0.0"' "$reg_file")"
+        src="$(jq -r --arg s "$name" '.skills[$s].source // "canonical"' "$reg_file")"
+        domain="$(jq -r --arg s "$name" '.skills[$s].domain // "general"' "$reg_file")"
+        status="$(jq -r --arg s "$name" '.skills[$s].status // "active"' "$reg_file")"
+        tags="$(jq -r --arg s "$name" '.skills[$s].tags // [] | join(", ")' "$reg_file")"
+        deps="$(jq -r --arg s "$name" '.skills[$s].dependencies // [] | join(", ")' "$reg_file")"
+        triggers="$(jq -r --arg s "$name" '.skills[$s].triggers // [] | join(", ")' "$reg_file")"
+        caps="$(jq -r --arg s "$name" '.skills[$s].capabilities // [] | join(", ")' "$reg_file")"
+        local prov_json
+        prov_json="$(jq -r --arg s "$name" '.skills[$s].provenance // empty' "$reg_file")"
+        if [ -n "$prov_json" ] && [ "$prov_json" != "null" ]; then
+            provenance="$(jq -r --arg s "$name" '.skills[$s].provenance.upstream_url // "local"' "$reg_file")"
+        fi
+    fi
+
+    echo -e "${BOLD}${CYAN}=== Skill Inspection: $name (v${ver}) ===${RESET}"
+    echo -e "  ${BOLD}Status:${RESET}       $status"
+    echo -e "  ${BOLD}Domain:${RESET}       $domain"
+    echo -e "  ${BOLD}Source:${RESET}       $src"
+    echo -e "  ${BOLD}Provenance:${RESET}   $provenance"
+    echo -e "  ${BOLD}Tags:${RESET}         $tags"
+    echo -e "  ${BOLD}Triggers:${RESET}     $triggers"
+    echo -e "  ${BOLD}Capabilities:${RESET} $caps"
+    echo -e "  ${BOLD}Dependencies:${RESET} ${deps:-none}"
+    echo -e "  ${BOLD}Location:${RESET}     $skill_dir"
+    echo
+    echo -e "${BOLD}${BLUE}--- SKILL.md Preview ---${RESET}"
+    head -n 25 "$skill_dir/SKILL.md"
+    echo
+}
+
+discover_sources() {
+    local src_file="$REPO_ROOT/resources/skills/_sources.json"
+    if [ ! -f "$src_file" ]; then
+        log_fail "Sources registry not found at $src_file"
+        return 1
+    fi
+
+    echo -e "${BOLD}${CYAN}Trusted AI Skills Sources & Registries:${RESET}"
+    echo
+
+    local source_keys=()
+    mapfile -t source_keys < <(jq -r '.sources | keys[]' "$src_file")
+    for k in "${source_keys[@]}"; do
+        local name
+        name="$(jq -r --arg k "$k" '.sources[$k].name' "$src_file")"
+        local type
+        type="$(jq -r --arg k "$k" '.sources[$k].type' "$src_file")"
+        local url
+        url="$(jq -r --arg k "$k" '.sources[$k].url' "$src_file")"
+        local desc
+        desc="$(jq -r --arg k "$k" '.sources[$k].description // ""' "$src_file")"
+        local trust
+        trust="$(jq -r --arg k "$k" '.sources[$k].trust_level // "unknown"' "$src_file")"
+        local policy
+        policy="$(jq -r --arg k "$k" '.sources[$k].curation_policy // "standard"' "$src_file")"
+
+        echo -e "  ${BOLD}${GREEN}$k${RESET} (${name})"
+        echo -e "    Type: ${type} | Trust: ${trust} | Policy: ${policy}"
+        echo -e "    URL:  ${url}"
+        [ -n "$desc" ] && echo -e "    ${desc}"
+        echo
+    done
+
+    echo -e "${BOLD}How to import external skills:${RESET}"
+    echo "  ai-skills import <git-url-or-dir> [skill-name]"
+    echo
+}
+
+import_skill() {
+    local src_location="${1:-}"
+    local skill_name="${2:-}"
+
+    if [ -z "$src_location" ]; then
+        log_fail "Usage: $(basename "$0") import <git-repo-or-dir> [skill-name]"
+        return 1
+    fi
+
+    local tmp_dir
+    tmp_dir="$(mktemp -d "/tmp/ai-skills-import.XXXXXX")"
+    cleanup_import() {
+        [ -d "$tmp_dir" ] && rm -rf "$tmp_dir"
+    }
+    trap cleanup_import EXIT
+
+    log_info "Fetching external skill bundle from: $src_location..."
+    if [ -d "$src_location" ]; then
+        cp -a "$src_location/." "$tmp_dir/"
+    elif [[ "$src_location" =~ ^https?:// ]] || [[ "$src_location" =~ ^git@ ]]; then
+        git clone --depth 1 "$src_location" "$tmp_dir" >/dev/null 2>&1 || {
+            log_fail "Failed to clone git repository: $src_location"
+            return 1
+        }
+    else
+        log_fail "Invalid source location: $src_location (must be local directory or git URL)"
+        return 1
+    fi
+
+    if [ ! -f "$tmp_dir/SKILL.md" ]; then
+        log_fail "Import failed: No SKILL.md found in source bundle"
+        return 1
+    fi
+
+    if [ -z "$skill_name" ]; then
+        skill_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$tmp_dir/SKILL.md" | tr -d '\r"' || true)"
+        [ -z "$skill_name" ] && skill_name="$(basename "$src_location" .git)"
+    fi
+
+    log_info "Running curation and security audit on '$skill_name'..."
+    source "$REPO_ROOT/scripts/lib/curate.sh"
+    if ! audit_skill_security "$tmp_dir"; then
+        log_fail "Import rejected: Security audit violations found in '$skill_name'"
+        return 1
+    fi
+
+    local target_dir="$SKILLS_SRC/$skill_name"
+    if [ -d "$target_dir" ]; then
+        log_warn "Target skill '$skill_name' already exists at $target_dir. Overwriting..."
+        rm -rf "$target_dir"
+    fi
+
+    mkdir -p "$target_dir"
+    cp -a "$tmp_dir/." "$target_dir/"
+
+    local hash
+    hash="$(compute_skill_hash "$target_dir")"
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    if [ -f "$reg_file" ]; then
+        local desc
+        desc="$(get_skill_desc "$target_dir")"
+        local tmp_reg
+        tmp_reg="$(mktemp "$reg_file.tmp.XXXXXX")"
+        jq --arg s "$skill_name" \
+           --arg hash "$hash" \
+           --arg desc "$desc" \
+           --arg url "$src_location" \
+           '
+           .skills[$s] = {
+               name: $s,
+               version: "1.0.0",
+               source: "external",
+               domain: "imported",
+               description: $desc,
+               tags: ["imported", "community"],
+               dependencies: [],
+               capabilities: [],
+               triggers: [$s],
+               provenance: {
+                   upstream_url: $url,
+                   commit: null,
+                   license: "unknown",
+                   verified_by: "manual-import"
+               },
+               content_hash: $hash
+           }
+           ' "$reg_file" > "$tmp_reg"
+        mv -f "$tmp_reg" "$reg_file"
+    fi
+
+    log_ok "Successfully imported skill '$skill_name' into $target_dir (hash: $hash)"
 }
 
 select_skills_interactive() {
@@ -984,27 +1361,35 @@ show_usage() {
     echo
     echo "Commands:"
     echo "  list                                  List all available skills and their link status"
+    echo "  search <keyword>                      Search skills by keyword across names, tags, capabilities"
+    echo "  inspect <skill>                       Display detailed skill metadata, triggers, and provenance"
+    echo "  discover                              List trusted external skill sources and registries"
+    echo "  import <url|dir> [name]               Import external skill bundle into repository"
     echo "  add <skill...> [--global <agent>]     Link skill canonically to agent config (default: all)"
     echo "  add <skill...> --project [path]       Physically copy skill bundle into project and update lockfile"
     echo "  remove <skill...> [--global <agent>]  Unlink skill from global agent config"
     echo "  remove <skill...> --project [path]    Remove physical skill from project and lockfile"
-    echo "  sync                                  Synchronize all canonical skills globally against _registry.json"
+    echo "  sync [--profile <name>]               Synchronize skills globally (default: global-core)"
     echo "  diff [skill...]                       Show unified diff between project skill and canonical version"
     echo "  update [skill...] [--force]           Safely update project skill and refresh lockfile hash"
     echo "  doctor                                Run diagnostic health audit on symlinks, locks, and binaries"
     echo "  preview <skill>                       Display full skill contents with rich metadata"
-    echo "  export [<skill>|--all]                Export ruleset snippet for project rules or all instructions"
+    echo "  export-rules                          Export compact baseline orchestration rules for editors"
+    echo "  export [<skill>]                      Export ruleset snippet for a specific skill"
     echo "  interactive                           Interactive fzf / menu selector (default if no args)"
     echo "  help                                  Show this help message"
     echo
     echo "Examples:"
     echo "  ai-skills list"
+    echo "  ai-skills search redis"
+    echo "  ai-skills inspect architecture-designer"
+    echo "  ai-skills discover"
+    echo "  ai-skills sync --profile global-core"
     echo "  ai-skills add ponytail caveman --global claude"
     echo "  ai-skills add ponytail caveman --project"
     echo "  ai-skills diff ponytail"
     echo "  ai-skills update ponytail"
     echo "  ai-skills doctor"
-    echo "  ai-skills sync"
 }
 
 # Main command dispatch
@@ -1014,6 +1399,18 @@ shift || true
 case "$CMD" in
     list|--list|-l)
         list_skills
+        ;;
+    search)
+        search_skills "$@"
+        ;;
+    inspect)
+        inspect_skill "$@"
+        ;;
+    discover)
+        discover_sources "$@"
+        ;;
+    import)
+        import_skill "$@"
         ;;
     preview|show)
         if [ "$#" -lt 1 ]; then
@@ -1208,11 +1605,14 @@ case "$CMD" in
         exit $?
         ;;
     sync)
-        sync_skills
+        sync_skills "$@"
+        ;;
+    export-rules)
+        export_rules "$@"
         ;;
     export)
         if [ "${1:-}" = "--all" ] || [ "$#" -eq 0 ]; then
-            export_all_rules
+            export_rules
         else
             export_skill "$1"
         fi
