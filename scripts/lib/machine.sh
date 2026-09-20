@@ -77,6 +77,50 @@ EOF
     esac
 }
 
+validate_state_version() {
+    [[ "$1" =~ ^[0-9]{2}\.[0-9]{2}$ ]] \
+        || error "Invalid NixOS stateVersion: $1 (expected YY.MM)"
+}
+
+detect_state_version() {
+    local state_version
+    local system_configuration
+    local -a detected_versions=()
+    DETECTED_STATE_VERSION=""
+
+    if [ "${DOTFILES_STATE_VERSION+x}" = x ]; then
+        state_version="$DOTFILES_STATE_VERSION"
+        validate_state_version "$state_version"
+        DETECTED_STATE_VERSION="$state_version"
+        return 0
+    fi
+
+    system_configuration="${DOTFILES_SYSTEM_CONFIGURATION:-/etc/nixos/configuration.nix}"
+    if [ -r "$system_configuration" ]; then
+        while IFS= read -r state_version; do
+            [ -n "$state_version" ] && detected_versions+=("$state_version")
+        done < <(
+            sed -nE \
+                's/^[[:space:]]*system\.stateVersion[[:space:]]*=[[:space:]]*"([0-9]{2}\.[0-9]{2})"[[:space:]]*;.*$/\1/p' \
+                "$system_configuration"
+        )
+    fi
+
+    if [ "${#detected_versions[@]}" -eq 1 ]; then
+        DETECTED_STATE_VERSION="${detected_versions[0]}"
+        return 0
+    fi
+
+    error "$(cat <<'EOF'
+Could not determine this machine's system.stateVersion.
+
+Run bootstrap again with:
+
+DOTFILES_STATE_VERSION=23.11 ./scripts/bootstrap.sh
+EOF
+)"
+}
+
 generate_machine_state() {
     HARDWARE_CONFIG="$MACHINE_DIR/hardware-configuration.nix"
     MACHINE_CONFIG="$MACHINE_DIR/configuration.nix"
@@ -120,7 +164,10 @@ EOF
 
     info "Generating machine configuration for a new machine state..."
     local bootloader
+    local state_version
     bootloader="$(detect_bootloader_policy)"
+    detect_state_version
+    state_version="$DETECTED_STATE_VERSION"
     cat > "$MACHINE_CONFIG" <<EOF
 # ============================================================
 # AUTO-GENERATED MACHINE CONFIGURATION
@@ -144,7 +191,7 @@ EOF
 
   # Detected machine-local boot policy; do not replace this file on later runs.
 $(bootloader_config "$bootloader")
-  system.stateVersion = "${DOTFILES_STATE_VERSION:-26.05}";
+  system.stateVersion = "$state_version";
 
   users.users."$USERNAME" = {
     isNormalUser = true;

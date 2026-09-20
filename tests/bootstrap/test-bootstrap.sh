@@ -75,7 +75,7 @@ export DOTFILES_MACHINE_DIR="$MACHINE_DIR"
 export DOTFILES_USER_HOME="$USER_HOME"
 export DOTFILES_GITIGNORE="$GITIGNORE"
 export DOTFILES_BOOTLOADER=systemd-boot
-export DOTFILES_STATE_VERSION=26.05
+export DOTFILES_STATE_VERSION=23.11
 export DOTFILES_SYNC_EDITORS_SCRIPT="$SYNC_SCRIPT"
 export DOTFILES_RECONCILE_GATEWAYS_SCRIPT="$GATEWAY_SCRIPT"
 export DOTFILES_BOOTSTRAP_SOURCE_ONLY=1
@@ -87,7 +87,7 @@ test -s "$MACHINE_DIR/hardware-configuration.nix"
 test -s "$MACHINE_DIR/configuration.nix"
 test -s "$MACHINE_DIR/hardware-extra.nix"
 grep -q 'dotfiles.primaryUser = "fixture-user"' "$MACHINE_DIR/configuration.nix"
-grep -q 'system.stateVersion = "26.05"' "$MACHINE_DIR/configuration.nix"
+grep -q 'system.stateVersion = "23.11"' "$MACHINE_DIR/configuration.nix"
 grep -q 'boot.loader.systemd-boot.enable = true' "$MACHINE_DIR/configuration.nix"
 if grep -q '"seat"' "$MACHINE_DIR/configuration.nix"; then
     exit 1
@@ -130,4 +130,30 @@ grep -q 'system.stateVersion = "23.11"' "$MACHINE_DIR/configuration.nix"
 grep -q './custom.nix' "$MACHINE_DIR/configuration.nix"
 grep -q 'intel-graphics.nix' "$MACHINE_DIR/hardware-extra.nix"
 
-echo "[✓] real bootstrap orchestration preserves existing machine config, stateVersion, bootloader, hardware imports, and remains idempotent"
+detected_machine_dir="$TEST_ROOT/detected-machine"
+detected_configuration="$TEST_ROOT/detected-configuration.nix"
+cat > "$detected_configuration" <<'EOF'
+{
+  system.stateVersion = "24.11";
+}
+EOF
+unset DOTFILES_STATE_VERSION
+export DOTFILES_SYSTEM_CONFIGURATION="$detected_configuration"
+export DOTFILES_MACHINE_DIR="$detected_machine_dir"
+main
+grep -q 'system.stateVersion = "24.11"' "$detected_machine_dir/configuration.nix"
+
+no_detect_machine_dir="$TEST_ROOT/no-detect-machine"
+export DOTFILES_SYSTEM_CONFIGURATION="$TEST_ROOT/missing-configuration.nix"
+export DOTFILES_MACHINE_DIR="$no_detect_machine_dir"
+if (main >"$TEST_ROOT/no-detect-output.log" 2>&1); then
+    echo "bootstrap unexpectedly succeeded without a trustworthy stateVersion source" >&2
+    exit 1
+fi
+grep -q "Could not determine this machine's system.stateVersion." "$TEST_ROOT/no-detect-output.log"
+test ! -e "$no_detect_machine_dir/configuration.nix"
+if grep -q '26.05' "$no_detect_machine_dir/configuration.nix" 2>/dev/null; then
+    exit 1
+fi
+
+echo "[✓] real bootstrap orchestration preserves existing machine config, detects or requires stateVersion, and remains idempotent"
