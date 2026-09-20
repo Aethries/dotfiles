@@ -1286,7 +1286,7 @@ if SEMANTIC_REVIEW_JSON="$TEST_E_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR
     log_fail "Test E: import --approve succeeded with invalid pair DUPLICATE+CREATE"
 fi
 
-# Test F — CONFLICT blocks automatic import
+# Test F — CONFLICT: preview succeeds without mutation, approve is rejected
 TEST_F_JSON='{
   "review_type": "semantic",
   "status": "completed",
@@ -1297,6 +1297,18 @@ TEST_F_JSON='{
 }'
 TEST_F_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_F_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_F_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test F: validate_semantic_review rejected valid CONFLICT payload"
+
+# F1: Preview succeeds (exit 0), shows conflict reason, prints NO approve command, does not mutate
+TEST_F_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_F_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
+F_PREV_STATUS=$?
+[ $F_PREV_STATUS -eq 0 ] || log_fail "Test F: preview failed with exit code $F_PREV_STATUS: $TEST_F_PREVIEW"
+echo "$TEST_F_PREVIEW" | grep -Fq "Conflicting ownership and workflow rules" || log_fail "Test F: preview did not show conflict reason"
+echo "$TEST_F_PREVIEW" | grep -Fq "Automatic import blocked due to CONFLICT" || log_fail "Test F: preview did not show conflict block message"
+echo "$TEST_F_PREVIEW" | grep -Fq "To import into canonical library, execute:" && log_fail "Test F: preview generated approve command for CONFLICT"
+[ ! -d "$T30_REG_DIR/nestjs-database-transaction-best-practices" ] || log_fail "Test F: preview mutated filesystem"
+jq -e '.skills["nestjs-database-transaction-best-practices"]' "$T30_REG_DIR/_registry.json" >/dev/null 2>&1 && log_fail "Test F: preview mutated registry"
+
+# F2: Approve fails (exit 1) and does not mutate
 if TEST_F_OUT=$(SEMANTIC_REVIEW_JSON="$TEST_F_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1); then
     log_fail "Test F: import --approve succeeded despite CONFLICT decision"
 fi
@@ -1315,11 +1327,63 @@ TEST_G_JSON='{
 }'
 TEST_G_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_G_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_G_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test G: validate_semantic_review rejected valid SUPERSEDES payload"
-# Preview indicates SUPERSEDES and REPLACE
+
+# G1: Preview indicates SUPERSEDES and REPLACE with target name indicating replacement
 TEST_G_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
 CLEAN_G_PREVIEW=$(echo "$TEST_G_PREVIEW" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
 echo "$CLEAN_G_PREVIEW" | grep -Fq "decision: SUPERSEDES" || log_fail "Test G: preview missing decision: SUPERSEDES: $TEST_G_PREVIEW"
 echo "$CLEAN_G_PREVIEW" | grep -Fq "action: REPLACE" || log_fail "Test G: preview missing action: REPLACE: $TEST_G_PREVIEW"
+echo "$CLEAN_G_PREVIEW" | grep -Fq "replaces existing canonical skill" || log_fail "Test G: preview missing replacement target notice: $TEST_G_PREVIEW"
+
+# G2: Real before/after test of SUPERSEDES + REPLACE mutation
+# Setup initial existing canonical skill directory in sandbox
+mkdir -p "$T30_REG_DIR/nestjs"
+echo "ORIGINAL_NESTJS_CONTENT" > "$T30_REG_DIR/nestjs/ORIGINAL_MARKER"
+
+# Without --replace flag, approve must fail
+if SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve >/dev/null 2>&1; then
+    log_fail "Test G: import --approve succeeded for SUPERSEDES without --replace flag"
+fi
+[ -f "$T30_REG_DIR/nestjs/ORIGINAL_MARKER" ] || log_fail "Test G: original marker deleted despite failed approve"
+
+# With --approve --replace, replacement must succeed
+TEST_G_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace 2>&1)
+echo "$TEST_G_APPROVE" | grep -Fq "Successfully imported skill 'nestjs'" || log_fail "Test G: approve --replace failed: $TEST_G_APPROVE"
+
+# Verify filesystem result:
+# 1. Existing skill directory contains candidate content
+[ -f "$T30_REG_DIR/nestjs/SKILL.md" ] || log_fail "Test G: missing nestjs/SKILL.md after replacement"
+[ ! -f "$T30_REG_DIR/nestjs/ORIGINAL_MARKER" ] || log_fail "Test G: original marker still present after replacement"
+grep -Fq "NestJS Database Transaction Best Practices" "$T30_REG_DIR/nestjs/SKILL.md" || log_fail "Test G: nestjs/SKILL.md does not contain candidate content"
+# 2. No duplicate directory created under candidate name
+[ ! -d "$T30_REG_DIR/nestjs-database-transaction-best-practices" ] || log_fail "Test G: duplicate candidate directory left in filesystem"
+
+# Verify registry result:
+# 1. Registry entry stays under existing skill name 'nestjs'
+jq -e '.skills["nestjs"]' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test G: missing registry entry for 'nestjs'"
+jq -e '.skills["nestjs"].name == "nestjs"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test G: registry name is not 'nestjs'"
+jq -e '.skills["nestjs"].provenance.semantic_review.decision == "SUPERSEDES"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test G: registry decision is not SUPERSEDES"
+jq -e '.skills["nestjs"].provenance.semantic_review.recommended_action == "REPLACE"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test G: registry action is not REPLACE"
+# 2. No duplicate entry under candidate name
+jq -e '.skills["nestjs-database-transaction-best-practices"]' "$T30_REG_DIR/_registry.json" >/dev/null 2>&1 && log_fail "Test G: duplicate candidate entry in registry"
+
+# G3: SUPERSEDES + EXTEND blocks automatic import
+TEST_G_EXTEND_JSON='{
+  "review_type": "semantic",
+  "status": "completed",
+  "existing": "nestjs",
+  "decision": "SUPERSEDES",
+  "recommended_action": "EXTEND",
+  "reason": "Candidate extends existing scope"
+}'
+if SEMANTIC_REVIEW_JSON="$TEST_G_EXTEND_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace >/dev/null 2>&1; then
+    log_fail "Test G: import --approve succeeded for EXTEND action"
+fi
+
+# Reset registry and sandbox directory for subsequent tests
+rm -rf "$T30_REG_DIR"
+mkdir -p "$T30_REG_DIR"
+cp "$REPO_ROOT/resources/skills/_registry.json" "$T30_REG_DIR/_registry.json"
 
 # Test H — KEEP_BOTH decision allows import
 TEST_H_JSON='{
@@ -1356,42 +1420,25 @@ echo "$TEST_I_APPROVE" | grep -Fq "Successfully imported skill" || log_fail "Tes
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.decision == "PARTIAL_OVERLAP"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test I: registry missing decision=PARTIAL_OVERLAP"
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.recommended_action == "COMPANION"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test I: registry missing recommended_action=COMPANION"
 
-# Test J — Multi-Overlap Priority: CONFLICT > DUPLICATE > SUPERSEDES > PARTIAL_OVERLAP > KEEP_BOTH
+# Test J — Multi-Overlap Priority via production helper (aggregate_semantic_reviews)
 # Subtest J1: KEEP_BOTH + DUPLICATE + PARTIAL_OVERLAP -> DUPLICATE
 MOCK_MULTI_1='[
   { "existing": "skillA", "review": { "status": "completed", "decision": "KEEP_BOTH", "recommended_action": "CREATE", "reason": "r1" } },
   { "existing": "skillB", "review": { "status": "completed", "decision": "DUPLICATE", "recommended_action": "REUSE", "reason": "r2" } },
   { "existing": "skillC", "review": { "status": "completed", "decision": "PARTIAL_OVERLAP", "recommended_action": "COMPANION", "reason": "r3" } }
 ]'
-RES_J1=$(bash -c '
-overlap_reviews="$1"
-conflict_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"CONFLICT\") ]")"
-dup_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"DUPLICATE\") ]")"
-super_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"SUPERSEDES\") ]")"
-partial_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"PARTIAL_OVERLAP\") ]")"
-keep_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"KEEP_BOTH\") ]")"
-if [ "$(echo "$conflict_entries" | jq "length")" -gt 0 ]; then echo "CONFLICT";
-elif [ "$(echo "$dup_entries" | jq "length")" -gt 0 ]; then echo "DUPLICATE";
-elif [ "$(echo "$super_entries" | jq "length")" -gt 0 ]; then echo "SUPERSEDES";
-elif [ "$(echo "$partial_entries" | jq "length")" -gt 0 ]; then echo "PARTIAL_OVERLAP";
-else echo "KEEP_BOTH"; fi
-' _ "$MOCK_MULTI_1")
-[ "$RES_J1" = "DUPLICATE" ] || log_fail "Test J1: Multi-overlap priority failed: expected DUPLICATE, got $RES_J1"
+RES_J1=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && aggregate_semantic_reviews '$MOCK_MULTI_1'")
+DEC_J1=$(echo "$RES_J1" | jq -r '.decision')
+[ "$DEC_J1" = "DUPLICATE" ] || log_fail "Test J1: Multi-overlap priority failed: expected DUPLICATE, got $DEC_J1"
 
 # Subtest J2: DUPLICATE + CONFLICT -> CONFLICT
 MOCK_MULTI_2='[
   { "existing": "skillA", "review": { "status": "completed", "decision": "DUPLICATE", "recommended_action": "REUSE", "reason": "r1" } },
   { "existing": "skillB", "review": { "status": "completed", "decision": "CONFLICT", "recommended_action": "REUSE", "reason": "r2" } }
 ]'
-RES_J2=$(bash -c '
-overlap_reviews="$1"
-conflict_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"CONFLICT\") ]")"
-dup_entries="$(echo "$overlap_reviews" | jq -c "[ .[] | select(.review.decision == \"DUPLICATE\") ]")"
-if [ "$(echo "$conflict_entries" | jq "length")" -gt 0 ]; then echo "CONFLICT";
-elif [ "$(echo "$dup_entries" | jq "length")" -gt 0 ]; then echo "DUPLICATE";
-else echo "KEEP_BOTH"; fi
-' _ "$MOCK_MULTI_2")
-[ "$RES_J2" = "CONFLICT" ] || log_fail "Test J2: Multi-overlap priority failed: expected CONFLICT, got $RES_J2"
+RES_J2=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && aggregate_semantic_reviews '$MOCK_MULTI_2'")
+DEC_J2=$(echo "$RES_J2" | jq -r '.decision')
+[ "$DEC_J2" = "CONFLICT" ] || log_fail "Test J2: Multi-overlap priority failed: expected CONFLICT, got $DEC_J2"
 
 rm -rf "$T30_REG_DIR"
 log_ok "Semantic review strict schema validation and decision handling verified (Tests A - J)"

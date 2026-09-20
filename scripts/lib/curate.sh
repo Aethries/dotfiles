@@ -752,6 +752,129 @@ review_candidate_overlaps() {
 }
 
 # ------------------------------------------------------------------------------
+# Aggregate Multi-Overlap Semantic Reviews
+# Priority: CONFLICT > DUPLICATE > SUPERSEDES > PARTIAL_OVERLAP > KEEP_BOTH
+# ------------------------------------------------------------------------------
+aggregate_semantic_reviews() {
+    local reviews_json="$1"
+
+    # shellcheck disable=SC2016
+    node -e '
+const raw = process.argv[1];
+let items = [];
+try {
+  const parsed = JSON.parse(raw);
+  if (Array.isArray(parsed)) items = parsed;
+  else if (parsed && typeof parsed === "object") items = [parsed];
+} catch (e) {
+  console.log(JSON.stringify({
+    has_pending: true,
+    decision: null,
+    recommended_action: null,
+    reason: "Malformed reviews payload: " + e.message,
+    conflict_matches: [],
+    duplicate_matches: [],
+    supersedes_matches: [],
+    partial_matches: [],
+    keep_matches: []
+  }));
+  process.exit(0);
+}
+
+if (items.length === 0) {
+  console.log(JSON.stringify({
+    has_pending: false,
+    decision: "KEEP_BOTH",
+    recommended_action: "CREATE",
+    reason: "No overlapping reviews.",
+    conflict_matches: [],
+    duplicate_matches: [],
+    supersedes_matches: [],
+    partial_matches: [],
+    keep_matches: []
+  }));
+  process.exit(0);
+}
+
+const getReview = it => it.review || it;
+const getExisting = it => {
+  const r = getReview(it);
+  return (it.existing || r.existing || "").trim();
+};
+
+// Check for pending reviews
+const pending = items.filter(it => {
+  const rev = getReview(it);
+  return rev.status !== "completed" || !rev.decision;
+});
+
+if (pending.length > 0) {
+  console.log(JSON.stringify({
+    has_pending: true,
+    decision: null,
+    recommended_action: null,
+    reason: "Semantic review is required because candidate overlaps existing skills.",
+    conflict_matches: [],
+    duplicate_matches: [],
+    supersedes_matches: [],
+    partial_matches: [],
+    keep_matches: []
+  }));
+  process.exit(0);
+}
+
+const conflict = items.filter(it => getReview(it).decision === "CONFLICT");
+const duplicate = items.filter(it => getReview(it).decision === "DUPLICATE");
+const supersedes = items.filter(it => getReview(it).decision === "SUPERSEDES");
+const partial = items.filter(it => getReview(it).decision === "PARTIAL_OVERLAP");
+const keep = items.filter(it => getReview(it).decision === "KEEP_BOTH");
+
+let decision = "KEEP_BOTH";
+let action = "CREATE";
+let reason = "Complementary capabilities with minimal overlap.";
+
+if (conflict.length > 0) {
+  decision = "CONFLICT";
+  const r = getReview(conflict[0]);
+  action = r.recommended_action || "NONE";
+  reason = r.reason || "Conflict with existing canonical skill";
+} else if (duplicate.length > 0) {
+  decision = "DUPLICATE";
+  const r = getReview(duplicate[0]);
+  action = "REUSE";
+  reason = r.reason || "Duplicate of existing skill";
+} else if (supersedes.length > 0) {
+  decision = "SUPERSEDES";
+  const r = getReview(supersedes[0]);
+  action = r.recommended_action || "REPLACE";
+  reason = r.reason || "Supersedes existing canonical skill";
+} else if (partial.length > 0) {
+  decision = "PARTIAL_OVERLAP";
+  const r = getReview(partial[0]);
+  action = r.recommended_action || "COMPANION";
+  reason = r.reason || "Partial overlap with existing skill";
+} else if (keep.length > 0) {
+  decision = "KEEP_BOTH";
+  const r = getReview(keep[0]);
+  action = r.recommended_action || "CREATE";
+  reason = r.reason || "Complementary capabilities with minimal overlap.";
+}
+
+console.log(JSON.stringify({
+  has_pending: false,
+  decision: decision,
+  recommended_action: action,
+  reason: reason,
+  conflict_matches: conflict.map(getExisting).filter(Boolean),
+  duplicate_matches: duplicate.map(getExisting).filter(Boolean),
+  supersedes_matches: supersedes.map(getExisting).filter(Boolean),
+  partial_matches: partial.map(getExisting).filter(Boolean),
+  keep_matches: keep.map(getExisting).filter(Boolean)
+}));
+' "$reviews_json"
+}
+
+# ------------------------------------------------------------------------------
 # CLI Dispatcher when run standalone
 # ------------------------------------------------------------------------------
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -792,8 +915,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         validate-semantic)
             validate_semantic_review "${2:-}" "${3:-}" "${4:-}"
             ;;
+        aggregate-semantic)
+            aggregate_semantic_reviews "${2:-[]}"
+            ;;
         help|--help|-h)
-            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|heuristic <cand_dir> <existing>|review <cand_dir> <existing>|validate-semantic <json> [cand] [exist]|overlaps-review <cand_dir> [registry]}"
+            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|heuristic <cand_dir> <existing>|review <cand_dir> <existing>|validate-semantic <json> [cand] [exist]|overlaps-review <cand_dir> [registry]|aggregate-semantic <json>}"
             ;;
         *)
             echo "Unknown command: $CMD" >&2

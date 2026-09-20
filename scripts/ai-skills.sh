@@ -1481,47 +1481,32 @@ import_skill() {
     local conflict_matches=()
     local supersedes_matches=()
     local has_pending_semantic=false
+    local target_skill_name="$skill_name"
 
     if [ "$rev_count" -gt 0 ]; then
         top_overlap="$(echo "$overlap_reviews" | jq -r '.[0].existing // empty')"
-        local pending_entries
-        pending_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.status != "completed" or .review.decision == null) ]')"
-        if [ "$(echo "$pending_entries" | jq 'length')" -gt 0 ]; then
-            has_pending_semantic=true
-        else
-            # Completed semantic reviews supplied: evaluate by strict priority:
-            # CONFLICT > DUPLICATE > SUPERSEDES > PARTIAL_OVERLAP > KEEP_BOTH
-            local conflict_entries dup_entries super_entries partial_entries keep_entries
-            conflict_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "CONFLICT") ]')"
-            dup_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "DUPLICATE") ]')"
-            super_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "SUPERSEDES") ]')"
-            partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP") ]')"
-            keep_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "KEEP_BOTH") ]')"
+        local agg_json
+        agg_json="$(aggregate_semantic_reviews "$overlap_reviews")"
+        has_pending_semantic="$(echo "$agg_json" | jq -r '.has_pending // false')"
+        if [ "$has_pending_semantic" = "false" ]; then
+            decision="$(echo "$agg_json" | jq -r '.decision // "KEEP_BOTH"')"
+            action="$(echo "$agg_json" | jq -r '.recommended_action // "CREATE"')"
+            reason="$(echo "$agg_json" | jq -r '.reason // ""')"
+            mapfile -t conflict_matches < <(echo "$agg_json" | jq -r '.conflict_matches[]? // empty')
+            mapfile -t duplicate_matches < <(echo "$agg_json" | jq -r '.duplicate_matches[]? // empty')
+            mapfile -t supersedes_matches < <(echo "$agg_json" | jq -r '.supersedes_matches[]? // empty')
+        fi
+    fi
 
-            if [ "$(echo "$conflict_entries" | jq 'length')" -gt 0 ]; then
-                decision="CONFLICT"
-                action="$(echo "$conflict_entries" | jq -r '.[0].review.recommended_action // "NONE"')"
-                reason="$(echo "$conflict_entries" | jq -r '.[0].review.reason // "Conflict with existing canonical skill"')"
-                mapfile -t conflict_matches < <(echo "$conflict_entries" | jq -r '.[].existing')
-            elif [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
-                decision="DUPLICATE"
-                action="REUSE"
-                reason="$(echo "$dup_entries" | jq -r '.[0].review.reason // "Duplicate of existing skill"')"
-                mapfile -t duplicate_matches < <(echo "$dup_entries" | jq -r '.[].existing')
-            elif [ "$(echo "$super_entries" | jq 'length')" -gt 0 ]; then
-                decision="SUPERSEDES"
-                action="$(echo "$super_entries" | jq -r '.[0].review.recommended_action // "REPLACE"')"
-                reason="$(echo "$super_entries" | jq -r '.[0].review.reason // "Supersedes existing canonical skill"')"
-                mapfile -t supersedes_matches < <(echo "$super_entries" | jq -r '.[].existing')
-            elif [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
-                decision="PARTIAL_OVERLAP"
-                action="$(echo "$partial_entries" | jq -r '.[0].review.recommended_action // "COMPANION"')"
-                reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
-            else
-                decision="KEEP_BOTH"
-                action="$(echo "$keep_entries" | jq -r '.[0].review.recommended_action // "CREATE"')"
-                reason="$(echo "$keep_entries" | jq -r '.[0].review.reason // "Complementary capabilities with minimal overlap."')"
-            fi
+    # Handle SUPERSEDES target name and multi-supersedes check
+    if [ "$decision" = "SUPERSEDES" ]; then
+        if [ "${#supersedes_matches[@]}" -gt 1 ]; then
+            log_fail "Import rejected: Skill '$skill_name' supersedes multiple existing skills (${supersedes_matches[*]}). Manual resolution required."
+            return 1
+        fi
+        if [ "$action" = "REPLACE" ]; then
+            target_skill_name="${supersedes_matches[0]:-$top_overlap}"
+            target_dir="$SKILLS_SRC/$target_skill_name"
         fi
     fi
 
@@ -1534,12 +1519,23 @@ import_skill() {
         fi
     fi
 
-    # Check for CONFLICT rejection
+    # Check for CONFLICT rejection on approve
     if [ "$decision" = "CONFLICT" ]; then
-        log_fail "Import rejected: semantic review found a conflict with existing canonical skills: ${conflict_matches[*]:-$top_overlap}."
-        echo -e "  Semantic Review Reason: ${reason}"
-        echo -e "  Resolve the conflict explicitly before importing."
-        return 1
+        if [ "$mode" = "approve" ]; then
+            log_fail "Import rejected: semantic review found a conflict with existing canonical skills: ${conflict_matches[*]:-$top_overlap}."
+            echo -e "  Semantic Review Reason: ${reason}"
+            echo -e "  Resolve the conflict explicitly before importing."
+            return 1
+        fi
+    fi
+
+    # Check for EXTEND rejection on approve (automatic extend not supported)
+    if [ "$action" = "EXTEND" ]; then
+        if [ "$mode" = "approve" ]; then
+            log_fail "Import rejected: Recommended action is EXTEND. Automatic extend is not supported; candidate must be manually integrated into existing skill '${supersedes_matches[0]:-$top_overlap}'."
+            echo -e "  Semantic Review Reason: ${reason}"
+            return 1
+        fi
     fi
 
     # Check for duplicate rejection
@@ -1554,20 +1550,20 @@ import_skill() {
     fi
 
     # Check for SUPERSEDES replacement protection
-    if [ "$decision" = "SUPERSEDES" ]; then
-        if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
-            if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
-                log_fail "Import rejected: Skill '$skill_name' SUPERSEDES existing skill(s) (${supersedes_matches[*]:-$top_overlap}) and target exists. Use --replace or --force to overwrite."
-                return 1
-            fi
+    if [ "$decision" = "SUPERSEDES" ] && [ "$action" = "REPLACE" ]; then
+        if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
+            log_fail "Import rejected: Skill '$skill_name' SUPERSEDES existing skill '$target_skill_name'. Pass --replace with --approve to confirm replacement."
+            return 1
         fi
     fi
 
-    # Check if target skill already exists in canonical library
-    if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
-        if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
-            log_fail "Import rejected: Skill '$skill_name' already exists in canonical library. Use --replace or --force to overwrite."
-            return 1
+    # Check if target skill already exists in canonical library (for non-supersedes)
+    if [ "$decision" != "SUPERSEDES" ]; then
+        if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
+            if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
+                log_fail "Import rejected: Skill '$skill_name' already exists in canonical library. Use --replace or --force to overwrite."
+                return 1
+            fi
         fi
     fi
 
@@ -1576,7 +1572,11 @@ import_skill() {
         echo -e "\n${BOLD}${CYAN}=== External Skill Import Preview: '$skill_name' ===${RESET}"
         echo -e "  ${BOLD}Source:${RESET}        $src_location"
         [ -n "$subpath" ] && echo -e "  ${BOLD}Path in repo:${RESET}  $subpath"
-        echo -e "  ${BOLD}Target Name:${RESET}   $skill_name"
+        if [ "$decision" = "SUPERSEDES" ] && [ "$action" = "REPLACE" ]; then
+            echo -e "  ${BOLD}Target Name:${RESET}   $target_skill_name (replaces existing canonical skill)"
+        else
+            echo -e "  ${BOLD}Target Name:${RESET}   $skill_name"
+        fi
         echo -e "  ${BOLD}Domain:${RESET}        $skill_domain"
         echo -e "  ${BOLD}License:${RESET}       $license"
         echo -e "  ${BOLD}Description:${RESET}   $skill_desc"
@@ -1624,7 +1624,15 @@ import_skill() {
         echo
         if [ "$decision" = "CONFLICT" ]; then
             echo -e "  ${RED}${BOLD}Automatic import blocked due to CONFLICT.${RESET}"
+            echo -e "  Semantic Review Reason: ${reason}"
             echo -e "  Resolve the conflict with existing canonical skill(s) before importing.\n"
+            return 0
+        fi
+
+        if [ "$action" = "EXTEND" ]; then
+            echo -e "  ${YELLOW}${BOLD}Automatic import blocked: recommended action is EXTEND.${RESET}"
+            echo -e "  Semantic Review Reason: ${reason}"
+            echo -e "  Candidate content must be manually integrated into existing skill '${supersedes_matches[0]:-$top_overlap}'.\n"
             return 0
         fi
 
@@ -1641,9 +1649,9 @@ import_skill() {
     fi
 
     # Mode: APPROVE
-    log_info "Approving and importing skill '$skill_name' into canonical library..."
+    log_info "Approving and importing skill '$skill_name' into canonical library (target: '$target_skill_name')..."
     if [ -d "$target_dir" ]; then
-        log_warn "Target skill '$skill_name' exists. Overwriting (--replace specified)..."
+        log_warn "Target skill '$target_skill_name' exists. Overwriting (--replace specified)..."
         rm -rf "$target_dir"
     fi
 
@@ -1658,6 +1666,12 @@ import_skill() {
         cp "$tmp_dir/LICENSE" "$target_dir/LICENSE"
     fi
 
+    if [ "$decision" = "SUPERSEDES" ] && [ "$action" = "REPLACE" ]; then
+        if [ -f "$target_dir/SKILL.md" ]; then
+            sed -i -E "s/^(name:[[:space:]]*).+$/\1\"$target_skill_name\"/" "$target_dir/SKILL.md"
+        fi
+    fi
+
     local hash
     hash="$(compute_skill_hash "$target_dir")"
 
@@ -1669,7 +1683,8 @@ import_skill() {
         local reviewed_against
         reviewed_against="$(echo "$overlap_reviews" | jq -c '[ .[] | { existing: .existing, score: .score, classification: .classification, decision: (.review.decision // null), heuristic: (.heuristic.heuristic_decision // null) } ]')"
 
-        jq --arg s "$skill_name" \
+        jq --arg s "$target_skill_name" \
+           --arg orig_cand "$skill_name" \
            --arg hash "$hash" \
            --arg desc "$skill_desc" \
            --arg domain "$skill_domain" \
@@ -1710,7 +1725,8 @@ import_skill() {
                        status: (if ($rev_count | tonumber) > 0 then "completed" else "not_required" end),
                        decision: $decision,
                        recommended_action: $action,
-                       reviewed_against: $reviewed
+                       reviewed_against: $reviewed,
+                       superseded_candidate: (if $s != $orig_cand then $orig_cand else null end)
                    },
                    imported_at: $now
                },
@@ -1720,7 +1736,7 @@ import_skill() {
         mv -f "$tmp_reg" "$reg_file"
     fi
 
-    log_ok "Successfully imported skill '$skill_name' into $target_dir (hash: $hash)"
+    log_ok "Successfully imported skill '$target_skill_name' into $target_dir (hash: $hash)"
 }
 
 select_skills_interactive() {
