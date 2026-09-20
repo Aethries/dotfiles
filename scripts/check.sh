@@ -61,10 +61,17 @@ jq -e '
 # (for example ~/.local/bin/9router) to exist on the checking machine.
 service_check_dir="$(mktemp -d -t dotfiles-systemd-check-XXXXXX)"
 trap 'rm -rf "$service_check_dir"' EXIT
+true_bin="$(type -P true)"
+for target in default.target graphical-session.target sysinit.target; do
+    cat > "$service_check_dir/$target" <<EOF
+[Unit]
+Description=QA stub for $target
+EOF
+done
 for service in resources/systemd/user/*.service; do
     sed \
-        -e 's|^ExecStartPre=.*|ExecStartPre=/run/current-system/sw/bin/true|' \
-        -e 's|^ExecStart=.*|ExecStart=/run/current-system/sw/bin/true|' \
+        -e "s|^ExecStartPre=.*|ExecStartPre=$true_bin|" \
+        -e "s|^ExecStart=.*|ExecStart=$true_bin|" \
         "$service" > "$service_check_dir/$(basename "$service")"
 done
 SYSTEMD_UNIT_PATH="$service_check_dir:/nix/var/nix/profiles/system/etc/systemd/system:/run/current-system/sw/lib/systemd/system" systemd-analyze verify "$service_check_dir"/*.service

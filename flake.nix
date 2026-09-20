@@ -67,9 +67,11 @@
       formatter.x86_64-linux = pkgs.nixfmt;
       devShells.x86_64-linux.default = pkgs.mkShellNoCC {
         packages = [
+          pkgs.bashInteractive
           pkgs.jq
           pkgs.neovim
           pkgs.nixfmt
+          pkgs.ripgrep
           pkgs.shellcheck
         ];
       };
