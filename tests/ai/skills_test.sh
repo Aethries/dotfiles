@@ -190,6 +190,63 @@ done
 log_ok "All 6 Layer 0 Core Guardrail skills verified (frontmatter, token economy, content & registry)"
 
 # ------------------------------------------------------------------------------
+# 1.2 Validate Layer 1 Senior Leadership Skills
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 1 Senior Leadership skills & trigger boundaries..."
+
+LEADERSHIP_SKILLS=(
+    "feature-spec-writer"
+    "technical-planner"
+    "skill-author"
+)
+
+for l in "${LEADERSHIP_SKILLS[@]}"; do
+    l_file="$REPO_ROOT/resources/skills/$l/SKILL.md"
+    [ -f "$l_file" ] || log_fail "Missing leadership skill: $l_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$l_file")
+    [ "$head_line" = "---" ] || log_fail "$l/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$l" "$l_file" || log_fail "$l/SKILL.md missing valid name"
+    grep -Eiq '^description:' "$l_file" || log_fail "$l/SKILL.md missing description"
+
+    # Registry integrity
+    jq -e --arg l "$l" '.skills[$l]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $l"
+done
+
+# Check templates
+[ -f "$REPO_ROOT/resources/skills/feature-spec-writer/references/spec-template.md" ] || log_fail "Missing spec-template.md"
+[ -f "$REPO_ROOT/resources/skills/technical-planner/references/plan-template.md" ] || log_fail "Missing plan-template.md"
+
+# Behavioral Invariant Check: technical-planner must forbid writing code / modifying files
+grep -Fq "STRICTLY ANALYTICAL ROLE" "$REPO_ROOT/resources/skills/technical-planner/SKILL.md" || log_fail "technical-planner missing STRICTLY ANALYTICAL ROLE"
+grep -Fq "MUST NOT write or edit project source code" "$REPO_ROOT/resources/skills/technical-planner/SKILL.md" || log_fail "technical-planner missing code edit prohibition"
+
+# Question Policy Check: feature-spec-writer must have strict question policy
+grep -Fq "Strict Question Policy" "$REPO_ROOT/resources/skills/feature-spec-writer/SKILL.md" || log_fail "feature-spec-writer missing Strict Question Policy"
+grep -Fq "Proposal" "$REPO_ROOT/resources/skills/feature-spec-writer/SKILL.md" || log_fail "feature-spec-writer missing proposal default convention"
+
+# Trigger Boundary Disambiguation Tests
+SPEC_DESC=$(jq -r '.skills["feature-spec-writer"].description' "$REPO_ROOT/resources/skills/_registry.json")
+PLAN_DESC=$(jq -r '.skills["technical-planner"].description' "$REPO_ROOT/resources/skills/_registry.json")
+
+# Input 1: "Write a specification for user authentication."
+echo "$SPEC_DESC" | grep -Eiq "spec|specification" || log_fail "feature-spec-writer description fails to match specification request"
+echo "$PLAN_DESC" | grep -Eiq "^(Write a specification|specifications)" && log_fail "technical-planner description collided with specification request"
+
+# Input 2: "Create implementation plan from docs/specs/auth.md."
+echo "$PLAN_DESC" | grep -Eiq "plan|implementation plan" || log_fail "technical-planner description fails to match planning request"
+
+# Profile check
+jq -e '.profiles["senior-leadership"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'senior-leadership' profile"
+for l in "${LEADERSHIP_SKILLS[@]}"; do
+    jq -e --arg l "$l" '.profiles["senior-leadership"].skills | index($l)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "senior-leadership profile missing $l"
+done
+
+log_ok "All 3 Layer 1 Senior Leadership skills verified (templates, invariants, trigger boundaries & registry)"
+
+
+# ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
 # ------------------------------------------------------------------------------
 log_info "Testing ai-skills.sh CLI in isolated sandbox..."

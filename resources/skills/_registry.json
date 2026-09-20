@@ -191,6 +191,54 @@
         "source-quality"
       ],
       "content_hash": "sha256:163bf48b10faae42d146ffa1dcc18879a32420397fa2b053311c4c4df490764b"
+    },
+    "feature-spec-writer": {
+      "name": "feature-spec-writer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate exhaustive, unambiguous product and feature specifications.",
+      "tags": [
+        "planning",
+        "specification",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:933afb0e3ec49b46646b55f833787aa5158f388284e341604984db78ef5f7acd"
+    },
+    "technical-planner": {
+      "name": "technical-planner",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate concrete, phased technical implementation plans from approved specs.",
+      "tags": [
+        "planning",
+        "architecture",
+        "technical-plan",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "feature-spec-writer",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:e61c616254a0b7c6a8f2d98f0c719a15eb610e95b9ee577118225d831f7f6fd3"
+    },
+    "skill-author": {
+      "name": "skill-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author, standardize, and package new AI agent skills for the dotfiles ecosystem.",
+      "tags": [
+        "meta",
+        "skills",
+        "authoring",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:997256ddef9b2a6de03e34ec65b507bfdbd28e9f8c0aa773038c1a5ca3724a8c"
     }
   }
 }

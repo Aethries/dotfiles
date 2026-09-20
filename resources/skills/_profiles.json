@@ -51,6 +51,15 @@
         "security-guardrails",
         "quality-gate"
       ]
+    },
+    "senior-leadership": {
+      "name": "Senior Engineering Leadership",
+      "description": "Layer 1 leadership skills: feature specifications, technical planning, and skill authoring",
+      "skills": [
+        "feature-spec-writer",
+        "technical-planner",
+        "skill-author"
+      ]
     }
   }
 }
