@@ -99,6 +99,98 @@
       ],
       "dependencies": [],
       "content_hash": "sha256:a4a8bed5dfe322bc64e468e5613ebdac00181b6f290afcfb68342165133bfff9"
+    },
+    "project-context": {
+      "name": "project-context",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory codebase reconnaissance, dependency inspection, and convention adherence.",
+      "tags": [
+        "guardrail",
+        "reconnaissance",
+        "context",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:201ff9564b98ccc79a027def33f0fb93b829d9911c48f8af508beb72c131d6ba"
+    },
+    "source-quality": {
+      "name": "source-quality",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero tolerance for code duplication, dead code, and package manager drift.",
+      "tags": [
+        "guardrail",
+        "quality",
+        "clean-code",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:aed5ca07bd656fbbad951aa991c801f6c6d7ac426019ef248f1c5bbf1a6c45a6"
+    },
+    "architecture-guardrails": {
+      "name": "architecture-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Domain boundaries, clean layering, and unidirectional dependency graphs.",
+      "tags": [
+        "guardrail",
+        "architecture",
+        "layering",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:ec6bf657629a00c348b0cd27200a5e899d3b7391f0c31062c07e2a6e4cc9805a"
+    },
+    "system-design-guardrails": {
+      "name": "system-design-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed systems constraints, idempotency, retry safety, and transaction boundaries.",
+      "tags": [
+        "guardrail",
+        "system-design",
+        "reliability",
+        "layer0"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:1dda9cd689b814d2c3d645df34d6313c13b4c928f5006ed078406f353987a407"
+    },
+    "security-guardrails": {
+      "name": "security-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero hardcoded secrets, input validation, and authorization boundaries.",
+      "tags": [
+        "guardrail",
+        "security",
+        "zero-trust",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a514867e02370d40c2a60bc72fe28b6bd8dfa872dd5a09259386a3605d435f4b"
+    },
+    "quality-gate": {
+      "name": "quality-gate",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Non-negotiable verification sequence (lint, format, typecheck, test, build) before declaring work done.",
+      "tags": [
+        "guardrail",
+        "verification",
+        "testing",
+        "layer0"
+      ],
+      "dependencies": [
+        "source-quality"
+      ],
+      "content_hash": "sha256:163bf48b10faae42d146ffa1dcc18879a32420397fa2b053311c4c4df490764b"
     }
   }
 }

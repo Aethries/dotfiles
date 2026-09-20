@@ -141,6 +141,55 @@ grep -Fq "claudeCode" "$REPO_ROOT/modules/packages.nix" || log_fail "modules/pac
 log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, CodeGraph, and Metadata Registries are valid"
 
 # ------------------------------------------------------------------------------
+# 1.1 Validate Layer 0 Core Guardrails
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 0 Core Guardrails schema & token economy..."
+
+GUARDRAIL_SKILLS=(
+    "project-context"
+    "source-quality"
+    "architecture-guardrails"
+    "system-design-guardrails"
+    "security-guardrails"
+    "quality-gate"
+)
+
+for g in "${GUARDRAIL_SKILLS[@]}"; do
+    g_file="$REPO_ROOT/resources/skills/$g/SKILL.md"
+    [ -f "$g_file" ] || log_fail "Missing guardrail skill: $g_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$g_file")
+    [ "$head_line" = "---" ] || log_fail "$g/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$g" "$g_file" || log_fail "$g/SKILL.md missing valid name"
+    grep -Eiq '^description:[[:space:]]*"?Internal guardrail' "$g_file" || log_fail "$g/SKILL.md description must start with 'Internal guardrail' to prevent auto-triggering"
+
+    # Token economy audit: ensure concise, actionable rules (under 350 words)
+    w_count=$(wc -w < "$g_file" | tr -d ' ')
+    [ "$w_count" -le 350 ] || log_fail "$g/SKILL.md word count ($w_count) exceeds token economy limit (350 words)"
+
+    # Registry integrity
+    jq -e --arg g "$g" '.skills[$g]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $g"
+done
+
+# Invariant & rule content verification
+grep -Fq "Strict Precedence Hierarchy" "$REPO_ROOT/resources/skills/project-context/SKILL.md" || log_fail "project-context missing precedence hierarchy"
+grep -Fq "project convention > generic best practice" "$REPO_ROOT/resources/skills/project-context/SKILL.md" || log_fail "project-context missing precedence rule"
+grep -Fq "Zero Duplication" "$REPO_ROOT/resources/skills/source-quality/SKILL.md" || log_fail "source-quality missing zero duplication"
+grep -Fq "Unidirectional Dependency Flow" "$REPO_ROOT/resources/skills/architecture-guardrails/SKILL.md" || log_fail "architecture-guardrails missing dependency flow"
+grep -Fq "Write Idempotency" "$REPO_ROOT/resources/skills/system-design-guardrails/SKILL.md" || log_fail "system-design-guardrails missing idempotency"
+grep -Fq "Zero Hardcoded Secrets" "$REPO_ROOT/resources/skills/security-guardrails/SKILL.md" || log_fail "security-guardrails missing secrets rule"
+grep -Fq "Mandatory 5-Step Verification Sequence" "$REPO_ROOT/resources/skills/quality-gate/SKILL.md" || log_fail "quality-gate missing verification sequence"
+
+# Profile check
+jq -e '.profiles["core-guardrails"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'core-guardrails' profile"
+for g in "${GUARDRAIL_SKILLS[@]}"; do
+    jq -e --arg g "$g" '.profiles["core-guardrails"].skills | index($g)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "core-guardrails profile missing $g"
+done
+
+log_ok "All 6 Layer 0 Core Guardrail skills verified (frontmatter, token economy, content & registry)"
+
+# ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
 # ------------------------------------------------------------------------------
 log_info "Testing ai-skills.sh CLI in isolated sandbox..."

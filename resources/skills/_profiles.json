@@ -39,6 +39,18 @@
         "rtk",
         "junior-coding-agent"
       ]
+    },
+    "core-guardrails": {
+      "name": "Core Engineering Guardrails",
+      "description": "Layer 0 essential guardrails enforced across architectural, security, and quality domains",
+      "skills": [
+        "project-context",
+        "source-quality",
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails",
+        "quality-gate"
+      ]
     }
   }
 }

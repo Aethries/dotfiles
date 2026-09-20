@@ -3,6 +3,30 @@
 
 > Generated automatically from canonical AI skills registry.
 
+## architecture-guardrails
+
+
+# Architecture Guardrails
+
+Enforces modular architecture, domain boundaries, and strict layer isolation across application components.
+
+## Core Rules
+
+1. **Unidirectional Dependency Flow**:
+   - Dependencies must flow inward: `Presentation / API -> Domain / Service -> Persistence / Infrastructure`.
+   - Outer layers depend on inner layers; inner core domain models never depend on outer transport or database frameworks.
+2. **Layer Isolation**:
+   - Presentation/controller layers must never directly query databases, execute SQL, or handle raw ORM transaction scopes.
+   - Domain logic must remain free of transport-specific types (HTTP status codes, request bodies, gRPC metadata).
+3. **Module & Domain Boundaries**:
+   - Communicate across domain boundaries only through defined service interfaces or public module contracts.
+   - Circular package or module imports are strictly prohibited.
+4. **Side-Effect Containment**:
+   - Keep business calculations pure and deterministic; isolate I/O, timers, and external network interactions to boundary adapters.
+   - Avoid hidden or mutable global state.
+
+---
+
 ## caveman
 
 
@@ -377,6 +401,53 @@ Lazy means efficient, not careless. The best code is the code never written.
 
 ---
 
+## project-context
+
+
+# Project Context Guardrail
+
+Mandatory pre-flight reconnaissance before proposing or executing non-trivial architectural or implementation decisions.
+
+## Core Rules
+
+1. **Reconnaissance First**:
+   - Inspect build system, package manager, linter/formatter configs, and test frameworks before changing code.
+   - Detect existing package managers via lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `bun.lockb`, `yarn.lock`, `Cargo.lock`, `flake.nix`, `go.mod`, `pyproject.toml`). Never assume tools.
+2. **Strict Precedence Hierarchy**:
+   `project convention > generic best practice > agent personal preference`
+3. **Reuse Existing Abstractions**:
+   - Search the codebase for existing utilities, helpers, patterns, and type definitions before creating new ones.
+   - Match existing naming conventions, directory structure, and module granularity.
+4. **Target Runtime & Edition**:
+   - Align with the project's configured language version, compiler flags, and target environment.
+
+---
+
+## quality-gate
+
+
+# Quality Gate Guardrail
+
+Non-negotiable verification sequence and test integrity standards required before marking any task complete.
+
+## Core Rules
+
+1. **Mandatory 5-Step Verification Sequence**:
+   Tasks are ONLY considered complete when all applicable verification rungs pass locally:
+   1. **Lint**: Run project linters (`eslint`, `shellcheck`, `golangci-lint`, `ruff`, `cargo clippy`).
+   2. **Format**: Check formatting compliance (`prettier`, `nixfmt`, `gofmt`, `black`, `rustfmt`).
+   3. **Typecheck**: Verify static types (`tsc`, `mypy`, `pyright`).
+   4. **Test**: Execute unit, integration, and regression test suites.
+   5. **Build**: Execute local build / compilation step.
+2. **Zero Weakening of Guardrails**:
+   - Never insert `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `# noqa`, or compiler suppression flags to bypass failures without explicit approval.
+   - Never weaken assertions, skip existing tests, or delete failing test cases to make a test suite pass.
+3. **Regression Evidence**:
+   - Bug fixes must include an automated regression test reproducing the original issue.
+   - Non-trivial logic must leave at least one runnable automated verification check behind.
+
+---
+
 ## release-notes
 
 
@@ -475,5 +546,78 @@ High-volume terminal outputs (`git diff`, `npm test`, linter logs, build stdout)
    - RTK automatically strips ANSI escapes, collapses repetitive test run lines, and prunes boilerplate headers.
 3. **Preserve Error Traces**:
    - Never filter out root cause stack traces, type errors, compiler warnings, or security alerts.
+
+---
+
+## security-guardrails
+
+
+# Security Guardrails
+
+Zero-tolerance security guardrails protecting infrastructure, data integrity, and authentication boundaries.
+
+## Core Rules
+
+1. **Zero Hardcoded Secrets**:
+   - Never commit API keys, passwords, bearer tokens, or private certificates.
+   - Load secrets exclusively via environment variables, secret managers, or encrypted credential vaults.
+   - Verify sensitive credential files match `.gitignore` rules before touching code.
+2. **Untrusted Boundary Validation**:
+   - Validate and constrain all inputs at system entrypoints (schema, types, maximum length, allowable ranges).
+   - Parameterize all database queries (zero raw string concatenation for SQL, NoSQL, or shell invocations).
+   - Sanitize against injection attacks (SQLi, command injection, XSS, SSRF, path traversal `../`).
+3. **Authorization & Multi-Tenancy**:
+   - Verify authentication and authorization permissions on every private endpoint and mutation.
+   - Scope all entity lookups and modifications by tenant and user identity to prevent Insecure Direct Object Reference (IDOR).
+4. **Principle of Least Privilege**:
+   - Restrict execution permissions. Containers and service daemons must run as non-root unprivileged users.
+   - Restrict filesystem read/write privileges to designated working directories.
+
+---
+
+## source-quality
+
+
+# Source Quality Guardrail
+
+Zero-tolerance for unnecessary code duplication, dead code, and package manager drift.
+
+## Core Rules
+
+1. **Zero Duplication (AST & Symbol Awareness)**:
+   - Search for existing implementations before writing new code.
+   - Maintain a single source of truth for constants, endpoints, domain models, and utility routines.
+2. **Strict Tooling & Lockfile Adherence**:
+   - Strictly follow the repository's established package manager. Never run `npm install` when `pnpm-lock.yaml` or `yarn.lock` is present.
+   - Never add duplicate dependencies when current dependencies or standard libraries satisfy the requirement.
+   - Follow repo formatting rules (tabs vs spaces, semicolons, import sorting).
+3. **Dead Code Elimination**:
+   - Disallow unused imports, variables, unreachable functions, and commented-out code.
+   - Remove temporary debug statements and logs before completing tasks.
+4. **Minimalistic Footprint**:
+   - Shortest clean diff wins. Prefer boring, maintainable constructs over clever speculative abstractions.
+
+---
+
+## system-design-guardrails
+
+
+# System Design Guardrails
+
+Enforces reliability, fault tolerance, transaction hygiene, and distributed systems invariants.
+
+## Core Rules
+
+1. **Write Idempotency**:
+   - Any state-mutating operation, background job, message handler, or webhook receiver must be safely retryable or keyed by an idempotency token.
+2. **Failure Handling & Bounded Retries**:
+   - All network calls and external service integrations must configure explicit timeouts.
+   - Retries must be bounded and employ exponential backoff with jitter to avoid stampedes.
+   - Implement backpressure and circuit breaking on asynchronous streams and queue consumers.
+3. **Transaction Boundaries**:
+   - No blind multi-service distributed two-phase commits. Use saga or transactional outbox patterns across distributed boundaries.
+   - Keep database transactions as short and narrow as possible. Never hold an open database transaction across an external HTTP or RPC call.
+4. **Resource Management**:
+   - Explicitly release all connections, streams, file descriptors, and mutex locks using native deterministic constructs (`defer`, `finally`, `using`).
 
 ---
