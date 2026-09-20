@@ -53,4 +53,11 @@ if ! grep -q "oneshot_timeout: 400" "$REPO_ROOT/resources/warpd/config"; then
 fi
 echo "  [✓] Warpd oneshot_timeout configured correctly"
 
+# 7. Test kill_warpd synchronization alias in main config
+if ! grep -q "kill_warpd" "$REPO_ROOT/resources/kanata/kanata.kbd"; then
+    echo "  [✗] Missing kill_warpd alias in resources/kanata/kanata.kbd" >&2
+    exit 1
+fi
+echo "  [✓] Synchronous kill_warpd alias present in kanata.kbd"
+
 echo "  [✓] All Kanata recovery tests passed successfully!"
