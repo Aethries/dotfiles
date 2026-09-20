@@ -7,8 +7,8 @@ cd "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 bash -n scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
 shellcheck scripts/*.sh scripts/lib/*.sh resources/zellij/scripts/*.sh tests/bootstrap/*.sh tests/installer/*.sh tests/gh/*.sh tests/vault/*.sh tests/zellij/*.sh tests/ai/*.sh tests/kanata/*.sh
 
-if rg -n '^[^#]*\|\| true' scripts/*.sh scripts/lib/*.sh | grep -v 'BEST_EFFORT:'; then
-    echo "Error: every non-comment best-effort fallback must include a BEST_EFFORT rationale" >&2
+if rg -n '^[^#]*\|\| true' scripts/*.sh scripts/lib/*.sh | grep -vE '(BEST_EFFORT|OPTIONAL_FEATURE):'; then
+    echo "Error: every non-comment fallback must include a BEST_EFFORT or OPTIONAL_FEATURE rationale" >&2
     exit 1
 fi
 

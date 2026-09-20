@@ -1,4 +1,4 @@
-{ ... }:
+{ config, lib, ... }:
 
 {
   # WEIKAV NUT75 requires seatd because systemd-logind rejects its malformed
@@ -10,7 +10,14 @@
 
   environment.sessionVariables.LIBSEAT_BACKEND = "seatd";
 
-  users.users.greeter.extraGroups = [ "seat" ];
+  users.users = lib.mkMerge [
+    {
+      greeter.extraGroups = [ "seat" ];
+    }
+    (lib.mkIf (config.dotfiles.primaryUser != null) {
+      "${config.dotfiles.primaryUser}".extraGroups = lib.mkAfter [ "seat" ];
+    })
+  ];
 
   services.udev.extraRules = ''
     ACTION=="add|change", SUBSYSTEM=="input", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="fef9|880c", ENV{ID_INPUT_KEY}="1", ENV{ID_INPUT_KEYBOARD}="1"

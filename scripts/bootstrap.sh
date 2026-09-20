@@ -17,7 +17,7 @@ source "$LIB_DIR/ownership.sh"
 source "$LIB_DIR/links.sh"
 
 preflight() {
-    "$REPO_ROOT/scripts/preflight.sh" bootstrap
+    bash "$REPO_ROOT/scripts/preflight.sh" bootstrap
 }
 
 rebuild_system() {
@@ -30,16 +30,17 @@ rebuild_system() {
 
 sync_editor_configs() {
     info "Synchronizing editor configuration and extensions..."
-    "$REPO_ROOT/scripts/sync-editors.sh"
+    "${DOTFILES_SYNC_EDITORS_SCRIPT:-$REPO_ROOT/scripts/sync-editors.sh}"
 }
 
 reconcile_gateways() {
     info "Reconciling AI Gateways (9Router & OmniRoute)..."
+    local reconcile_script="${DOTFILES_RECONCILE_GATEWAYS_SCRIPT:-$REPO_ROOT/scripts/reconcile-ai-gateways.sh}"
     if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
-        sudo -u "$SUDO_USER" -H "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" \
+        sudo -u "$SUDO_USER" -H "$reconcile_script" \
             || error "AI Gateway reconciliation failed during bootstrap."
     else
-        "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" \
+        "$reconcile_script" \
             || error "AI Gateway reconciliation failed during bootstrap."
     fi
 }

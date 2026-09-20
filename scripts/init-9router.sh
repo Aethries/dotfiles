@@ -53,7 +53,8 @@ ensure_user_owned() {
     fi
 }
 
-ensure_user_owned "$HOME/.local"
+# npm owns its user-local prefix; only repair the gateway state this script creates.
+ensure_user_owned "$HOME/.local/bin/9router"
 ensure_user_owned "$HOME/.9router"
 
 echo -e "${BOLD}=========================================${NC}"
@@ -152,8 +153,10 @@ fi
 
 # Keep resources/certs/9router-rootCA.key locally if missing (also gitignored)
 if [ -f "$HOME/.9router/mitm/rootCA.key" ] && [ ! -f "$CERTS_DIR/9router-rootCA.key" ]; then
-    cp -f "$HOME/.9router/mitm/rootCA.key" "$CERTS_DIR/9router-rootCA.key" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
-    chmod 600 "$CERTS_DIR/9router-rootCA.key" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    cp -f "$HOME/.9router/mitm/rootCA.key" "$CERTS_DIR/9router-rootCA.key" 2>/dev/null || \
+        warn "Optional local certificate-key backup was not written to resources/certs."
+    chmod 600 "$CERTS_DIR/9router-rootCA.key" 2>/dev/null || \
+        warn "Optional local certificate-key backup permissions were not tightened."
 fi
 
 # The OS trust store is owned declaratively by NixOS (modules/base.nix).
@@ -165,7 +168,8 @@ if command -v certutil >/dev/null 2>&1; then
     for db in "${NSS_DIRS[@]}"; do
         if [ -d "$db" ]; then
             certutil -d sql:"$db" -A -t "C,," -n "9Router MITM Root CA" -i "$HOME/.9router/mitm/rootCA.crt" 2>/dev/null || \
-            certutil -d "$db" -A -t "C,," -n "9Router MITM Root CA" -i "$HOME/.9router/mitm/rootCA.crt" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+            certutil -d "$db" -A -t "C,," -n "9Router MITM Root CA" -i "$HOME/.9router/mitm/rootCA.crt" 2>/dev/null || \
+                warn "OPTIONAL_FEATURE: NSS certificate registration failed for $db; system trust remains configured."
         fi
     done
     success "Root CA registered in NSS database."
@@ -244,7 +248,7 @@ SERVICE_DEST="$SYSTEMD_USER_DIR/9router.service"
 
 # bootstrap.sh deliberately links user units to the repository. Keep that model
 # here instead of copying a file through a symlink back onto itself.
-if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+if [ "$(readlink -f "$SERVICE_DEST" 2>/dev/null || true)" != "$(readlink -f "$SERVICE_SRC")" ]; then # BEST_EFFORT: an unreadable absent service link is treated as drift and replaced.
     if [ -e "$SERVICE_DEST" ] && [ ! -L "$SERVICE_DEST" ]; then
         mv "$SERVICE_DEST" "$SERVICE_DEST.pre-init-9router.$(date +%Y%m%d%H%M%S)"
     fi
@@ -262,17 +266,17 @@ if command -v loginctl >/dev/null 2>&1; then
     CURRENT_LINGER=$(loginctl show-user "$USER" -p Linger 2>/dev/null | cut -d= -f2 || echo "no")
     if [ "$CURRENT_LINGER" != "yes" ]; then
         info "Enabling user lingering for $USER (so 9router starts on boot without login)..."
-        sudo loginctl enable-linger "$USER" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        sudo loginctl enable-linger "$USER" 2>/dev/null || true # OPTIONAL_FEATURE: lingering is only needed for user services after logout.
     fi
 fi
 
 # Stop the managed service first so Restart=on-failure cannot race the cleanup,
 # then terminate only leftover 9router processes owned by this user.
-systemctl --user stop 9router.service 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
-mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[9]router/cli.js' 2>/dev/null || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+systemctl --user stop 9router.service 2>/dev/null || true # BEST_EFFORT: stopping an already-stopped service is safe before restart.
+mapfile -t RUNNING_PIDS < <(pgrep -u "$UID" -f '[9]router/cli.js' 2>/dev/null || true) # BEST_EFFORT: no matching process is a valid clean state.
 if [ "${#RUNNING_PIDS[@]}" -gt 0 ]; then
     info "Stopping running manual 9router process (PID: ${RUNNING_PIDS[*]})..."
-    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    kill "${RUNNING_PIDS[@]}" 2>/dev/null || true # BEST_EFFORT: a process may exit between discovery and termination.
     sleep 1
 fi
 
@@ -305,7 +309,7 @@ if systemctl --user is-active --quiet 9router.service; then
 
     if [ -n "$CLI_TOKEN" ]; then
         STATUS_JSON=$(curl -s -H "x-9r-cli-token: $CLI_TOKEN" http://localhost:20128/api/cli-tools/antigravity-mitm 2>/dev/null || echo "{}")
-        CERT_TRUSTED=$(echo "$STATUS_JSON" | grep -o '"certTrusted":true' || true) # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        CERT_TRUSTED=$(echo "$STATUS_JSON" | grep -o '"certTrusted":true' || true) # BEST_EFFORT: status JSON may omit the optional certificate field.
         if [ -n "$CERT_TRUSTED" ]; then
             echo -e "  - Root CA Status:    ${GREEN}${BOLD}✓ TRUSTED${NC} (Dashboard will show green checkmarks)"
         else

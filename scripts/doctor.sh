@@ -76,7 +76,7 @@ else
 fi
 
 if command -v nix >/dev/null 2>&1; then
-    ok "Nix is installed ($(nix --version 2>/dev/null || true))" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    ok "Nix is installed ($(nix --version 2>/dev/null || true))" # BEST_EFFORT: version text is diagnostic-only after command availability succeeded.
 else
     fail "Nix is not found in PATH"
 fi
@@ -172,7 +172,7 @@ else
 fi
 
 if command -v antigravity-ide >/dev/null 2>&1; then
-    ANTIGRAVITY_EXTENSIONS="$(antigravity-ide --list-extensions --show-versions 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    ANTIGRAVITY_EXTENSIONS="$(antigravity-ide --list-extensions --show-versions 2>/dev/null || true)" # OPTIONAL_FEATURE: extension listing is unavailable on installations without a working IDE CLI.
     while IFS=$'\t' read -r extension_id extension_version; do
         if printf '%s\n' "$ANTIGRAVITY_EXTENSIONS" | grep -Fqx "$extension_id@$extension_version"; then
             ok "Antigravity extension: $extension_id@$extension_version"

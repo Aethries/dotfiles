@@ -30,7 +30,7 @@ case "$MODE" in
     installer)
         REQUIRED_TOOLS=(
             nix nix-shell nixos-generate-config nixos-install ping hostname
-            lsblk wipefs parted mkfs.fat mkfs.ext4 mount umount swapoff swapon
+            lsblk wipefs parted mkfs.fat mkfs.ext4 mount umount findmnt swapoff swapon mkswap
             partprobe chown cp
         )
         ;;

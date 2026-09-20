@@ -384,7 +384,7 @@ discover_candidates() {
     local query="${1:-}"
     local output_json=false
 
-    shift || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    shift || true # BEST_EFFORT: argument normalization tolerates an empty optional argument list.
     while [ "$#" -gt 0 ]; do
         case "$1" in
             --json)
@@ -710,7 +710,7 @@ recommend_project_skills() {
 # ------------------------------------------------------------------------------
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     CMD="${1:-help}"
-    shift || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    shift || true # BEST_EFFORT: argument normalization tolerates an empty optional argument list.
     case "$CMD" in
         verify)
             verify_candidate "$@"

@@ -35,9 +35,9 @@ validate_omniroute_node_version() {
 get_port_listeners() {
     local port="$1"
     if command -v ss >/dev/null 2>&1; then
-        ss -tlHn "sport = :$port" 2>/dev/null | awk '{print $4}' | grep -v '^$' || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        ss -tlHn "sport = :$port" 2>/dev/null | awk '{print $4}' | grep -v '^$' || true # BEST_EFFORT: listener discovery is informational; an empty result means no process was found.
     elif command -v lsof >/dev/null 2>&1; then
-        lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR>1 {print $9}' | sed 's/->.*//' | grep -v '^$' || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR>1 {print $9}' | sed 's/->.*//' | grep -v '^$' || true # BEST_EFFORT: lsof is a secondary listener probe; no output does not change gateway correctness.
     fi
 }
 

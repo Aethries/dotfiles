@@ -43,8 +43,8 @@ cleanup() {
     if [[ -d "${CLEANUP_TARGET:-}" ]] && [[ "$CLEANUP_TARGET" == "$REAL_REPO/.sandbox"* ]]; then
         # Kill only recorded test session
         if [ -n "${TEST_SESSION:-}" ]; then
-            zellij kill-session "$TEST_SESSION" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
-            zellij delete-session "$TEST_SESSION" --force 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+            zellij kill-session "$TEST_SESSION" 2>/dev/null || true # BEST_EFFORT: cleanup tolerates a session that already exited.
+            zellij delete-session "$TEST_SESSION" --force 2>/dev/null || true # BEST_EFFORT: cleanup tolerates a session that was already removed.
         fi
         rm -rf "$CLEANUP_TARGET"
     fi
@@ -78,7 +78,7 @@ log_info "1. Testing clean background session creation in isolated socket..."
 zellij attach --create-background "$TEST_SESSION"
 sleep 1
 
-ACTIVE_SESSIONS="$(zellij list-sessions --short --no-formatting 2>/dev/null || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+ACTIVE_SESSIONS="$(zellij list-sessions --short --no-formatting 2>/dev/null || true)" # BEST_EFFORT: an empty isolated socket is a valid no-session result.
 echo "$ACTIVE_SESSIONS" | grep -Fxq "$TEST_SESSION" || log_fail "Session $TEST_SESSION was not created in isolated socket"
 log_ok "Isolated session created successfully"
 
@@ -98,7 +98,7 @@ log_ok "All layout configurations evaluated without error"
 log_info "4. Testing isolated session termination..."
 zellij kill-session "$TEST_SESSION"
 sleep 1
-REMAINING="$(zellij list-sessions --short --no-formatting 2>&1 || true)" # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+REMAINING="$(zellij list-sessions --short --no-formatting 2>&1 || true)" # BEST_EFFORT: listing after termination is diagnostic-only and may return no sessions.
 if echo "$REMAINING" | grep -Fxq "$TEST_SESSION"; then
     log_fail "Session $TEST_SESSION was not terminated"
 fi

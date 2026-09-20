@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MACHINE_CONFIG="$REPO_ROOT/.machine/configuration.nix"
 
 ACTION="${1:-switch}"
-shift 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+shift 2>/dev/null || true # BEST_EFFORT: the first two positional parameters are consumed when no extra rebuild flags exist.
 
 case "$ACTION" in
     switch|boot|test|build|dry-build|dry-activate)
@@ -49,10 +49,10 @@ fi
 BACKUP_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/backup-latest"
 mkdir -p "$BACKUP_DIR"
 if [ -d "$HOME/.config/antigravity" ]; then
-    cp -r "$HOME/.config/antigravity" "$BACKUP_DIR/" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    cp -r "$HOME/.config/antigravity" "$BACKUP_DIR/" 2>/dev/null || true # BEST_EFFORT: rollback snapshots are advisory and a missing/unreadable optional config must not block a build.
 fi
 if [ -d "$HOME/.config/nvim" ]; then
-    cp -r "$HOME/.config/nvim" "$BACKUP_DIR/" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+    cp -r "$HOME/.config/nvim" "$BACKUP_DIR/" 2>/dev/null || true # BEST_EFFORT: rollback snapshots are advisory and a missing/unreadable optional config must not block a build.
 fi
 
 report_backup_on_error() {

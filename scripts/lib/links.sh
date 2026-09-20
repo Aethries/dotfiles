@@ -26,7 +26,8 @@ setup_wallpapers() {
         mkdir -p "$USER_HOME/Pictures" "$USER_HOME/Videos" "$USER_HOME/Downloads" "$USER_HOME/Documents"
         cp -r "$wallpaper_src" "$wallpaper_dest"
         if [ -n "${SUDO_USER:-}" ]; then
-            chown -R "$SUDO_USER:" "$USER_HOME/Pictures" "$USER_HOME/Videos" "$USER_HOME/Downloads" "$USER_HOME/Documents" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+            # REQUIRED: the repository-created wallpaper subtree must be usable by the target user.
+            chown -R "$SUDO_USER:" "$wallpaper_dest"
         fi
         success "Wallpapers copied successfully to $wallpaper_dest"
     else
@@ -143,12 +144,58 @@ link_configs() {
 
     if command -v npm >/dev/null 2>&1; then
         if [ -n "${SUDO_USER:-}" ]; then
-            sudo -u "$SUDO_USER" npm config set prefix "$USER_HOME/.local" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+            sudo -u "$SUDO_USER" npm config set prefix "$USER_HOME/.local" 2>/dev/null || \
+                warn "Optional npm user-prefix configuration was not applied."
         else
-            npm config set prefix "$USER_HOME/.local" 2>/dev/null || true # BEST_EFFORT: optional cleanup or probe failure is non-fatal.
+            npm config set prefix "$USER_HOME/.local" 2>/dev/null || \
+                warn "Optional npm user-prefix configuration was not applied."
         fi
     fi
 
-    repair_managed_ownership
+    repair_managed_ownership \
+        "$USER_HOME/.config/gh/config.yml" \
+        "$USER_HOME/.config/niri" \
+        "$USER_HOME/.config/noctalia/config.toml" \
+        "$USER_HOME/.config/kitty" \
+        "$USER_HOME/.config/antigravity" \
+        "$USER_HOME/.config/starship.toml" \
+        "$USER_HOME/.zshrc" \
+        "$USER_HOME/.zimrc" \
+        "$USER_HOME/.config/zellij" \
+        "$USER_HOME/.config/nvim" \
+        "$USER_HOME/.config/fcitx5/config" \
+        "$USER_HOME/.config/fcitx5/profile" \
+        "$USER_HOME/.config/fcitx5/conf/bamboo.conf" \
+        "$USER_HOME/.config/fcitx5/conf/classicui.conf" \
+        "$USER_HOME/.gitconfig" \
+        "$USER_HOME/.gitconfig-1bitlab" \
+        "$USER_HOME/.config/git/ignore" \
+        "$USER_HOME/.ssh/config" \
+        "$USER_HOME/.config/fastfetch/config.jsonc" \
+        "$USER_HOME/.config/yazi/keymap.toml" \
+        "$USER_HOME/.config/yazi/yazi.toml" \
+        "$USER_HOME/.config/warpd/config" \
+        "$USER_HOME/.local/share/applications/jira.desktop" \
+        "$USER_HOME/.local/share/icons/hicolor/scalable/apps/jira.svg" \
+        "$USER_HOME/.local/bin/pj" \
+        "$USER_HOME/.local/bin/flakify" \
+        "$USER_HOME/.local/bin/vault" \
+        "$USER_HOME/.local/bin/secrets" \
+        "$USER_HOME/.local/bin/jira-app" \
+        "$USER_HOME/.local/bin/rebuild" \
+        "$USER_HOME/.local/bin/sync-theme" \
+        "$USER_HOME/.local/bin/screenshot" \
+        "$USER_HOME/.local/bin/doctor" \
+        "$USER_HOME/.local/bin/dotfiles-check" \
+        "$USER_HOME/.local/bin/tunnel" \
+        "$USER_HOME/.local/bin/cleanup" \
+        "$USER_HOME/.local/bin/init-9router" \
+        "$USER_HOME/.local/bin/9router-init" \
+        "$USER_HOME/.local/bin/init-omniroute" \
+        "$USER_HOME/.local/bin/sync-omniroute" \
+        "$USER_HOME/.local/bin/reconcile-ai-gateways" \
+        "$USER_HOME/.local/bin/ai-skills" \
+        "$USER_HOME/.local/bin/add-skills" \
+        "$USER_HOME/.local/bin/kanata-recovery"
     success "Configuration files linked successfully!"
 }
