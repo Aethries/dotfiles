@@ -552,22 +552,22 @@ binds {
         spawn-sh "noctalia msg session lock"
     }
     // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
-    Mod+Alt+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
+    Mod+Alt+P allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Hint Mode" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --hint"
     }
-    Mod+Alt+Shift+P hotkey-overlay-title="Mouse: Warpd Hint Mode" {
+    Mod+Alt+Shift+P allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Hint Mode" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --hint"
     }
-    Mod+Alt+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
+    Mod+Alt+M allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Normal Movement" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --normal"
     }
-    Mod+Alt+Shift+M hotkey-overlay-title="Mouse: Warpd Normal Movement" {
+    Mod+Alt+Shift+M allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Normal Movement" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --normal"
     }
-    Mod+Alt+G hotkey-overlay-title="Mouse: Warpd Grid Mode" {
+    Mod+Alt+G allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Grid Mode" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --grid"
     }
-    Mod+Alt+Escape hotkey-overlay-title="Mouse: Exit Warpd" {
+    Mod+Alt+Escape allow-inhibiting=false hotkey-overlay-title="Mouse: Exit Warpd" {
         spawn-sh "pkill -x warpd"
     }
     // Noctalia Shell keybinds
