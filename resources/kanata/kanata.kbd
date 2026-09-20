@@ -40,7 +40,7 @@
   ;; Layer Switching Aliases
   ;; --------------------------------------------------------------------------
   ;; Kill Warpd pointer emulation synchronously when entering any keyboard mode
-  kill_warpd (multi (release-key lsft) (release-key rsft) M-A-esc)
+  kill_warpd (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50))
 
   to_norm (layer-switch normal)
   to_nav  (multi @kill_warpd (layer-switch navigate))
@@ -248,22 +248,22 @@
   n9 (fork M-9 C-M-9 (lctl rctl))
 
   ;; One-shot actions that automatically return to normal mode
-  niri_center (multi M-c @to_norm)
-  niri_proj   (multi M-p @to_norm)
-  niri_shot   (multi M-s @to_norm)
-  niri_rec    (multi M-r @to_norm)
-  niri_menu   (multi M-d @to_norm)
-  niri_term   (multi M-ret @to_norm)
-  niri_over   (multi M-o @to_norm)
-  niri_clip   (multi M-v @to_norm)
+  niri_center (multi (macro M-c 50) @to_norm)
+  niri_proj   (multi (macro M-p 50) @to_norm)
+  niri_shot   (multi (macro M-s 50) @to_norm)
+  niri_rec    (multi (macro M-r 50) @to_norm)
+  niri_menu   (multi (macro M-d 50) @to_norm)
+  niri_term   (multi (macro M-ret 50) @to_norm)
+  niri_over   (multi (macro M-o 50) @to_norm)
+  niri_clip   (multi (macro M-v 50) @to_norm)
 
   ;; --------------------------------------------------------------------------
   ;; Warpd Pointer Layer Actions (Mouse Emulation via Issue #28)
   ;; --------------------------------------------------------------------------
-  warp_hint (multi (release-key lsft) (release-key rsft) M-A-p)
-  warp_norm (multi (release-key lsft) (release-key rsft) M-A-m)
-  warp_hint_norm (multi (release-key lsft) (release-key rsft) M-A-p (one-shot-pause-processing 50) @to_norm)
-  warp_norm_norm (multi (release-key lsft) (release-key rsft) M-A-m (one-shot-pause-processing 50) @to_norm)
+  warp_hint (multi (release-key lsft) (release-key rsft) (macro M-A-p 50))
+  warp_norm (multi (release-key lsft) (release-key rsft) (macro M-A-m 50))
+  warp_hint_norm (multi (release-key lsft) (release-key rsft) (macro M-A-p 50) @to_norm)
+  warp_norm_norm (multi (release-key lsft) (release-key rsft) (macro M-A-m 50) @to_norm)
   m_nav     (fork @warp_hint_norm @warp_norm_norm (lsft rsft))
   m_caps    (fork @warp_hint @warp_norm (lsft rsft))
 
@@ -309,13 +309,13 @@
 ;; Direct Sequential Key Sequences (Tap CapsLock + <key>)
 ;; ----------------------------------------------------------------------------
 (defvirtualkeys
-  v_sup    (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch super))
-  v_nav    (multi (release-key lsft) (release-key rsft) M-A-esc (one-shot-pause-processing 100) (layer-switch navigate))
-  v_niri   (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch niri))
-  v_chrom  (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch chromium))
-  v_term   (multi (release-key lsft) (release-key rsft) M-A-esc (layer-switch terminals))
-  v_warp   (multi M-A-p)
-  v_warp_m (multi M-A-m)
+  v_sup    (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50) (layer-switch super))
+  v_nav    (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50) (one-shot-pause-processing 100) (layer-switch navigate))
+  v_niri   (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50) (layer-switch niri))
+  v_chrom  (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50) (layer-switch chromium))
+  v_term   (multi (release-key lsft) (release-key rsft) (macro M-A-esc 50) (layer-switch terminals))
+  v_warp   (multi (macro M-A-p 50))
+  v_warp_m (multi (macro M-A-m 50))
 )
 
 (defseq
