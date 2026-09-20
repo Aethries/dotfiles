@@ -107,7 +107,28 @@ grep -Fq "codebase-memory-mcp" "$REPO_ROOT/modules/packages.nix" || log_fail "mo
 # Assert OmniRoute cavemanEnabled is false by default
 grep -Eiq '^OMNIROUTE_CAVEMAN_ENABLED="false"' "$REPO_ROOT/resources/ai/gateway.env" || log_fail "OMNIROUTE_CAVEMAN_ENABLED must be false"
 
-log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, and CodeGraph skill schemas are valid"
+# Assert agent adapter configuration and schema validity
+[ -f "$REPO_ROOT/resources/skills/_agents.schema.json" ] || log_fail "Missing _agents.schema.json"
+[ -f "$REPO_ROOT/resources/skills/_agents.json" ] || log_fail "Missing _agents.json"
+jq empty "$REPO_ROOT/resources/skills/_agents.schema.json" || log_fail "Invalid _agents.schema.json JSON"
+jq empty "$REPO_ROOT/resources/skills/_agents.json" || log_fail "Invalid _agents.json JSON"
+jq -e '.agents["claude-code"]' "$REPO_ROOT/resources/skills/_agents.json" >/dev/null || log_fail "_agents.json missing claude-code"
+jq -e '.agents["antigravity-cli"]' "$REPO_ROOT/resources/skills/_agents.json" >/dev/null || log_fail "_agents.json missing antigravity-cli"
+jq -e '.agents["codex-cli"]' "$REPO_ROOT/resources/skills/_agents.json" >/dev/null || log_fail "_agents.json missing codex-cli"
+
+# Assert agent library and path resolution
+[ -f "$REPO_ROOT/scripts/lib/agents.sh" ] || log_fail "Missing scripts/lib/agents.sh"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/scripts/lib/agents.sh"
+CLAUDE_TEST_PATH="$(resolve_agent_global_path claude-code "/test/home")"
+[ "$CLAUDE_TEST_PATH" = "/test/home/.claude/skills" ] || log_fail "resolve_agent_global_path failed for claude-code"
+GEMINI_TEST_PATH="$(resolve_agent_global_path antigravity-cli "/test/home")"
+[ "$GEMINI_TEST_PATH" = "/test/home/.gemini/config/skills" ] || log_fail "resolve_agent_global_path failed for antigravity-cli"
+
+# Assert Claude Code package in packages.nix
+grep -Fq "claudeCode" "$REPO_ROOT/modules/packages.nix" || log_fail "modules/packages.nix missing claudeCode"
+
+log_ok "Ponytail, Junior, Release Notes, Caveman, RTK, Codebase Memory, CodeGraph, and Agent Adapters schemas are valid"
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
@@ -135,10 +156,13 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini >/dev/null
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target codex >/dev/null
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "Failed to link ponytail to codex"
 
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target claude >/dev/null
+[ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "Failed to link ponytail to claude"
+
 # Test 2.4: add command (project target)
 (cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target project >/dev/null)
 [ -L "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Failed to link ponytail to project .agents/skills"
-log_ok "ai-skills.sh add links correctly across gemini, codex, and project"
+log_ok "ai-skills.sh add links correctly across gemini, codex, claude, and project"
 
 # Test 2.5: export command
 EXPORT_OUTPUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" export ponytail)
@@ -149,6 +173,9 @@ log_ok "ai-skills.sh export produces markdown snippet"
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target gemini >/dev/null
 [ ! -e "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "remove command failed to unlink gemini target"
 
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target claude >/dev/null
+[ ! -e "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "remove command failed to unlink claude target"
+
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target all >/dev/null
 [ ! -e "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "remove command failed to unlink codex target"
 log_ok "ai-skills.sh remove unlinks targets cleanly"
@@ -157,15 +184,20 @@ log_ok "ai-skills.sh remove unlinks targets cleanly"
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync command failed to link gemini ponytail"
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex ponytail"
+[ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "sync command failed to link claude ponytail"
 [ -L "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync command failed to link gemini junior-coding-agent"
 [ -L "$MOCK_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync command failed to link codex junior-coding-agent"
+[ -L "$MOCK_HOME/.claude/skills/junior-coding-agent" ] || log_fail "sync command failed to link claude junior-coding-agent"
 [ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync command failed to link gemini release-notes"
 [ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync command failed to link codex release-notes"
+[ -L "$MOCK_HOME/.claude/skills/release-notes" ] || log_fail "sync command failed to link claude release-notes"
 [ -L "$MOCK_HOME/.gemini/config/skills/caveman" ] || log_fail "sync command failed to link gemini caveman"
 [ -L "$MOCK_HOME/.codex/skills/caveman" ] || log_fail "sync command failed to link codex caveman"
+[ -L "$MOCK_HOME/.claude/skills/caveman" ] || log_fail "sync command failed to link claude caveman"
 [ -L "$MOCK_HOME/.gemini/config/skills/rtk" ] || log_fail "sync command failed to link gemini rtk"
 [ -L "$MOCK_HOME/.codex/skills/rtk" ] || log_fail "sync command failed to link codex rtk"
-log_ok "ai-skills.sh sync synchronizes canonical skills"
+[ -L "$MOCK_HOME/.claude/skills/rtk" ] || log_fail "sync command failed to link claude rtk"
+log_ok "ai-skills.sh sync synchronizes canonical skills across all agents"
 
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration
@@ -178,6 +210,7 @@ mkdir -p "$MOCK_SYNC_HOME"
 HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync-editors.sh did not link ponytail skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/ponytail" ] || log_fail "sync-editors.sh did not link codex skill"
+[ -L "$MOCK_SYNC_HOME/.claude/skills/ponytail" ] || log_fail "sync-editors.sh did not link claude skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link junior-coding-agent skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not link codex junior-coding-agent skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync-editors.sh did not link release-notes skill"
@@ -186,6 +219,7 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.codex/skills/caveman" ] || log_fail "sync-editors.sh did not link codex caveman skill"
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/rtk" ] || log_fail "sync-editors.sh did not link rtk skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/rtk" ] || log_fail "sync-editors.sh did not link codex rtk skill"
+[ -L "$MOCK_SYNC_HOME/.claude/skills/rtk" ] || log_fail "sync-editors.sh did not link claude rtk skill"
 log_ok "sync-editors.sh links skills automatically"
 
 echo

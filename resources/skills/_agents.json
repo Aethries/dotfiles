@@ -1,0 +1,78 @@
+{
+  "$schema": "./_agents.schema.json",
+  "version": 1,
+  "agents": {
+    "antigravity-cli": {
+      "name": "Google Antigravity CLI",
+      "binary": "agy",
+      "env_var": "GEMINI_CONFIG_DIR",
+      "global_path": "$HOME/.gemini/config/skills",
+      "project_path": ".agents/skills",
+      "rule_file": "GEMINI.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "antigravity-ide": {
+      "name": "Google Antigravity IDE",
+      "binary": "antigravity-ide",
+      "env_var": "ANTIGRAVITY_CONFIG_DIR",
+      "global_path": "$HOME/.gemini/antigravity-cli/skills",
+      "project_path": ".agents/skills",
+      "rule_file": "GEMINI.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "antigravity-desktop": {
+      "name": "Google Antigravity Desktop",
+      "binary": "antigravity",
+      "env_var": "GEMINI_HOME",
+      "global_path": "$HOME/.gemini/skills",
+      "project_path": ".agents/skills",
+      "rule_file": "GEMINI.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "codex-cli": {
+      "name": "OpenAI Codex CLI",
+      "binary": "codex",
+      "env_var": "CODEX_HOME",
+      "global_path": "$HOME/.codex/skills",
+      "project_path": ".codex/skills",
+      "rule_file": "AGENTS.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "codex-gui": {
+      "name": "OpenAI Codex GUI / Desktop",
+      "binary": "codex-desktop",
+      "env_var": "CODEX_HOME",
+      "global_path": "$HOME/.codex/gui/skills",
+      "project_path": ".codex/gui/skills",
+      "rule_file": "AGENTS.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    },
+    "claude-code": {
+      "name": "Anthropic Claude Code CLI",
+      "binary": "claude",
+      "env_var": "CLAUDE_CONFIG_DIR",
+      "global_path": "$HOME/.claude/skills",
+      "project_path": ".claude/skills",
+      "rule_file": "CLAUDE.md",
+      "supported_install_modes": [
+        "global_symlink",
+        "project_copy"
+      ]
+    }
+  }
+}

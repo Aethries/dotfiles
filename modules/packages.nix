@@ -57,6 +57,15 @@ let
       });
   antigravity = antigravityFlake.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity;
   antigravityCli = llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli;
+  claudeCode =
+    (llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.claude-code).overrideAttrs
+      (old: {
+        postInstall = (old.postInstall or "") + ''
+          if [ -f "$out/bin/claude" ] && [ ! -e "$out/bin/claude-code" ]; then
+            ln -s claude $out/bin/claude-code
+          fi
+        '';
+      });
 
   codexDesktop =
     (llmAgentsFlake.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt).overrideAttrs
@@ -201,6 +210,7 @@ in
     antigravity
     antigravityIde
     antigravityCli
+    claudeCode
     codex
     codexDesktop
     rtk

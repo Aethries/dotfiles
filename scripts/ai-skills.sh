@@ -24,6 +24,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILLS_SRC="$REPO_ROOT/resources/skills"
 
+# Load agent adapter library
+if [ -f "$REPO_ROOT/scripts/lib/agents.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/agents.sh"
+fi
+
 # Dynamic user and home detection (never hardcode user paths)
 TARGET_USER="$(id -un)"
 TARGET_HOME="$HOME"
@@ -32,8 +38,10 @@ if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
     TARGET_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
 fi
 
-GEMINI_SKILLS_DIR="$TARGET_HOME/.gemini/config/skills"
-CODEX_SKILLS_DIR="$TARGET_HOME/.codex/skills"
+GEMINI_SKILLS_DIR="$(resolve_agent_global_path antigravity-cli "$TARGET_HOME")"
+GEMINI_IDE_SKILLS_DIR="$(resolve_agent_global_path antigravity-ide "$TARGET_HOME")"
+CODEX_SKILLS_DIR="$(resolve_agent_global_path codex-cli "$TARGET_HOME")"
+CLAUDE_SKILLS_DIR="$(resolve_agent_global_path claude-code "$TARGET_HOME")"
 PROJECT_SKILLS_DIR="$PWD/.agents/skills"
 
 safe_link() {
@@ -89,14 +97,17 @@ list_skills() {
     local found=0
     for skill_dir in "$SKILLS_SRC"/*; do
         [ -d "$skill_dir" ] || continue
-        found=1
+        [ -f "$skill_dir/SKILL.md" ] || continue
         local name
         name="$(basename "$skill_dir")"
+        [[ "$name" == _* ]] && continue
+        found=1
         local desc
         desc="$(get_skill_desc "$skill_dir")"
 
         local status_gemini="${RED}○${RESET}"
         local status_codex="${RED}○${RESET}"
+        local status_claude="${RED}○${RESET}"
         local status_project="${RED}○${RESET}"
 
         if [ -L "$GEMINI_SKILLS_DIR/$name" ] && [ -e "$GEMINI_SKILLS_DIR/$name" ]; then
@@ -105,12 +116,15 @@ list_skills() {
         if [ -L "$CODEX_SKILLS_DIR/$name" ] && [ -e "$CODEX_SKILLS_DIR/$name" ]; then
             status_codex="${GREEN}●${RESET}"
         fi
+        if [ -L "$CLAUDE_SKILLS_DIR/$name" ] && [ -e "$CLAUDE_SKILLS_DIR/$name" ]; then
+            status_claude="${GREEN}●${RESET}"
+        fi
         if [ -L "$PROJECT_SKILLS_DIR/$name" ] && [ -e "$PROJECT_SKILLS_DIR/$name" ]; then
             status_project="${GREEN}●${RESET}"
         fi
 
         echo
-        echo -e "  ${BOLD}${name}${RESET}  [Gemini: $status_gemini | Codex: $status_codex | Project: $status_project]"
+        echo -e "  ${BOLD}${name}${RESET}  [Gemini: $status_gemini | Codex: $status_codex | Claude: $status_claude | Project: $status_project]"
         echo -e "    ${desc}"
     done
 
@@ -138,7 +152,7 @@ add_skill() {
     local target="${2:-all}"
     local skill_dir="$SKILLS_SRC/$name"
 
-    if [ ! -d "$skill_dir" ]; then
+    if [ ! -d "$skill_dir" ] || [ ! -f "$skill_dir/SKILL.md" ]; then
         log_fail "Skill '$name' does not exist in $SKILLS_SRC"
         return 1
     fi
@@ -148,25 +162,42 @@ add_skill() {
     case "$target" in
         all)
             safe_link "$skill_dir" "$GEMINI_SKILLS_DIR/$name"
-            log_ok "Linked to Gemini/Antigravity: $GEMINI_SKILLS_DIR/$name"
+            log_ok "Linked to Gemini/Antigravity CLI: $GEMINI_SKILLS_DIR/$name"
             safe_link "$skill_dir" "$CODEX_SKILLS_DIR/$name"
             log_ok "Linked to Codex CLI: $CODEX_SKILLS_DIR/$name"
+            safe_link "$skill_dir" "$CLAUDE_SKILLS_DIR/$name"
+            log_ok "Linked to Claude Code: $CLAUDE_SKILLS_DIR/$name"
             ;;
         gemini|antigravity)
             safe_link "$skill_dir" "$GEMINI_SKILLS_DIR/$name"
-            log_ok "Linked to Gemini/Antigravity: $GEMINI_SKILLS_DIR/$name"
+            log_ok "Linked to Gemini/Antigravity CLI: $GEMINI_SKILLS_DIR/$name"
             ;;
-        codex)
+        antigravity-ide)
+            safe_link "$skill_dir" "$GEMINI_IDE_SKILLS_DIR/$name"
+            log_ok "Linked to Antigravity IDE: $GEMINI_IDE_SKILLS_DIR/$name"
+            ;;
+        codex|codex-cli)
             safe_link "$skill_dir" "$CODEX_SKILLS_DIR/$name"
             log_ok "Linked to Codex CLI: $CODEX_SKILLS_DIR/$name"
+            ;;
+        claude|claude-code)
+            safe_link "$skill_dir" "$CLAUDE_SKILLS_DIR/$name"
+            log_ok "Linked to Claude Code: $CLAUDE_SKILLS_DIR/$name"
             ;;
         project)
             safe_link "$skill_dir" "$PROJECT_SKILLS_DIR/$name"
             log_ok "Linked to Project: $PROJECT_SKILLS_DIR/$name"
             ;;
         *)
-            log_fail "Unknown target: $target (choose: all, gemini, codex, project)"
-            return 1
+            local custom_path
+            custom_path="$(resolve_agent_global_path "$target" "$TARGET_HOME")"
+            if [ -n "$custom_path" ] && [ "$custom_path" != "$TARGET_HOME/.$target/skills" ]; then
+                safe_link "$skill_dir" "$custom_path/$name"
+                log_ok "Linked to $(get_agent_name "$target"): $custom_path/$name"
+            else
+                log_fail "Unknown target: $target (choose: all, gemini, codex, claude, project, or agent id)"
+                return 1
+            fi
             ;;
     esac
 }
@@ -181,20 +212,33 @@ remove_skill() {
         all)
             safe_unlink "$GEMINI_SKILLS_DIR/$name"
             safe_unlink "$CODEX_SKILLS_DIR/$name"
+            safe_unlink "$CLAUDE_SKILLS_DIR/$name"
             safe_unlink "$PROJECT_SKILLS_DIR/$name"
             ;;
         gemini|antigravity)
             safe_unlink "$GEMINI_SKILLS_DIR/$name"
             ;;
-        codex)
+        antigravity-ide)
+            safe_unlink "$GEMINI_IDE_SKILLS_DIR/$name"
+            ;;
+        codex|codex-cli)
             safe_unlink "$CODEX_SKILLS_DIR/$name"
+            ;;
+        claude|claude-code)
+            safe_unlink "$CLAUDE_SKILLS_DIR/$name"
             ;;
         project)
             safe_unlink "$PROJECT_SKILLS_DIR/$name"
             ;;
         *)
-            log_fail "Unknown target: $target (choose: all, gemini, codex, project)"
-            return 1
+            local custom_path
+            custom_path="$(resolve_agent_global_path "$target" "$TARGET_HOME")"
+            if [ -n "$custom_path" ]; then
+                safe_unlink "$custom_path/$name"
+            else
+                log_fail "Unknown target: $target (choose: all, gemini, codex, claude, project, or agent id)"
+                return 1
+            fi
             ;;
     esac
 }
@@ -208,8 +252,10 @@ sync_skills() {
 
     for skill_dir in "$SKILLS_SRC"/*; do
         [ -d "$skill_dir" ] || continue
+        [ -f "$skill_dir/SKILL.md" ] || continue
         local name
         name="$(basename "$skill_dir")"
+        [[ "$name" == _* ]] && continue
         add_skill "$name" "all"
     done
     log_ok "All skills synchronized successfully"
@@ -234,7 +280,7 @@ interactive_mode() {
         return 1
     fi
 
-    mapfile -t skills < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
+    mapfile -t skills < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | sort)
     if [ "${#skills[@]}" -eq 0 ]; then
         echo "No skills available in $SKILLS_SRC."
         return 0
@@ -267,22 +313,24 @@ interactive_mode() {
 
     echo
     echo -e "Selected Skill: ${BOLD}${selected_skill}${RESET}"
-    echo "1) Link to All (Gemini & Codex)"
-    echo "2) Link to Gemini / Antigravity only"
+    echo "1) Link to All (Gemini, Codex & Claude)"
+    echo "2) Link to Gemini / Antigravity CLI only"
     echo "3) Link to Codex CLI only"
-    echo "4) Link to current project (.agents/skills)"
-    echo "5) Export ruleset snippet for .cursorrules / CLAUDE.md"
-    echo "6) Unlink / Remove skill"
+    echo "4) Link to Claude Code only"
+    echo "5) Link to current project (.agents/skills)"
+    echo "6) Export ruleset snippet for .cursorrules / CLAUDE.md"
+    echo "7) Unlink / Remove skill"
     echo "q) Quit"
-    read -r -p "Choose action [1-6/q]: " action
+    read -r -p "Choose action [1-7/q]: " action
 
     case "$action" in
         1) add_skill "$selected_skill" "all" ;;
         2) add_skill "$selected_skill" "gemini" ;;
         3) add_skill "$selected_skill" "codex" ;;
-        4) add_skill "$selected_skill" "project" ;;
-        5) export_skill "$selected_skill" ;;
-        6) remove_skill "$selected_skill" "all" ;;
+        4) add_skill "$selected_skill" "claude" ;;
+        5) add_skill "$selected_skill" "project" ;;
+        6) export_skill "$selected_skill" ;;
+        7) remove_skill "$selected_skill" "all" ;;
         *) echo "Cancelled." ;;
     esac
 }
@@ -292,9 +340,9 @@ show_usage() {
     echo
     echo "Commands:"
     echo "  list                     List all available skills and their link status"
-    echo "  add <skill> [--target <all|gemini|codex|project>]"
+    echo "  add <skill> [--target <all|gemini|codex|claude|project>]"
     echo "                           Link a skill to agent config (default target: all)"
-    echo "  remove <skill> [--target <all|gemini|codex|project>]"
+    echo "  remove <skill> [--target <all|gemini|codex|claude|project>]"
     echo "                           Unlink a skill from agent config"
     echo "  sync                     Synchronize all repository skills to agents"
     echo "  preview <skill>          Display full skill contents"
@@ -305,6 +353,7 @@ show_usage() {
     echo "Examples:"
     echo "  add-skills list"
     echo "  add-skills add ponytail"
+    echo "  add-skills add ponytail --target claude"
     echo "  add-skills add ponytail --target project"
     echo "  add-skills sync"
 }

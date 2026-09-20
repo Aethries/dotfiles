@@ -104,10 +104,12 @@ fi
 
 if [ -d "$REPO_ROOT/resources/skills" ]; then
     for skill_dir in "$REPO_ROOT/resources/skills"/*; do
-        if [ -d "$skill_dir" ]; then
+        if [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ]; then
             skill_name="$(basename "$skill_dir")"
+            [[ "$skill_name" == _* ]] && continue
             safe_link "$skill_dir" "$TARGET_HOME/.gemini/config/skills/$skill_name"
             safe_link "$skill_dir" "$TARGET_HOME/.codex/skills/$skill_name"
+            safe_link "$skill_dir" "$TARGET_HOME/.claude/skills/$skill_name"
         fi
     done
 fi
@@ -131,6 +133,7 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude/skills" 2>/dev/null || true
 fi
 success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 
