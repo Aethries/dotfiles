@@ -80,6 +80,17 @@
         "senior-implementer",
         "pixel-perfect-ui"
       ]
+    },
+    "senior-operations": {
+      "name": "Senior Operations & Verification",
+      "description": "Layer 1 operations: engineering review, incident response, reliability, migrations, and technical research",
+      "skills": [
+        "engineering-review",
+        "incident-investigator",
+        "reliability-engineer",
+        "migration-strategist",
+        "technical-researcher"
+      ]
     }
   }
 }

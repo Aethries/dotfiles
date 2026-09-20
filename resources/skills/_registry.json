@@ -353,6 +353,94 @@
         "quality-gate"
       ],
       "content_hash": "sha256:21002041c82633d4f27ce55d697a0a8fd63adefc2664777cf328c28c6104b85d"
+    },
+    "engineering-review": {
+      "name": "engineering-review",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rigorous pull request and code change review. Categorizes findings into Blocker, Warning, and Suggestion against specs and repo standards.",
+      "tags": [
+        "review",
+        "pull-request",
+        "code-quality",
+        "verification",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "source-quality",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:dfbc90f52ce965c02d15e530de8f36a00ae3c810dadbd2fdb9472af5dc8a0916"
+    },
+    "incident-investigator": {
+      "name": "incident-investigator",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Production incident triage, live troubleshooting, and root cause analysis with 5 Whys and blameless post-mortems.",
+      "tags": [
+        "incident",
+        "postmortem",
+        "triage",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:52891cbbddad828e955b32a27a183b55a72cc019f5564ba012243df8ad046bea"
+    },
+    "reliability-engineer": {
+      "name": "reliability-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Site reliability engineering and system resilience design: circuit breakers, jittered backoff, DLQs, and SLOs.",
+      "tags": [
+        "sre",
+        "reliability",
+        "resilience",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:070068b7d4bd8ef58ef629faa25403b988d3be686fe8ef16a08f1c9a744dd9f5"
+    },
+    "migration-strategist": {
+      "name": "migration-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero-downtime database, data model, and system migrations via multi-phase expand-contract patterns.",
+      "tags": [
+        "database",
+        "migration",
+        "expand-contract",
+        "zero-downtime",
+        "layer1"
+      ],
+      "dependencies": [
+        "data-model-architect",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:acc4137b4c3e59a7e767d302064ef331fab461e7da9d8d8b9377c841e89d4e55"
+    },
+    "technical-researcher": {
+      "name": "technical-researcher",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Conducts deep technical spikes, library/vendor evaluations, benchmarks, and trade-off matrices.",
+      "tags": [
+        "research",
+        "benchmarking",
+        "spikes",
+        "evaluation",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:da0d1229ac9930f34c95a64a41edab8db84de4fb1068954fc05965e613926dd4"
     }
   }
 }

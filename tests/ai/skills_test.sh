@@ -364,6 +364,66 @@ jq -e '.profiles["frontend"].skills | index("pixel-perfect-ui")' "$REPO_ROOT/res
 
 log_ok "All Layer 2 Implementation Engine skills verified (templates, invariants, deprecation & registry)"
 
+# ------------------------------------------------------------------------------
+# 1.5 Validate Layer 1 Operations & Verification Skills
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 1 Operations & Verification skills..."
+
+OPS_SKILLS=(
+    "engineering-review"
+    "incident-investigator"
+    "reliability-engineer"
+    "migration-strategist"
+    "technical-researcher"
+)
+
+for o in "${OPS_SKILLS[@]}"; do
+    o_file="$REPO_ROOT/resources/skills/$o/SKILL.md"
+    [ -f "$o_file" ] || log_fail "Missing operations skill: $o_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$o_file")
+    [ "$head_line" = "---" ] || log_fail "$o/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$o" "$o_file" || log_fail "$o/SKILL.md missing valid name"
+    grep -Eiq '^description:' "$o_file" || log_fail "$o/SKILL.md missing description"
+
+    # Registry integrity
+    jq -e --arg s "$o" '.skills[$s]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $o"
+done
+
+# Check reference templates
+[ -f "$REPO_ROOT/resources/skills/engineering-review/references/review-checklist.md" ] || log_fail "Missing review-checklist.md"
+[ -f "$REPO_ROOT/resources/skills/incident-investigator/references/postmortem-template.md" ] || log_fail "Missing postmortem-template.md"
+[ -f "$REPO_ROOT/resources/skills/reliability-engineer/references/resilience-patterns.md" ] || log_fail "Missing resilience-patterns.md"
+[ -f "$REPO_ROOT/resources/skills/migration-strategist/references/migration-plan-template.md" ] || log_fail "Missing migration-plan-template.md"
+[ -f "$REPO_ROOT/resources/skills/technical-researcher/references/evaluation-matrix.md" ] || log_fail "Missing evaluation-matrix.md"
+
+# Invariant checks
+grep -Fq "BLOCKER" "$REPO_ROOT/resources/skills/engineering-review/SKILL.md" || log_fail "engineering-review missing BLOCKER classification"
+grep -Fq "5 Whys" "$REPO_ROOT/resources/skills/incident-investigator/SKILL.md" || log_fail "incident-investigator missing 5 Whys rule"
+grep -Fq "Exponential Backoff with Full Jitter" "$REPO_ROOT/resources/skills/reliability-engineer/SKILL.md" || log_fail "reliability-engineer missing jitter rule"
+grep -Fq "Mandatory Expand-Contract Pattern" "$REPO_ROOT/resources/skills/migration-strategist/SKILL.md" || log_fail "migration-strategist missing Expand-Contract rule"
+grep -Fq "Objective, Bias-Free Evaluation" "$REPO_ROOT/resources/skills/technical-researcher/SKILL.md" || log_fail "technical-researcher missing bias-free rule"
+
+# Trigger Boundary Fixtures
+REV_DESC=$(jq -r '.skills["engineering-review"].description' "$REPO_ROOT/resources/skills/_registry.json")
+INC_DESC=$(jq -r '.skills["incident-investigator"].description' "$REPO_ROOT/resources/skills/_registry.json")
+
+# Input: "Review PR 42 against the auth specification." -> triggers engineering-review
+echo "$REV_DESC" | grep -Eiq "review|pull request" || log_fail "engineering-review description fails to match PR review query"
+
+# Input: "Production API is throwing 500 errors on checkout, investigate immediately." -> triggers incident-investigator
+echo "$INC_DESC" | grep -Eiq "incident|triage|outage" || log_fail "incident-investigator description fails to match incident query"
+
+# Profile check
+jq -e '.profiles["senior-operations"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'senior-operations' profile"
+for o in "${OPS_SKILLS[@]}"; do
+    jq -e --arg o "$o" '.profiles["senior-operations"].skills | index($o)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "senior-operations profile missing $o"
+done
+
+log_ok "All 5 Layer 1 Operations & Verification skills verified (templates, invariants, trigger boundaries & registry)"
+
+
 
 
 
