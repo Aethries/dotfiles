@@ -82,6 +82,23 @@ validate_state_version() {
         || error "Invalid NixOS stateVersion: $1 (expected YY.MM)"
 }
 
+migrate_machine_hardware_extra_import() {
+    if grep -Fq './hardware-extra.nix' "$MACHINE_CONFIG"; then
+        return 0
+    fi
+
+    if ! grep -Eq '^[[:space:]]*\./hardware-configuration\.nix[[:space:]]*$' "$MACHINE_CONFIG"; then
+        error "Existing machine configuration does not import ./hardware-configuration.nix; add ./hardware-extra.nix to its imports manually."
+    fi
+
+    if [ ! -w "$MACHINE_CONFIG" ]; then
+        error "Existing machine configuration is not writable; restore ownership, then rerun bootstrap so ./hardware-extra.nix can be imported."
+    fi
+
+    sed -i '/^[[:space:]]*\.\/hardware-configuration\.nix[[:space:]]*$/a\    ./hardware-extra.nix' "$MACHINE_CONFIG"
+    success "Migrated existing machine configuration to import $HARDWARE_EXTRA"
+}
+
 detect_state_version() {
     local state_version
     local system_configuration
@@ -158,6 +175,7 @@ EOF
     fi
 
     if [ -f "$MACHINE_CONFIG" ]; then
+        migrate_machine_hardware_extra_import
         success "Existing machine configuration preserved at $MACHINE_CONFIG"
         return 0
     fi
