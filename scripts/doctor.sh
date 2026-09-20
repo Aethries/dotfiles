@@ -305,7 +305,15 @@ if [ "$ROUTER_9_LISTEN" = true ] && [ "$OMNI_LISTEN_LOOPBACK" = true ]; then
     ok "AI Gateways coexistence verified (port $ROUTER_9_PORT: 9router, port $OMNIROUTE_PORT: OmniRoute loopback)"
 fi
 
-# Verify AI Agent Skills
+# Verify AI Agent Skills & Doctor Subsystem
+if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
+    if "$REPO_ROOT/scripts/ai-skills.sh" doctor >/dev/null 2>&1; then
+        ok "AI Skills doctor subsystem audit passed"
+    else
+        warn "AI Skills doctor audit reported issues (run 'ai-skills doctor')"
+    fi
+fi
+
 if [ -d "$REPO_ROOT/resources/skills" ]; then
     for skill_dir in "$REPO_ROOT/resources/skills"/*; do
         [ -d "$skill_dir" ] || continue
@@ -315,7 +323,7 @@ if [ -d "$REPO_ROOT/resources/skills" ]; then
             if [ -L "$HOME/.gemini/config/skills/$skill_name" ] && [ -e "$HOME/.gemini/config/skills/$skill_name" ]; then
                 ok "AI Skill '$skill_name' active in Antigravity/Gemini"
             else
-                warn "AI Skill '$skill_name' is not linked in ~/.gemini/config/skills (run 'add-skills sync')"
+                warn "AI Skill '$skill_name' is not linked in ~/.gemini/config/skills (run 'ai-skills sync')"
             fi
         fi
     done

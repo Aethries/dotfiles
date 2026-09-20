@@ -167,3 +167,38 @@ map_target_to_agent_ids() {
             ;;
     esac
 }
+
+resolve_target_paths() {
+    local mode="$1" # "global" or "project"
+    local base_dir="${2:-$PWD}"
+    shift 2
+    local targets=("$@")
+
+    local resolved_paths=()
+    for t in "${targets[@]}"; do
+        [ -n "$t" ] || continue
+        local agent_ids
+        agent_ids="$(map_target_to_agent_ids "$t")"
+        if [ -z "$agent_ids" ]; then
+            agent_ids="$t"
+        fi
+
+        for aid in $agent_ids; do
+            local p=""
+            if [ "$mode" = "project" ]; then
+                p="$(resolve_agent_project_path "$aid" "$base_dir")"
+            else
+                p="$(resolve_agent_global_path "$aid" "$base_dir")"
+            fi
+            if [ -n "$p" ]; then
+                resolved_paths+=("$p")
+            fi
+        done
+    done
+
+    if [ "${#resolved_paths[@]}" -eq 0 ]; then
+        return 0
+    fi
+
+    printf '%s\n' "${resolved_paths[@]}" | LC_ALL=C sort -u
+}

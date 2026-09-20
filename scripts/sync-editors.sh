@@ -114,6 +114,29 @@ if [ -d "$REPO_ROOT/resources/skills" ]; then
     done
 fi
 
+if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
+    info "Exporting consolidated AI rules and instructions for editors"
+    RULES_CONTENT="$("$REPO_ROOT/scripts/ai-skills.sh" export --all)"
+
+    # 1. Claude Code (CLAUDE.md)
+    mkdir -p "$TARGET_HOME/.claude"
+    echo "$RULES_CONTENT" > "$TARGET_HOME/.claude/CLAUDE.md"
+
+    # 2. Neovim (AGENTS.md)
+    mkdir -p "$TARGET_HOME/.config/nvim"
+    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/nvim/AGENTS.md"
+
+    # 3. Zed
+    mkdir -p "$TARGET_HOME/.config/zed/prompts"
+    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/zed/prompts/AGENTS.md"
+
+    # 4. VSCode / Antigravity IDE
+    mkdir -p "$TARGET_HOME/.antigravity-ide/User/prompts"
+    echo "$RULES_CONTENT" > "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md"
+    mkdir -p "$TARGET_HOME/.config/Code/User/prompts"
+    echo "$RULES_CONTENT" > "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"
+fi
+
 TEMPLATE_SOURCE="${GODOT_EXPORT_TEMPLATES_SOURCE:-/run/current-system/sw/share/godot/export_templates}"
 if [ -d "$TEMPLATE_SOURCE" ]; then
     safe_link "$TEMPLATE_SOURCE" "$TARGET_DATA/godot/export_templates"
@@ -128,12 +151,16 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.antigravity-ide/User/settings.json" \
         "$TARGET_HOME/.antigravity-ide/User/keybindings.json" \
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
-        "$TARGET_HOME/.gemini/antigravity/mcp_config.json" 2>/dev/null || true
+        "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
+        "$TARGET_HOME/.claude/CLAUDE.md" \
+        "$TARGET_HOME/.config/nvim/AGENTS.md" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.antigravity-ide/User" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/config" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.gemini/antigravity" 2>/dev/null || true
     chown -R "$TARGET_USER:" "$TARGET_HOME/.codex/skills" 2>/dev/null || true
-    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude/skills" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.claude" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/zed" 2>/dev/null || true
+    chown -R "$TARGET_USER:" "$TARGET_HOME/.config/Code" 2>/dev/null || true
 fi
 success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
 

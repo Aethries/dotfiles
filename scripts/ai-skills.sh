@@ -136,13 +136,35 @@ list_skills() {
 
 preview_skill() {
     local name="$1"
-    local skill_file="$SKILLS_SRC/$name/SKILL.md"
+    local skill_dir="$SKILLS_SRC/$name"
+    local skill_file="$skill_dir/SKILL.md"
     if [ ! -f "$skill_file" ]; then
         log_fail "Skill '$name' not found at $SKILLS_SRC/$name"
         return 1
     fi
 
-    echo -e "${BOLD}${CYAN}=== Skill: $name ===${RESET}"
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local ver="1.0.0"
+    local src="canonical"
+    local tags="[]"
+    local deps="none"
+    if [ -f "$reg_file" ]; then
+        ver="$(jq -r --arg s "$name" '.skills[$s].version // "1.0.0"' "$reg_file")"
+        src="$(jq -r --arg s "$name" '.skills[$s].source // "canonical"' "$reg_file")"
+        tags="$(jq -r --arg s "$name" '.skills[$s].tags // [] | join(", ")' "$reg_file")"
+        deps="$(jq -r --arg s "$name" '.skills[$s].dependencies // [] | join(", ")' "$reg_file")"
+        [ -z "$deps" ] && deps="none"
+    fi
+
+    local desc
+    desc="$(get_skill_desc "$skill_dir")"
+
+    echo -e "${BOLD}${CYAN}=== AI Skill: $name (v${ver}) ===${RESET}"
+    echo -e "  ${BOLD}Source:${RESET}       $src"
+    echo -e "  ${BOLD}Tags:${RESET}         $tags"
+    echo -e "  ${BOLD}Dependencies:${RESET} $deps"
+    echo -e "  ${BOLD}Description:${RESET}  $desc"
+    echo -e "${BOLD}${BLUE}--- SKILL.md ---${RESET}"
     cat "$skill_file"
     echo
 }
@@ -456,21 +478,44 @@ remove_skill() {
 }
 
 sync_skills() {
-    log_info "Synchronizing all canonical skills to user agents..."
+    log_info "Synchronizing canonical skills from _registry.json to user agents..."
     if [ ! -d "$SKILLS_SRC" ]; then
         log_warn "No skills directory at $SKILLS_SRC"
         return 0
     fi
 
-    for skill_dir in "$SKILLS_SRC"/*; do
-        [ -d "$skill_dir" ] || continue
-        [ -f "$skill_dir/SKILL.md" ] || continue
-        local name
-        name="$(basename "$skill_dir")"
-        [[ "$name" == _* ]] && continue
-        add_skill "$name" "all"
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local skill_names=()
+    if [ -f "$reg_file" ]; then
+        mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file" | LC_ALL=C sort)
+    else
+        mapfile -t skill_names < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
+    fi
+
+    for name in "${skill_names[@]}"; do
+        [ -d "$SKILLS_SRC/$name" ] || continue
+        [ -f "$SKILLS_SRC/$name/SKILL.md" ] || continue
+        install_global "$name" "all"
     done
-    log_ok "All skills synchronized successfully"
+
+    # Reconcile and clean up broken symlinks across agent global directories
+    local agent_ids
+    agent_ids="$(get_all_agent_ids)"
+    for agent in $agent_ids; do
+        local gpath
+        gpath="$(resolve_agent_global_path "$agent" "$TARGET_HOME")"
+        if [ -d "$gpath" ]; then
+            for link in "$gpath"/*; do
+                [ -L "$link" ] || continue
+                if [ ! -e "$link" ]; then
+                    log_warn "Removing broken global symlink: $link"
+                    rm -f "$link"
+                fi
+            done
+        fi
+    done
+
+    log_ok "All skills synchronized successfully against _registry.json"
 }
 
 export_skill() {
@@ -486,64 +531,451 @@ export_skill() {
     sed -e '1{/^---$/!q;};1,/^---$/d' "$skill_file"
 }
 
-interactive_mode() {
+export_all_rules() {
+    echo "<!-- Consolidated AI Rules & Instructions -->"
+    echo "# AI Agent Guidelines & Engineering Standards"
+    echo
+    echo "> Generated automatically from canonical AI skills registry."
+    echo
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local skill_names=()
+    if [ -f "$reg_file" ]; then
+        mapfile -t skill_names < <(jq -r '.skills | keys[]' "$reg_file" | LC_ALL=C sort)
+    else
+        mapfile -t skill_names < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
+    fi
+
+    for s in "${skill_names[@]}"; do
+        local skill_file="$SKILLS_SRC/$s/SKILL.md"
+        [ -f "$skill_file" ] || continue
+        echo "## $s"
+        echo
+        sed -e '1{/^---$/!q;};1,/^---$/d' "$skill_file"
+        echo
+        echo "---"
+        echo
+    done
+}
+
+cmd_diff() {
+    local proj_root
+    proj_root="$(find_project_root "$PWD")"
+    local lock_file="$proj_root/.agent-skills.lock.json"
+
+    local skills_to_diff=()
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --project|-p)
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    proj_root="$(find_project_root "$2")"
+                    lock_file="$proj_root/.agent-skills.lock.json"
+                    shift 2
+                else
+                    shift 1
+                fi
+                ;;
+            *)
+                skills_to_diff+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [ "${#skills_to_diff[@]}" -eq 0 ]; then
+        if [ -f "$lock_file" ]; then
+            mapfile -t skills_to_diff < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)
+        elif [ -d "$proj_root/.agents/skills" ]; then
+            mapfile -t skills_to_diff < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true)
+        fi
+    fi
+
+    if [ "${#skills_to_diff[@]}" -eq 0 ]; then
+        log_warn "No project skills found to diff in $proj_root"
+        return 0
+    fi
+
+    local has_diff=0
+    for s in "${skills_to_diff[@]}"; do
+        local canonical_dir="$SKILLS_SRC/$s"
+        if [ ! -d "$canonical_dir" ]; then
+            log_fail "Canonical skill '$s' not found at $canonical_dir"
+            has_diff=1
+            continue
+        fi
+
+        local local_dir=""
+        if [ -f "$lock_file" ]; then
+            local rel_path
+            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file" 2>/dev/null || true)"
+            if [ -n "$rel_path" ] && [ -d "$proj_root/$rel_path" ]; then
+                local_dir="$proj_root/$rel_path"
+            fi
+        fi
+
+        if [ -z "$local_dir" ]; then
+            if [ -d "$proj_root/.agents/skills/$s" ]; then
+                local_dir="$proj_root/.agents/skills/$s"
+            elif [ -d "$proj_root/.codex/skills/$s" ]; then
+                local_dir="$proj_root/.codex/skills/$s"
+            elif [ -d "$proj_root/.claude/skills/$s" ]; then
+                local_dir="$proj_root/.claude/skills/$s"
+            fi
+        fi
+
+        if [ -z "$local_dir" ] || [ ! -d "$local_dir" ]; then
+            log_fail "Project skill '$s' not found on disk in $proj_root"
+            has_diff=1
+            continue
+        fi
+
+        echo -e "${BOLD}${CYAN}Diffing skill '$s': canonical ($canonical_dir) <-> local ($local_dir)${RESET}"
+        if ! diff -u -r "$canonical_dir" "$local_dir"; then
+            has_diff=1
+        else
+            log_ok "Skill '$s' matches canonical version"
+        fi
+        echo
+    done
+
+    return "$has_diff"
+}
+
+cmd_update() {
+    local force=false
+    local skills_to_update=()
+    local proj_dir="$PWD"
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force|-f)
+                force=true
+                shift
+                ;;
+            --project|-p)
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    proj_dir="$2"
+                    shift 2
+                else
+                    shift 1
+                fi
+                ;;
+            *)
+                skills_to_update+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    local proj_root
+    proj_root="$(find_project_root "$proj_dir")"
+    local lock_file="$proj_root/.agent-skills.lock.json"
+
+    if [ "${#skills_to_update[@]}" -eq 0 ]; then
+        if [ -f "$lock_file" ]; then
+            mapfile -t skills_to_update < <(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)
+        elif [ -d "$proj_root/.agents/skills" ]; then
+            mapfile -t skills_to_update < <(find "$proj_root/.agents/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null || true)
+        fi
+    fi
+
+    if [ "${#skills_to_update[@]}" -eq 0 ]; then
+        log_warn "No project skills found to update in $proj_root"
+        return 0
+    fi
+
+    local update_count=0
+    for s in "${skills_to_update[@]}"; do
+        local canonical_dir="$SKILLS_SRC/$s"
+        if [ ! -d "$canonical_dir" ]; then
+            log_fail "Canonical skill '$s' not found at $canonical_dir"
+            continue
+        fi
+
+        local local_dir=""
+        local rel_path=""
+        if [ -f "$lock_file" ]; then
+            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file" 2>/dev/null || true)"
+            if [ -n "$rel_path" ] && [ -d "$proj_root/$rel_path" ]; then
+                local_dir="$proj_root/$rel_path"
+            fi
+        fi
+
+        if [ -z "$local_dir" ]; then
+            if [ -d "$proj_root/.agents/skills/$s" ]; then
+                rel_path=".agents/skills/$s"
+                local_dir="$proj_root/$rel_path"
+            elif [ -d "$proj_root/.codex/skills/$s" ]; then
+                rel_path=".codex/skills/$s"
+                local_dir="$proj_root/$rel_path"
+            elif [ -d "$proj_root/.claude/skills/$s" ]; then
+                rel_path=".claude/skills/$s"
+                local_dir="$proj_root/$rel_path"
+            fi
+        fi
+
+        if [ -z "$local_dir" ] || [ ! -d "$local_dir" ]; then
+            log_fail "Project skill '$s' not found on disk to update"
+            continue
+        fi
+
+        local local_hash
+        local_hash="$(compute_skill_hash "$local_dir")"
+        local recorded_hash=""
+        if [ -f "$lock_file" ]; then
+            recorded_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file" 2>/dev/null || true)"
+        fi
+        local canonical_hash
+        canonical_hash="$(compute_skill_hash "$canonical_dir")"
+
+        # Check for local modifications
+        if [ -n "$recorded_hash" ] && [ "$local_hash" != "$recorded_hash" ] && [ "$local_hash" != "$canonical_hash" ]; then
+            if [ "$force" != true ]; then
+                if [ -t 0 ]; then
+                    read -r -p "Skill '$s' has local modifications. Overwrite with canonical? [y/N]: " confirm
+                    if [[ ! "$confirm" =~ ^[yY] ]]; then
+                        log_warn "Skipped '$s' (local modifications preserved)"
+                        continue
+                    fi
+                else
+                    log_warn "Skill '$s' has local modifications. Skipping (use --force to overwrite)."
+                    continue
+                fi
+            fi
+        fi
+
+        # Safely copy canonical bundle
+        rm -rf "$local_dir"
+        mkdir -p "$local_dir"
+        cp -f "$canonical_dir/SKILL.md" "$local_dir/"
+        for subdir in references scripts assets; do
+            if [ -d "$canonical_dir/$subdir" ]; then
+                cp -a "$canonical_dir/$subdir" "$local_dir/"
+            fi
+        done
+
+        update_project_lockfile "$proj_root" "$s" "add" "$rel_path"
+        log_ok "Updated skill '$s' in project: $local_dir (content hash: $canonical_hash)"
+        update_count=$((update_count + 1))
+    done
+
+    log_ok "Updated $update_count skill(s) in $proj_root"
+}
+
+cmd_doctor() {
+    local doctor_errors=0
+    local doctor_warns=0
+    local doctor_ok=0
+
+    echo -e "${BOLD}${CYAN}AI Skills Health Doctor${RESET}"
+    echo "Auditing global symlinks, project locks, and AI binaries..."
+    echo
+
+    # 1. Global symlinks
+    echo -e "${BOLD}${BLUE}==> Global Agent Symlinks${RESET}"
+    local agent_ids
+    agent_ids="$(get_all_agent_ids)"
+    for agent in $agent_ids; do
+        local gpath
+        gpath="$(resolve_agent_global_path "$agent" "$TARGET_HOME")"
+        if [ -d "$gpath" ]; then
+            for link in "$gpath"/*; do
+                [ -e "$link" ] || [ -L "$link" ] || continue
+                local link_name
+                link_name="$(basename "$link")"
+                [[ "$link_name" == _* ]] && continue
+                if [ -L "$link" ]; then
+                    if [ -e "$link" ]; then
+                        echo -e "  [${GREEN}✓${RESET}] $agent: $link_name -> $(readlink "$link")"
+                        doctor_ok=$((doctor_ok + 1))
+                    else
+                        echo -e "  [${RED}✗${RESET}] $agent: BROKEN symlink: $link -> $(readlink "$link")"
+                        doctor_errors=$((doctor_errors + 1))
+                    fi
+                elif [ -d "$link" ]; then
+                    echo -e "  [${YELLOW}!${RESET}] $agent: $link_name is a directory, not a symlink"
+                    doctor_warns=$((doctor_warns + 1))
+                fi
+            done
+        fi
+    done
+
+    # 2. Project locks & integrity
+    echo
+    echo -e "${BOLD}${BLUE}==> Project Skills & Lockfile Integrity${RESET}"
+    local proj_root
+    proj_root="$(find_project_root "$PWD")"
+    local lock_file="$proj_root/.agent-skills.lock.json"
+    if [ -f "$lock_file" ]; then
+        echo -e "  Lockfile: $lock_file"
+        local locked_skills
+        locked_skills="$(jq -r '.skills | keys[]' "$lock_file" 2>/dev/null || true)"
+        for s in $locked_skills; do
+            local expected_hash
+            expected_hash="$(jq -r --arg s "$s" '.skills[$s].content_hash // empty' "$lock_file")"
+            local rel_path
+            rel_path="$(jq -r --arg s "$s" '.skills[$s].target_path // empty' "$lock_file")"
+            [ -z "$rel_path" ] && rel_path=".agents/skills/$s"
+            local full_path="$proj_root/$rel_path"
+
+            if [ ! -d "$full_path" ]; then
+                echo -e "  [${RED}✗${RESET}] Skill '$s': missing on disk at $full_path"
+                doctor_errors=$((doctor_errors + 1))
+            else
+                local actual_hash
+                actual_hash="$(compute_skill_hash "$full_path")"
+                if [ "$actual_hash" = "$expected_hash" ]; then
+                    echo -e "  [${GREEN}✓${RESET}] Skill '$s': hash verified ($actual_hash)"
+                    doctor_ok=$((doctor_ok + 1))
+                else
+                    echo -e "  [${YELLOW}!${RESET}] Skill '$s': modified/drifted (lock: $expected_hash, local: $actual_hash)"
+                    doctor_warns=$((doctor_warns + 1))
+                fi
+            fi
+        done
+    else
+        echo -e "  No project lockfile found in $proj_root"
+    fi
+
+    # 3. Installed AI binaries
+    echo
+    echo -e "${BOLD}${BLUE}==> Installed AI Binaries${RESET}"
+    local binaries=("gemini" "codex" "claude" "rtk")
+    for bin in "${binaries[@]}"; do
+        if command -v "$bin" >/dev/null 2>&1; then
+            local bin_path
+            bin_path="$(command -v "$bin")"
+            echo -e "  [${GREEN}✓${RESET}] $bin: installed ($bin_path)"
+            doctor_ok=$((doctor_ok + 1))
+        elif [ "$bin" = "gemini" ] && command -v agy >/dev/null 2>&1; then
+            local bin_path
+            bin_path="$(command -v agy)"
+            echo -e "  [${GREEN}✓${RESET}] gemini (agy): installed ($bin_path)"
+            doctor_ok=$((doctor_ok + 1))
+        elif [ "$bin" = "claude" ] && command -v claude-code >/dev/null 2>&1; then
+            local bin_path
+            bin_path="$(command -v claude-code)"
+            echo -e "  [${GREEN}✓${RESET}] claude (claude-code): installed ($bin_path)"
+            doctor_ok=$((doctor_ok + 1))
+        else
+            echo -e "  [${YELLOW}!${RESET}] $bin: not found in PATH"
+            doctor_warns=$((doctor_warns + 1))
+        fi
+    done
+
+    echo
+    echo -e "${BOLD}Summary:${RESET} ${GREEN}${doctor_ok} OK${RESET}, ${YELLOW}${doctor_warns} Warnings${RESET}, ${RED}${doctor_errors} Errors${RESET}"
+    if [ "$doctor_errors" -gt 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+select_skills_interactive() {
     if [ ! -d "$SKILLS_SRC" ]; then
         log_fail "No skills repository found at $SKILLS_SRC"
         return 1
     fi
 
-    mapfile -t skills < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | sort)
+    mapfile -t skills < <(find "$SKILLS_SRC" -mindepth 1 -maxdepth 1 -type d ! -name '_*' -exec test -f '{}/SKILL.md' ';' -exec basename {} \; | LC_ALL=C sort)
     if [ "${#skills[@]}" -eq 0 ]; then
         echo "No skills available in $SKILLS_SRC."
         return 0
     fi
 
-    local selected_skill=""
+    local selected_skills=()
     if command -v fzf >/dev/null 2>&1; then
         # shellcheck disable=SC2016
-        selected_skill=$(printf '%s\n' "${skills[@]}" | fzf \
-            --prompt="Select AI Skill: " \
-            --header="[Enter] Select | [ESC] Exit" \
-            --preview "cat $SKILLS_SRC/{}/SKILL.md 2>/dev/null || echo 'No preview'" \
-            --preview-window="right:60%:wrap")
+        mapfile -t selected_skills < <(printf '%s\n' "${skills[@]}" | fzf \
+            --multi \
+            --prompt="Select AI Skill(s) [TAB=Multi-select, ENTER=Confirm]: " \
+            --header="[TAB] Toggle Selection | [Enter] Confirm | [ESC] Exit" \
+            --preview "$REPO_ROOT/scripts/ai-skills.sh preview {}" \
+            --preview-window="right:65%:wrap")
     else
-        echo -e "${BOLD}${CYAN}Select an AI Skill:${RESET}"
+        echo -e "${BOLD}${CYAN}Available AI Skills:${RESET}"
         local i=1
         for s in "${skills[@]}"; do
             echo "  $i) $s"
             i=$((i + 1))
         done
-        read -r -p "Enter number (1-${#skills[@]}): " choice
-        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#skills[@]}" ]; then
-            selected_skill="${skills[$((choice - 1))]}"
+        read -r -p "Enter number(s) (e.g. 1,3 or 'all'): " choices
+        if [ "$choices" = "all" ] || [ "$choices" = "*" ]; then
+            selected_skills=("${skills[@]}")
+        else
+            IFS=', ' read -r -a nums <<< "$choices"
+            for n in "${nums[@]}"; do
+                if [[ "$n" =~ ^[0-9]+$ ]] && [ "$n" -ge 1 ] && [ "$n" -le "${#skills[@]}" ]; then
+                    selected_skills+=("${skills[$((n - 1))]}")
+                fi
+            done
         fi
     fi
 
-    if [ -z "$selected_skill" ]; then
+    if [ "${#selected_skills[@]}" -eq 0 ]; then
         return 0
     fi
 
     echo
-    echo -e "Selected Skill: ${BOLD}${selected_skill}${RESET}"
-    echo "1) Link to All (Gemini, Codex & Claude)"
-    echo "2) Link to Gemini / Antigravity CLI only"
-    echo "3) Link to Codex CLI only"
-    echo "4) Link to Claude Code only"
-    echo "5) Link to current project (.agents/skills)"
-    echo "6) Export ruleset snippet for .cursorrules / CLAUDE.md"
-    echo "7) Unlink / Remove skill"
+    echo -e "${BOLD}Selected Skill(s):${RESET} ${GREEN}${selected_skills[*]}${RESET}"
+    echo "1) Link to All Global Agents (Gemini, Antigravity IDE, Codex, Claude)"
+    echo "2) Select Specific Global Agents via Multi-Select"
+    echo "3) Install to Project (.agents/skills - physical copy + lockfile)"
+    echo "4) Diff against Project copy"
+    echo "5) Update in Project (refresh lockfile)"
+    echo "6) Export ruleset snippet"
+    echo "7) Remove / Unlink"
     echo "q) Quit"
     read -r -p "Choose action [1-7/q]: " action
 
     case "$action" in
-        1) add_skill "$selected_skill" "all" ;;
-        2) add_skill "$selected_skill" "gemini" ;;
-        3) add_skill "$selected_skill" "codex" ;;
-        4) add_skill "$selected_skill" "claude" ;;
-        5) add_skill "$selected_skill" "project" ;;
-        6) export_skill "$selected_skill" ;;
-        7) remove_skill "$selected_skill" "all" ;;
-        *) echo "Cancelled." ;;
+        1)
+            for s in "${selected_skills[@]}"; do
+                install_global "$s" "all"
+            done
+            ;;
+        2)
+            local chosen_agents=()
+            local agent_candidates=("antigravity-cli" "antigravity-ide" "codex-cli" "claude-code")
+            if command -v fzf >/dev/null 2>&1; then
+                mapfile -t chosen_agents < <(printf '%s\n' "${agent_candidates[@]}" | fzf \
+                    --multi \
+                    --prompt="Select Target Agent(s) [TAB=Multi-select, ENTER=Confirm]: " \
+                    --header="[TAB] Toggle Selection | [Enter] Confirm")
+            else
+                chosen_agents=("antigravity-cli" "antigravity-ide" "codex-cli" "claude-code")
+            fi
+            for s in "${selected_skills[@]}"; do
+                for a in "${chosen_agents[@]}"; do
+                    install_global "$s" "$a"
+                done
+            done
+            ;;
+        3)
+            local proj_root
+            proj_root="$(find_project_root "$PWD")"
+            for s in "${selected_skills[@]}"; do
+                install_project "$s" "$proj_root/.agents/skills"
+            done
+            ;;
+        4)
+            cmd_diff "${selected_skills[@]}"
+            ;;
+        5)
+            cmd_update "${selected_skills[@]}"
+            ;;
+        6)
+            for s in "${selected_skills[@]}"; do
+                export_skill "$s"
+            done
+            ;;
+        7)
+            for s in "${selected_skills[@]}"; do
+                remove_skill "$s" "all"
+            done
+            ;;
+        *)
+            echo "Cancelled."
+            ;;
     esac
 }
 
@@ -552,22 +984,27 @@ show_usage() {
     echo
     echo "Commands:"
     echo "  list                                  List all available skills and their link status"
-    echo "  add <skill> [--global <agent>]        Link skill canonically to agent config (default: all)"
-    echo "  add <skill> --project [path]          Physically copy skill bundle into project and update lockfile"
-    echo "  remove <skill> [--global <agent>]     Unlink skill from global agent config"
-    echo "  remove <skill> --project [path]       Remove physical skill from project and lockfile"
-    echo "  sync                                  Synchronize all repository skills globally"
-    echo "  preview <skill>                       Display full skill contents"
-    echo "  export <skill>                        Export markdown snippet for project rules"
+    echo "  add <skill...> [--global <agent>]     Link skill canonically to agent config (default: all)"
+    echo "  add <skill...> --project [path]       Physically copy skill bundle into project and update lockfile"
+    echo "  remove <skill...> [--global <agent>]  Unlink skill from global agent config"
+    echo "  remove <skill...> --project [path]    Remove physical skill from project and lockfile"
+    echo "  sync                                  Synchronize all canonical skills globally against _registry.json"
+    echo "  diff [skill...]                       Show unified diff between project skill and canonical version"
+    echo "  update [skill...] [--force]           Safely update project skill and refresh lockfile hash"
+    echo "  doctor                                Run diagnostic health audit on symlinks, locks, and binaries"
+    echo "  preview <skill>                       Display full skill contents with rich metadata"
+    echo "  export [<skill>|--all]                Export ruleset snippet for project rules or all instructions"
     echo "  interactive                           Interactive fzf / menu selector (default if no args)"
     echo "  help                                  Show this help message"
     echo
     echo "Examples:"
-    echo "  add-skills list"
-    echo "  add-skills add ponytail --global claude"
-    echo "  add-skills add ponytail --project"
-    echo "  add-skills add ponytail --project .agents/skills"
-    echo "  add-skills sync"
+    echo "  ai-skills list"
+    echo "  ai-skills add ponytail caveman --global claude"
+    echo "  ai-skills add ponytail caveman --project"
+    echo "  ai-skills diff ponytail"
+    echo "  ai-skills update ponytail"
+    echo "  ai-skills doctor"
+    echo "  ai-skills sync"
 }
 
 # Main command dispatch
@@ -586,21 +1023,23 @@ case "$CMD" in
         preview_skill "$1"
         ;;
     add|install)
-        if [ "$#" -lt 1 ]; then
-            log_fail "Missing skill name. Usage: $(basename "$0") add <skill> [--global <agent>] [--project [path]]"
-            exit 1
-        fi
-        SKILL_NAME="$1"
+        skills=()
         MODE="global"
         TARGET_OPT="all"
-        PROJECT_OPT="$PROJECT_SKILLS_DIR"
-        shift
+        TARGET_SPECIFIED=false
+        PROJECT_OPT=""
         while [ "$#" -gt 0 ]; do
             case "$1" in
                 --global|-g)
                     MODE="global"
-                    TARGET_OPT="${2:-all}"
-                    shift 2 || shift 1
+                    TARGET_SPECIFIED=true
+                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                        TARGET_OPT="$2"
+                        shift 2
+                    else
+                        TARGET_OPT="all"
+                        shift 1
+                    fi
                     ;;
                 --project|-p)
                     MODE="project"
@@ -608,53 +1047,83 @@ case "$CMD" in
                         PROJECT_OPT="$2"
                         shift 2
                     else
-                        PROJECT_OPT="$PROJECT_SKILLS_DIR"
                         shift 1
                     fi
                     ;;
                 --target|-t)
+                    TARGET_SPECIFIED=true
                     if [ "${2:-}" = "project" ]; then
                         MODE="project"
-                        PROJECT_OPT="$PROJECT_SKILLS_DIR"
                     else
-                        MODE="global"
                         TARGET_OPT="${2:-all}"
                     fi
                     shift 2 || shift 1
                     ;;
                 project)
                     MODE="project"
-                    PROJECT_OPT="$PROJECT_SKILLS_DIR"
+                    shift
+                    ;;
+                global)
+                    MODE="global"
+                    shift
+                    ;;
+                all)
+                    TARGET_OPT="all"
+                    TARGET_SPECIFIED=true
                     shift
                     ;;
                 *)
-                    TARGET_OPT="$1"
+                    skills+=("$1")
                     shift
                     ;;
             esac
         done
+
+        if [ "${#skills[@]}" -eq 0 ]; then
+            log_fail "Missing skill name. Usage: $(basename "$0") add <skill...> [--global <agent>] [--project [path]]"
+            exit 1
+        fi
+
         if [ "$MODE" = "project" ]; then
-            install_project "$SKILL_NAME" "$PROJECT_OPT"
+            target_paths=()
+            if [ -n "$PROJECT_OPT" ]; then
+                target_paths=("$PROJECT_OPT")
+            elif [ "$TARGET_SPECIFIED" = true ]; then
+                proj_root="$(find_project_root "$PWD")"
+                mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$TARGET_OPT")
+            else
+                proj_root="$(find_project_root "$PWD")"
+                target_paths=("$proj_root/.agents/skills")
+            fi
+            for sk in "${skills[@]}"; do
+                for dest_p in "${target_paths[@]}"; do
+                    install_project "$sk" "$dest_p"
+                done
+            done
         else
-            install_global "$SKILL_NAME" "$TARGET_OPT"
+            for sk in "${skills[@]}"; do
+                install_global "$sk" "$TARGET_OPT"
+            done
         fi
         ;;
     remove|rm|uninstall)
-        if [ "$#" -lt 1 ]; then
-            log_fail "Missing skill name. Usage: $(basename "$0") remove <skill> [--global <agent>] [--project [path]]"
-            exit 1
-        fi
-        SKILL_NAME="$1"
-        MODE="global"
+        skills=()
+        MODE="all"
         TARGET_OPT="all"
-        PROJECT_OPT="$PROJECT_SKILLS_DIR"
-        shift
+        TARGET_SPECIFIED=false
+        PROJECT_OPT=""
         while [ "$#" -gt 0 ]; do
             case "$1" in
                 --global|-g)
                     MODE="global"
-                    TARGET_OPT="${2:-all}"
-                    shift 2 || shift 1
+                    TARGET_SPECIFIED=true
+                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                        TARGET_OPT="$2"
+                        shift 2
+                    else
+                        TARGET_OPT="all"
+                        shift 1
+                    fi
                     ;;
                 --project|-p)
                     MODE="project"
@@ -662,52 +1131,94 @@ case "$CMD" in
                         PROJECT_OPT="$2"
                         shift 2
                     else
-                        PROJECT_OPT="$PROJECT_SKILLS_DIR"
                         shift 1
                     fi
                     ;;
                 --target|-t)
+                    TARGET_SPECIFIED=true
                     if [ "${2:-}" = "project" ]; then
                         MODE="project"
-                        PROJECT_OPT="$PROJECT_SKILLS_DIR"
                     else
-                        MODE="global"
                         TARGET_OPT="${2:-all}"
                     fi
                     shift 2 || shift 1
                     ;;
                 project)
                     MODE="project"
-                    PROJECT_OPT="$PROJECT_SKILLS_DIR"
+                    shift
+                    ;;
+                global)
+                    MODE="global"
+                    shift
+                    ;;
+                all)
+                    MODE="all"
+                    TARGET_OPT="all"
+                    TARGET_SPECIFIED=true
                     shift
                     ;;
                 *)
-                    TARGET_OPT="$1"
+                    skills+=("$1")
                     shift
                     ;;
             esac
         done
-        if [ "$MODE" = "project" ]; then
-            remove_project "$SKILL_NAME" "$PROJECT_OPT"
-        elif [ "$TARGET_OPT" = "all" ]; then
-            remove_global "$SKILL_NAME" "all"
-            remove_project "$SKILL_NAME" "$PROJECT_OPT"
-        else
-            remove_global "$SKILL_NAME" "$TARGET_OPT"
+
+        if [ "${#skills[@]}" -eq 0 ]; then
+            log_fail "Missing skill name. Usage: $(basename "$0") remove <skill...> [--global <agent>] [--project [path]]"
+            exit 1
         fi
+
+        for sk in "${skills[@]}"; do
+            if [ "$MODE" = "project" ]; then
+                target_paths=()
+                if [ -n "$PROJECT_OPT" ]; then
+                    target_paths=("$PROJECT_OPT")
+                elif [ "$TARGET_SPECIFIED" = true ]; then
+                    proj_root="$(find_project_root "$PWD")"
+                    mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$TARGET_OPT")
+                else
+                    proj_root="$(find_project_root "$PWD")"
+                    target_paths=("$proj_root/.agents/skills")
+                fi
+                for dest_p in "${target_paths[@]}"; do
+                    remove_project "$sk" "$dest_p"
+                done
+            elif [ "$MODE" = "all" ] && [ "$TARGET_OPT" = "all" ]; then
+                remove_global "$sk" "all"
+                proj_root="$(find_project_root "$PWD")"
+                if [ -e "$proj_root/.agents/skills/$sk" ]; then
+                    remove_project "$sk" "$proj_root/.agents/skills"
+                fi
+            else
+                remove_global "$sk" "$TARGET_OPT"
+            fi
+        done
+        ;;
+    diff)
+        cmd_diff "$@"
+        exit $?
+        ;;
+    update)
+        cmd_update "$@"
+        exit $?
+        ;;
+    doctor)
+        cmd_doctor "$@"
+        exit $?
         ;;
     sync)
         sync_skills
         ;;
     export)
-        if [ "$#" -lt 1 ]; then
-            log_fail "Missing skill name. Usage: $(basename "$0") export <skill>"
-            exit 1
+        if [ "${1:-}" = "--all" ] || [ "$#" -eq 0 ]; then
+            export_all_rules
+        else
+            export_skill "$1"
         fi
-        export_skill "$1"
         ;;
     interactive)
-        interactive_mode
+        select_skills_interactive
         ;;
     help|--help|-h)
         show_usage
@@ -723,3 +1234,4 @@ case "$CMD" in
         fi
         ;;
 esac
+

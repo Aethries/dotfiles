@@ -225,6 +225,56 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.claude/skills/rtk" ] || log_fail "sync command failed to link claude rtk"
 log_ok "ai-skills.sh sync synchronizes canonical skills across all agents"
 
+# Test 2.8: Batch selection & collision deduplication
+log_info "Testing batch skill installation and path deduplication..."
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail caveman junior-coding-agent --global all >/dev/null
+[ -L "$MOCK_HOME/.gemini/config/skills/caveman" ] || log_fail "Batch add failed for gemini caveman"
+[ -L "$MOCK_HOME/.claude/skills/junior-coding-agent" ] || log_fail "Batch add failed for claude junior-coding-agent"
+
+# Project batch installation
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail caveman --project >/dev/null)
+[ -d "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Batch project copy failed for ponytail"
+[ -d "$MOCK_PROJECT/.agents/skills/caveman" ] || log_fail "Batch project copy failed for caveman"
+jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Batch add missing ponytail in lockfile"
+jq -e '.skills["caveman"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Batch add missing caveman in lockfile"
+
+# Test path collision deduplication engine
+DEDUP_PROJECT_PATHS=$(resolve_target_paths "project" "$MOCK_PROJECT" antigravity-cli antigravity-ide)
+DEDUP_COUNT=$(echo "$DEDUP_PROJECT_PATHS" | wc -l | tr -d ' ')
+[ "$DEDUP_COUNT" -eq 1 ] || log_fail "Path deduplication failed to collapse duplicate project paths: $DEDUP_PROJECT_PATHS"
+[ "$DEDUP_PROJECT_PATHS" = "$MOCK_PROJECT/.agents/skills" ] || log_fail "Path deduplication returned unexpected path: $DEDUP_PROJECT_PATHS"
+log_ok "Batch installation and path deduplication engine passed"
+
+# Test 2.9: diff and update commands
+log_info "Testing diff and update drift management..."
+# Clean project copy has diff 0
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" diff ponytail >/dev/null) || log_fail "Prinstine skill reported diff"
+
+# Inject drift into project skill
+echo "# Local modification for drift test" >> "$MOCK_PROJECT/.agents/skills/ponytail/SKILL.md"
+if (cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" diff ponytail >/dev/null); then
+    log_fail "diff failed to detect local modifications (expected non-zero exit)"
+fi
+
+# Run update with force to refresh
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" update ponytail --force >/dev/null) || log_fail "update --force failed"
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" diff ponytail >/dev/null) || log_fail "Skill still has diff after update"
+grep -Fq "Local modification for drift test" "$MOCK_PROJECT/.agents/skills/ponytail/SKILL.md" && log_fail "Local modification persisted after update"
+log_ok "ai-skills.sh diff and update detect drift and refresh lockfile"
+
+# Test 2.10: doctor command and broken symlink detection
+log_info "Testing doctor diagnostic subsystem..."
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" doctor >/dev/null) || log_fail "doctor reported errors on healthy system"
+
+# Inject broken symlink in test home
+ln -s "/nonexistent/test/path/broken-skill" "$MOCK_HOME/.gemini/config/skills/broken-test-skill"
+if (cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" doctor >/dev/null); then
+    log_fail "doctor failed to report error on broken symlink"
+fi
+rm -f "$MOCK_HOME/.gemini/config/skills/broken-test-skill"
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" doctor >/dev/null) || log_fail "doctor failed after removing broken link"
+log_ok "ai-skills.sh doctor catches broken symlinks and verifies system integrity"
+
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration
 # ------------------------------------------------------------------------------
@@ -246,7 +296,18 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/rtk" ] || log_fail "sync-editors.sh did not link rtk skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/rtk" ] || log_fail "sync-editors.sh did not link codex rtk skill"
 [ -L "$MOCK_SYNC_HOME/.claude/skills/rtk" ] || log_fail "sync-editors.sh did not link claude rtk skill"
-log_ok "sync-editors.sh links skills automatically"
+
+# Verify Editor Export Integration (CLAUDE.md, Neovim AGENTS.md, Zed AGENTS.md, VSCode/Antigravity AGENTS.md)
+[ -f "$MOCK_SYNC_HOME/.claude/CLAUDE.md" ] || log_fail "Missing .claude/CLAUDE.md"
+[ -f "$MOCK_SYNC_HOME/.config/nvim/AGENTS.md" ] || log_fail "Missing .config/nvim/AGENTS.md"
+[ -f "$MOCK_SYNC_HOME/.config/zed/prompts/AGENTS.md" ] || log_fail "Missing .config/zed/prompts/AGENTS.md"
+[ -f "$MOCK_SYNC_HOME/.antigravity-ide/User/prompts/AGENTS.md" ] || log_fail "Missing .antigravity-ide/User/prompts/AGENTS.md"
+[ -f "$MOCK_SYNC_HOME/.config/Code/User/prompts/AGENTS.md" ] || log_fail "Missing .config/Code/User/prompts/AGENTS.md"
+grep -Fq "AI Agent Guidelines" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing header"
+grep -Fq "ponytail" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ponytail rule"
+
+log_ok "sync-editors.sh links skills and exports editor rules automatically"
 
 echo
 log_ok "All AI Skills test assertions passed successfully!"
+
