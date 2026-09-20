@@ -64,8 +64,7 @@ jobs:
           jq empty resources/skills/_profiles.json
           jq empty resources/skills/_sources.json
           jq empty resources/skills/_lock.schema.json
-          jq empty resources/skills/_registry.schema.json
-          jq empty resources/skills/_sources.schema.json
+          jq empty resources/skills/_agents.schema.json
 
       - name: Run Security Audit
         run: |
