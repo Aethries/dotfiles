@@ -458,6 +458,196 @@
       ],
       "dependencies": [],
       "content_hash": "sha256:5714729c75bc18a710f7557664b43be76ef1f65ef2f22bb789822627a6ea22e4"
+    },
+    "nestjs": {
+      "name": "nestjs",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NestJS enterprise architecture, modular structure, dependency injection, and interceptor/pipe patterns.",
+      "tags": [
+        "backend",
+        "typescript",
+        "nestjs",
+        "architecture",
+        "layer3"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:86892be2a987fe3d0baa97aa93096d6ffcbbea2f55b55ae9a600db8cd90dad37"
+    },
+    "centrifugo": {
+      "name": "centrifugo",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Realtime messaging, WebSockets, channel permissions, and presence using Centrifugo and Centrifuge.",
+      "tags": [
+        "realtime",
+        "websockets",
+        "centrifugo",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:dbd0ebea717eeaa4ea099dc10fd59488018b60940010bb1185c713870b889058"
+    },
+    "bullmq": {
+      "name": "bullmq",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed job queues, background workers, scheduled jobs, and retry policies using BullMQ and Redis.",
+      "tags": [
+        "queues",
+        "workers",
+        "bullmq",
+        "redis",
+        "layer3"
+      ],
+      "dependencies": [
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:526b8b04e4427e513303bdf5a1aaa35b28b6b7c804b219382010e16855890ea8"
+    },
+    "postgresql": {
+      "name": "postgresql",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "PostgreSQL database performance tuning, indexing, connection pooling with PgBouncer, and query optimization.",
+      "tags": [
+        "database",
+        "postgresql",
+        "performance",
+        "pgbouncer",
+        "layer3"
+      ],
+      "dependencies": [
+        "data-model-architect"
+      ],
+      "content_hash": "sha256:5b7676a6b324a473561bd5c886bcbba3211e05f3917dae7a6d5de969ac4d4afe"
+    },
+    "redis": {
+      "name": "redis",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Redis caching patterns, eviction policies, data structures, atomic operations, and pub/sub.",
+      "tags": [
+        "database",
+        "cache",
+        "redis",
+        "key-value",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:df2642e36c44028620f2cb253a79f020f94e9678f3b4d85af24bdde7cca8e669"
+    },
+    "vps-hardening": {
+      "name": "vps-hardening",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Linux VPS and server hardening: SSH security, UFW firewall, Fail2ban, automatic updates, and systemd unit sandboxing.",
+      "tags": [
+        "security",
+        "devops",
+        "vps",
+        "linux",
+        "hardening",
+        "layer3"
+      ],
+      "dependencies": [
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:a1420f81877daee9c578a973a3433697d3e2b0640d9a6c05f389779f6dd92132"
+    },
+    "docker": {
+      "name": "docker",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Docker containerization, multi-stage builds, rootless containers, layer caching, and compose architectures.",
+      "tags": [
+        "devops",
+        "containers",
+        "docker",
+        "dockerfile",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f0b30dfe703c40f4e8ad4777b6cb2ce9aa13ba18bc8360dfa34cb8adb2c1ffa9"
+    },
+    "cloud-infra": {
+      "name": "cloud-infra",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Cloud infrastructure design, Terraform/OpenTofu, serverless architectures, and multi-cloud patterns across AWS, GCP, and Cloudflare.",
+      "tags": [
+        "devops",
+        "cloud",
+        "terraform",
+        "aws",
+        "cloudflare",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:2afa5980a947f5b8b8e35e82db331a5439464b4fc90f5e1827d0d013bdb99675"
+    },
+    "nixos": {
+      "name": "nixos",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NixOS module design, Flakes configuration, Home Manager integrations, and reproducible devShells.",
+      "tags": [
+        "nixos",
+        "nix",
+        "flakes",
+        "declarative",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5de12b5aace259631a1c651f4c730113a851924050e3beb10bed0b2a54b76c9c"
+    },
+    "neovim-lua": {
+      "name": "neovim-lua",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Neovim Lua configuration, plugin development, LSP server setup, Treesitter, and keymap architecture.",
+      "tags": [
+        "editor",
+        "neovim",
+        "lua",
+        "lsp",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f33e6a5243323f00f20849ec93bd014b58c57f68f55bf0f95d4afff933a1638d"
+    },
+    "rust": {
+      "name": "rust",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust systems programming: memory safety, ownership/borrowing, Tokio async runtime, error handling, and Clippy hygiene.",
+      "tags": [
+        "rust",
+        "systems",
+        "tokio",
+        "async",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:3b638e5738c0498049327de6b1852baca9ec3068cf18436e8abf94f4cb1b5d4a"
+    },
+    "chrome-extension": {
+      "name": "chrome-extension",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Chrome Extension development using Manifest V3: service workers, content scripts, popup/options UI, and WebExtension APIs.",
+      "tags": [
+        "frontend",
+        "browser",
+        "chrome",
+        "extension",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:03dfd1469d511f30c3f825674496bcd0606452feec96a97b8de50a8c1c298028"
     }
   }
 }

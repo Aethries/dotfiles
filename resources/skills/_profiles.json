@@ -20,7 +20,12 @@
         "codebase-memory",
         "codegraph",
         "ponytail",
-        "release-notes"
+        "release-notes",
+        "nestjs",
+        "centrifugo",
+        "bullmq",
+        "postgresql",
+        "redis"
       ]
     },
     "frontend": {
@@ -30,7 +35,8 @@
         "ponytail",
         "pixel-perfect-ui",
         "junior-coding-agent",
-        "rtk"
+        "rtk",
+        "chrome-extension"
       ]
     },
     "devops": {
@@ -39,7 +45,10 @@
       "skills": [
         "release-notes",
         "rtk",
-        "junior-coding-agent"
+        "junior-coding-agent",
+        "vps-hardening",
+        "docker",
+        "cloud-infra"
       ]
     },
     "core-guardrails": {
@@ -97,6 +106,21 @@
       "description": "Layer 4 declarative diagram authoring across Mermaid, DBML, PlantUML, and draw.io",
       "skills": [
         "diagram-author"
+      ]
+    },
+    "nixos": {
+      "name": "NixOS & System Configuration",
+      "description": "NixOS flakes, modules, devShells, and Neovim Lua tooling",
+      "skills": [
+        "nixos",
+        "neovim-lua"
+      ]
+    },
+    "rust": {
+      "name": "Rust Systems Programming",
+      "description": "Idiomatic Rust, Tokio async runtime, and memory safety patterns",
+      "skills": [
+        "rust"
       ]
     }
   }

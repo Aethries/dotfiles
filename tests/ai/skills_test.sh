@@ -463,6 +463,71 @@ jq -e '.profiles["artifacts"].skills | index("diagram-author")' "$REPO_ROOT/reso
 
 log_ok "Layer 4 Artifact & Diagram Authoring skills verified (templates, invariants, trigger boundaries & registry)"
 
+# ------------------------------------------------------------------------------
+# 1.7 Validate Layer 3 Domain Skills Curation & Semantic Dedup
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 3 Domain Skills Curation & Semantic Dedup..."
+
+CURATE_LIB="$REPO_ROOT/scripts/lib/curate.sh"
+[ -f "$CURATE_LIB" ] || log_fail "Missing scripts/lib/curate.sh"
+[ -x "$CURATE_LIB" ] || log_fail "scripts/lib/curate.sh is not executable"
+
+# Run security audit on all skills
+"$CURATE_LIB" audit "$REPO_ROOT/resources/skills" || log_fail "curate.sh audit failed on resources/skills"
+
+# Run semantic deduplication check
+"$CURATE_LIB" dedup "$REPO_ROOT/resources/skills/_registry.json" || log_fail "curate.sh dedup detected registry collisions"
+
+DOMAIN_SKILLS=(
+    "nestjs"
+    "centrifugo"
+    "bullmq"
+    "postgresql"
+    "redis"
+    "vps-hardening"
+    "docker"
+    "cloud-infra"
+    "nixos"
+    "neovim-lua"
+    "rust"
+    "chrome-extension"
+)
+
+for d in "${DOMAIN_SKILLS[@]}"; do
+    d_file="$REPO_ROOT/resources/skills/$d/SKILL.md"
+    [ -f "$d_file" ] || log_fail "Missing domain skill: $d_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$d_file")
+    [ "$head_line" = "---" ] || log_fail "$d/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$d" "$d_file" || log_fail "$d/SKILL.md missing valid name"
+    grep -Eiq '^description:' "$d_file" || log_fail "$d/SKILL.md missing description"
+
+    # Registry integrity
+    jq -e --arg s "$d" '.skills[$s]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $d"
+done
+
+# Profile memberships
+for s in nestjs centrifugo bullmq postgresql redis; do
+    jq -e --arg s "$s" '.profiles["backend"].skills | index($s)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "backend profile missing $s"
+done
+
+for s in vps-hardening docker cloud-infra; do
+    jq -e --arg s "$s" '.profiles["devops"].skills | index($s)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "devops profile missing $s"
+done
+
+jq -e '.profiles["frontend"].skills | index("chrome-extension")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "frontend profile missing chrome-extension"
+
+jq -e '.profiles["nixos"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'nixos' profile"
+jq -e '.profiles["nixos"].skills | index("nixos")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "nixos profile missing nixos"
+jq -e '.profiles["nixos"].skills | index("neovim-lua")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "nixos profile missing neovim-lua"
+
+jq -e '.profiles["rust"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'rust' profile"
+jq -e '.profiles["rust"].skills | index("rust")' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "rust profile missing rust"
+
+log_ok "All 12 Layer 3 Domain Skills verified (security audit, dedup, frontmatter, registry & profiles)"
+
+
 
 
 
