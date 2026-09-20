@@ -870,20 +870,20 @@ echo "$SINGLE_PREVIEW" | grep -Fq "STATUS: PREVIEW ONLY" || log_fail "Single rep
 [ ! -d "$REPO_ROOT/resources/skills/single-test-skill" ] || log_fail "Single repo preview wrote to canonical library"
 log_ok "Multi-skill repo import requires --path and preview mode is strictly non-mutating"
 
-# Test 2.18: Semantic review fixture validation (Cases A, B, C)
-log_info "Testing AI semantic review fixtures..."
+# Test 2.18: Heuristic review fixture validation (Cases A, B, C)
+log_info "Testing AI heuristic review fixtures..."
 # Case A: browser-debugging vs nextjs-runtime-debugging -> PARTIAL_OVERLAP / COMPANION
-CASE_A_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/browser-debugging" "$REPO_ROOT/tests/ai/fixtures/semantic/nextjs-runtime-debugging")
-echo "$CASE_A_REV" | jq -e '.decision == "PARTIAL_OVERLAP" and .recommended_action == "COMPANION"' >/dev/null || log_fail "Case A did not yield PARTIAL_OVERLAP / COMPANION: $CASE_A_REV"
+CASE_A_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" heuristic "$REPO_ROOT/tests/ai/fixtures/semantic/browser-debugging" "$REPO_ROOT/tests/ai/fixtures/semantic/nextjs-runtime-debugging")
+echo "$CASE_A_REV" | jq -e '.heuristic_decision == "PARTIAL_OVERLAP" and .heuristic_action == "COMPANION"' >/dev/null || log_fail "Case A did not yield PARTIAL_OVERLAP / COMPANION: $CASE_A_REV"
 
 # Case B: nestjs-transactions vs nestjs-database-transaction-best-practices -> DUPLICATE / REUSE
-CASE_B_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-transactions" "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices")
-echo "$CASE_B_REV" | jq -e '.decision == "DUPLICATE" and .recommended_action == "REUSE"' >/dev/null || log_fail "Case B did not yield DUPLICATE / REUSE: $CASE_B_REV"
+CASE_B_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" heuristic "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-transactions" "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices")
+echo "$CASE_B_REV" | jq -e '.heuristic_decision == "DUPLICATE" and .heuristic_action == "REUSE"' >/dev/null || log_fail "Case B did not yield DUPLICATE / REUSE: $CASE_B_REV"
 
 # Case C: prisma-transactions vs canonical postgresql -> KEEP_BOTH / CREATE
-CASE_C_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/prisma-transactions" "$REPO_ROOT/resources/skills/postgresql")
-echo "$CASE_C_REV" | jq -e '.decision == "KEEP_BOTH" and .recommended_action == "CREATE"' >/dev/null || log_fail "Case C did not yield KEEP_BOTH / CREATE: $CASE_C_REV"
-log_ok "All semantic review cases (PARTIAL_OVERLAP, DUPLICATE, KEEP_BOTH) evaluated correctly"
+CASE_C_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" heuristic "$REPO_ROOT/tests/ai/fixtures/semantic/prisma-transactions" "$REPO_ROOT/resources/skills/postgresql")
+echo "$CASE_C_REV" | jq -e '.heuristic_decision == "KEEP_BOTH" and .heuristic_action == "CREATE"' >/dev/null || log_fail "Case C did not yield KEEP_BOTH / CREATE: $CASE_C_REV"
+log_ok "All heuristic review cases (PARTIAL_OVERLAP, DUPLICATE, KEEP_BOTH) evaluated correctly"
 
 # Test 2.19: Exact target path ownership protection in remove_project
 log_info "Testing exact target path ownership protection in remove_project..."
@@ -1114,6 +1114,86 @@ CLEAN_MISSING=$(echo "$REC_MISSING" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)
 echo "$CLEAN_MISSING" | grep -Fq "Missing Coverage: bullmq" || log_fail "Mock empty registry failed to detect missing bullmq"
 rm -rf "$REG_PROJ" "$MOCK_EMPTY_REG"
 log_ok "Recommendation engine coverage is dynamically driven by registry state"
+
+# Test 2.26: Discovery candidate verification filter (Blocker 1)
+log_info "Testing discovery candidate verification filter..."
+VALID_CAND_JSON=$(jq -n --arg repo "$SINGLE_REPO" '{
+    name: "sample-single",
+    source: "local-test",
+    upstream_url: $repo,
+    skill_path: ".",
+    revision: null
+}')
+CHECKED_VALID=$(bash "$REPO_ROOT/scripts/lib/discovery.sh" verify-discovery "$VALID_CAND_JSON")
+echo "$CHECKED_VALID" | jq -e '.verification.status == "verified"' >/dev/null || log_fail "verify_discovery_candidate rejected valid bundle: $CHECKED_VALID"
+
+INVALID_CAND_JSON=$(jq -n --arg repo "$SINGLE_REPO" '{
+    name: "missing-path-skill",
+    source: "local-test",
+    upstream_url: $repo,
+    skill_path: "nonexistent/subpath",
+    revision: null
+}')
+CHECKED_INVALID=$(bash "$REPO_ROOT/scripts/lib/discovery.sh" verify-discovery "$INVALID_CAND_JSON")
+echo "$CHECKED_INVALID" | jq -e '.verification.status == "rejected"' >/dev/null || log_fail "verify_discovery_candidate accepted invalid path: $CHECKED_INVALID"
+log_ok "verify_discovery_candidate validates reachable bundles and rejects missing paths"
+
+# Test 2.27: Heuristic vs Semantic review schema separation (Blocker 3)
+log_info "Testing heuristic vs semantic review schema separation..."
+HEUR_OUT=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && perform_heuristic_review '$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices' 'nestjs' '$REPO_ROOT/resources/skills/_registry.json'")
+echo "$HEUR_OUT" | jq -e '.review_type == "heuristic"' >/dev/null || log_fail "Heuristic review missing review_type=heuristic: $HEUR_OUT"
+echo "$HEUR_OUT" | jq -e '.heuristic_decision != null and .heuristic_action != null and .similarity_score != null' >/dev/null || log_fail "Heuristic review missing heuristic fields: $HEUR_OUT"
+echo "$HEUR_OUT" | jq -e '.decision == null and .recommended_action == null' >/dev/null || log_fail "Heuristic review emitted reserved semantic fields (decision/recommended_action): $HEUR_OUT"
+
+# Semantic review without input returns status=required (no heuristic fallback)
+SEM_REQUIRED=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && unset SEMANTIC_REVIEW_FILE SEMANTIC_REVIEW_JSON && perform_semantic_review '$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices' 'nestjs' '$REPO_ROOT/resources/skills/_registry.json'")
+echo "$SEM_REQUIRED" | jq -e '.review_type == "semantic" and .status == "required"' >/dev/null || log_fail "perform_semantic_review did not return status=required without input: $SEM_REQUIRED"
+log_ok "Heuristic review strictly separates schema from semantic review and omits decision/recommended_action"
+
+# Test 2.28: Import gate on overlapping candidate (Blocker 3)
+log_info "Testing import gate on overlapping candidate..."
+GATE_REG_DIR="$SANDBOX_DIR/gate_registry"
+mkdir -p "$GATE_REG_DIR"
+cp "$REPO_ROOT/resources/skills/_registry.json" "$GATE_REG_DIR/_registry.json"
+
+NEST_CAND_PATH="$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices"
+
+# Preview on overlapping candidate succeeds and marks Semantic Review: REQUIRED
+OVERLAP_PREVIEW=$(HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_CAND_PATH" --preview 2>&1)
+CLEAN_OVERLAP=$(echo "$OVERLAP_PREVIEW" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
+echo "$CLEAN_OVERLAP" | grep -Fq "Semantic Review: REQUIRED" || log_fail "Preview failed to indicate Semantic Review: REQUIRED: $OVERLAP_PREVIEW"
+
+# Approve on overlapping candidate WITHOUT semantic review MUST FAIL
+if HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_CAND_PATH" --approve >/dev/null 2>&1; then
+    log_fail "ai-skills import --approve succeeded on overlapping candidate without semantic review"
+fi
+
+# Approve on overlapping candidate WITH completed semantic review succeeds
+MOCK_SEM_JSON='{
+  "review_type": "semantic",
+  "status": "completed",
+  "candidate": "nestjs-database-transaction-best-practices",
+  "existing": "nestjs",
+  "decision": "PARTIAL_OVERLAP",
+  "recommended_action": "COMPANION",
+  "reason": "Specialized companion for transaction boundaries",
+  "evidence": ["Both touch NestJS transactions"]
+}'
+APPROVE_SEM_OUT=$(SEMANTIC_REVIEW_JSON="$MOCK_SEM_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_CAND_PATH" --approve 2>&1)
+echo "$APPROVE_SEM_OUT" | grep -Fq "Successfully imported skill" || log_fail "Approve with valid semantic review failed: $APPROVE_SEM_OUT"
+
+rm -rf "$GATE_REG_DIR"
+log_ok "Import gate blocks approval of overlapping candidates until semantic review is completed"
+
+# Test 2.29: Curation document structure and verification audit (Blocker 4)
+log_info "Testing curation document evidence separation..."
+CURATION_DOC="$REPO_ROOT/docs/ai-skills-curation.md"
+[ -f "$CURATION_DOC" ] || log_fail "Missing docs/ai-skills-curation.md"
+grep -Fq "Section A: Verified Real-World Curation Audit" "$CURATION_DOC" || log_fail "Curation doc missing Section A"
+grep -Fq "Section B: Test Fixture Validation" "$CURATION_DOC" || log_fail "Curation doc missing Section B"
+grep -Fq "NOT REAL UPSTREAM EVIDENCE" "$CURATION_DOC" || log_fail "Curation doc missing test fixture disclaimer"
+grep -Fq "No verified candidate found" "$CURATION_DOC" || log_fail "Curation doc missing No verified candidate found entries"
+log_ok "Curation document strictly segregates verified real-world evidence from test fixtures"
 
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration

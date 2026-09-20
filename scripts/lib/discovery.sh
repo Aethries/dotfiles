@@ -136,6 +136,68 @@ verify_candidate() {
 }
 
 # ------------------------------------------------------------------------------
+# Candidate Verification Filter for Discovery (Blocker 1)
+# Validates candidate and outputs schema with status "verified" or "rejected".
+# ------------------------------------------------------------------------------
+verify_discovery_candidate() {
+    local candidate_json="$1"
+    local name upstream_url skill_path revision
+    name="$(echo "$candidate_json" | jq -r '.name // empty')"
+    upstream_url="$(echo "$candidate_json" | jq -r '.upstream_url // empty')"
+    skill_path="$(echo "$candidate_json" | jq -r '.skill_path // "."')"
+    revision="$(echo "$candidate_json" | jq -r '.revision // empty')"
+    [ "$skill_path" = "null" ] || [ -z "$skill_path" ] && skill_path="."
+
+    # In fixture mode with remote URLs, check if fixture SKILL.md exists
+    if [ -n "${DISCOVERY_FIXTURE_DIR:-}" ] && [[ "$upstream_url" =~ ^https?:// ]]; then
+        local fix_skill=""
+        if [ -f "$DISCOVERY_FIXTURE_DIR/../semantic/$name/SKILL.md" ]; then
+            fix_skill="$DISCOVERY_FIXTURE_DIR/../semantic/$name/SKILL.md"
+        elif [ -f "$DISCOVERY_FIXTURE_DIR/$name/SKILL.md" ]; then
+            fix_skill="$DISCOVERY_FIXTURE_DIR/$name/SKILL.md"
+        elif [ -d "$DISCOVERY_FIXTURE_DIR/$skill_path" ] && [ -f "$DISCOVERY_FIXTURE_DIR/$skill_path/SKILL.md" ]; then
+            fix_skill="$DISCOVERY_FIXTURE_DIR/$skill_path/SKILL.md"
+        fi
+
+        if [ -n "$fix_skill" ] && head -n 1 "$fix_skill" | grep -q '^---'; then
+            local rev="${revision:-b5c7e9a0f1e2d3c4}"
+            [ "$rev" = "null" ] && rev="b5c7e9a0f1e2d3c4"
+            echo "$candidate_json" | jq -c --arg rev "$rev" '
+                .revision = $rev |
+                .verification = { status: "verified" }
+            '
+            return 0
+        else
+            echo "$candidate_json" | jq -c '
+                .verification = { status: "rejected", reason: "SKILL.md not found or invalid frontmatter" }
+            '
+            return 0
+        fi
+    fi
+
+    local v_res
+    v_res="$(verify_candidate "$upstream_url" "$skill_path" "${revision:-HEAD}")"
+    local is_verified
+    is_verified="$(echo "$v_res" | jq -r '.verified // false')"
+
+    if [ "$is_verified" = "true" ]; then
+        local resolved_commit
+        resolved_commit="$(echo "$v_res" | jq -r '.resolved_commit // empty')"
+        [ -z "$resolved_commit" ] || [ "$resolved_commit" = "null" ] && resolved_commit="$revision"
+        echo "$candidate_json" | jq -c --arg commit "$resolved_commit" '
+            .revision = (if $commit != "" and $commit != "null" then $commit else .revision end) |
+            .verification = { status: "verified" }
+        '
+    else
+        local reason
+        reason="$(echo "$v_res" | jq -r '.reason // "Verification failed"')"
+        echo "$candidate_json" | jq -c --arg reason "$reason" '
+            .verification = { status: "rejected", reason: $reason }
+        '
+    fi
+}
+
+# ------------------------------------------------------------------------------
 # Fixture Loader (Phase 1)
 # Strictly active only when DISCOVERY_FIXTURE_DIR is explicitly configured.
 # ------------------------------------------------------------------------------
@@ -238,20 +300,77 @@ discover_from_github() {
     local query="$1"
     # Live fallback query via GitHub CLI if available and authenticated
     if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-        local raw_repos
-        raw_repos="$(gh search repos "topic:agent-skills $query" --limit 3 --json fullName,url,description 2>/dev/null || echo "[]")"
-        if [ "$(echo "$raw_repos" | jq 'length')" -gt 0 ]; then
-            echo "$raw_repos" | jq -c '[ .[] | {
-                name: (.fullName | split("/")[1]),
-                source: "github-search",
-                upstream_url: .url,
-                skill_path: ".",
-                revision: null,
-                description: (.description // ""),
-                trust: "unverified",
-                license: "unknown",
-                discovered_via: "github-search"
-            } ]'
+        local raw_results="[]"
+        # 1. Search code specifically for SKILL.md matching query
+        local code_hits
+        code_hits="$(gh search code "$query" --filename "SKILL.md" --limit 10 --json path,repository 2>/dev/null || echo "[]")"
+        if [ "$(echo "$code_hits" | jq 'length' 2>/dev/null || echo 0)" -gt 0 ]; then
+            raw_results="$(echo "$code_hits" | jq -c '[ .[] |
+                (if (.path | contains("/")) then (.path | split("/")[:-1] | join("/")) else "." end) as $dir |
+                (if $dir == "." then (.repository.name // "skill") else ($dir | split("/")[-1]) end) as $sname |
+                {
+                    name: $sname,
+                    source: "github-search",
+                    upstream_url: .repository.url,
+                    skill_path: $dir,
+                    revision: null,
+                    description: ("Discovered via GitHub code search at " + .path),
+                    trust: "unverified",
+                    license: "unknown",
+                    discovered_via: "github-search"
+                }
+            ]')"
+        fi
+
+        # 2. If code search returns empty, search repositories by topic and inspect tree for SKILL.md
+        if [ "$(echo "$raw_results" | jq 'length' 2>/dev/null || echo 0)" -eq 0 ]; then
+            local repo_hits
+            repo_hits="$(gh search repos "topic:agent-skills $query" --limit 3 --json fullName,url 2>/dev/null || echo "[]")"
+            local repo_count
+            repo_count="$(echo "$repo_hits" | jq 'length' 2>/dev/null || echo 0)"
+            if [ "$repo_count" -gt 0 ]; then
+                local repo_candidates="[]"
+                for (( r=0; r<repo_count; r++ )); do
+                    local r_full r_url
+                    r_full="$(echo "$repo_hits" | jq -r ".[$r].fullName")"
+                    r_url="$(echo "$repo_hits" | jq -r ".[$r].url")"
+                    local tree_items
+                    tree_items="$(gh api "repos/${r_full}/git/trees/HEAD?recursive=1" --jq '.tree[]? | select(.path | endswith("SKILL.md")) | .path' 2>/dev/null || echo "")"
+                    if [ -n "$tree_items" ]; then
+                        while IFS= read -r skill_file; do
+                            [ -z "$skill_file" ] && continue
+                            local s_dir s_name
+                            s_dir="$(dirname "$skill_file")"
+                            if [ "$s_dir" = "." ]; then
+                                s_name="$(echo "$r_full" | cut -d'/' -f2)"
+                            else
+                                s_name="$(basename "$s_dir")"
+                            fi
+                            repo_candidates="$(echo "$repo_candidates" | jq \
+                                --arg name "$s_name" \
+                                --arg url "$r_url" \
+                                --arg path "$s_dir" \
+                                '. + [{
+                                    name: $name,
+                                    source: "github-search",
+                                    upstream_url: $url,
+                                    skill_path: $path,
+                                    revision: null,
+                                    description: ("Discovered via GitHub repository tree at " + $path),
+                                    trust: "unverified",
+                                    license: "unknown",
+                                    discovered_via: "github-search"
+                                }]'
+                            )"
+                        done <<< "$tree_items"
+                    fi
+                done
+                raw_results="$repo_candidates"
+            fi
+        fi
+
+        if [ "$(echo "$raw_results" | jq 'length' 2>/dev/null || echo 0)" -gt 0 ]; then
+            echo "$raw_results" | jq -c 'unique_by({upstream_url, skill_path})'
             return 0
         fi
     fi
@@ -290,10 +409,29 @@ discover_candidates() {
     c_aas="$(discover_from_agentic_awesome "$query")"
     c_gh="$(discover_from_github "$query")"
 
-    # Merge candidates and group by name to preserve alternate source evidence (Phase 10)
+    # Merge raw candidates
+    local all_raw
+    all_raw="$(jq -s 'add // []' <(echo "$c_vendor") <(echo "$c_anthropic") <(echo "$c_skills_sh") <(echo "$c_aas") <(echo "$c_gh"))"
+
+    # Verify each candidate before display/aggregation (Blocker 1)
+    local verified_cands="[]"
+    local raw_len
+    raw_len="$(echo "$all_raw" | jq 'length' 2>/dev/null || echo 0)"
+    if [ "$raw_len" -gt 0 ]; then
+        for (( i=0; i<raw_len; i++ )); do
+            local raw_item checked_item c_status
+            raw_item="$(echo "$all_raw" | jq -c --argjson idx "$i" '.[$idx]')"
+            checked_item="$(verify_discovery_candidate "$raw_item")"
+            c_status="$(echo "$checked_item" | jq -r '.verification.status // "rejected"')"
+            if [ "$c_status" = "verified" ]; then
+                verified_cands="$(echo "$verified_cands" | jq --argjson item "$checked_item" '. + [$item]')"
+            fi
+        done
+    fi
+
+    # Merge verified candidates and group by name to preserve alternate source evidence (Phase 10)
     local all_candidates
-    all_candidates="$(jq -s '
-        add |
+    all_candidates="$(echo "$verified_cands" | jq '
         group_by(.name) |
         map(
             sort_by(
@@ -313,10 +451,11 @@ discover_candidates() {
                 trust: .[0].trust,
                 license: .[0].license,
                 discovered_via: .[0].discovered_via,
+                verification: .[0].verification,
                 alternates: (if length > 1 then [ .[1:][] | { source: .source, upstream_url: .upstream_url, skill_path: .skill_path } ] else [] end)
             }
         )
-    ' <(echo "$c_vendor") <(echo "$c_anthropic") <(echo "$c_skills_sh") <(echo "$c_aas") <(echo "$c_gh"))"
+    ')"
 
     if [ "$output_json" = true ]; then
         echo "$all_candidates"
@@ -575,6 +714,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     case "$CMD" in
         verify)
             verify_candidate "$@"
+            ;;
+        verify-discovery)
+            verify_discovery_candidate "$@"
             ;;
         discover)
             discover_candidates "$@"

@@ -1464,7 +1464,7 @@ import_skill() {
     [ ! -f "$reg_file" ] && reg_file="$REPO_ROOT/resources/skills/_registry.json"
     local target_dir="$SKILLS_SRC/$skill_name"
 
-    # Multi-overlap review (Phase 14 & 15)
+    # Multi-overlap review (Phase 14 & Blocker 3)
     local overlap_reviews="[]"
     if [ -f "$reg_file" ]; then
         overlap_reviews="$(review_candidate_overlaps "$skill_bundle_dir" "$reg_file" 2>/dev/null || echo "[]")"
@@ -1478,26 +1478,41 @@ import_skill() {
     local reason="Complementary capabilities with minimal overlap."
     local top_overlap=""
     local duplicate_matches=()
+    local has_pending_semantic=false
 
     if [ "$rev_count" -gt 0 ]; then
         top_overlap="$(echo "$overlap_reviews" | jq -r '.[0].existing // empty')"
-
-        # Check if any reviewed candidate is DUPLICATE
-        local dup_entries
-        dup_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "DUPLICATE" or .review.heuristic_decision == "DUPLICATE") ]')"
-        if [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
-            decision="DUPLICATE"
-            action="REUSE"
-            reason="$(echo "$dup_entries" | jq -r '.[0].review.reason // "Duplicate of existing skill"')"
-            mapfile -t duplicate_matches < <(echo "$dup_entries" | jq -r '.[].existing')
+        local pending_entries
+        pending_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.status != "completed" or .review.decision == null) ]')"
+        if [ "$(echo "$pending_entries" | jq 'length')" -gt 0 ]; then
+            has_pending_semantic=true
         else
-            local partial_entries
-            partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP" or .review.heuristic_decision == "PARTIAL_OVERLAP") ]')"
-            if [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
-                decision="PARTIAL_OVERLAP"
-                action="COMPANION"
-                reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
+            # Completed semantic review supplied: use authoritative semantic decision
+            local dup_entries
+            dup_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "DUPLICATE") ]')"
+            if [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
+                decision="DUPLICATE"
+                action="REUSE"
+                reason="$(echo "$dup_entries" | jq -r '.[0].review.reason // "Duplicate of existing skill"')"
+                mapfile -t duplicate_matches < <(echo "$dup_entries" | jq -r '.[].existing')
+            else
+                local partial_entries
+                partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP") ]')"
+                if [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
+                    decision="PARTIAL_OVERLAP"
+                    action="$(echo "$partial_entries" | jq -r '.[0].review.recommended_action // "COMPANION"')"
+                    reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
+                fi
             fi
+        fi
+    fi
+
+    # Blocker 3 Import Gate: Overlapping skills require completed semantic review before approve
+    if [ "$mode" = "approve" ]; then
+        if [ "$has_pending_semantic" = true ]; then
+            log_fail "Import cannot be approved. Semantic review is required because this candidate overlaps existing skills."
+            echo -e "  Provide completed AI semantic review via SEMANTIC_REVIEW_JSON or SEMANTIC_REVIEW_FILE."
+            return 1
         fi
     fi
 
@@ -1535,21 +1550,31 @@ import_skill() {
         echo
         echo -e "${BOLD}Semantic Overlap & Catalog Alignment:${RESET}"
         if [ "$rev_count" -gt 0 ]; then
-            echo -e "  Reviewed Overlaps ($rev_count total):"
+            echo -e "  Overlap candidates ($rev_count total):"
             for (( i=0; i<rev_count; i++ )); do
-                local r_name r_score r_class r_dec r_act r_reason
+                local r_name r_score r_class r_hdec r_hact r_hreason r_sstat
                 r_name="$(echo "$overlap_reviews" | jq -r ".[$i].existing")"
                 r_score="$(echo "$overlap_reviews" | jq -r ".[$i].score")"
                 r_class="$(echo "$overlap_reviews" | jq -r ".[$i].classification")"
-                r_dec="$(echo "$overlap_reviews" | jq -r ".[$i].review.decision // .[$i].review.heuristic_decision")"
-                r_act="$(echo "$overlap_reviews" | jq -r ".[$i].review.recommended_action // .[$i].review.heuristic_action")"
-                r_reason="$(echo "$overlap_reviews" | jq -r ".[$i].review.reason")"
-                echo -e "  - ${BOLD}${r_name}${RESET} (score: ${r_score}, class: ${r_class})"
-                echo -e "    Decision: ${BOLD}${r_dec}${RESET} | Action: ${BOLD}${r_act}${RESET}"
-                echo -e "    Reason:   ${r_reason}"
+                r_hdec="$(echo "$overlap_reviews" | jq -r ".[$i].heuristic.heuristic_decision // \"UNKNOWN\"")"
+                r_hact="$(echo "$overlap_reviews" | jq -r ".[$i].heuristic.heuristic_action // \"UNKNOWN\"")"
+                r_hreason="$(echo "$overlap_reviews" | jq -r ".[$i].heuristic.reason // \"\"")"
+                r_sstat="$(echo "$overlap_reviews" | jq -r ".[$i].review.status // \"required\"")"
+                echo -e "  - ${BOLD}${r_name}${RESET}: ${r_score} (${r_class})"
+                echo -e "    Heuristic:       ${BOLD}${r_hdec}${RESET} (action: ${r_hact})"
+                echo -e "    Reason:          ${r_hreason}"
+                if [ "$r_sstat" = "completed" ]; then
+                    local r_sdec r_sact
+                    r_sdec="$(echo "$overlap_reviews" | jq -r ".[$i].review.decision")"
+                    r_sact="$(echo "$overlap_reviews" | jq -r ".[$i].review.recommended_action")"
+                    echo -e "    Semantic Review: ${GREEN}COMPLETED${RESET} (decision: ${BOLD}${r_sdec}${RESET}, action: ${BOLD}${r_sact}${RESET})"
+                else
+                    echo -e "    Semantic Review: ${YELLOW}${BOLD}REQUIRED${RESET}"
+                fi
             done
         else
             echo -e "  No significant overlap with existing canonical skills."
+            echo -e "  Semantic Review:     ${GREEN}NOT REQUIRED${RESET}"
             echo -e "  Semantic Decision:   ${BOLD}KEEP_BOTH${RESET}"
             echo -e "  Recommended Action:  ${BOLD}CREATE${RESET}"
         fi
@@ -1600,7 +1625,7 @@ import_skill() {
         local now
         now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
         local reviewed_against
-        reviewed_against="$(echo "$overlap_reviews" | jq -c '[ .[] | { existing: .existing, score: .score, classification: .classification, decision: (.review.decision // .review.heuristic_decision) } ]')"
+        reviewed_against="$(echo "$overlap_reviews" | jq -c '[ .[] | { existing: .existing, score: .score, classification: .classification, decision: (.review.decision // null), heuristic: (.heuristic.heuristic_decision // null) } ]')"
 
         jq --arg s "$skill_name" \
            --arg hash "$hash" \
@@ -1616,6 +1641,7 @@ import_skill() {
            --arg now "$now" \
            --argjson caps "$skill_caps" \
            --argjson trigs "$skill_trigs" \
+           --arg rev_count "$rev_count" \
            '
            .skills[$s] = {
                name: $s,
@@ -1639,6 +1665,7 @@ import_skill() {
                        timestamp: $now
                    },
                    semantic_review: {
+                       status: (if ($rev_count | tonumber) > 0 then "completed" else "not_required" end),
                        decision: $decision,
                        recommended_action: $action,
                        reviewed_against: $reviewed

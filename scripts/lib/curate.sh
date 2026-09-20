@@ -5,9 +5,10 @@
 
 set -euo pipefail
 
+_CURATE_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$_CURATE_LIB_DIR/../.." && pwd)"
 if [ -z "${REPO_ROOT:-}" ]; then
-    _CURATE_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    REPO_ROOT="$(cd "$_CURATE_LIB_DIR/../.." && pwd)"
+    REPO_ROOT="$DOTFILES_ROOT"
 fi
 
 RED="\033[31m"
@@ -362,7 +363,19 @@ for (const [name, skill] of Object.entries(reg.skills || {})) {
   const wordJaccard = wordUnion.size > 0 ? (wordInter.length / wordUnion.size) : 0;
 
   // Weighted total score
-  const score = (0.40 * capJaccard) + (0.30 * trigJaccard) + (0.10 * domainScore) + (0.20 * wordJaccard);
+  let score = (0.40 * capJaccard) + (0.30 * trigJaccard) + (0.10 * domainScore) + (0.20 * wordJaccard);
+
+  const candParts = candName.toLowerCase().split("-").filter(p => p.length > 2);
+  const existParts = name.toLowerCase().split("-").filter(p => p.length > 2);
+  const sharedName = candParts.filter(p => existParts.includes(p));
+
+  if (candName.toLowerCase() === name.toLowerCase()) {
+    score = 1.0;
+  } else if (candParts.includes(name.toLowerCase()) || existParts.includes(candName.toLowerCase())) {
+    score = Math.max(score, 0.75);
+  } else if (sharedName.length > 0 && (candDomain === existDomain || trigInter.length > 0)) {
+    score = Math.max(score, 0.60);
+  }
 
   if (score >= 0.40) {
     overlaps.push({
@@ -391,6 +404,10 @@ perform_heuristic_review() {
     if [ ! -f "$existing_path" ] && [ ! -d "$existing_path" ]; then
         if [ -d "$REPO_ROOT/resources/skills/$existing_target" ]; then
             existing_path="$REPO_ROOT/resources/skills/$existing_target"
+        elif [ -d "$DOTFILES_ROOT/resources/skills/$existing_target" ]; then
+            existing_path="$DOTFILES_ROOT/resources/skills/$existing_target"
+        elif [ -f "$reg_file" ] && [ -d "$(dirname "$reg_file")/$existing_target" ]; then
+            existing_path="$(dirname "$reg_file")/$existing_target"
         fi
     fi
 
@@ -423,10 +440,9 @@ const exist = readSkill(existArg);
 
 if (!cand || !exist) {
   console.log(JSON.stringify({
+    review_type: "heuristic",
     candidate: cand ? cand.name : "unknown",
     existing: exist ? exist.name : "unknown",
-    decision: "KEEP_BOTH",
-    recommended_action: "CREATE",
     heuristic_decision: "KEEP_BOTH",
     heuristic_action: "CREATE",
     similarity_score: 0.0,
@@ -473,10 +489,9 @@ if (cand.name === exist.name || (jaccard >= 0.70 && nameShared.length >= 1)) {
 }
 
 console.log(JSON.stringify({
+  review_type: "heuristic",
   candidate: cand.name,
   existing: exist.name,
-  decision,
-  recommended_action: action,
   heuristic_decision: decision,
   heuristic_action: action,
   similarity_score: Number(jaccard.toFixed(2)),
@@ -494,28 +509,55 @@ classify_textual_overlap() {
 }
 
 # ------------------------------------------------------------------------------
-# AI Semantic Review Contract (Phase 6 / Phase 13)
-# Wrapper supporting external model review payload with heuristic fallback.
+# AI Semantic Review Contract (Blocker 3)
+# Wrapper supporting external model review payload with NO heuristic fallback.
 # ------------------------------------------------------------------------------
 perform_semantic_review() {
     local cand_dir="$1"
     local existing_target="$2"
     local reg_file="${3:-$REPO_ROOT/resources/skills/_registry.json}"
 
+    local raw_json=""
     if [ -n "${SEMANTIC_REVIEW_FILE:-}" ] && [ -f "$SEMANTIC_REVIEW_FILE" ]; then
-        cat "$SEMANTIC_REVIEW_FILE"
-        return 0
-    fi
-    if [ -n "${SEMANTIC_REVIEW_JSON:-}" ]; then
-        echo "$SEMANTIC_REVIEW_JSON"
-        return 0
+        raw_json="$(cat "$SEMANTIC_REVIEW_FILE")"
+    elif [ -n "${SEMANTIC_REVIEW_JSON:-}" ]; then
+        raw_json="$SEMANTIC_REVIEW_JSON"
     fi
 
-    perform_heuristic_review "$cand_dir" "$existing_target" "$reg_file"
+    if [ -n "$raw_json" ]; then
+        if echo "$raw_json" | jq -e . >/dev/null 2>&1; then
+            if echo "$raw_json" | jq -e 'type == "array"' >/dev/null 2>&1; then
+                local match
+                match="$(echo "$raw_json" | jq -c --arg target "$existing_target" '.[] | select(.existing == $target or .target == $target)' 2>/dev/null || echo "")"
+                if [ -n "$match" ] && [ "$match" != "null" ]; then
+                    echo "$match" | jq -c '.review_type = "semantic" | .status = (.status // "completed")'
+                    return 0
+                fi
+            else
+                local rev_exist
+                rev_exist="$(echo "$raw_json" | jq -r '.existing // .target // ""')"
+                if [ -z "$rev_exist" ] || [ "$rev_exist" = "$existing_target" ]; then
+                    echo "$raw_json" | jq -c \
+                        --arg existing_target "$existing_target" \
+                        '.review_type = "semantic" | .status = (.status // "completed") | .existing = (if .existing then .existing else $existing_target end)'
+                    return 0
+                fi
+            fi
+        fi
+    fi
+
+    # No valid semantic review supplied: return status "required" (NEVER heuristic fallback)
+    jq -n \
+        --arg target "$existing_target" \
+        '{
+            review_type: "semantic",
+            status: "required",
+            existing: $target
+        }'
 }
 
 # ------------------------------------------------------------------------------
-# Multi-Overlap Review Evaluator (Phase 14)
+# Multi-Overlap Review Evaluator (Phase 14 & Blocker 3)
 # Evaluates candidate against all strong_review_candidate + top 3 review_candidate.
 # ------------------------------------------------------------------------------
 review_candidate_overlaps() {
@@ -558,14 +600,16 @@ review_candidate_overlaps() {
         target_score="$(echo "$targets_json" | jq -r ".[$i].score")"
         target_class="$(echo "$targets_json" | jq -r ".[$i].classification")"
 
-        local rev
-        rev="$(perform_semantic_review "$cand_dir" "$target_name" "$reg_file")"
+        local heur sem
+        heur="$(perform_heuristic_review "$cand_dir" "$target_name" "$reg_file")"
+        sem="$(perform_semantic_review "$cand_dir" "$target_name" "$reg_file")"
 
         results="$(echo "$results" | jq --arg name "$target_name" \
                                        --argjson score "$target_score" \
                                        --arg cls "$target_class" \
-                                       --argjson rev "$rev" \
-            '. + [{ existing: $name, score: $score, classification: $cls, review: $rev }]'
+                                       --argjson heur "$heur" \
+                                       --argjson sem "$sem" \
+            '. + [{ existing: $name, score: $score, classification: $cls, heuristic: $heur, review: $sem }]'
         )"
     done
 
