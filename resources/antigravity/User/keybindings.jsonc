@@ -1,0 +1,16 @@
+// ==============================================================================
+// Antigravity IDE Keybindings
+// Default keybindings preserved; overrides explicitly configured below.
+// ==============================================================================
+[
+  // Disable Toggle Tab Key Moves Focus (VS Code default ctrl+m)
+  {
+    "key": "ctrl+m",
+    "command": "-editor.action.toggleTabFocusMode"
+  },
+  // Prevent ctrl+m from executing any command inside Antigravity
+  {
+    "key": "ctrl+m",
+    "command": ""
+  }
+]

@@ -73,7 +73,7 @@ safe_link \
     "$REPO_ROOT/resources/antigravity/User/settings.jsonc" \
     "$TARGET_HOME/.antigravity-ide/User/settings.json"
 safe_link \
-    "$REPO_ROOT/resources/antigravity/User/keybindings.generated.jsonc" \
+    "$REPO_ROOT/resources/antigravity/User/keybindings.jsonc" \
     "$TARGET_HOME/.antigravity-ide/User/keybindings.json"
 safe_link \
     "$REPO_ROOT/resources/gemini/mcp_config.json" \

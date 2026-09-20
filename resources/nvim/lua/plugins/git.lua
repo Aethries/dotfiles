@@ -7,7 +7,6 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
-    cond = not vim.g.vscode,
     opts = {
       signs = {
         add = { text = "▎" },
@@ -45,7 +44,6 @@ return {
   {
     "sindrets/diffview.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory" },
-    cond = not vim.g.vscode,
     keys = {
       { "<leader>gdo", "<cmd>DiffviewOpen<cr>", desc = "Open Diffview" },
       { "<leader>gdc", "<cmd>DiffviewClose<cr>", desc = "Close Diffview" },

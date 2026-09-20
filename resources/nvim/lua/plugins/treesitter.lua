@@ -7,7 +7,6 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    cond = not vim.g.vscode,
     opts = {
       ensure_installed = {
         "bash",

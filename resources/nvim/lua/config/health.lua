@@ -23,9 +23,7 @@ function M.check()
   end
 
   -- 2. Host runtime
-  if vim.g.vscode then
-    ok("Running as Antigravity IDE Neovim backend (asvetliakov.vscode-neovim)")
-  elseif vim.g.neovide then
+  if vim.g.neovide then
     ok("Running as Neovide GUI client")
   else
     ok("Running as Native Terminal Neovim")

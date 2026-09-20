@@ -8,7 +8,6 @@ return {
   {
     "folke/trouble.nvim",
     cmd = "Trouble",
-    cond = not vim.g.vscode,
     opts = {},
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
@@ -24,7 +23,6 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
-    cond = not vim.g.vscode,
     dependencies = {
       "saghen/blink.cmp",
     },
