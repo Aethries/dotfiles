@@ -1,20 +1,37 @@
 { pkgs, ... }:
 
 let
-  kanataHud = pkgs.writers.writePython3Bin "kanata-hud" {
-    libraries = with pkgs; [
-      python3Packages.pygobject3
-      python3Packages.pycairo
-      gtk3
-      gtk-layer-shell
+  pythonEnv = pkgs.python3.withPackages (
+    ps: with ps; [
+      pygobject3
+      pycairo
+    ]
+  );
+
+  kanataHud = pkgs.stdenv.mkDerivation {
+    pname = "kanata-hud";
+    version = "1.0.0";
+
+    nativeBuildInputs = [
+      pkgs.wrapGAppsHook3
+      pkgs.gobject-introspection
     ];
-    flakeIgnore = [
-      "E265"
-      "E402"
-      "E501"
-      "F401"
+
+    buildInputs = [
+      pkgs.gtk3
+      pkgs.gtk-layer-shell
+      pythonEnv
     ];
-  } (builtins.readFile ../scripts/kanata-hud.py);
+
+    dontUnpack = true;
+
+    installPhase = ''
+      mkdir -p $out/bin
+      cp ${../scripts/kanata-hud.py} $out/bin/kanata-hud
+      chmod +x $out/bin/kanata-hud
+      sed -i "1s|^.*$|#!${pythonEnv}/bin/python3|" $out/bin/kanata-hud
+    '';
+  };
 in
 {
   # ============================================================
@@ -27,6 +44,12 @@ in
     keyboards.internal = {
       configFile = ../resources/kanata/kanata.kbd;
     };
+  };
+
+  # Auto-restart daemon on crash or exit for stable recovery
+  systemd.services.kanata-internal.serviceConfig = {
+    Restart = "always";
+    RestartSec = "2s";
   };
 
   # Enable userland input injection via uinput
