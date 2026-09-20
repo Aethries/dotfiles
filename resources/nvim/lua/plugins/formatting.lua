@@ -9,7 +9,6 @@ return {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
     cmd = { "ConformInfo" },
-    cond = not vim.g.vscode,
     opts = {
       formatters_by_ft = {
         lua = { "stylua" },
@@ -47,7 +46,6 @@ return {
   {
     "mfussenegger/nvim-lint",
     event = { "BufReadPost", "BufWritePost" },
-    cond = not vim.g.vscode,
     config = function()
       local lint = require("lint")
       lint.linters_by_ft = {

@@ -5,16 +5,6 @@
   "description": "Pinned Antigravity user extensions and verification checksums",
   "extensions": [
     {
-      "id": "asvetliakov.vscode-neovim",
-      "version": "1.19.0",
-      "publisher": "asvetliakov",
-      "name": "vscode-neovim",
-      "description": "Vim emulation for Visual Studio Code powered by Neovim",
-      "sha256": "3d3b8ea9bbe137696eb5284c9fbeaec6e9defe0779b137392927c0db12e1987f",
-      "download_url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/asvetliakov/vsextensions/vscode-neovim/1.19.0/vspackage",
-      "required": true
-    },
-    {
       "id": "geequlim.godot-tools",
       "version": "2.7.1",
       "publisher": "geequlim",
@@ -26,6 +16,7 @@
     }
   ],
   "banned_extensions": [
+    "asvetliakov.vscode-neovim",
     "vscodevim.vim",
     "amiralizadeh9480.cpp-helper"
   ]

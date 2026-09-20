@@ -4,7 +4,6 @@
 
 local M = {}
 
-M.is_vscode = vim.g.vscode ~= nil
 M.is_neovide = vim.g.neovide ~= nil
 M.is_headless = #vim.api.nvim_list_uis() == 0
 M.has_wayland = os.getenv("WAYLAND_DISPLAY") ~= nil

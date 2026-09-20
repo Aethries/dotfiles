@@ -8,7 +8,6 @@ return {
     "saghen/blink.cmp",
     version = "*",
     event = "InsertEnter",
-    cond = not vim.g.vscode,
     opts = {
       keymap = {
         preset = "default",

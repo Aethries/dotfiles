@@ -7,7 +7,6 @@ return {
   {
     "echasnovski/mini.icons",
     lazy = true,
-    cond = not vim.g.vscode,
     opts = {},
     init = function()
       package.preload["nvim-web-devicons"] = function()
@@ -21,7 +20,6 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    cond = not vim.g.vscode,
     opts = {
       options = {
         theme = "auto",
@@ -46,7 +44,6 @@ return {
     "RRethy/base16-nvim",
     lazy = false,
     priority = 1000,
-    cond = not vim.g.vscode,
     config = function()
       -- Try loading matugen if configured, fallback to base16 default
       local ok, matugen = pcall(require, "matugen")

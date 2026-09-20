@@ -6,7 +6,6 @@
 return {
   {
     "mfussenegger/nvim-dap",
-    cond = not vim.g.vscode,
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",

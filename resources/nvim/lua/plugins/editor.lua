@@ -10,7 +10,6 @@ return {
   {
     "smart-splits-nvim/smart-splits.nvim",
     lazy = false,
-    cond = not vim.g.vscode,
     opts = {
       at_edge = "stop",
       zellij_move_focus_or_tab = true,
@@ -27,7 +26,6 @@ return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
-    cond = not vim.g.vscode,
     opts = {
       preset = "helix",
       spec = {
@@ -48,7 +46,6 @@ return {
     "folke/snacks.nvim",
     priority = 1000,
     lazy = false,
-    cond = not vim.g.vscode,
     opts = {
       bigfile = { enabled = true },
       dashboard = { enabled = true },

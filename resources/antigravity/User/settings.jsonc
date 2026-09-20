@@ -25,13 +25,6 @@
   "workbench.colorTheme": "NoctaliaTheme",
   "workbench.iconTheme": "material-icon-theme",
 
-  // Neovim Integration (asvetliakov.vscode-neovim)
-  "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
-  },
-  "vscode-neovim.neovimClean": false,
-  "vscode-neovim.neovimExecutablePaths.linux": "nvim",
-
   // Formatting & Linting
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

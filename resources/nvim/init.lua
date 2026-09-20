@@ -15,13 +15,7 @@ require("config.options")
 -- 2. Autocmds (highlight on yank, reload, bigfile protection)
 require("config.autocmds")
 
--- 3. Fast-path for Antigravity IDE (asvetliakov.vscode-neovim backend)
-if vim.g.vscode then
-  require("config.keymaps")
-  return
-end
-
--- 4. Native Neovim / Neovide setup
+-- 3. Native Neovim / Neovide setup
 require("config.keymaps")
 require("config.lazy")
 

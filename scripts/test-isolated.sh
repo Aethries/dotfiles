@@ -77,7 +77,7 @@ json_files=(
 )
 jsonc_files=(
     "resources/antigravity/User/settings.jsonc"
-    "resources/antigravity/User/keybindings.generated.jsonc"
+    "resources/antigravity/User/keybindings.jsonc"
 )
 
 for file in "${json_files[@]}"; do
@@ -122,9 +122,9 @@ log_info "Testing Neovim headless startup in isolated environment..."
 # Link resources/nvim to sandbox ~/.config/nvim for true runtimepath emulation
 ln -sfn "$REPO_ROOT/resources/nvim" "$XDG_CONFIG_HOME/nvim"
 
-# Test 5A: Antigravity Neovim backend (vim.g.vscode = 1)
-nvim --headless --cmd "let g:vscode=1" -c "q"
-log_ok "Antigravity backend (g:vscode=1) fast-path startup OK"
+# Test 5A: Native Neovim headless startup
+nvim --headless -c "q"
+log_ok "Native Neovim headless startup OK"
 
 # Test 5B: Native modules and plugin specs without network/plugin downloads.
 nvim --headless -u NONE \

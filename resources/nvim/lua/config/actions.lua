@@ -10,11 +10,6 @@ local term_buf = nil
 local term_win = nil
 
 function M.toggle_terminal()
-  if vim.g.vscode then
-    require("vscode").action("workbench.action.terminal.toggleTerminal")
-    return
-  end
-
   if term_win and vim.api.nvim_win_is_valid(term_win) then
     vim.api.nvim_win_hide(term_win)
     term_win = nil
@@ -36,11 +31,6 @@ function M.toggle_terminal()
 end
 
 function M.close_other_buffers()
-  if vim.g.vscode then
-    require("vscode").action("workbench.action.closeOtherEditors")
-    return
-  end
-
   local current = vim.api.nvim_get_current_buf()
   local closed = 0
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -53,23 +43,15 @@ function M.close_other_buffers()
 end
 
 function M.execute(entry)
-  if vim.g.vscode then
-    if entry.vscode then
-      require("vscode").action(entry.vscode)
-    elseif type(entry.native) == "function" then
-      entry.native()
-    end
-  else
-    if entry.action == "terminal.toggle" or entry.action == "ai.toggle_agent" then
-      M.toggle_terminal()
-    elseif entry.action == "buffer.close_others" then
-      M.close_other_buffers()
-    elseif type(entry.native) == "function" then
-      entry.native()
-    elseif type(entry.native) == "string" and entry.native:sub(1, 5) == "<cmd>" then
-      local cmd = entry.native:sub(6, -5)
-      vim.cmd(cmd)
-    end
+  if entry.action == "terminal.toggle" or entry.action == "ai.toggle_agent" then
+    M.toggle_terminal()
+  elseif entry.action == "buffer.close_others" then
+    M.close_other_buffers()
+  elseif type(entry.native) == "function" then
+    entry.native()
+  elseif type(entry.native) == "string" and entry.native:sub(1, 5) == "<cmd>" then
+    local cmd = entry.native:sub(6, -5)
+    vim.cmd(cmd)
   end
 end
 
