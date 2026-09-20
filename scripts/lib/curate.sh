@@ -509,13 +509,115 @@ classify_textual_overlap() {
 }
 
 # ------------------------------------------------------------------------------
-# AI Semantic Review Contract (Blocker 3)
-# Wrapper supporting external model review payload with NO heuristic fallback.
+# Strict AI Semantic Review Validator
+# Validates schema, decisions, recommended_actions, pairs, and target matching.
+# ------------------------------------------------------------------------------
+validate_semantic_review() {
+    local review_json="$1"
+    local cand_name="${2:-}"
+    local existing_target="${3:-}"
+
+    # shellcheck disable=SC2016
+    node -e '
+const raw = process.argv[1];
+const candName = (process.argv[2] || "").trim();
+const existName = (process.argv[3] || "").trim();
+
+let data;
+try {
+  data = JSON.parse(raw);
+} catch (e) {
+  console.log(JSON.stringify({ valid: false, reason: "Malformed JSON payload: " + e.message }));
+  process.exit(0);
+}
+
+if (!data || typeof data !== "object" || Array.isArray(data)) {
+  console.log(JSON.stringify({ valid: false, reason: "Semantic review payload must be a JSON object" }));
+  process.exit(0);
+}
+
+if (data.review_type !== "semantic") {
+  console.log(JSON.stringify({ valid: false, reason: "Missing or invalid review_type (must be '\''semantic'\'')" }));
+  process.exit(0);
+}
+
+if (data.status !== "completed") {
+  console.log(JSON.stringify({ valid: false, reason: "Missing or invalid status (must be '\''completed'\'')" }));
+  process.exit(0);
+}
+
+const ALLOWED_DECISIONS = ["KEEP_BOTH", "PARTIAL_OVERLAP", "DUPLICATE", "SUPERSEDES", "CONFLICT"];
+if (!ALLOWED_DECISIONS.includes(data.decision)) {
+  console.log(JSON.stringify({ valid: false, reason: `Invalid decision '\''${data.decision}'\''. Allowed: ${ALLOWED_DECISIONS.join(", ")}` }));
+  process.exit(0);
+}
+
+const ALLOWED_ACTIONS = ["REUSE", "EXTEND", "COMPANION", "CREATE", "REPLACE"];
+if (data.decision !== "CONFLICT" && !ALLOWED_ACTIONS.includes(data.recommended_action)) {
+  console.log(JSON.stringify({ valid: false, reason: `Missing or invalid recommended_action '\''${data.recommended_action}'\''. Allowed: ${ALLOWED_ACTIONS.join(", ")}` }));
+  process.exit(0);
+}
+
+// Decision & Action pair validation
+const VALID_PAIRS = {
+  KEEP_BOTH: ["CREATE", "COMPANION"],
+  PARTIAL_OVERLAP: ["COMPANION", "EXTEND"],
+  DUPLICATE: ["REUSE"],
+  SUPERSEDES: ["REPLACE", "EXTEND"],
+  CONFLICT: ["NONE", null, undefined, "REUSE"]
+};
+
+if (data.decision === "CONFLICT") {
+  if (data.recommended_action && ["CREATE", "COMPANION", "REPLACE", "EXTEND"].includes(data.recommended_action)) {
+    console.log(JSON.stringify({ valid: false, reason: `Invalid decision/action pair: CONFLICT cannot pair with '\''${data.recommended_action}'\''` }));
+    process.exit(0);
+  }
+} else {
+  const allowedForDec = VALID_PAIRS[data.decision] || [];
+  if (!allowedForDec.includes(data.recommended_action)) {
+    console.log(JSON.stringify({ valid: false, reason: `Invalid decision/action pair: ${data.decision} cannot pair with ${data.recommended_action}. Allowed for ${data.decision}: ${allowedForDec.join(", ")}` }));
+    process.exit(0);
+  }
+}
+
+if (!data.existing || typeof data.existing !== "string" || !data.existing.trim()) {
+  console.log(JSON.stringify({ valid: false, reason: "Missing existing skill target" }));
+  process.exit(0);
+}
+
+if (existName && data.existing.trim() !== existName) {
+  console.log(JSON.stringify({ valid: false, reason: `Target mismatch: payload targets '\''${data.existing.trim()}'\'' but comparing against '\''${existName}'\''` }));
+  process.exit(0);
+}
+
+if (candName && data.candidate && typeof data.candidate === "string" && data.candidate.trim() !== candName) {
+  console.log(JSON.stringify({ valid: false, reason: `Candidate mismatch: payload candidate '\''${data.candidate.trim()}'\'' does not match '\''${candName}'\''` }));
+  process.exit(0);
+}
+
+if (!data.reason || typeof data.reason !== "string" || !data.reason.trim()) {
+  console.log(JSON.stringify({ valid: false, reason: "Missing or empty reason for semantic review decision" }));
+  process.exit(0);
+}
+
+console.log(JSON.stringify({ valid: true }));
+' "$review_json" "$cand_name" "$existing_target"
+}
+
+# ------------------------------------------------------------------------------
+# AI Semantic Review Contract
+# Evaluates external model review payload with strict validation and NO heuristic fallback.
 # ------------------------------------------------------------------------------
 perform_semantic_review() {
     local cand_dir="$1"
     local existing_target="$2"
     local reg_file="${3:-$REPO_ROOT/resources/skills/_registry.json}"
+
+    local cand_name=""
+    if [ -d "$cand_dir" ] && [ -f "$cand_dir/SKILL.md" ]; then
+        cand_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$cand_dir/SKILL.md" | tr -d '\r"' || true)"
+    fi
+    [ -z "$cand_name" ] && cand_name="$(basename "$cand_dir")"
 
     local raw_json=""
     if [ -n "${SEMANTIC_REVIEW_FILE:-}" ] && [ -f "$SEMANTIC_REVIEW_FILE" ]; then
@@ -524,35 +626,68 @@ perform_semantic_review() {
         raw_json="$SEMANTIC_REVIEW_JSON"
     fi
 
-    if [ -n "$raw_json" ]; then
-        if echo "$raw_json" | jq -e . >/dev/null 2>&1; then
-            if echo "$raw_json" | jq -e 'type == "array"' >/dev/null 2>&1; then
-                local match
-                match="$(echo "$raw_json" | jq -c --arg target "$existing_target" '.[] | select(.existing == $target or .target == $target)' 2>/dev/null || echo "")"
-                if [ -n "$match" ] && [ "$match" != "null" ]; then
-                    echo "$match" | jq -c '.review_type = "semantic" | .status = (.status // "completed")'
-                    return 0
-                fi
-            else
-                local rev_exist
-                rev_exist="$(echo "$raw_json" | jq -r '.existing // .target // ""')"
-                if [ -z "$rev_exist" ] || [ "$rev_exist" = "$existing_target" ]; then
-                    echo "$raw_json" | jq -c \
-                        --arg existing_target "$existing_target" \
-                        '.review_type = "semantic" | .status = (.status // "completed") | .existing = (if .existing then .existing else $existing_target end)'
-                    return 0
-                fi
-            fi
-        fi
+    if [ -z "$raw_json" ]; then
+        jq -n \
+            --arg target "$existing_target" \
+            '{
+                review_type: "semantic",
+                status: "required",
+                existing: $target,
+                reason: "No semantic review payload provided"
+            }'
+        return 0
     fi
 
-    # No valid semantic review supplied: return status "required" (NEVER heuristic fallback)
+    if ! echo "$raw_json" | jq -e . >/dev/null 2>&1; then
+        jq -n \
+            --arg target "$existing_target" \
+            '{
+                review_type: "semantic",
+                status: "required",
+                existing: $target,
+                reason: "Malformed JSON payload"
+            }'
+        return 0
+    fi
+
+    local target_item=""
+    if echo "$raw_json" | jq -e 'type == "array"' >/dev/null 2>&1; then
+        target_item="$(echo "$raw_json" | jq -c --arg target "$existing_target" '.[] | select(.existing == $target or .target == $target)' 2>/dev/null || echo "")"
+        if [ -z "$target_item" ] || [ "$target_item" = "null" ]; then
+            jq -n \
+                --arg target "$existing_target" \
+                '{
+                    review_type: "semantic",
+                    status: "required",
+                    existing: $target,
+                    reason: "Target mismatch: no review entry matching target"
+                }'
+            return 0
+        fi
+    else
+        target_item="$raw_json"
+    fi
+
+    local val_res
+    val_res="$(validate_semantic_review "$target_item" "$cand_name" "$existing_target")"
+    local is_valid
+    is_valid="$(echo "$val_res" | jq -r '.valid // false')"
+
+    if [ "$is_valid" = "true" ]; then
+        echo "$target_item"
+        return 0
+    fi
+
+    local val_reason
+    val_reason="$(echo "$val_res" | jq -r '.reason // "Validation failed"')"
     jq -n \
         --arg target "$existing_target" \
+        --arg reason "Invalid semantic review payload: $val_reason" \
         '{
             review_type: "semantic",
             status: "required",
-            existing: $target
+            existing: $target,
+            reason: $reason
         }'
 }
 
@@ -654,8 +789,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         overlaps-review)
             review_candidate_overlaps "${2:-$PWD}" "${3:-$REPO_ROOT/resources/skills/_registry.json}"
             ;;
+        validate-semantic)
+            validate_semantic_review "${2:-}" "${3:-}" "${4:-}"
+            ;;
         help|--help|-h)
-            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|heuristic <cand_dir> <existing>|review <cand_dir> <existing>|overlaps-review <cand_dir> [registry]}"
+            echo "Usage: $0 {audit [path]|dedup [registry]|license <path>|metadata <path>|overlap <cand_dir> [registry]|heuristic <cand_dir> <existing>|review <cand_dir> <existing>|validate-semantic <json> [cand] [exist]|overlaps-review <cand_dir> [registry]}"
             ;;
         *)
             echo "Unknown command: $CMD" >&2

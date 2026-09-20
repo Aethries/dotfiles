@@ -1478,6 +1478,8 @@ import_skill() {
     local reason="Complementary capabilities with minimal overlap."
     local top_overlap=""
     local duplicate_matches=()
+    local conflict_matches=()
+    local supersedes_matches=()
     local has_pending_semantic=false
 
     if [ "$rev_count" -gt 0 ]; then
@@ -1487,33 +1489,57 @@ import_skill() {
         if [ "$(echo "$pending_entries" | jq 'length')" -gt 0 ]; then
             has_pending_semantic=true
         else
-            # Completed semantic review supplied: use authoritative semantic decision
-            local dup_entries
+            # Completed semantic reviews supplied: evaluate by strict priority:
+            # CONFLICT > DUPLICATE > SUPERSEDES > PARTIAL_OVERLAP > KEEP_BOTH
+            local conflict_entries dup_entries super_entries partial_entries keep_entries
+            conflict_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "CONFLICT") ]')"
             dup_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "DUPLICATE") ]')"
-            if [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
+            super_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "SUPERSEDES") ]')"
+            partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP") ]')"
+            keep_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "KEEP_BOTH") ]')"
+
+            if [ "$(echo "$conflict_entries" | jq 'length')" -gt 0 ]; then
+                decision="CONFLICT"
+                action="$(echo "$conflict_entries" | jq -r '.[0].review.recommended_action // "NONE"')"
+                reason="$(echo "$conflict_entries" | jq -r '.[0].review.reason // "Conflict with existing canonical skill"')"
+                mapfile -t conflict_matches < <(echo "$conflict_entries" | jq -r '.[].existing')
+            elif [ "$(echo "$dup_entries" | jq 'length')" -gt 0 ]; then
                 decision="DUPLICATE"
                 action="REUSE"
                 reason="$(echo "$dup_entries" | jq -r '.[0].review.reason // "Duplicate of existing skill"')"
                 mapfile -t duplicate_matches < <(echo "$dup_entries" | jq -r '.[].existing')
+            elif [ "$(echo "$super_entries" | jq 'length')" -gt 0 ]; then
+                decision="SUPERSEDES"
+                action="$(echo "$super_entries" | jq -r '.[0].review.recommended_action // "REPLACE"')"
+                reason="$(echo "$super_entries" | jq -r '.[0].review.reason // "Supersedes existing canonical skill"')"
+                mapfile -t supersedes_matches < <(echo "$super_entries" | jq -r '.[].existing')
+            elif [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
+                decision="PARTIAL_OVERLAP"
+                action="$(echo "$partial_entries" | jq -r '.[0].review.recommended_action // "COMPANION"')"
+                reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
             else
-                local partial_entries
-                partial_entries="$(echo "$overlap_reviews" | jq -c '[ .[] | select(.review.decision == "PARTIAL_OVERLAP") ]')"
-                if [ "$(echo "$partial_entries" | jq 'length')" -gt 0 ]; then
-                    decision="PARTIAL_OVERLAP"
-                    action="$(echo "$partial_entries" | jq -r '.[0].review.recommended_action // "COMPANION"')"
-                    reason="$(echo "$partial_entries" | jq -r '.[0].review.reason // "Partial overlap with existing skill"')"
-                fi
+                decision="KEEP_BOTH"
+                action="$(echo "$keep_entries" | jq -r '.[0].review.recommended_action // "CREATE"')"
+                reason="$(echo "$keep_entries" | jq -r '.[0].review.reason // "Complementary capabilities with minimal overlap."')"
             fi
         fi
     fi
 
-    # Blocker 3 Import Gate: Overlapping skills require completed semantic review before approve
+    # Blocker Import Gate: Overlapping skills require completed semantic review before approve
     if [ "$mode" = "approve" ]; then
         if [ "$has_pending_semantic" = true ]; then
             log_fail "Import cannot be approved. Semantic review is required because this candidate overlaps existing skills."
             echo -e "  Provide completed AI semantic review via SEMANTIC_REVIEW_JSON or SEMANTIC_REVIEW_FILE."
             return 1
         fi
+    fi
+
+    # Check for CONFLICT rejection
+    if [ "$decision" = "CONFLICT" ]; then
+        log_fail "Import rejected: semantic review found a conflict with existing canonical skills: ${conflict_matches[*]:-$top_overlap}."
+        echo -e "  Semantic Review Reason: ${reason}"
+        echo -e "  Resolve the conflict explicitly before importing."
+        return 1
     fi
 
     # Check for duplicate rejection
@@ -1524,6 +1550,16 @@ import_skill() {
             echo -e "  Recommended Action:     ${action}"
             echo -e "  Pass --replace with --approve to override."
             return 1
+        fi
+    fi
+
+    # Check for SUPERSEDES replacement protection
+    if [ "$decision" = "SUPERSEDES" ]; then
+        if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
+            if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
+                log_fail "Import rejected: Skill '$skill_name' SUPERSEDES existing skill(s) (${supersedes_matches[*]:-$top_overlap}) and target exists. Use --replace or --force to overwrite."
+                return 1
+            fi
         fi
     fi
 
@@ -1586,9 +1622,15 @@ import_skill() {
         echo -e "  No files were copied to $target_dir"
         echo -e "  Registry was not modified."
         echo
+        if [ "$decision" = "CONFLICT" ]; then
+            echo -e "  ${RED}${BOLD}Automatic import blocked due to CONFLICT.${RESET}"
+            echo -e "  Resolve the conflict with existing canonical skill(s) before importing.\n"
+            return 0
+        fi
+
         local approve_cmd="ai-skills import \"$src_location\""
         [ -n "$subpath" ] && approve_cmd+=" --path \"$subpath\""
-        if [ "$decision" = "DUPLICATE" ] || [ -d "$target_dir" ]; then
+        if [ "$decision" = "DUPLICATE" ] || [ "$decision" = "SUPERSEDES" ] || [ -d "$target_dir" ]; then
             approve_cmd+=" --approve --replace"
         else
             approve_cmd+=" --approve"
