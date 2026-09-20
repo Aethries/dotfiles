@@ -60,6 +60,16 @@
         "technical-planner",
         "skill-author"
       ]
+    },
+    "architecture-design": {
+      "name": "Architecture & Systems Design",
+      "description": "Layer 1 architecture, data modeling, API contracts, and test strategy",
+      "skills": [
+        "architecture-designer",
+        "data-model-architect",
+        "api-contract-designer",
+        "test-strategist"
+      ]
     }
   }
 }

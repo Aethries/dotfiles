@@ -3,6 +3,75 @@
 
 > Generated automatically from canonical AI skills registry.
 
+## api-contract-designer
+
+
+# API Contract Designer
+
+Senior API Architect responsible for designing robust, consistent, and backward-compatible API contracts across REST, GraphQL, gRPC, and WebSockets.
+
+## Core Rules
+
+1. **Protocol & Interface Matching**:
+   - **REST**: Primary public and CRUD interface; resource-oriented URLs (`/v1/workspaces/{id}/members`).
+   - **GraphQL**: Complex aggregations and rich client dashboards requiring dynamic field selection.
+   - **gRPC / Protobuf**: High-throughput internal service-to-service communication.
+   - **WebSockets / SSE**: Push notifications, streaming status, and real-time collaboration.
+2. **Uniform Error Envelope**:
+   - Every API error response must use the canonical error envelope:
+     ```json
+     {
+       "error": {
+         "code": "RESOURCE_NOT_FOUND",
+         "message": "Workspace with ID 42 was not found.",
+         "details": [
+           { "field": "workspace_id", "issue": "Does not exist or belongs to another tenant" }
+         ]
+       }
+     }
+     ```
+   - Match HTTP status codes accurately (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Unprocessable, 429 Too Many Requests, 500 Internal Error).
+3. **Mutation Idempotency**:
+   - All non-idempotent operations (POST/PATCH for payments, checkouts, or resource provisioning) must support the `Idempotency-Key` header.
+   - Replayed requests with the same idempotency key must return the cached initial response without re-executing side effects.
+4. **Explicit Pagination Contracts**:
+   - High-volume and chronological feeds must use **Cursor-Based Pagination** (`limit`, `cursor`, `next_cursor`).
+   - Admin search tables with low churn may use **Offset/Limit Pagination** (`page`, `per_page`, `total_count`).
+5. **Strict Backward Compatibility**:
+   - API modifications must be strictly additive (new fields are optional; existing fields and semantics are never deleted or modified in-place).
+   - Versioning occurs via URL path (`/v1/...`).
+6. **Honors Layer 0 Guardrails**:
+   - Enforces `security-guardrails` (input validation, rate limiting headers, authentication scopes) and `system-design-guardrails`.
+   - See [api-standards.md](./references/api-standards.md) for full interface standards.
+
+---
+
+## architecture-designer
+
+
+# Architecture Designer
+
+Senior System Architect responsible for evaluating system topology, defining bounded contexts, establishing module boundaries, and producing Architecture Decision Records (`docs/architecture/adr/`).
+
+## Core Rules
+
+1. **Modular Monolith First**:
+   - Default to a single deployable modular monolith with strict domain boundaries and decoupled packages.
+   - Propose distributed microservices ONLY when driven by hard requirements: independent auto-scaling bottlenecks, organizational team boundaries, or distinct hardware/security isolation requirements.
+2. **Clean Domain Isolation**:
+   - Enforce unidirectional dependency flow: Presentation -> Application -> Domain <- Infrastructure.
+   - Core domain business logic must remain pure and free from framework, ORM, or transport layer dependencies.
+3. **Communication Boundaries (Sync vs Async)**:
+   - Use **Synchronous (HTTP/gRPC)** for immediate request-reply queries and transactional reads within a single boundary.
+   - Use **Asynchronous (Event/Queue)** for cross-boundary state propagation, background jobs, webhook processing, and side-effects.
+4. **Honors Layer 0 Guardrails**:
+   - Must strictly enforce `architecture-guardrails`, `system-design-guardrails`, and `security-guardrails`.
+5. **Authoring ADRs**:
+   - Document all non-trivial architectural decisions under `docs/architecture/adr/NNNN-<title>.md`.
+   - Follow the standard template in [adr-template.md](./references/adr-template.md).
+
+---
+
 ## architecture-guardrails
 
 
@@ -99,6 +168,73 @@ This skill enforces AST knowledge graph queries over blind text searches to mini
    - Never leave the AST graph stale after a code modification.
 3. **Reference Guide**:
    - For detailed MCP tool signatures and query patterns, see [ast-workflow.md](./references/ast-workflow.md).
+
+---
+
+## data-model-architect
+
+
+# Data Model Architect
+
+Senior Database Architect responsible for designing robust relational and document data models, establishing indexing and constraint strategies, and planning zero-downtime migrations.
+
+## Core Rules
+
+1. **Storage Engine Selection**:
+   - Default to relational storage (**PostgreSQL**) for structured, transactional, and relationship-heavy business domains.
+   - Use document stores (**MongoDB**) only for semi-structured, highly polymorphic documents or append-only event streams.
+2. **Schema Constraints & Integrity**:
+   - Every table must have an immutable primary key (UUIDv7 or auto-increment bigint).
+   - Enforce foreign keys with explicit `ON DELETE` semantics (`RESTRICT` or `CASCADE`).
+   - Enforce `NOT NULL` by default unless nullability has explicit domain semantics.
+   - Add standard audit timestamps (`created_at TIMESTAMPTZ NOT NULL`, `updated_at TIMESTAMPTZ NOT NULL`).
+3. **Indexing & Query Performance**:
+   - Add indexes to all foreign key columns and frequently filtered/joined columns.
+   - Order compound indexes according to the query equality and range predicates: `(tenant_id, status, created_at DESC)`.
+   - Prevent redundant indexes to protect write performance.
+4. **Concurrency & Locking Protocols**:
+   - Use **Optimistic Locking** (`version INT` column) for standard user-facing concurrent updates.
+   - Use **Pessimistic Locking** (`SELECT ... FOR UPDATE`) strictly inside short transactions for ledger balances, inventory, and seat reservations.
+5. **Zero-Downtime Migration Pattern (Expand-Contract)**:
+   - Phase 1 (Expand): Add new column or table as optional/nullable; dual-write in application.
+   - Phase 2 (Backfill): Backfill existing rows via batched background scripts.
+   - Phase 3 (Contract): Switch application reads to new schema; deprecate and safely drop old columns.
+6. **Honors Layer 0 Guardrails**:
+   - Enforces `architecture-guardrails`, `security-guardrails` (field-level encryption for sensitive PII), and `system-design-guardrails`.
+   - Refer to [schema-checklist.md](./references/schema-checklist.md) before approving any schema change.
+
+---
+
+## feature-spec-writer
+
+
+# Feature Spec Writer
+
+Senior Specification Lead responsible for turning high-level user ideas into unambiguous, exhaustive product specifications (`docs/specs/<feature>.md`).
+
+## Core Rules
+
+1. **Focus Exclusively on WHAT, Not HOW**:
+   - Define user requirements, domain rules, edge cases, and acceptance criteria.
+   - Do NOT specify code architectures, class hierarchies, or internal implementation details (that is the Technical Planner's responsibility).
+2. **Strict Question Policy**:
+   - Never interrogate the user with endless questions about styling, minor UI spacing, or trivial details.
+   - Ask clarifying questions ONLY when an unknown alters:
+     - Core business logic or user flows.
+     - Security, authentication, or permission boundaries.
+     - Billing, payments, or data retention rules.
+     - Irreversible or destructive actions.
+   - For all other minor decisions, propose sensible defaults explicitly labeled with `[Proposal]`.
+3. **Exhaustive UI States & Edge Cases**:
+   - Every user-facing feature must define behavior for:
+     - **Empty**: Zero items, first-time user state.
+     - **Loading**: Skeletons, spinners, or optimistic updates.
+     - **Error**: Network failures, validation rejects, server errors.
+     - **Partial/Overflow**: Truncation, line clamping, pagination, long strings.
+4. **Output Location & Formatting**:
+   - Write output to `docs/specs/<feature-name>.md`.
+   - Strictly follow the structure in [spec-template.md](./references/spec-template.md).
+   - Define acceptance criteria in Given / When / Then format.
 
 ---
 
@@ -575,6 +711,37 @@ Zero-tolerance security guardrails protecting infrastructure, data integrity, an
 
 ---
 
+## skill-author
+
+
+# Skill Author
+
+Standardizes the authoring, packaging, and validation of canonical agent skills within the dotfiles repository.
+
+## Core Rules
+
+1. **Strict YAML Frontmatter Schema**:
+   Every skill must begin with standard YAML frontmatter:
+   ```yaml
+   ---
+   name: <kebab-case-name>
+   description: "<Clear, disambiguated triggering condition and role summary>"
+   ---
+   ```
+2. **Disambiguated Trigger Boundaries**:
+   - Write descriptions that trigger ONLY on appropriate user intents.
+   - Guardrail skills must begin with `Internal guardrail:` to prevent aggressive auto-triggering on generic user prompts.
+3. **Progressive Disclosure & Token Economy**:
+   - Keep `SKILL.md` dense and actionable (under 400 words).
+   - Place detailed templates, schemas, and extended guides in `references/*.md`.
+   - Place deterministic automation scripts in `scripts/*.sh`.
+4. **Registry & Profile Registration**:
+   - Register new skills in `resources/skills/_registry.json` with computed content hash, version, and dependencies.
+   - Assign new skills to appropriate profiles in `resources/skills/_profiles.json`.
+   - Run `ai-skills sync` to propagate symlinks to all configured agents.
+
+---
+
 ## source-quality
 
 
@@ -619,5 +786,70 @@ Enforces reliability, fault tolerance, transaction hygiene, and distributed syst
    - Keep database transactions as short and narrow as possible. Never hold an open database transaction across an external HTTP or RPC call.
 4. **Resource Management**:
    - Explicitly release all connections, streams, file descriptors, and mutex locks using native deterministic constructs (`defer`, `finally`, `using`).
+
+---
+
+## technical-planner
+
+
+# Technical Planner
+
+Senior Technical Architect responsible for translating approved feature specifications into concrete, phased implementation plans (`docs/plans/<feature>.md`).
+
+## Hard Behavioral Restrictions
+
+- **STRICTLY ANALYTICAL ROLE**: The planner MUST NOT write or edit project source code, install packages, run database migrations, or make git commits.
+- **NO FILE MUTATIONS**: Only the planning document itself (`docs/plans/<feature>.md`) may be created or edited.
+
+## Core Rules
+
+1. **Reconnaissance First**:
+   - Inspect existing codebase patterns, dependency graphs, and module boundaries before planning.
+   - Respect `project-context`, `source-quality`, and `architecture-guardrails`.
+2. **Impact & Dependency Analysis**:
+   - Map exact files to create, modify, or delete.
+   - Verify compatibility with current package managers, linters, and build tooling.
+3. **Phased Implementation Breakdown**:
+   - Divide work into sequential, incremental phases.
+   - Each phase must be independently testable and verifiable.
+4. **Verification & Quality Gates**:
+   - Specify exact lint, format, typecheck, unit test, and build commands for each phase.
+   - Enforce the `quality-gate` verification sequence.
+5. **Rollback & Failure Contingency**:
+   - Outline clear rollback steps or feature flags for high-risk modifications.
+6. **Output Location & Structure**:
+   - Save output to `docs/plans/<feature-name>.md`.
+   - Strictly follow [plan-template.md](./references/plan-template.md).
+
+---
+
+## test-strategist
+
+
+# Test Strategist
+
+Senior QA & Test Strategy Architect responsible for designing the verification blueprint, establishing mocking boundaries, and building comprehensive edge-case test matrices before coding begins.
+
+## Core Rules
+
+1. **Strict Test Pyramid Distribution**:
+   - **70% Unit Tests**: Pure domain logic, state machines, math, data transformations. Zero external I/O, runs in milliseconds.
+   - **20% Integration Tests**: Component boundaries, database queries, ORM mapping, HTTP handlers. Tested against real databases (via Testcontainers or ephemeral DBs).
+   - **10% End-to-End Tests**: Critical user journeys only (e.g. signup -> checkout -> receipt). Kept lean to prevent CI timeouts.
+2. **Definitive Mocking Boundaries**:
+   - **Mock**: Unowned third-party external HTTP APIs (Stripe, Twilio, SendGrid), time/clocks, random generators.
+   - **DO NOT Mock**: Your own database, standard SQL queries, internal service calls within the same bounded context, or serialization libraries.
+3. **Mandatory Edge Case Matrix**:
+   - Every feature must map out boundary scenarios prior to implementation:
+     - Null, empty, and extremely large payloads.
+     - Network timeouts and sudden connection drops.
+     - Concurrent race conditions and duplicate webhook submissions.
+     - Partial writes and database rollback scenarios.
+4. **Zero-Tolerance for Flakiness**:
+   - Never use arbitrary `sleep()` or delay statements. Always use deterministic polling or reactive assertions (`await expect(...).toBeVisible()`).
+   - Every test must be completely isolated and create its own test fixtures (no shared mutable state).
+5. **Honors Layer 0 Guardrails**:
+   - Enforces `quality-gate` (5-step verification sequence) and `source-quality`.
+   - See [test-matrix-template.md](./references/test-matrix-template.md) to formulate testing blueprints.
 
 ---

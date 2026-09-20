@@ -239,6 +239,80 @@
       ],
       "dependencies": [],
       "content_hash": "sha256:997256ddef9b2a6de03e34ec65b507bfdbd28e9f8c0aa773038c1a5ca3724a8c"
+    },
+    "architecture-designer": {
+      "name": "architecture-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Evaluate system topology, bounded contexts, module boundaries, and synchronous vs asynchronous communication.",
+      "tags": [
+        "architecture",
+        "adr",
+        "systems-design",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:9075e03350ddf605ed0e0385750dc9020c032ded7b8c2ed19aceffef92b6c164"
+    },
+    "data-model-architect": {
+      "name": "data-model-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Design relational (Postgres) and document (MongoDB) schemas, indexing strategies, foreign keys, and zero-downtime migrations.",
+      "tags": [
+        "database",
+        "schema",
+        "postgres",
+        "data-modeling",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:2ccd2c151ee6e41b3fd13dc4eacf9b64e7e0ae3fd23e1c0670a72dd84bd80a4b"
+    },
+    "api-contract-designer": {
+      "name": "api-contract-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Standardize API interfaces across REST, GraphQL, gRPC, and WebSockets with uniform error envelopes and idempotency.",
+      "tags": [
+        "api",
+        "rest",
+        "graphql",
+        "grpc",
+        "contract",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:68c23c2afb77a3b8307d7b5d878ec186d7e959eea4ef4e1ccb02e73fd0d04be7"
+    },
+    "test-strategist": {
+      "name": "test-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate comprehensive test strategies, test pyramids, and edge-case matrices across unit, integration, and E2E boundaries.",
+      "tags": [
+        "testing",
+        "qa",
+        "test-strategy",
+        "edge-cases",
+        "layer1"
+      ],
+      "dependencies": [
+        "quality-gate",
+        "source-quality"
+      ],
+      "content_hash": "sha256:1623b9c5e2ea76239687c9710f2b85d5a6fc9a40b166b85702138a0d71969493"
     }
   }
 }

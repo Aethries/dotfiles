@@ -245,6 +245,64 @@ done
 
 log_ok "All 3 Layer 1 Senior Leadership skills verified (templates, invariants, trigger boundaries & registry)"
 
+# ------------------------------------------------------------------------------
+# 1.3 Validate Layer 1 Architecture & Systems Design Skills
+# ------------------------------------------------------------------------------
+log_info "Validating Layer 1 Architecture & Systems Design skills..."
+
+ARCH_DESIGN_SKILLS=(
+    "architecture-designer"
+    "data-model-architect"
+    "api-contract-designer"
+    "test-strategist"
+)
+
+for a in "${ARCH_DESIGN_SKILLS[@]}"; do
+    a_file="$REPO_ROOT/resources/skills/$a/SKILL.md"
+    [ -f "$a_file" ] || log_fail "Missing architecture/design skill: $a_file"
+
+    # Frontmatter check
+    head_line=$(head -n 1 "$a_file")
+    [ "$head_line" = "---" ] || log_fail "$a/SKILL.md missing frontmatter start '---'"
+    grep -Eiq "^name:[[:space:]]*$a" "$a_file" || log_fail "$a/SKILL.md missing valid name"
+    grep -Eiq '^description:' "$a_file" || log_fail "$a/SKILL.md missing description"
+
+    # Registry integrity
+    jq -e --arg a "$a" '.skills[$a]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "_registry.json missing entry for $a"
+done
+
+# Check reference templates
+[ -f "$REPO_ROOT/resources/skills/architecture-designer/references/adr-template.md" ] || log_fail "Missing adr-template.md"
+[ -f "$REPO_ROOT/resources/skills/data-model-architect/references/schema-checklist.md" ] || log_fail "Missing schema-checklist.md"
+[ -f "$REPO_ROOT/resources/skills/api-contract-designer/references/api-standards.md" ] || log_fail "Missing api-standards.md"
+[ -f "$REPO_ROOT/resources/skills/test-strategist/references/test-matrix-template.md" ] || log_fail "Missing test-matrix-template.md"
+
+# Invariant checks
+grep -Fq "Modular Monolith First" "$REPO_ROOT/resources/skills/architecture-designer/SKILL.md" || log_fail "architecture-designer missing Modular Monolith First rule"
+grep -Fq "docs/architecture/adr" "$REPO_ROOT/resources/skills/architecture-designer/SKILL.md" || log_fail "architecture-designer missing ADR path"
+grep -Fq "Expand-Contract" "$REPO_ROOT/resources/skills/data-model-architect/SKILL.md" || log_fail "data-model-architect missing Expand-Contract rule"
+grep -Fq "Idempotency-Key" "$REPO_ROOT/resources/skills/api-contract-designer/SKILL.md" || log_fail "api-contract-designer missing Idempotency-Key rule"
+grep -Fq "Strict Test Pyramid Distribution" "$REPO_ROOT/resources/skills/test-strategist/SKILL.md" || log_fail "test-strategist missing Test Pyramid rule"
+
+# Trigger Boundary Fixtures
+SCHEMA_DESC=$(jq -r '.skills["data-model-architect"].description' "$REPO_ROOT/resources/skills/_registry.json")
+API_DESC=$(jq -r '.skills["api-contract-designer"].description' "$REPO_ROOT/resources/skills/_registry.json")
+
+# Input: "Design database schema and migration strategy for billing subscriptions." -> triggers data-model-architect
+echo "$SCHEMA_DESC" | grep -Eiq "schema|database" || log_fail "data-model-architect description fails to match database schema query"
+
+# Input: "Define REST API contract and error format for payment webhooks." -> triggers api-contract-designer
+echo "$API_DESC" | grep -Eiq "api|contract" || log_fail "api-contract-designer description fails to match API contract query"
+
+# Profile check
+jq -e '.profiles["architecture-design"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing 'architecture-design' profile"
+for a in "${ARCH_DESIGN_SKILLS[@]}"; do
+    jq -e --arg a "$a" '.profiles["architecture-design"].skills | index($a)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "architecture-design profile missing $a"
+done
+
+log_ok "All 4 Layer 1 Architecture & Systems Design skills verified (templates, invariants, trigger boundaries & registry)"
+
+
 
 # ------------------------------------------------------------------------------
 # 2. Test ai-skills.sh CLI in Sandbox
