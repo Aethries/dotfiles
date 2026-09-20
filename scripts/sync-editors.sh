@@ -22,13 +22,29 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOCK_FILE="$REPO_ROOT/resources/antigravity/extensions.lock.json"
 SYNC_EXTENSIONS=true
+FORCE_REPLACE=false
+ALLOW_BACKUP=false
 
-if [ "${1:-}" = "--no-extensions" ]; then
-    SYNC_EXTENSIONS=false
-elif [ "$#" -gt 0 ]; then
-    echo "Usage: $0 [--no-extensions]" >&2
-    exit 2
-fi
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --no-extensions)
+            SYNC_EXTENSIONS=false
+            shift
+            ;;
+        --replace|--force|-f)
+            FORCE_REPLACE=true
+            shift
+            ;;
+        --backup|-b)
+            ALLOW_BACKUP=true
+            shift
+            ;;
+        *)
+            echo "Usage: $0 [--no-extensions] [--replace|--force] [--backup]" >&2
+            exit 2
+            ;;
+    esac
+done
 
 TARGET_USER="$(id -un)"
 TARGET_HOME="$HOME"
@@ -46,10 +62,19 @@ safe_link() {
 
     mkdir -p "$(dirname "$dest")"
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        local backup
-        backup="${dest}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
-        mv -- "$dest" "$backup"
-        warn "Moved existing $dest to $backup"
+        if [ "$FORCE_REPLACE" != true ] && [ "$ALLOW_BACKUP" != true ]; then
+            warn "Unmanaged non-symlink file/directory exists at '$dest'. Skipping to prevent silent mutation. Use --replace or --backup to update."
+            return 0
+        fi
+        if [ "$ALLOW_BACKUP" = true ]; then
+            local backup
+            backup="${dest}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+            mv -- "$dest" "$backup"
+            warn "Moved existing $dest to $backup"
+        else
+            rm -rf -- "$dest"
+            warn "Replaced unmanaged $dest (--replace/--force specified)"
+        fi
     fi
     ln -sfn "$src" "$dest"
 }
@@ -113,10 +138,16 @@ if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
         local target_file="$1"
         mkdir -p "$(dirname "$target_file")"
         if [ -f "$target_file" ] && ! grep -q "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$target_file" 2>/dev/null; then
-            local backup
-            backup="${target_file}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
-            mv "$target_file" "$backup"
-            warn "Backed up unmanaged existing rule file $target_file to $backup"
+            if [ "$FORCE_REPLACE" != true ] && [ "$ALLOW_BACKUP" != true ]; then
+                warn "Unmanaged rule file exists at '$target_file'. Skipping write to prevent overwriting user edits. Pass --replace or --backup to update."
+                return 0
+            fi
+            if [ "$ALLOW_BACKUP" = true ]; then
+                local backup
+                backup="${target_file}.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+                mv "$target_file" "$backup"
+                warn "Backed up unmanaged existing rule file $target_file to $backup"
+            fi
         fi
         echo "$RULES_CONTENT" > "$target_file"
     }

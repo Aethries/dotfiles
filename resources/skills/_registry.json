@@ -310,7 +310,7 @@
       "dependencies": [
         "project-context"
       ],
-      "content_hash": "sha256:ec6bf657629a00c348b0cd27200a5e899d3b7391f0c31062c07e2a6e4cc9805a",
+      "content_hash": "sha256:26790f784944bce857f84fef8b4b2c14187804c2a0005d80aa70d7b3a844b2ce",
       "domain": "guardrail",
       "capabilities": [
         "layering-enforcement",
@@ -445,7 +445,7 @@
       "dependencies": [
         "project-context"
       ],
-      "content_hash": "sha256:933afb0e3ec49b46646b55f833787aa5158f388284e341604984db78ef5f7acd",
+      "content_hash": "sha256:13c869e9c67e90296cbfcba31ff96270ad5c9f317db98d7697da59891c21b784",
       "domain": "leadership",
       "capabilities": [
         "feature-spec-authoring",
@@ -485,7 +485,7 @@
         "feature-spec-writer",
         "architecture-guardrails"
       ],
-      "content_hash": "sha256:e61c616254a0b7c6a8f2d98f0c719a15eb610e95b9ee577118225d831f7f6fd3",
+      "content_hash": "sha256:a188efbf729d6014439d7ed784db378c248893bb6d02a6752326f9e6214bf65d",
       "domain": "leadership",
       "capabilities": [
         "implementation-planning",
@@ -521,7 +521,7 @@
         "layer1"
       ],
       "dependencies": [],
-      "content_hash": "sha256:997256ddef9b2a6de03e34ec65b507bfdbd28e9f8c0aa773038c1a5ca3724a8c",
+      "content_hash": "sha256:a66e74b22731fe1a18e0fb5802d31eabbdfb8f77a00464bb1e492fe5684c5e08",
       "domain": "tooling",
       "capabilities": [
         "agent-skill-authoring",
@@ -598,7 +598,7 @@
         "architecture-guardrails",
         "system-design-guardrails"
       ],
-      "content_hash": "sha256:2ccd2c151ee6e41b3fd13dc4eacf9b64e7e0ae3fd23e1c0670a72dd84bd80a4b",
+      "content_hash": "sha256:54ac63d9fd96f3cf4bf93a912b5b1012e49a4194c69aaa871da993cf6511871e",
       "domain": "database",
       "capabilities": [
         "relational-schema-design",
@@ -716,10 +716,14 @@
         "source-quality",
         "security-guardrails",
         "quality-gate",
+        "project-context",
+        "architecture-guardrails",
+        "codebase-memory",
         "codegraph",
+        "caveman",
         "rtk"
       ],
-      "content_hash": "sha256:eccd5abcacd2e80778ad83d0dd328919a8d09eed43f60568f8737684e2f7fb7c",
+      "content_hash": "sha256:d7971a17eb71ed358fdbf77af7987abcc1c718492689701e13376df410615537",
       "domain": "implementation",
       "capabilities": [
         "spec-execution",
@@ -759,7 +763,7 @@
         "source-quality",
         "quality-gate"
       ],
-      "content_hash": "sha256:21002041c82633d4f27ce55d697a0a8fd63adefc2664777cf328c28c6104b85d",
+      "content_hash": "sha256:770d4a3870833d26706d6b4d66b6c24fc3f55a3d13580f4816d315e579d05fd9",
       "domain": "frontend",
       "capabilities": [
         "pixel-perfect-fidelity",
@@ -802,7 +806,7 @@
         "source-quality",
         "architecture-guardrails"
       ],
-      "content_hash": "sha256:dfbc90f52ce965c02d15e530de8f36a00ae3c810dadbd2fdb9472af5dc8a0916",
+      "content_hash": "sha256:576abf435196b65c85162331462073d62d59aa858fc9a415df410e8cd779a0d3",
       "domain": "review",
       "capabilities": [
         "pr-review",
@@ -1031,7 +1035,7 @@
       "dependencies": [
         "architecture-guardrails"
       ],
-      "content_hash": "sha256:86892be2a987fe3d0baa97aa93096d6ffcbbea2f55b55ae9a600db8cd90dad37",
+      "content_hash": "sha256:d67ca357b8ebc0654105381d8c16fe3c98136502746b529e57c771701c31d1b7",
       "domain": "backend",
       "capabilities": [
         "nestjs-modules",
@@ -1139,7 +1143,7 @@
       "dependencies": [
         "data-model-architect"
       ],
-      "content_hash": "sha256:5b7676a6b324a473561bd5c886bcbba3211e05f3917dae7a6d5de969ac4d4afe",
+      "content_hash": "sha256:6b3abe678f079fba470dabe6ddf38f69edd303d3d3e28710fa0488f23ab0420f",
       "domain": "database",
       "capabilities": [
         "query-plan-analysis",
@@ -1353,7 +1357,7 @@
         "layer3"
       ],
       "dependencies": [],
-      "content_hash": "sha256:f33e6a5243323f00f20849ec93bd014b58c57f68f55bf0f95d4afff933a1638d",
+      "content_hash": "sha256:f423e5ef37fc6c9ffbfb4f05b50a7e920a035e073f7113ae9dcacef03553444c",
       "domain": "tooling",
       "capabilities": [
         "neovim-lua-config",

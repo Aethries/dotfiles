@@ -101,22 +101,38 @@ check_semantic_dedup() {
         return 1
     fi
 
-    # 2. Capability and Trigger Overlap Analysis (Jaccard similarity threshold: 0.70)
+    # 2. Capability, Trigger & SKILL.md Semantic Overlap Analysis
     if command -v node >/dev/null 2>&1; then
         local overlap_report
         # shellcheck disable=SC2016
         overlap_report="$(node -e '
 const fs = require("fs");
-const reg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const path = require("path");
+const regFile = process.argv[1];
+const skillsBase = path.dirname(regFile);
+const reg = JSON.parse(fs.readFileSync(regFile, "utf8"));
 const skills = reg.skills || {};
 const entries = Object.entries(skills).filter(([_, s]) => s.status !== "deprecated");
+
+function getSkillText(name) {
+  const p = path.join(skillsBase, name, "SKILL.md");
+  if (fs.existsSync(p)) return fs.readFileSync(p, "utf8").toLowerCase();
+  return "";
+}
+
+function wordTokens(str) {
+  return new Set((str || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(w => w.length > 3));
+}
 
 let violations = 0;
 for (let i = 0; i < entries.length; i++) {
   for (let j = i + 1; j < entries.length; j++) {
     const [name1, s1] = entries[i];
     const [name2, s2] = entries[j];
-    if (s1.domain !== s2.domain) continue;
+
+    const isDep = (s1.dependencies && s1.dependencies.includes(name2)) ||
+                  (s2.dependencies && s2.dependencies.includes(name1));
+    if (isDep) continue;
 
     const caps1 = new Set(s1.capabilities || []);
     const caps2 = new Set(s2.capabilities || []);
@@ -130,12 +146,30 @@ for (let i = 0; i < entries.length; i++) {
     const trigInter = [...trigs1].filter(x => trigs2.has(x));
     const trigJaccard = trigUnion.size > 0 ? (trigInter.length / trigUnion.size) : 0;
 
-    const isDep = (s1.dependencies && s1.dependencies.includes(name2)) ||
-                  (s2.dependencies && s2.dependencies.includes(name1));
+    // Prefilter: high capability or trigger Jaccard
+    if (capJaccard >= 0.65 || trigJaccard >= 0.65) {
+      const text1 = getSkillText(name1);
+      const text2 = getSkillText(name2);
+      const words1 = wordTokens(text1 || s1.description);
+      const words2 = wordTokens(text2 || s2.description);
+      const wordUnion = new Set([...words1, ...words2]);
+      const wordInter = [...words1].filter(w => words2.has(w));
+      const wordJaccard = wordUnion.size > 0 ? (wordInter.length / wordUnion.size) : 0;
 
-    if ((capJaccard >= 0.7 || trigJaccard >= 0.7) && !isDep) {
-      console.error(`Conflict: high semantic overlap between "${name1}" and "${name2}" in domain "${s1.domain}" (capabilities: ${(capJaccard*100).toFixed(0)}%, triggers: ${(trigJaccard*100).toFixed(0)}%)`);
-      violations++;
+      const outputs1 = (text1.match(/docs\/(specs|plans|reviews|architecture|incidents)\/[a-z0-9_.-]+/g) || []);
+      const outputs2 = (text2.match(/docs\/(specs|plans|reviews|architecture|incidents)\/[a-z0-9_.-]+/g) || []);
+      const sharedOutputs = outputs1.filter(o => outputs2.includes(o));
+
+      if (wordJaccard >= 0.60 || sharedOutputs.length > 0 || (capJaccard >= 0.70 && trigJaccard >= 0.70)) {
+        console.error(`Conflict: high semantic overlap between "${name1}" and "${name2}":`);
+        console.error(`  Capabilities Jaccard: ${(capJaccard * 100).toFixed(0)}%`);
+        console.error(`  Triggers Jaccard:     ${(trigJaccard * 100).toFixed(0)}%`);
+        console.error(`  Body Token Jaccard:   ${(wordJaccard * 100).toFixed(0)}%`);
+        if (sharedOutputs.length > 0) {
+          console.error(`  Colliding Artifacts:  ${sharedOutputs.join(", ")}`);
+        }
+        violations++;
+      }
     }
   }
 }

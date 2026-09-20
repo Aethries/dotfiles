@@ -9,7 +9,15 @@ Standardizes the authoring, packaging, and validation of canonical agent skills 
 
 ## Core Rules
 
-1. **Strict YAML Frontmatter Schema**:
+1. **Scope Decision & Discovery First**:
+   - Before authoring any skill, search canonical and trusted sources: `ai-skills search <term>`.
+   - Strictly follow the triage ladder: **Reuse existing** > **Extend existing** > **Create new**.
+   - Verify semantic uniqueness via `curate.sh dedup` (Jaccard threshold <0.70) to prevent domain/capability bloat.
+2. **Enhance Raw Requirements & English Rewrite**:
+   - Transform ambiguous user notes or raw prompt instructions into crisp, professional, English-first rules.
+   - Disambiguate trigger boundaries: clearly state WHEN to activate and WHEN NOT to activate.
+   - Guardrail skills must begin with `Internal guardrail:` to prevent spurious auto-triggering on generic user prompts.
+3. **Strict YAML Frontmatter Schema**:
    Every skill must begin with standard YAML frontmatter:
    ```yaml
    ---
@@ -17,14 +25,11 @@ Standardizes the authoring, packaging, and validation of canonical agent skills 
    description: "<Clear, disambiguated triggering condition and role summary>"
    ---
    ```
-2. **Disambiguated Trigger Boundaries**:
-   - Write descriptions that trigger ONLY on appropriate user intents.
-   - Guardrail skills must begin with `Internal guardrail:` to prevent aggressive auto-triggering on generic user prompts.
-3. **Progressive Disclosure & Token Economy**:
+4. **Progressive Disclosure & Token Economy**:
    - Keep `SKILL.md` dense and actionable (under 400 words).
-   - Place detailed templates, schemas, and extended guides in `references/*.md`.
+   - Place detailed checklists, schemas, and extended guides in `references/*.md`.
    - Place deterministic automation scripts in `scripts/*.sh`.
-4. **Registry & Profile Registration**:
-   - Register new skills in `resources/skills/_registry.json` with computed content hash, version, and dependencies.
-   - Assign new skills to appropriate profiles in `resources/skills/_profiles.json`.
-   - Run `ai-skills sync` to propagate symlinks to all configured agents.
+5. **Registry, Profile Registration & Installation**:
+   - Compute hash and register in `resources/skills/_registry.json` with capabilities, triggers, and provenance.
+   - Assign to appropriate profile in `resources/skills/_profiles.json`.
+   - Propagate globally (`ai-skills sync`) or install into project (`ai-skills add <name> --project`).

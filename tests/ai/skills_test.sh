@@ -599,7 +599,7 @@ for (const f of fixtures) {
 process.exit(failed > 0 ? 1 : 0);
 ' "$REPO_ROOT/resources/skills/_registry.json" "$FIXTURE_FILE" 2>&1) || log_fail "Trigger boundary behavioral routing failed: $ROUTING_TEST_RESULT"
 
-log_ok "All $fixture_count trigger boundary fixtures verified behaviorally (router accurately selects expected role and rejects forbidden roles)"
+log_ok "All $fixture_count trigger boundary fixtures verified via metadata routing heuristic (does not prove actual model runtime behavior)"
 
 
 
@@ -634,7 +634,8 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini >/dev/null
 [ -f "$MOCK_HOME/.gemini/config/skills/ponytail/SKILL.md" ] || log_fail "Linked skill file not accessible"
 
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target codex >/dev/null
-[ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "Failed to link ponytail to codex"
+[ -L "$MOCK_HOME/.agents/skills/ponytail" ] || log_fail "Failed to link ponytail to codex primary path (~/.agents/skills)"
+[ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "Failed to link ponytail to codex compatibility path (~/.codex/skills)"
 
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --global claude >/dev/null
 [ -L "$MOCK_HOME/.claude/skills/ponytail" ] || log_fail "Failed to link ponytail to claude via --global"
@@ -745,6 +746,83 @@ fi
 rm -f "$MOCK_HOME/.gemini/config/skills/broken-test-skill"
 (cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" doctor >/dev/null) || log_fail "doctor failed after removing broken link"
 log_ok "ai-skills.sh doctor catches broken symlinks and verifies system integrity"
+
+# Test 2.11: Unmanaged target protection for safe_link
+log_info "Testing unmanaged target protection in safe_link..."
+mkdir -p "$MOCK_HOME/.gemini/config/skills"
+rm -rf "$MOCK_HOME/.gemini/config/skills/ponytail"
+echo "unmanaged local content" > "$MOCK_HOME/.gemini/config/skills/ponytail"
+# Attempt to link ponytail over unmanaged file without --replace must fail
+if HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini >/dev/null 2>&1; then
+    log_fail "safe_link silently overwrote unmanaged file without --replace"
+fi
+[ -f "$MOCK_HOME/.gemini/config/skills/ponytail" ] && [ ! -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "Unmanaged file was replaced prematurely"
+grep -Fq "unmanaged local content" "$MOCK_HOME/.gemini/config/skills/ponytail" || log_fail "Unmanaged file content was modified"
+
+# With --replace, it must succeed and convert to symlink
+HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --target gemini --replace >/dev/null
+[ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "safe_link failed to replace unmanaged file when --replace was passed"
+log_ok "safe_link protects unmanaged targets and mutates only with explicit --replace flag"
+
+# Test 2.12: Unmanaged directory protection for project install
+log_info "Testing unmanaged directory protection in install_project..."
+mkdir -p "$MOCK_PROJECT/.agents/skills/docker"
+echo "manual docker configuration" > "$MOCK_PROJECT/.agents/skills/docker/SKILL.md"
+# docker exists on disk but is not recorded in .agent-skills.lock.json
+if (cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add docker --project >/dev/null 2>&1); then
+    log_fail "install_project silently overwrote unmanaged directory without --force"
+fi
+grep -Fq "manual docker configuration" "$MOCK_PROJECT/.agents/skills/docker/SKILL.md" || log_fail "Unmanaged directory was modified without --force"
+
+# With --force, it must succeed and copy canonical docker skill
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add docker --project --force >/dev/null)
+[ -f "$MOCK_PROJECT/.agents/skills/docker/SKILL.md" ] || log_fail "docker SKILL.md missing after forced install"
+grep -Fq "Docker containerization" "$MOCK_PROJECT/.agents/skills/docker/SKILL.md" || log_fail "docker skill not updated with canonical content"
+jq -e '.skills["docker"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Lockfile missing docker entry after forced install"
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove docker --project >/dev/null)
+log_ok "install_project protects unmanaged directories and overwrites only with explicit --force flag"
+
+# Test 2.13: Path-prefix confinement escape test
+log_info "Testing path-prefix confinement escape security..."
+FAKE_ESCAPE_DIR="${MOCK_PROJECT}-sibling"
+mkdir -p "$FAKE_ESCAPE_DIR"
+# Direct invocation of assert_path_inside_project with sibling directory
+# shellcheck disable=SC1091
+source "$REPO_ROOT/scripts/ai-skills.sh"
+if assert_path_inside_project "$FAKE_ESCAPE_DIR/.agents/skills/ponytail" "$MOCK_PROJECT" >/dev/null 2>&1; then
+    log_fail "assert_path_inside_project allowed prefix escape to sibling path: $FAKE_ESCAPE_DIR"
+fi
+rm -rf "$FAKE_ESCAPE_DIR"
+log_ok "assert_path_inside_project strictly rejects sibling prefix escape attempts"
+
+# Test 2.14: Multi-agent project resolution test
+log_info "Testing multi-agent project resolution engine..."
+rm -rf "$MOCK_PROJECT/.agents/skills" "$MOCK_PROJECT/.claude/skills" "$MOCK_PROJECT/.agent-skills.lock.json"
+(cd "$MOCK_PROJECT" && HOME="$MOCK_HOME" "$AI_SKILLS_BIN" add ponytail --project >/dev/null)
+[ -d "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail "Missing .agents/skills/ponytail"
+[ -d "$MOCK_PROJECT/.claude/skills/ponytail" ] || log_fail "Missing .claude/skills/ponytail"
+[ ! -L "$MOCK_PROJECT/.agents/skills/ponytail" ] || log_fail ".agents/skills/ponytail must not be symlink"
+[ ! -L "$MOCK_PROJECT/.claude/skills/ponytail" ] || log_fail ".claude/skills/ponytail must not be symlink"
+jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null || log_fail "Lockfile missing ponytail"
+log_ok "ai-skills.sh add --project installs to both .agents/skills and .claude/skills"
+
+# Test 2.15: External import overwrite protection
+log_info "Testing external import overwrite protection..."
+MOCK_IMPORT_DIR="$SANDBOX_DIR/external-import-skill"
+mkdir -p "$MOCK_IMPORT_DIR"
+cat << 'EOF' > "$MOCK_IMPORT_DIR/SKILL.md"
+---
+name: ponytail
+description: Duplicate external ponytail attempt
+---
+# Duplicate
+EOF
+if HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MOCK_IMPORT_DIR" ponytail >/dev/null 2>&1; then
+    log_fail "import silently overwrote canonical skill 'ponytail' without --force"
+fi
+grep -Fq "Ponytail / Lazy Senior Developer" "$REPO_ROOT/resources/skills/ponytail/SKILL.md" || log_fail "Canonical ponytail was modified"
+rm -rf "$MOCK_IMPORT_DIR"
+log_ok "ai-skills.sh import rejects overwriting canonical skills without explicit --force"
 
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration

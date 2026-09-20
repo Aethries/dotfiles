@@ -51,10 +51,10 @@ The adapter engine (`scripts/lib/agents.sh`) discovers and configures supported 
 
 | Agent Identifier | Target Name | Global Primary Path | Global Compatibility Paths | Project Primary Path | Rule File |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `antigravity-cli` | Antigravity CLI (Gemini) | `~/.gemini/config/skills/` | `~/.gemini/antigravity/skills/` | `.gemini/skills/` | `RULES.md` |
-| `antigravity-ide` | Antigravity IDE | `~/.agents/skills/` | — | `.agents/skills/` | `AGENTS.md` |
-| `codex-cli` | Codex CLI | `~/.codex/skills/` | — | `.codex/skills/` | `AGENTS.md` |
-| `claude-code` | Claude Code CLI | `~/.claude/skills/` | — | `.claude/skills/` | `CLAUDE.md` |
+| `antigravity-cli` | Google Antigravity CLI | `~/.gemini/config/skills/` | `~/.gemini/antigravity-cli/skills/` | `.agents/skills/` | `GEMINI.md` |
+| `antigravity-ide` | Google Antigravity IDE | `~/.gemini/config/skills/` | `~/.agents/skills/` | `.agents/skills/` | `GEMINI.md` |
+| `codex-cli` | OpenAI Codex CLI | `~/.agents/skills/` | `~/.codex/skills/` | `.agents/skills/` | `AGENTS.md` |
+| `claude-code` | Anthropic Claude Code CLI | `~/.claude/skills/` | — | `.claude/skills/` | `CLAUDE.md` |
 
 ---
 

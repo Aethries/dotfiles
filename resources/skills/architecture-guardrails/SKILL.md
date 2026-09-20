@@ -9,15 +9,15 @@ Enforces modular architecture, domain boundaries, and strict layer isolation acr
 
 ## Core Rules
 
-1. **Unidirectional Dependency Flow**:
-   - Dependencies must flow inward: `Presentation / API -> Domain / Service -> Persistence / Infrastructure`.
-   - Outer layers depend on inner layers; inner core domain models never depend on outer transport or database frameworks.
-2. **Layer Isolation**:
-   - Presentation/controller layers must never directly query databases, execute SQL, or handle raw ORM transaction scopes.
-   - Domain logic must remain free of transport-specific types (HTTP status codes, request bodies, gRPC metadata).
-3. **Module & Domain Boundaries**:
-   - Communicate across domain boundaries only through defined service interfaces or public module contracts.
-   - Circular package or module imports are strictly prohibited.
-4. **Side-Effect Containment**:
-   - Keep business calculations pure and deterministic; isolate I/O, timers, and external network interactions to boundary adapters.
-   - Avoid hidden or mutable global state.
+1. **Project-First Architectural Preservation**:
+   - Inspect and detect the repository's established topological model (e.g. Hexagonal, Layered, Feature-Sliced, Vertical Slice, Monolithic MVC, Microservices, or Flat Library).
+   - Preserve and enforce the existing architectural boundaries of the codebase; never impose foreign architectural paradigms (such as dogmatic Clean Architecture) onto a project with established conventions.
+2. **Unidirectional Dependency Flow & Acyclic Graphs**:
+   - Maintain strictly acyclic dependency graphs (DAG) across modules and packages.
+   - Circular dependencies between modules, packages, or domains are strictly prohibited.
+3. **Module & Domain Boundary Integrity**:
+   - Communicate across module/domain boundaries only through defined public interfaces or exported service contracts.
+   - Prevent components from bypassing public boundaries to reach directly into private module internals.
+4. **Side-Effect & State Containment**:
+   - Isolate I/O, timers, hardware access, and network interactions to designated boundary adapters.
+   - Avoid hidden side-effects and uncontrolled global mutable state.

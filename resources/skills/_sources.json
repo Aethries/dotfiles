@@ -12,10 +12,10 @@
       "curation_policy": "strict"
     },
     "official-vendor": {
-      "name": "Official Vendor Repositories",
-      "type": "git",
-      "url": "https://github.com/google-deepmind/antigravity",
-      "description": "First-party skill libraries from Anthropic, OpenAI, and Google",
+      "name": "Official Vendor Policy & Specs",
+      "type": "policy",
+      "url": "https://github.com/anthropics/skills",
+      "description": "Multi-vendor policy source aggregating first-party specifications from Anthropic, Google, and OpenAI",
       "trust_level": "trusted",
       "curation_policy": "vendor-verified"
     },
@@ -38,7 +38,7 @@
     "agentic-awesome-skills": {
       "name": "Agentic Awesome Skills",
       "type": "git",
-      "url": "https://github.com/agentic-ai/awesome-skills",
+      "url": "https://github.com/sickn33/agentic-awesome-skills",
       "description": "Curated collection of community and enterprise agent skills",
       "trust_level": "community",
       "curation_policy": "curated-audit"

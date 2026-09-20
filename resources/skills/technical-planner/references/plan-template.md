@@ -10,21 +10,27 @@
 - Existing codebase components impacted by this change.
 - Upstream and downstream module dependencies.
 
-## 2. File Modification Manifest
+## 2. Architecture Alternatives & Trade-Offs
+| Option | Description | Pros | Cons | Decision |
+| :--- | :--- | :--- | :--- | :--- |
+| **Option A (Chosen)** | Native platform / stdlib approach | Minimal dependency overhead, simple lifecycle | Requires manual wiring | Selected |
+| **Option B** | Third-party framework abstraction | Feature-rich out of the box | Adds heavy runtime dependency | Rejected |
+
+## 3. File Modification Manifest
 | Action | File Path | Description |
 | :--- | :--- | :--- |
 | `CREATE` | `src/services/new-service.ts` | Implementation of core business logic |
 | `MODIFY` | `src/controllers/api.ts` | Add endpoint route handlers |
 | `DELETE` | `src/legacy/old-util.ts` | Remove deprecated helper |
 
-## 3. Phased Execution Roadmap
+## 4. Phased Execution Roadmap
 
 ### Phase 1: Data Models & Interfaces
 - **Objective**: Establish domain types and interfaces without side effects.
 - **Tasks**:
   1. Define types/interfaces in `src/types/`.
   2. Implement unit tests for data validators.
-- **Verification**: Run `npm test` or equivalent runner.
+- **Verification**: Discovered test command (e.g. `cargo test`, `pnpm test`, `nix flake check`).
 
 ### Phase 2: Core Domain Logic
 - **Objective**: Implement service algorithms and state transitions.
@@ -40,13 +46,13 @@
   2. Connect UI components to service layer.
 - **Verification**: Run integration test suite and quality gate.
 
-## 4. Verification & Quality Gates
-- **Lint**: `npm run lint` or `shellcheck`
-- **Format**: `npm run format:check`
-- **Typecheck**: `npm run typecheck`
-- **Tests**: `npm test`
-- **Build**: `npm run build`
+## 5. Verification & Discovered Quality Gates
+- **Lint**: Discovered project linter (e.g. `golangci-lint`, `cargo clippy`, `eslint`, `shellcheck`)
+- **Format**: Discovered formatter (e.g. `nixfmt`, `cargo fmt`, `prettier --check`)
+- **Typecheck**: Discovered typechecker (e.g. `tsc --noEmit`, `pyright`, `cargo check`)
+- **Tests**: Discovered test runner
+- **Build**: Discovered build command
 
-## 5. Rollback & Contingency Plan
+## 6. Rollback & Contingency Plan
 - Steps to revert changes if regressions are identified post-merge.
 - Feature flag or environmental gating mechanisms.

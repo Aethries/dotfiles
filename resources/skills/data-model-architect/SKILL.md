@@ -9,18 +9,15 @@ Senior Database Architect responsible for designing robust relational and docume
 
 ## Core Rules
 
-1. **Storage Engine Selection**:
-   - Default to relational storage (**PostgreSQL**) for structured, transactional, and relationship-heavy business domains.
-   - Use document stores (**MongoDB**) only for semi-structured, highly polymorphic documents or append-only event streams.
-2. **Schema Constraints & Integrity**:
-   - Every table must have an immutable primary key (UUIDv7 or auto-increment bigint).
-   - Enforce foreign keys with explicit `ON DELETE` semantics (`RESTRICT` or `CASCADE`).
-   - Enforce `NOT NULL` by default unless nullability has explicit domain semantics.
-   - Add standard audit timestamps (`created_at TIMESTAMPTZ NOT NULL`, `updated_at TIMESTAMPTZ NOT NULL`).
-3. **Indexing & Query Performance**:
-   - Add indexes to all foreign key columns and frequently filtered/joined columns.
-   - Order compound indexes according to the query equality and range predicates: `(tenant_id, status, created_at DESC)`.
-   - Prevent redundant indexes to protect write performance.
+1. **Domain & Access Pattern Driven Modeling**:
+   - Model schemas starting from business domain boundaries, relationship cardinality, query access paths, and write volume.
+   - Inspect and preserve existing repository schema conventions (e.g. ULID vs UUID vs serial bigint, snake_case vs camelCase, soft-delete vs hard-delete, audit timestamp naming). Never force external naming or ID conventions onto an established database.
+2. **Identifier & Constraint Architecture**:
+   - Select primary key strategies driven by domain requirements: natural composite keys for pure association tables, sequential IDs for compact local indexes, or time-ordered UUIDs/ULIDs when distributed generation is needed.
+   - Enforce explicit integrity constraints: foreign keys with purposeful `ON DELETE` semantics (`RESTRICT`, `CASCADE`, `SET NULL`), `CHECK` constraints for domain invariants, and `NOT NULL` wherever values are mandatory.
+3. **Indexing & Access Path Alignment**:
+   - Design compound indexes matching actual query access patterns: place equality predicates first, followed by range filters and sort orders `(tenant_id, status, created_at DESC)`.
+   - Prevent index redundancy to maintain optimal write throughput and reduce autovacuum overhead.
 4. **Concurrency & Locking Protocols**:
    - Use **Optimistic Locking** (`version INT` column) for standard user-facing concurrent updates.
    - Use **Pessimistic Locking** (`SELECT ... FOR UPDATE`) strictly inside short transactions for ledger balances, inventory, and seat reservations.

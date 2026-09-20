@@ -44,10 +44,19 @@ safe_link() {
 
     mkdir -p "$(dirname "$dest")"
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        local backup
-        backup="${dest}.pre-skill.$(date +%Y%m%d%H%M%S)"
-        mv -- "$dest" "$backup"
-        log_warn "Moved existing non-symlink $dest to $backup"
+        if [ "${FORCE_REPLACE:-false}" != true ] && [ "${ALLOW_BACKUP:-false}" != true ]; then
+            log_fail "Unmanaged file or directory exists at '$dest'. Aborting to prevent silent overwrite. Pass --replace or --backup to proceed."
+            return 1
+        fi
+        if [ "${ALLOW_BACKUP:-false}" = true ]; then
+            local backup
+            backup="${dest}.pre-skill.$(date +%Y%m%d%H%M%S)"
+            mv -- "$dest" "$backup"
+            log_warn "Moved existing non-symlink $dest to $backup"
+        else
+            rm -rf -- "$dest"
+            log_warn "Replaced unmanaged existing $dest (--replace/--force specified)"
+        fi
     fi
     ln -sfn "$src" "$dest"
     if [ "$TARGET_USER" != "$(id -un)" ]; then
@@ -230,7 +239,7 @@ assert_path_inside_project() {
     local real_target_dir
     real_target_dir="$(cd "$check_dir" 2>/dev/null && pwd -P || echo "$check_dir")"
 
-    if [[ "$real_target_dir" != "$real_root"* ]]; then
+    if [[ "$real_target_dir" != "$real_root" && "$real_target_dir" != "$real_root/"* ]]; then
         log_fail "Path escape violation: '$target_path' resolves outside project root '$real_root'"
         return 1
     fi
@@ -370,12 +379,27 @@ install_global() {
 
 install_project() {
     local name="$1"
-    local dest_base="${2:-}"
+    local dest_target="${2:-}"
+    local proj_root_arg="${3:-}"
     local skill_src="$SKILLS_SRC/$name"
 
     local proj_root
-    if [ -n "$dest_base" ] && [ "$dest_base" != "project" ]; then
-        proj_root="$(find_project_root "$dest_base")"
+    local dest_base
+    if [ -n "$proj_root_arg" ]; then
+        proj_root="$(find_project_root "$proj_root_arg")"
+        if [ -n "$dest_target" ] && [[ "$dest_target" == "$proj_root"* ]]; then
+            dest_base="$dest_target"
+        else
+            dest_base="$proj_root/.agents/skills"
+        fi
+    elif [ -n "$dest_target" ]; then
+        if [[ "$dest_target" == *"/skills" ]] || [[ "$dest_target" == *"/skills/" ]]; then
+            proj_root="$(find_project_root "$dest_target")"
+            dest_base="$dest_target"
+        else
+            proj_root="$(find_project_root "$dest_target")"
+            dest_base="$proj_root/.agents/skills"
+        fi
     else
         proj_root="$(find_project_root "$PWD")"
         dest_base="$proj_root/.agents/skills"
@@ -390,6 +414,31 @@ install_project() {
 
     # Confinement assertion
     assert_path_inside_project "$dest" "$proj_root" || return 1
+
+    # Check unmanaged existing destination (BLOCKER 4)
+    local lock_file="$proj_root/.agent-skills.lock.json"
+    local is_managed=false
+    if [ -f "$lock_file" ]; then
+        if jq -e --arg s "$name" '.skills[$s]' "$lock_file" >/dev/null 2>&1; then
+            is_managed=true
+        fi
+    fi
+
+    if [ -e "$dest" ] && [ "$is_managed" != true ]; then
+        if [ "${FORCE_REPLACE:-false}" != true ] && [ "${ALLOW_BACKUP:-false}" != true ]; then
+            log_fail "Destination '$dest' already exists and is NOT managed by $lock_file. Aborting to prevent accidental data loss. Pass --force or --backup to proceed."
+            return 1
+        fi
+        if [ "${ALLOW_BACKUP:-false}" = true ]; then
+            local backup
+            backup="${dest}.pre-skill.$(date +%Y%m%d%H%M%S)"
+            mv "$dest" "$backup"
+            log_warn "Backed up unmanaged existing destination $dest to $backup"
+        else
+            rm -rf "$dest"
+            log_warn "Removed unmanaged existing destination $dest (--force/--replace specified)"
+        fi
+    fi
 
     log_info "Installing skill '$name' into project (path: $dest)..."
 
@@ -467,11 +516,26 @@ remove_global() {
 
 remove_project() {
     local name="$1"
-    local dest_base="${2:-}"
+    local dest_target="${2:-}"
+    local proj_root_arg="${3:-}"
     local proj_root
+    local dest_base
 
-    if [ -n "$dest_base" ] && [ "$dest_base" != "project" ]; then
-        proj_root="$(find_project_root "$dest_base")"
+    if [ -n "$proj_root_arg" ]; then
+        proj_root="$(find_project_root "$proj_root_arg")"
+        if [ -n "$dest_target" ] && [[ "$dest_target" == "$proj_root"* ]]; then
+            dest_base="$dest_target"
+        else
+            dest_base="$proj_root/.agents/skills"
+        fi
+    elif [ -n "$dest_target" ]; then
+        if [[ "$dest_target" == *"/skills" ]] || [[ "$dest_target" == *"/skills/" ]]; then
+            proj_root="$(find_project_root "$dest_target")"
+            dest_base="$dest_target"
+        else
+            proj_root="$(find_project_root "$dest_target")"
+            dest_base="$proj_root/.agents/skills"
+        fi
     else
         proj_root="$(find_project_root "$PWD")"
         dest_base="$proj_root/.agents/skills"
@@ -1155,11 +1219,27 @@ discover_sources() {
 }
 
 import_skill() {
-    local src_location="${1:-}"
-    local skill_name="${2:-}"
+    local src_location=""
+    local skill_name=""
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force|-f|--replace)
+                FORCE_REPLACE=true
+                shift
+                ;;
+            *)
+                if [ -z "$src_location" ]; then
+                    src_location="$1"
+                elif [ -z "$skill_name" ]; then
+                    skill_name="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
 
     if [ -z "$src_location" ]; then
-        log_fail "Usage: $(basename "$0") import <git-repo-or-dir> [skill-name]"
+        log_fail "Usage: $(basename "$0") import <git-repo-or-dir> [skill-name] [--force]"
         return 1
     fi
 
@@ -1201,9 +1281,29 @@ import_skill() {
     fi
 
     local target_dir="$SKILLS_SRC/$skill_name"
-    if [ -d "$target_dir" ]; then
-        log_warn "Target skill '$skill_name' already exists at $target_dir. Overwriting..."
+    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+
+    # BLOCKER 6: Prevent silent overwrite of existing canonical skills
+    if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
+        if [ "${FORCE_REPLACE:-false}" != true ]; then
+            log_fail "Import rejected: Skill '$skill_name' already exists in canonical library. Use --force or --replace to overwrite."
+            return 1
+        fi
+        log_warn "Target skill '$skill_name' exists. Overwriting (--force/--replace specified)..."
         rm -rf "$target_dir"
+    fi
+
+    # BLOCKER 7: Record reproducible commit SHA and license metadata
+    local commit_sha="null"
+    if [ -d "$tmp_dir/.git" ]; then
+        commit_sha="$(cd "$tmp_dir" && git rev-parse HEAD 2>/dev/null || echo "null")"
+    fi
+
+    local license="unspecified"
+    if [ -f "$tmp_dir/LICENSE" ]; then
+        license="$(head -n 1 "$tmp_dir/LICENSE" | tr -d '\r\n')"
+    elif [ -f "$tmp_dir/LICENSE.md" ]; then
+        license="$(head -n 1 "$tmp_dir/LICENSE.md" | tr -d '\r\n')"
     fi
 
     mkdir -p "$target_dir"
@@ -1211,16 +1311,20 @@ import_skill() {
 
     local hash
     hash="$(compute_skill_hash "$target_dir")"
-    local reg_file="$REPO_ROOT/resources/skills/_registry.json"
     if [ -f "$reg_file" ]; then
         local desc
         desc="$(get_skill_desc "$target_dir")"
         local tmp_reg
         tmp_reg="$(mktemp "$reg_file.tmp.XXXXXX")"
+        local now
+        now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
         jq --arg s "$skill_name" \
            --arg hash "$hash" \
            --arg desc "$desc" \
            --arg url "$src_location" \
+           --arg commit "$commit_sha" \
+           --arg license "$license" \
+           --arg now "$now" \
            '
            .skills[$s] = {
                name: $s,
@@ -1234,9 +1338,10 @@ import_skill() {
                triggers: [$s],
                provenance: {
                    upstream_url: $url,
-                   commit: null,
-                   license: "unknown",
-                   verified_by: "manual-import"
+                   commit: (if $commit == "null" then null else $commit end),
+                   license: $license,
+                   verified_by: "curate.sh-security-audit",
+                   imported_at: $now
                },
                content_hash: $hash
            }
@@ -1330,8 +1435,25 @@ select_skills_interactive() {
         3)
             local proj_root
             proj_root="$(find_project_root "$PWD")"
+            local chosen_agents=()
+            local agent_candidates=("antigravity-cli" "antigravity-ide" "codex-cli" "claude-code")
+            if command -v fzf >/dev/null 2>&1; then
+                mapfile -t chosen_agents < <(printf '%s\n' "${agent_candidates[@]}" | fzf \
+                    --multi \
+                    --prompt="Select Project Target Agent(s) [TAB=Multi-select, ENTER=Confirm]: " \
+                    --header="[TAB] Toggle Selection | [Enter] Confirm")
+            else
+                chosen_agents=("antigravity-cli" "antigravity-ide" "codex-cli" "claude-code")
+            fi
+            if [ "${#chosen_agents[@]}" -eq 0 ]; then
+                chosen_agents=("antigravity-cli" "antigravity-ide" "codex-cli" "claude-code")
+            fi
+            local target_paths=()
+            mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "${chosen_agents[@]}")
             for s in "${selected_skills[@]}"; do
-                install_project "$s" "$proj_root/.agents/skills"
+                for dest_p in "${target_paths[@]}"; do
+                    install_project "$s" "$dest_p" "$proj_root"
+                done
             done
             ;;
         4)
@@ -1354,6 +1476,202 @@ select_skills_interactive() {
             echo "Cancelled."
             ;;
     esac
+}
+
+cmd_add() {
+    local skills=()
+    local MODE="global"
+    local TARGET_OPT="all"
+    local PROJECT_OPT=""
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --global|-g)
+                MODE="global"
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    TARGET_OPT="$2"
+                    shift 2
+                else
+                    TARGET_OPT="all"
+                    shift 1
+                fi
+                ;;
+            --project|-p)
+                MODE="project"
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    PROJECT_OPT="$2"
+                    shift 2
+                else
+                    shift 1
+                fi
+                ;;
+            --target|-t)
+                if [ "${2:-}" = "project" ]; then
+                    MODE="project"
+                else
+                    TARGET_OPT="${2:-all}"
+                fi
+                shift 2 || shift 1
+                ;;
+            --force|-f)
+                FORCE_REPLACE=true
+                shift
+                ;;
+            --replace)
+                FORCE_REPLACE=true
+                shift
+                ;;
+            --backup|-b)
+                ALLOW_BACKUP=true
+                shift
+                ;;
+            project)
+                MODE="project"
+                shift
+                ;;
+            global)
+                MODE="global"
+                shift
+                ;;
+            all)
+                TARGET_OPT="all"
+                shift
+                ;;
+            *)
+                skills+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [ "${#skills[@]}" -eq 0 ]; then
+        log_fail "Missing skill name. Usage: $(basename "$0") add <skill...> [--global <agent>] [--project [path]] [--target <agent>] [--force|--replace|--backup]"
+        return 1
+    fi
+
+    if [ "$MODE" = "project" ]; then
+        local proj_root
+        if [ -n "$PROJECT_OPT" ]; then
+            proj_root="$(find_project_root "$PROJECT_OPT")"
+        else
+            proj_root="$(find_project_root "$PWD")"
+        fi
+        local target_spec="${TARGET_OPT:-all}"
+        local target_paths=()
+        mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$target_spec")
+        if [ "${#target_paths[@]}" -eq 0 ]; then
+            target_paths=("$proj_root/.agents/skills")
+        fi
+        for sk in "${skills[@]}"; do
+            for dest_p in "${target_paths[@]}"; do
+                install_project "$sk" "$dest_p" "$proj_root"
+            done
+        done
+    else
+        for sk in "${skills[@]}"; do
+            install_global "$sk" "$TARGET_OPT"
+        done
+    fi
+}
+
+cmd_remove() {
+    local skills=()
+    local MODE="all"
+    local TARGET_OPT="all"
+    local PROJECT_OPT=""
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --global|-g)
+                MODE="global"
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    TARGET_OPT="$2"
+                    shift 2
+                else
+                    TARGET_OPT="all"
+                    shift 1
+                fi
+                ;;
+            --project|-p)
+                MODE="project"
+                if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
+                    PROJECT_OPT="$2"
+                    shift 2
+                else
+                    shift 1
+                fi
+                ;;
+            --target|-t)
+                if [ "${2:-}" = "project" ]; then
+                    MODE="project"
+                else
+                    TARGET_OPT="${2:-all}"
+                fi
+                shift 2 || shift 1
+                ;;
+            --force|-f|--replace)
+                FORCE_REPLACE=true
+                shift
+                ;;
+            --backup|-b)
+                ALLOW_BACKUP=true
+                shift
+                ;;
+            project)
+                MODE="project"
+                shift
+                ;;
+            global)
+                MODE="global"
+                shift
+                ;;
+            all)
+                MODE="all"
+                TARGET_OPT="all"
+                shift
+                ;;
+            *)
+                skills+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [ "${#skills[@]}" -eq 0 ]; then
+        log_fail "Missing skill name. Usage: $(basename "$0") remove <skill...> [--global <agent>] [--project [path]] [--target <agent>]"
+        return 1
+    fi
+
+    for sk in "${skills[@]}"; do
+        if [ "$MODE" = "project" ]; then
+            local proj_root
+            if [ -n "$PROJECT_OPT" ]; then
+                proj_root="$(find_project_root "$PROJECT_OPT")"
+            else
+                proj_root="$(find_project_root "$PWD")"
+            fi
+            local target_spec="${TARGET_OPT:-all}"
+            local target_paths=()
+            mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$target_spec")
+            if [ "${#target_paths[@]}" -eq 0 ]; then
+                target_paths=("$proj_root/.agents/skills")
+            fi
+            for dest_p in "${target_paths[@]}"; do
+                remove_project "$sk" "$dest_p" "$proj_root"
+            done
+        elif [ "$MODE" = "all" ] && [ "$TARGET_OPT" = "all" ]; then
+            remove_global "$sk" "all"
+            local proj_root
+            proj_root="$(find_project_root "$PWD")"
+            local target_paths=()
+            mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "all")
+            for dest_p in "${target_paths[@]}"; do
+                remove_project "$sk" "$dest_p" "$proj_root"
+            done
+        else
+            remove_global "$sk" "$TARGET_OPT"
+        fi
+    done
 }
 
 show_usage() {
@@ -1393,10 +1711,11 @@ show_usage() {
 }
 
 # Main command dispatch
-CMD="${1:-interactive}"
-shift || true
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    CMD="${1:-interactive}"
+    shift || true
 
-case "$CMD" in
+    case "$CMD" in
     list|--list|-l)
         list_skills
         ;;
@@ -1420,177 +1739,10 @@ case "$CMD" in
         preview_skill "$1"
         ;;
     add|install)
-        skills=()
-        MODE="global"
-        TARGET_OPT="all"
-        TARGET_SPECIFIED=false
-        PROJECT_OPT=""
-        while [ "$#" -gt 0 ]; do
-            case "$1" in
-                --global|-g)
-                    MODE="global"
-                    TARGET_SPECIFIED=true
-                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
-                        TARGET_OPT="$2"
-                        shift 2
-                    else
-                        TARGET_OPT="all"
-                        shift 1
-                    fi
-                    ;;
-                --project|-p)
-                    MODE="project"
-                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
-                        PROJECT_OPT="$2"
-                        shift 2
-                    else
-                        shift 1
-                    fi
-                    ;;
-                --target|-t)
-                    TARGET_SPECIFIED=true
-                    if [ "${2:-}" = "project" ]; then
-                        MODE="project"
-                    else
-                        TARGET_OPT="${2:-all}"
-                    fi
-                    shift 2 || shift 1
-                    ;;
-                project)
-                    MODE="project"
-                    shift
-                    ;;
-                global)
-                    MODE="global"
-                    shift
-                    ;;
-                all)
-                    TARGET_OPT="all"
-                    TARGET_SPECIFIED=true
-                    shift
-                    ;;
-                *)
-                    skills+=("$1")
-                    shift
-                    ;;
-            esac
-        done
-
-        if [ "${#skills[@]}" -eq 0 ]; then
-            log_fail "Missing skill name. Usage: $(basename "$0") add <skill...> [--global <agent>] [--project [path]]"
-            exit 1
-        fi
-
-        if [ "$MODE" = "project" ]; then
-            target_paths=()
-            if [ -n "$PROJECT_OPT" ]; then
-                target_paths=("$PROJECT_OPT")
-            elif [ "$TARGET_SPECIFIED" = true ]; then
-                proj_root="$(find_project_root "$PWD")"
-                mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$TARGET_OPT")
-            else
-                proj_root="$(find_project_root "$PWD")"
-                target_paths=("$proj_root/.agents/skills")
-            fi
-            for sk in "${skills[@]}"; do
-                for dest_p in "${target_paths[@]}"; do
-                    install_project "$sk" "$dest_p"
-                done
-            done
-        else
-            for sk in "${skills[@]}"; do
-                install_global "$sk" "$TARGET_OPT"
-            done
-        fi
+        cmd_add "$@"
         ;;
     remove|rm|uninstall)
-        skills=()
-        MODE="all"
-        TARGET_OPT="all"
-        TARGET_SPECIFIED=false
-        PROJECT_OPT=""
-        while [ "$#" -gt 0 ]; do
-            case "$1" in
-                --global|-g)
-                    MODE="global"
-                    TARGET_SPECIFIED=true
-                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
-                        TARGET_OPT="$2"
-                        shift 2
-                    else
-                        TARGET_OPT="all"
-                        shift 1
-                    fi
-                    ;;
-                --project|-p)
-                    MODE="project"
-                    if [ "$#" -ge 2 ] && [[ "$2" != --* ]]; then
-                        PROJECT_OPT="$2"
-                        shift 2
-                    else
-                        shift 1
-                    fi
-                    ;;
-                --target|-t)
-                    TARGET_SPECIFIED=true
-                    if [ "${2:-}" = "project" ]; then
-                        MODE="project"
-                    else
-                        TARGET_OPT="${2:-all}"
-                    fi
-                    shift 2 || shift 1
-                    ;;
-                project)
-                    MODE="project"
-                    shift
-                    ;;
-                global)
-                    MODE="global"
-                    shift
-                    ;;
-                all)
-                    MODE="all"
-                    TARGET_OPT="all"
-                    TARGET_SPECIFIED=true
-                    shift
-                    ;;
-                *)
-                    skills+=("$1")
-                    shift
-                    ;;
-            esac
-        done
-
-        if [ "${#skills[@]}" -eq 0 ]; then
-            log_fail "Missing skill name. Usage: $(basename "$0") remove <skill...> [--global <agent>] [--project [path]]"
-            exit 1
-        fi
-
-        for sk in "${skills[@]}"; do
-            if [ "$MODE" = "project" ]; then
-                target_paths=()
-                if [ -n "$PROJECT_OPT" ]; then
-                    target_paths=("$PROJECT_OPT")
-                elif [ "$TARGET_SPECIFIED" = true ]; then
-                    proj_root="$(find_project_root "$PWD")"
-                    mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "$TARGET_OPT")
-                else
-                    proj_root="$(find_project_root "$PWD")"
-                    target_paths=("$proj_root/.agents/skills")
-                fi
-                for dest_p in "${target_paths[@]}"; do
-                    remove_project "$sk" "$dest_p"
-                done
-            elif [ "$MODE" = "all" ] && [ "$TARGET_OPT" = "all" ]; then
-                remove_global "$sk" "all"
-                proj_root="$(find_project_root "$PWD")"
-                if [ -e "$proj_root/.agents/skills/$sk" ]; then
-                    remove_project "$sk" "$proj_root/.agents/skills"
-                fi
-            else
-                remove_global "$sk" "$TARGET_OPT"
-            fi
-        done
+        cmd_remove "$@"
         ;;
     diff)
         cmd_diff "$@"
@@ -1633,5 +1785,6 @@ case "$CMD" in
             exit 1
         fi
         ;;
-esac
+    esac
+fi
 

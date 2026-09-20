@@ -9,16 +9,16 @@ Engineering standards for authoring high-performance, modular Neovim configurati
 
 ## Core Rules
 
-1. **Lua Module Structure & Lazy Loading**:
-   - Organize under `lua/<namespace>/` following standard runtimepath conventions.
-   - Use `lazy.nvim` or native package management with explicit lazy-loading events (`VeryLazy`, filetype, keymap, or command triggers) to keep startup time under 50ms.
-2. **Native Vim APIs First**:
-   - Use modern Lua APIs: `vim.api.nvim_set_keymap`, `vim.keymap.set`, `vim.opt`, `vim.fs`, `vim.notify`.
-   - Avoid legacy Vimscript commands (`vim.cmd[[...]]`) where native Lua APIs exist.
+1. **Inspect Neovim Environment & Package Management First**:
+   - Inspect how Neovim is packaged and managed in the environment (e.g. Nix Flakes / Home Manager `programs.neovim`, `lazy.nvim`, `mini.deps`, `pckr`, or native `packpath`). Never impose `lazy.nvim` or external managers if the config is Nix-managed or native.
+   - Inspect existing configuration files under `init.lua`, `lua/`, and `resources/nvim/` to follow established module structures and conventions.
+2. **Native Vim Lua APIs First**:
+   - Use modern Lua APIs: `vim.keymap.set`, `vim.api.*`, `vim.opt`, `vim.fs`, `vim.notify`, `vim.iter`.
+   - Avoid legacy Vimscript strings (`vim.cmd[[...]]`) where native Lua APIs exist.
 3. **LSP & Treesitter Architecture**:
-   - Configure Language Server Protocol via `nvim-lspconfig` and modern capabilities.
-   - Attach LSP keymaps and formatting commands conditionally on `on_attach(client, bufnr)` based on server capabilities (e.g. `client.server_capabilities.documentFormattingProvider`).
-   - Enable Treesitter highlights, incremental selection, and textobjects.
-4. **Keymap Consistency**:
-   - Always specify `{ noremap = true, silent = true, desc = "Human readable description" }`.
-   - Follow the repository's existing leader key and keybinding conventions (see `keymap-architecture.md`).
+   - Integrate with the repository's active LSP management (native Neovim 0.10+ `vim.lsp.enable` / `vim.lsp.buf` or plugin wrappers).
+   - Attach buffer-local keymaps and formatting conditionally based on `client.supports_method("textDocument/formatting")`.
+   - Enable Treesitter highlights, textobjects, and folds aligned with the host build mechanism.
+4. **Keymap & Option Consistency**:
+   - Always specify descriptive options `{ desc = "...", silent = true }`.
+   - Respect the repository's existing leader key conventions (`<Space>`, `\`) and modular keymap architecture.
