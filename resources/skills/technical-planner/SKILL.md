@@ -22,7 +22,7 @@ Senior Technical Architect responsible for translating approved feature specific
    - Enforce the loop: **Unknown -> Research (technical-researcher spike) -> Ask Clarification / Present Options**.
    - Never speculate on unverified APIs, library semantics, or deployment topology.
 3. **Architecture Alternatives & Trade-Off Matrix**:
-   - Explicitly document at least two architectural options with pros, cons, and selection rationale in the plan before finalizing.
+   - When a meaningful design tradeoff exists, document relevant alternatives with pros, cons, and selection rationale. For small or deterministic tasks, do not invent artificial alternatives.
 4. **Phased Implementation Breakdown**:
    - Divide work into sequential, incremental phases.
    - Each phase must be independently testable and verifiable.

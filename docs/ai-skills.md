@@ -103,28 +103,104 @@ Outputs compact, token-dense baseline orchestration rules (< 70 lines) equipped 
 ai-skills export-rules
 ```
 
+### `list`
+Lists all available skills in the canonical registry, displaying name, version, tags, and summary.
+```bash
+ai-skills list
+```
+
 ### `search <query>`
-Searches across the local registry and configured trusted sources (`_sources.json`).
+Searches across the local canonical library only. If no local skills match, provides immediate discovery guidance (`ai-skills discover <query>`).
 ```bash
-ai-skills search testing
+ai-skills search redis
 ```
 
-### `inspect <source> <skill>`
-Inspects metadata, triggers, capabilities, and frontmatter of a skill from an external source before importing.
+### `sources`
+Lists trusted external skill sources and registries defined in `_sources.json`, including source types, trust levels, and curation policies.
 ```bash
-ai-skills inspect anthropic-skills web-search
+ai-skills sources
 ```
 
-### `discover <source>`
-Lists all available skills from a specified trusted source.
+### `discover <query> [--json]`
+Discovers skills across trusted external providers (Official Vendor, Anthropic Skills, skills.sh, Agentic Awesome, GitHub topic search).
 ```bash
-ai-skills discover official-vendor
+ai-skills discover nextjs
 ```
 
-### `import <source> <skill>`
-Curates, security-audits, validates semantic deduplication, and registers a remote skill into the canonical dotfiles library.
+### `recommend [--project <path>]`
+Audits high-signal project descriptors (`package.json`, `Cargo.toml`, `flake.nix`, `Dockerfile`, etc.) to detect tech stack and compare against installed skills, providing advisory skill suggestions.
 ```bash
-ai-skills import anthropic-skills browser-use
+ai-skills recommend --project .
+```
+
+### `inspect <skill>` / `inspect --external <url|dir>`
+- `ai-skills inspect <skill>`: Displays detailed local skill metadata, triggers, capabilities, and provenance.
+- `ai-skills inspect --external <url|dir> [--path <subpath>]`: Inspects and security-audits an external skill bundle before importing.
+```bash
+# Local inspection
+ai-skills inspect architecture-designer
+
+# External bundle inspection
+ai-skills inspect --external https://github.com/anthropics/skills --path skills/github-actions
+```
+
+### `import <url|dir> [name] [options]`
+Imports an external skill bundle into the canonical dotfiles library.
+- `--preview` (default): Performs security audit, license detection, and AI semantic review without modifying any files or registry.
+- `--path <path>`: Specifies subpath when importing from a multi-skill monorepo (aborts if multi-skill repo is detected without `--path`).
+- `--approve`: Commits the verified skill into canonical `resources/skills/` and records complete provenance in `_registry.json`.
+- `--replace`: Overwrites existing canonical skill or semantic duplicate.
+```bash
+# Preview mode (safe default)
+ai-skills import https://github.com/anthropics/skills --path skills/github-actions --preview
+
+# Approve and commit to canonical library
+ai-skills import https://github.com/anthropics/skills --path skills/github-actions --approve
+```
+
+### `add <skill...> [--global <agent>] [--project [path]]`
+Installs skills globally via symlinks or into a project via physical standalone copy.
+```bash
+# Install globally to all agents (symlinks)
+ai-skills add senior-implementer
+
+# Install into current project (physical copy + lockfile)
+ai-skills add data-model-architect --project
+```
+
+### `remove <skill...> [--global <agent>] [--project [path]] [--all-scopes]`
+Removes skills with explicit, non-destructive scoping:
+- Default (`ai-skills remove <skill>`): Unlinks from global agent configs only.
+- `--project [path]`: Removes physical copy from project directory and updates `.agent-skills.lock.json`. Protects unmanaged files.
+- `--all-scopes`: Removes from both global configs and project target paths.
+```bash
+# Remove globally only
+ai-skills remove junior-coding-agent
+
+# Remove from project only
+ai-skills remove junior-coding-agent --project
+
+# Remove from all scopes
+ai-skills remove junior-coding-agent --all-scopes
+```
+
+### `sync [--profile <name>] [--all-canonical]`
+Synchronizes skills across all configured global agent paths.
+By default, synchronizes the **`global-core`** profile (26 foundational skills).
+Use `--profile <name>` to sync a specific profile, or `--all-canonical` to sync the full registry.
+```bash
+# Sync default global-core profile
+ai-skills sync
+
+# Sync specific profile or everything
+ai-skills sync --profile backend
+ai-skills sync --all-canonical
+```
+
+### `export-rules`
+Outputs compact, token-dense baseline orchestration rules (< 70 lines) equipped with the ownership marker `<!-- managed-by: Aethries/dotfiles ai-skills -->`. Designed for direct integration into `CLAUDE.md`, `AGENTS.md`, and `RULES.md` without context bloat.
+```bash
+ai-skills export-rules
 ```
 
 ### `diff [skill]`
@@ -169,16 +245,26 @@ Skills are organized into composable profiles in `resources/skills/_profiles.jso
 
 ## 6. Security & Curation Pipeline (`scripts/lib/curate.sh`)
 
-All imported and canonical skills must pass automated security and deduplication checks:
+All imported and canonical skills pass a dual-stage automated verification pipeline:
 
-1. **Security Audit**: Scans for reverse shells (`/dev/tcp/`, `nc -e`), pipe-to-shell (`curl ... | sh`), dynamic `eval`, base64 execution (`base64 -d | sh`), tracking/telemetry webhooks, and prompt injection signatures.
+1. **Security Audit (`audit_skill_security`)**:
+   Scans for reverse shells (`/dev/tcp/`, `nc -e`), arbitrary pipe-to-shell (`curl ... | sh`), dynamic `eval`, base64 execution (`base64 -d | sh`), tracking/telemetry webhooks, and prompt injection signatures.
    ```bash
    ./scripts/lib/curate.sh audit
    ```
-2. **Semantic Deduplication**: Evaluates Jaccard similarity across skill `capabilities` and `triggers` with a strict `0.70` threshold, rejecting overlapping or duplicate skills.
-   ```bash
-   ./scripts/lib/curate.sh dedup
-   ```
+
+2. **Metadata Overlap Detection vs AI Semantic Review**:
+   To prevent catalog pollution, the system distinguishes between statistical prefiltering and functional semantic evaluation:
+   - **Stage A: Metadata Overlap Detection (`detect_metadata_overlap`)**:
+     Fast token, capability, and trigger Jaccard similarity scoring:
+     - `Score < 0.40`: Disjoint / unique (no review required).
+     - `0.40 <= Score < 0.70`: Flagged as `review_candidate`.
+     - `Score >= 0.70`: Flagged as `strong_review_candidate`.
+   - **Stage B: AI Semantic Review Contract (`perform_semantic_review`)**:
+     Evaluates functional boundaries, workflows, and tools against flagged canonical skills:
+     - **Decisions**: `KEEP_BOTH`, `PARTIAL_OVERLAP`, `DUPLICATE`, `SUPERSEDES`, `CONFLICT`.
+     - **Actions**: `REUSE` (stop and use existing), `EXTEND` (augment existing), `COMPANION` (install alongside), `CREATE` (import new), `REPLACE` (supersede existing).
+     - **Hard Gate**: If decision is `DUPLICATE`, `ai-skills import --approve` strictly halts unless `--replace` is explicitly passed.
 
 ---
 

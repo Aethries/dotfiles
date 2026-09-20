@@ -9,10 +9,16 @@ Standardizes the authoring, packaging, and validation of canonical agent skills 
 
 ## Core Rules
 
-1. **Scope Decision & Discovery First**:
-   - Before authoring any skill, search canonical and trusted sources: `ai-skills search <term>`.
-   - Strictly follow the triage ladder: **Reuse existing** > **Extend existing** > **Create new**.
-   - Verify semantic uniqueness via `curate.sh dedup` (Jaccard threshold <0.70) to prevent domain/capability bloat.
+1. **Required Triage & Discovery Workflow**:
+   - **Understand Raw Requirement**: Analyze user needs and identify required capabilities.
+   - **Decide Scope**: Determine whether skill belongs in Global agent config, Dotfiles canonical library, or Project-local `.agents/skills`.
+   - **Local Search First**: Query local skills via `ai-skills search <term>`.
+   - **Discover Trusted Sources**: If not found locally, query trusted catalogs: `ai-skills discover <term>`.
+   - **Resolve Original Upstream**: Verify first-party vendor or official upstream repository (catalog != upstream).
+   - **Inspect & Security Review**: Audit candidate files for security and malicious patterns via `curate.sh audit`.
+   - **Metadata Overlap & Semantic Review**: Perform deep semantic comparison against existing skills. Classify relationship: `KEEP_BOTH`, `PARTIAL_OVERLAP`, `DUPLICATE`, `SUPERSEDES`, or `CONFLICT`.
+   - **Select Action**: Determine action from **REUSE** (stop and reuse existing), **EXTEND**, **COMPANION**, **CREATE**, or **REPLACE**.
+   - **Stop on Duplicate**: When existing skill suffices, explicitly state: "Do not create a new skill. Reuse existing <name>."
 2. **Enhance Raw Requirements & English Rewrite**:
    - Transform ambiguous user notes or raw prompt instructions into crisp, professional, English-first rules.
    - Disambiguate trigger boundaries: clearly state WHEN to activate and WHEN NOT to activate.

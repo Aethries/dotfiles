@@ -30,6 +30,16 @@ if [ -f "$REPO_ROOT/scripts/lib/agents.sh" ]; then
     source "$REPO_ROOT/scripts/lib/agents.sh"
 fi
 
+if [ -f "$REPO_ROOT/scripts/lib/curate.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/curate.sh"
+fi
+
+if [ -f "$REPO_ROOT/scripts/lib/discovery.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/lib/discovery.sh"
+fi
+
 # Dynamic user and home detection (never hardcode user paths)
 TARGET_USER="$(id -un)"
 TARGET_HOME="$HOME"
@@ -246,6 +256,26 @@ assert_path_inside_project() {
     return 0
 }
 
+is_managed_project_target() {
+    local proj_root="$1"
+    local skill_name="$2"
+    local rel_path="$3"
+    local lock_file="$proj_root/.agent-skills.lock.json"
+
+    [ -f "$lock_file" ] || return 1
+
+    jq -e --arg s "$skill_name" --arg p "$rel_path" '
+        .skills[$s] as $entry |
+        $entry != null and (
+            $entry.target_path == $p or
+            (
+                ($entry.targets | type == "array") and
+                ([ $entry.targets[] | select(.path == $p) ] | length > 0)
+            )
+        )
+    ' "$lock_file" >/dev/null 2>&1
+}
+
 update_project_lockfile() {
     local proj_root="$1"
     local skill_name="$2"
@@ -415,18 +445,29 @@ install_project() {
     # Confinement assertion
     assert_path_inside_project "$dest" "$proj_root" || return 1
 
-    # Check unmanaged existing destination (BLOCKER 4)
-    local lock_file="$proj_root/.agent-skills.lock.json"
-    local is_managed=false
-    if [ -f "$lock_file" ]; then
-        if jq -e --arg s "$name" '.skills[$s]' "$lock_file" >/dev/null 2>&1; then
-            is_managed=true
-        fi
+    # Compute relative target path inside project
+    local rel_dest
+    local real_root
+    real_root="$(cd "$proj_root" 2>/dev/null && pwd -P || echo "$proj_root")"
+    local real_check_dest
+    if [ -d "$dest" ]; then
+        real_check_dest="$(cd "$dest" 2>/dev/null && pwd -P || echo "$dest")"
+    else
+        real_check_dest="$dest"
+    fi
+    if [[ "$real_check_dest" == "$real_root/"* ]]; then
+        rel_dest="${real_check_dest#"$real_root"/}"
+    elif [[ "$dest" == "$proj_root/"* ]]; then
+        rel_dest="${dest#"$proj_root"/}"
+    else
+        rel_dest=".agents/skills/$name"
     fi
 
-    if [ -e "$dest" ] && [ "$is_managed" != true ]; then
+    # Check unmanaged existing destination (B4 / Phase 11)
+    local lock_file="$proj_root/.agent-skills.lock.json"
+    if [ -e "$dest" ] && ! is_managed_project_target "$proj_root" "$name" "$rel_dest"; then
         if [ "${FORCE_REPLACE:-false}" != true ] && [ "${ALLOW_BACKUP:-false}" != true ]; then
-            log_fail "Destination '$dest' already exists and is NOT managed by $lock_file. Aborting to prevent accidental data loss. Pass --force or --backup to proceed."
+            log_fail "Destination '$dest' already exists and is NOT managed by $lock_file for target path '$rel_dest'. Aborting to prevent accidental data loss. Pass --force or --backup to proceed."
             return 1
         fi
         if [ "${ALLOW_BACKUP:-false}" = true ]; then
@@ -546,24 +587,38 @@ remove_project() {
     # Confinement assertion
     assert_path_inside_project "$dest" "$proj_root" || return 1
 
-    log_info "Removing project skill '$name' from $dest_base..."
-
-    if [ -e "$dest" ] || [ -L "$dest" ]; then
-        rm -rf "$dest"
-        log_ok "Removed project skill directory: $dest"
-    else
-        log_warn "Project skill $dest does not exist"
-    fi
-
     local rel_path
     local real_root
     real_root="$(cd "$proj_root" 2>/dev/null && pwd -P || echo "$proj_root")"
-    if [[ "$dest" == "$real_root/"* ]]; then
-        rel_path="${dest#"$real_root"/}"
+    local real_check_dest
+    if [ -d "$dest" ]; then
+        real_check_dest="$(cd "$dest" 2>/dev/null && pwd -P || echo "$dest")"
+    else
+        real_check_dest="$dest"
+    fi
+    if [[ "$real_check_dest" == "$real_root/"* ]]; then
+        rel_path="${real_check_dest#"$real_root"/}"
     elif [[ "$dest" == "$proj_root/"* ]]; then
         rel_path="${dest#"$proj_root"/}"
     else
         rel_path=".agents/skills/$name"
+    fi
+
+    log_info "Removing project skill '$name' from $dest_base..."
+
+    local lock_file="$proj_root/.agent-skills.lock.json"
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
+        if ! is_managed_project_target "$proj_root" "$name" "$rel_path"; then
+            if [ "${FORCE_REPLACE:-false}" != true ]; then
+                log_fail "Refusing to delete unmanaged project target '$dest' (not tracked in $lock_file for path '$rel_path'). Pass --force to override."
+                return 1
+            fi
+            log_warn "Forced removal of unmanaged project target '$dest' (--force specified)"
+        fi
+        rm -rf "$dest"
+        log_ok "Removed project skill directory: $dest"
+    else
+        log_warn "Project skill $dest does not exist"
     fi
 
     update_project_lockfile "$proj_root" "$name" "remove" "$rel_path"
@@ -924,6 +979,14 @@ cmd_update() {
                 continue
             fi
 
+            # Check exact target ownership (Phase 11)
+            if ! is_managed_project_target "$proj_root" "$s" "$rel_p"; then
+                if [ "$force" != true ]; then
+                    log_warn "Skill '$s' at '$rel_p' is unmanaged in lockfile. Skipping (use --force to overwrite)."
+                    continue
+                fi
+            fi
+
             local local_hash
             local_hash="$(compute_skill_hash "$local_dir")"
             local recorded_hash=""
@@ -1117,7 +1180,7 @@ search_skills() {
 
     if [ "$matched" -eq 0 ]; then
         echo "  No local skills matched '${query}'."
-        echo "  Use 'ai-skills discover' to inspect external trusted sources."
+        echo "  Try discovering external skills: ai-skills discover ${query}"
     else
         echo
         echo -e "Found ${matched} matching skill(s)."
@@ -1125,9 +1188,15 @@ search_skills() {
 }
 
 inspect_skill() {
+    if [ "${1:-}" = "--external" ]; then
+        shift
+        import_skill "$@" --preview
+        return $?
+    fi
+
     local name="${1:-}"
     if [ -z "$name" ]; then
-        log_fail "Usage: $(basename "$0") inspect <skill>"
+        log_fail "Usage: $(basename "$0") inspect <skill> (or: $(basename "$0") inspect --external <path|url>)"
         return 1
     fi
 
@@ -1221,10 +1290,31 @@ discover_sources() {
 import_skill() {
     local src_location=""
     local skill_name=""
+    local subpath=""
+    local mode="preview"
+    local force_replace=false
+
     while [ "$#" -gt 0 ]; do
         case "$1" in
             --force|-f|--replace)
-                FORCE_REPLACE=true
+                force_replace=true
+                shift
+                ;;
+            --path)
+                if [ "$#" -ge 2 ]; then
+                    subpath="$2"
+                    shift 2
+                else
+                    log_fail "Option --path requires an argument."
+                    return 1
+                fi
+                ;;
+            --preview)
+                mode="preview"
+                shift
+                ;;
+            --approve)
+                mode="approve"
                 shift
                 ;;
             *)
@@ -1239,23 +1329,43 @@ import_skill() {
     done
 
     if [ -z "$src_location" ]; then
-        log_fail "Usage: $(basename "$0") import <git-repo-or-dir> [skill-name] [--force]"
+        log_fail "Usage: $(basename "$0") import <git-repo-or-dir> [skill-name] [--path <path>] [--preview|--approve] [--replace]"
         return 1
+    fi
+
+    local clone_url="$src_location"
+    local clone_branch=""
+    if [[ "$src_location" =~ ^https?://github\.com/([^/]+)/([^/]+)/tree/([^/]+)/(.+)$ ]]; then
+        local gh_owner="${BASH_REMATCH[1]}"
+        local gh_repo="${BASH_REMATCH[2]}"
+        clone_branch="${BASH_REMATCH[3]}"
+        local gh_tree_path="${BASH_REMATCH[4]}"
+        clone_url="https://github.com/${gh_owner}/${gh_repo}.git"
+        if [ -z "$subpath" ]; then
+            subpath="$gh_tree_path"
+        fi
     fi
 
     local tmp_dir
     tmp_dir="$(mktemp -d "/tmp/ai-skills-import.XXXXXX")"
+    _IMPORT_TMP_DIR="$tmp_dir"
     cleanup_import() {
-        [ -d "$tmp_dir" ] && rm -rf "$tmp_dir"
+        if [ -n "${_IMPORT_TMP_DIR:-}" ] && [ -d "$_IMPORT_TMP_DIR" ]; then
+            rm -rf "$_IMPORT_TMP_DIR"
+        fi
     }
-    trap cleanup_import EXIT
+    trap cleanup_import EXIT RETURN
 
     log_info "Fetching external skill bundle from: $src_location..."
-    if [ -d "$src_location" ]; then
-        cp -a "$src_location/." "$tmp_dir/"
-    elif [[ "$src_location" =~ ^https?:// ]] || [[ "$src_location" =~ ^git@ ]]; then
-        git clone --depth 1 "$src_location" "$tmp_dir" >/dev/null 2>&1 || {
-            log_fail "Failed to clone git repository: $src_location"
+    if [ -d "$clone_url" ]; then
+        cp -a "$clone_url/." "$tmp_dir/"
+    elif [[ "$clone_url" =~ ^https?:// ]] || [[ "$clone_url" =~ ^git@ ]]; then
+        local git_clone_args=(--depth 1)
+        if [ -n "$clone_branch" ]; then
+            git_clone_args+=(-b "$clone_branch")
+        fi
+        git clone "${git_clone_args[@]}" "$clone_url" "$tmp_dir" >/dev/null 2>&1 || {
+            log_fail "Failed to clone git repository: $clone_url"
             return 1
         }
     else
@@ -1263,79 +1373,211 @@ import_skill() {
         return 1
     fi
 
-    if [ ! -f "$tmp_dir/SKILL.md" ]; then
-        log_fail "Import failed: No SKILL.md found in source bundle"
-        return 1
+    local skill_bundle_dir="$tmp_dir"
+    if [ -n "$subpath" ]; then
+        skill_bundle_dir="$tmp_dir/$subpath"
+        if [ ! -d "$skill_bundle_dir" ] || [ ! -f "$skill_bundle_dir/SKILL.md" ]; then
+            log_fail "Import failed: No SKILL.md found at specified path '$subpath'"
+            return 1
+        fi
+    else
+        local found_skills=()
+        mapfile -t found_skills < <(find "$tmp_dir" -name "SKILL.md" -not -path '*/.*/*' | LC_ALL=C sort)
+        if [ "${#found_skills[@]}" -gt 1 ]; then
+            log_fail "Repository contains multiple skill bundles. Specify which skill to import using --path <path>:"
+            for fs in "${found_skills[@]}"; do
+                local rel_p
+                rel_p="$(dirname "${fs#"$tmp_dir"/}")"
+                local s_title
+                s_title="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$fs" | tr -d '\r"' || true)"
+                echo -e "  - ${BOLD}$rel_p${RESET} (name: ${s_title:-unknown})"
+            done
+            return 1
+        elif [ "${#found_skills[@]}" -eq 1 ]; then
+            skill_bundle_dir="$(dirname "${found_skills[0]}")"
+        else
+            log_fail "Import failed: No SKILL.md found in source bundle"
+            return 1
+        fi
     fi
 
     if [ -z "$skill_name" ]; then
-        skill_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$tmp_dir/SKILL.md" | tr -d '\r"' || true)"
-        [ -z "$skill_name" ] && skill_name="$(basename "$src_location" .git)"
+        skill_name="$(sed -n -e '/^name:[[:space:]]*/{ s///; p; q; }' "$skill_bundle_dir/SKILL.md" | tr -d '\r"' || true)"
+        if [ -z "$skill_name" ]; then
+            if [ -n "$subpath" ]; then
+                skill_name="$(basename "$subpath")"
+            else
+                skill_name="$(basename "$src_location" .git)"
+            fi
+        fi
     fi
 
-    log_info "Running curation and security audit on '$skill_name'..."
-    source "$REPO_ROOT/scripts/lib/curate.sh"
-    if ! audit_skill_security "$tmp_dir"; then
+    log_info "Running security audit on '$skill_name'..."
+    if ! audit_skill_security "$skill_bundle_dir"; then
         log_fail "Import rejected: Security audit violations found in '$skill_name'"
         return 1
     fi
+    log_ok "Security audit passed: No malicious patterns detected."
 
-    local target_dir="$SKILLS_SRC/$skill_name"
+    local license
+    license="$(detect_license "$skill_bundle_dir")"
+    if [ "$license" = "unknown" ] && [ "$skill_bundle_dir" != "$tmp_dir" ]; then
+        license="$(detect_license "$tmp_dir")"
+    fi
+
+    local metadata_json
+    metadata_json="$(extract_skill_metadata "$skill_bundle_dir")"
+    local skill_desc skill_domain skill_caps skill_trigs
+    skill_desc="$(echo "$metadata_json" | jq -r '.description // ""')"
+    [ -z "$skill_desc" ] && skill_desc="$(get_skill_desc "$skill_bundle_dir")"
+    skill_domain="$(echo "$metadata_json" | jq -r '.domain // "imported"')"
+    skill_caps="$(echo "$metadata_json" | jq -c '.capabilities // []')"
+    skill_trigs="$(echo "$metadata_json" | jq -c '.triggers // []')"
+
     local reg_file="$REPO_ROOT/resources/skills/_registry.json"
+    local target_dir="$SKILLS_SRC/$skill_name"
 
-    # BLOCKER 6: Prevent silent overwrite of existing canonical skills
-    if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
-        if [ "${FORCE_REPLACE:-false}" != true ]; then
-            log_fail "Import rejected: Skill '$skill_name' already exists in canonical library. Use --force or --replace to overwrite."
+    # Overlap detection & semantic review
+    local overlaps="[]"
+    if [ -f "$reg_file" ]; then
+        overlaps="$(detect_metadata_overlap "$skill_bundle_dir" "$reg_file" 2>/dev/null || echo "[]")"
+    fi
+
+    local top_overlap=""
+    local top_score="0"
+    local top_class=""
+    if [ "$(echo "$overlaps" | jq 'length')" -gt 0 ]; then
+        top_overlap="$(echo "$overlaps" | jq -r '.[0].existing // empty')"
+        top_score="$(echo "$overlaps" | jq -r '.[0].score // 0')"
+        top_class="$(echo "$overlaps" | jq -r '.[0].classification // empty')"
+    fi
+
+    local decision="KEEP_BOTH"
+    local action="CREATE"
+    local reason="Complementary capabilities with minimal overlap."
+    local shared_caps="[]"
+
+    if [ -n "$top_overlap" ]; then
+        local review_json
+        review_json="$(perform_semantic_review "$skill_bundle_dir" "$top_overlap" "$reg_file" 2>/dev/null || echo "{}")"
+        decision="$(echo "$review_json" | jq -r '.decision // "KEEP_BOTH"')"
+        action="$(echo "$review_json" | jq -r '.recommended_action // "CREATE"')"
+        reason="$(echo "$review_json" | jq -r '.reason // ""')"
+        shared_caps="$(echo "$review_json" | jq -c '.shared_capabilities // []')"
+    fi
+
+    # Check for duplicate rejection
+    if [ "$decision" = "DUPLICATE" ]; then
+        if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
+            log_fail "Import rejected: Skill '$skill_name' is a DUPLICATE of existing skill '$top_overlap'."
+            echo -e "  Semantic Review Reason: ${reason}"
+            echo -e "  Recommended Action:     ${action}"
+            echo -e "  Pass --replace with --approve to override."
             return 1
         fi
-        log_warn "Target skill '$skill_name' exists. Overwriting (--force/--replace specified)..."
+    fi
+
+    # Check if target skill already exists in canonical library
+    if [ -d "$target_dir" ] || ([ -f "$reg_file" ] && jq -e --arg s "$skill_name" '.skills[$s]' "$reg_file" >/dev/null 2>&1); then
+        if [ "$mode" = "approve" ] && [ "$force_replace" != true ]; then
+            log_fail "Import rejected: Skill '$skill_name' already exists in canonical library. Use --replace or --force to overwrite."
+            return 1
+        fi
+    fi
+
+    # Mode: PREVIEW
+    if [ "$mode" = "preview" ]; then
+        echo -e "\n${BOLD}${CYAN}=== External Skill Import Preview: '$skill_name' ===${RESET}"
+        echo -e "  ${BOLD}Source:${RESET}        $src_location"
+        [ -n "$subpath" ] && echo -e "  ${BOLD}Path in repo:${RESET}  $subpath"
+        echo -e "  ${BOLD}Target Name:${RESET}   $skill_name"
+        echo -e "  ${BOLD}Domain:${RESET}        $skill_domain"
+        echo -e "  ${BOLD}License:${RESET}       $license"
+        echo -e "  ${BOLD}Description:${RESET}   $skill_desc"
+        echo -e "  ${BOLD}Capabilities:${RESET}  $(echo "$skill_caps" | jq -r 'join(", ")')"
+        echo -e "  ${BOLD}Triggers:${RESET}      $(echo "$skill_trigs" | jq -r 'join(", ")')"
+        echo -e "  ${BOLD}Security:${RESET}      ${GREEN}PASSED${RESET} (no malicious patterns)"
+        echo
+        echo -e "${BOLD}Semantic Overlap & Catalog Alignment:${RESET}"
+        if [ -n "$top_overlap" ]; then
+            echo -e "  Top Match:           ${BOLD}${top_overlap}${RESET} (overlap score: ${top_score})"
+            echo -e "  Classification:      ${top_class}"
+            echo -e "  Semantic Decision:   ${BOLD}${decision}${RESET}"
+            echo -e "  Recommended Action:  ${BOLD}${action}${RESET}"
+            echo -e "  Review Reason:       ${reason}"
+            echo -e "  Shared Capabilities: $(echo "$shared_caps" | jq -r 'join(", ")')"
+        else
+            echo -e "  No significant overlap with existing canonical skills."
+            echo -e "  Semantic Decision:   ${BOLD}KEEP_BOTH${RESET}"
+            echo -e "  Recommended Action:  ${BOLD}CREATE${RESET}"
+        fi
+        echo
+        echo -e "${BOLD}${BLUE}--- SKILL.md Excerpt ---${RESET}"
+        head -n 25 "$skill_bundle_dir/SKILL.md"
+        echo
+        echo -e "${YELLOW}${BOLD}STATUS: PREVIEW ONLY${RESET}"
+        echo -e "  No files were copied to $target_dir"
+        echo -e "  Registry was not modified."
+        echo
+        local approve_cmd="ai-skills import \"$src_location\""
+        [ -n "$subpath" ] && approve_cmd+=" --path \"$subpath\""
+        if [ "$decision" = "DUPLICATE" ] || [ -d "$target_dir" ]; then
+            approve_cmd+=" --approve --replace"
+        else
+            approve_cmd+=" --approve"
+        fi
+        echo -e "  To import into canonical library, execute:"
+        echo -e "    ${BOLD}${approve_cmd}${RESET}\n"
+        return 0
+    fi
+
+    # Mode: APPROVE
+    log_info "Approving and importing skill '$skill_name' into canonical library..."
+    if [ -d "$target_dir" ]; then
+        log_warn "Target skill '$skill_name' exists. Overwriting (--replace specified)..."
         rm -rf "$target_dir"
     fi
 
-    # BLOCKER 7: Record reproducible commit SHA and license metadata
     local commit_sha="null"
     if [ -d "$tmp_dir/.git" ]; then
         commit_sha="$(cd "$tmp_dir" && git rev-parse HEAD 2>/dev/null || echo "null")"
     fi
 
-    local license="unspecified"
-    if [ -f "$tmp_dir/LICENSE" ]; then
-        license="$(head -n 1 "$tmp_dir/LICENSE" | tr -d '\r\n')"
-    elif [ -f "$tmp_dir/LICENSE.md" ]; then
-        license="$(head -n 1 "$tmp_dir/LICENSE.md" | tr -d '\r\n')"
-    fi
-
     mkdir -p "$target_dir"
-    cp -a "$tmp_dir/." "$target_dir/"
+    cp -a "$skill_bundle_dir/." "$target_dir/"
+    if [ ! -f "$target_dir/LICENSE" ] && [ -f "$tmp_dir/LICENSE" ]; then
+        cp "$tmp_dir/LICENSE" "$target_dir/LICENSE"
+    fi
 
     local hash
     hash="$(compute_skill_hash "$target_dir")"
+
     if [ -f "$reg_file" ]; then
-        local desc
-        desc="$(get_skill_desc "$target_dir")"
         local tmp_reg
         tmp_reg="$(mktemp "$reg_file.tmp.XXXXXX")"
         local now
         now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
         jq --arg s "$skill_name" \
            --arg hash "$hash" \
-           --arg desc "$desc" \
+           --arg desc "$skill_desc" \
+           --arg domain "$skill_domain" \
            --arg url "$src_location" \
            --arg commit "$commit_sha" \
            --arg license "$license" \
            --arg now "$now" \
+           --argjson caps "$skill_caps" \
+           --argjson trigs "$skill_trigs" \
            '
            .skills[$s] = {
                name: $s,
                version: "1.0.0",
                source: "external",
-               domain: "imported",
+               domain: $domain,
                description: $desc,
                tags: ["imported", "community"],
                dependencies: [],
-               capabilities: [],
-               triggers: [$s],
+               capabilities: $caps,
+               triggers: $trigs,
                provenance: {
                    upstream_url: $url,
                    commit: (if $commit == "null" then null else $commit end),
@@ -1576,7 +1818,7 @@ cmd_add() {
 
 cmd_remove() {
     local skills=()
-    local MODE="all"
+    local MODE="global"
     local TARGET_OPT="all"
     local PROJECT_OPT=""
 
@@ -1600,6 +1842,14 @@ cmd_remove() {
                 else
                     shift 1
                 fi
+                ;;
+            --all-scopes)
+                MODE="all_scopes"
+                shift 1
+                ;;
+            --all-agents)
+                TARGET_OPT="all"
+                shift 1
                 ;;
             --target|-t)
                 if [ "${2:-}" = "project" ]; then
@@ -1626,7 +1876,7 @@ cmd_remove() {
                 shift
                 ;;
             all)
-                MODE="all"
+                MODE="all_scopes"
                 TARGET_OPT="all"
                 shift
                 ;;
@@ -1638,7 +1888,7 @@ cmd_remove() {
     done
 
     if [ "${#skills[@]}" -eq 0 ]; then
-        log_fail "Missing skill name. Usage: $(basename "$0") remove <skill...> [--global <agent>] [--project [path]] [--target <agent>]"
+        log_fail "Missing skill name. Usage: $(basename "$0") remove <skill...> [--global <agent>] [--project [path]] [--all-scopes] [--all-agents] [--target <agent>] [--force]"
         return 1
     fi
 
@@ -1659,10 +1909,14 @@ cmd_remove() {
             for dest_p in "${target_paths[@]}"; do
                 remove_project "$sk" "$dest_p" "$proj_root"
             done
-        elif [ "$MODE" = "all" ] && [ "$TARGET_OPT" = "all" ]; then
-            remove_global "$sk" "all"
+        elif [ "$MODE" = "all_scopes" ]; then
+            remove_global "$sk" "${TARGET_OPT:-all}"
             local proj_root
-            proj_root="$(find_project_root "$PWD")"
+            if [ -n "$PROJECT_OPT" ]; then
+                proj_root="$(find_project_root "$PROJECT_OPT")"
+            else
+                proj_root="$(find_project_root "$PWD")"
+            fi
             local target_paths=()
             mapfile -t target_paths < <(resolve_target_paths "project" "$proj_root" "all")
             for dest_p in "${target_paths[@]}"; do
@@ -1679,14 +1933,22 @@ show_usage() {
     echo
     echo "Commands:"
     echo "  list                                  List all available skills and their link status"
-    echo "  search <keyword>                      Search skills by keyword across names, tags, capabilities"
-    echo "  inspect <skill>                       Display detailed skill metadata, triggers, and provenance"
-    echo "  discover                              List trusted external skill sources and registries"
-    echo "  import <url|dir> [name]               Import external skill bundle into repository"
+    echo "  search <keyword>                      Search local canonical skills by keyword"
+    echo "  sources                               List trusted external skill sources and catalogs"
+    echo "  discover <query> [--json]             Discover skills from trusted external providers"
+    echo "  recommend [--project <path>]          Audit project stack and recommend relevant skills"
+    echo "  inspect <skill>                       Display metadata, triggers, and provenance of local skill"
+    echo "  inspect --external <url|dir>          Inspect and audit external skill bundle before importing"
+    echo "  import <url|dir> [name] [options]     Import external skill bundle into repository"
+    echo "                                          --path <path>: Subdirectory in multi-skill repository"
+    echo "                                          --preview: Preview metadata, security, and overlap (default)"
+    echo "                                          --approve: Approve import and save to canonical library"
+    echo "                                          --replace: Force replace if skill or duplicate exists"
     echo "  add <skill...> [--global <agent>]     Link skill canonically to agent config (default: all)"
     echo "  add <skill...> --project [path]       Physically copy skill bundle into project and update lockfile"
-    echo "  remove <skill...> [--global <agent>]  Unlink skill from global agent config"
+    echo "  remove <skill...> [--global <agent>]  Unlink skill from global agent config (default scope: global)"
     echo "  remove <skill...> --project [path]    Remove physical skill from project and lockfile"
+    echo "  remove <skill...> --all-scopes        Remove skill from both global agent configs and project"
     echo "  sync [--profile <name>]               Synchronize skills globally (default: global-core)"
     echo "  diff [skill...]                       Show unified diff between project skill and canonical version"
     echo "  update [skill...] [--force]           Safely update project skill and refresh lockfile hash"
@@ -1700,13 +1962,19 @@ show_usage() {
     echo "Examples:"
     echo "  ai-skills list"
     echo "  ai-skills search redis"
+    echo "  ai-skills sources"
+    echo "  ai-skills discover nextjs"
+    echo "  ai-skills recommend --project ."
     echo "  ai-skills inspect architecture-designer"
-    echo "  ai-skills discover"
+    echo "  ai-skills inspect --external https://github.com/anthropics/skills --path skills/github-actions"
+    echo "  ai-skills import https://github.com/anthropics/skills --path skills/github-actions --preview"
+    echo "  ai-skills import https://github.com/anthropics/skills --path skills/github-actions --approve"
     echo "  ai-skills sync --profile global-core"
     echo "  ai-skills add ponytail caveman --global claude"
     echo "  ai-skills add ponytail caveman --project"
     echo "  ai-skills diff ponytail"
     echo "  ai-skills update ponytail"
+    echo "  ai-skills remove ponytail --project"
     echo "  ai-skills doctor"
 }
 
@@ -1725,8 +1993,27 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     inspect)
         inspect_skill "$@"
         ;;
-    discover)
+    sources)
         discover_sources "$@"
+        ;;
+    discover)
+        discover_candidates "$@"
+        ;;
+    recommend)
+        rec_target="."
+        while [ "$#" -gt 0 ]; do
+            case "$1" in
+                --project|-p)
+                    rec_target="$2"
+                    shift 2
+                    ;;
+                *)
+                    rec_target="$1"
+                    shift
+                    ;;
+            esac
+        done
+        recommend_project_skills "$rec_target"
         ;;
     import)
         import_skill "$@"

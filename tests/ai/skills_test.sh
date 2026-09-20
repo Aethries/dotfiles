@@ -786,10 +786,7 @@ log_ok "install_project protects unmanaged directories and overwrites only with 
 log_info "Testing path-prefix confinement escape security..."
 FAKE_ESCAPE_DIR="${MOCK_PROJECT}-sibling"
 mkdir -p "$FAKE_ESCAPE_DIR"
-# Direct invocation of assert_path_inside_project with sibling directory
-# shellcheck disable=SC1091
-source "$REPO_ROOT/scripts/ai-skills.sh"
-if assert_path_inside_project "$FAKE_ESCAPE_DIR/.agents/skills/ponytail" "$MOCK_PROJECT" >/dev/null 2>&1; then
+if bash -c "source '$REPO_ROOT/scripts/ai-skills.sh' && assert_path_inside_project '$FAKE_ESCAPE_DIR/.agents/skills/ponytail' '$MOCK_PROJECT'" >/dev/null 2>&1; then
     log_fail "assert_path_inside_project allowed prefix escape to sibling path: $FAKE_ESCAPE_DIR"
 fi
 rm -rf "$FAKE_ESCAPE_DIR"
@@ -817,12 +814,177 @@ description: Duplicate external ponytail attempt
 ---
 # Duplicate
 EOF
-if HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MOCK_IMPORT_DIR" ponytail >/dev/null 2>&1; then
+if HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MOCK_IMPORT_DIR" ponytail --approve >/dev/null 2>&1; then
     log_fail "import silently overwrote canonical skill 'ponytail' without --force"
 fi
 grep -Fq "Ponytail / Lazy Senior Developer" "$REPO_ROOT/resources/skills/ponytail/SKILL.md" || log_fail "Canonical ponytail was modified"
 rm -rf "$MOCK_IMPORT_DIR"
 log_ok "ai-skills.sh import rejects overwriting canonical skills without explicit --force"
+
+# Test 2.16: Local search vs external discovery vs sources
+log_info "Testing search (local only) vs discover vs sources..."
+# Local search succeeds on canonical skill
+SEARCH_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" search redis)
+echo "$SEARCH_OUT" | grep -Fq "redis" || log_fail "ai-skills search failed to find canonical 'redis' skill"
+
+# Local search on non-existent query outputs guidance to use discover
+SEARCH_MISSING=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" search "nonexistent-skill-xyz")
+echo "$SEARCH_MISSING" | grep -Fq "ai-skills discover nonexistent-skill-xyz" || log_fail "ai-skills search did not suggest ai-skills discover"
+
+# Sources command lists trusted sources
+SOURCES_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sources)
+echo "$SOURCES_OUT" | grep -Fq "official-vendor" || log_fail "ai-skills sources missing official-vendor"
+echo "$SOURCES_OUT" | grep -Fq "anthropic-skills" || log_fail "ai-skills sources missing anthropic-skills"
+
+# Discover queries external catalog
+DISCOVER_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" discover nextjs)
+echo "$DISCOVER_OUT" | grep -Fq "nextjs-runtime-debugging" || log_fail "ai-skills discover failed to find nextjs candidate"
+log_ok "search is local only, sources lists sources, discover queries external catalogs"
+
+# Test 2.17: Multi-skill repo import with --path and preview mode
+log_info "Testing multi-skill repo import with --path..."
+MULTI_REPO="$REPO_ROOT/tests/ai/fixtures/import-repos/multi-skill-repo"
+SINGLE_REPO="$REPO_ROOT/tests/ai/fixtures/import-repos/single-skill-repo"
+
+# Importing multi-skill repo without --path must abort and list candidates
+if HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MULTI_REPO" >/dev/null 2>&1; then
+    log_fail "ai-skills import allowed multi-skill repo without --path"
+fi
+
+MULTI_ERR=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MULTI_REPO" 2>&1 || true)
+echo "$MULTI_ERR" | grep -Fq "Specify which skill to import using --path" || log_fail "ai-skills import did not prompt for --path"
+echo "$MULTI_ERR" | grep -Fq "skills/skill-alpha" || log_fail "ai-skills import did not list skill-alpha"
+
+# Importing with --path in preview mode must succeed without modifying canonical library
+MULTI_PREVIEW=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$MULTI_REPO" --path "skills/skill-alpha" --preview 2>&1)
+echo "$MULTI_PREVIEW" | grep -Fq "STATUS: PREVIEW ONLY" || log_fail "Preview mode did not show PREVIEW ONLY"
+[ ! -d "$REPO_ROOT/resources/skills/skill-alpha" ] || log_fail "Preview mode wrote to canonical library"
+
+# Single skill repo import in preview mode
+SINGLE_PREVIEW=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" import "$SINGLE_REPO" --preview 2>&1)
+echo "$SINGLE_PREVIEW" | grep -Fq "STATUS: PREVIEW ONLY" || log_fail "Single repo preview failed"
+[ ! -d "$REPO_ROOT/resources/skills/single-test-skill" ] || log_fail "Single repo preview wrote to canonical library"
+log_ok "Multi-skill repo import requires --path and preview mode is strictly non-mutating"
+
+# Test 2.18: Semantic review fixture validation (Cases A, B, C)
+log_info "Testing AI semantic review fixtures..."
+# Case A: browser-debugging vs nextjs-runtime-debugging -> PARTIAL_OVERLAP / COMPANION
+CASE_A_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/browser-debugging" "$REPO_ROOT/tests/ai/fixtures/semantic/nextjs-runtime-debugging")
+echo "$CASE_A_REV" | jq -e '.decision == "PARTIAL_OVERLAP" and .recommended_action == "COMPANION"' >/dev/null || log_fail "Case A did not yield PARTIAL_OVERLAP / COMPANION: $CASE_A_REV"
+
+# Case B: nestjs-transactions vs nestjs-database-transaction-best-practices -> DUPLICATE / REUSE
+CASE_B_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-transactions" "$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices")
+echo "$CASE_B_REV" | jq -e '.decision == "DUPLICATE" and .recommended_action == "REUSE"' >/dev/null || log_fail "Case B did not yield DUPLICATE / REUSE: $CASE_B_REV"
+
+# Case C: prisma-transactions vs canonical postgresql -> KEEP_BOTH / CREATE
+CASE_C_REV=$(bash "$REPO_ROOT/scripts/lib/curate.sh" review "$REPO_ROOT/tests/ai/fixtures/semantic/prisma-transactions" "$REPO_ROOT/resources/skills/postgresql")
+echo "$CASE_C_REV" | jq -e '.decision == "KEEP_BOTH" and .recommended_action == "CREATE"' >/dev/null || log_fail "Case C did not yield KEEP_BOTH / CREATE: $CASE_C_REV"
+log_ok "All semantic review cases (PARTIAL_OVERLAP, DUPLICATE, KEEP_BOTH) evaluated correctly"
+
+# Test 2.19: Exact target path ownership protection in remove_project
+log_info "Testing exact target path ownership protection in remove_project..."
+OWN_PROJ="$SANDBOX_DIR/own_proj"
+mkdir -p "$OWN_PROJ/.agents/skills" "$OWN_PROJ/.claude/skills"
+# Set up managed .agents/skills/docker and unmanaged .claude/skills/docker
+cp -a "$REPO_ROOT/resources/skills/docker" "$OWN_PROJ/.agents/skills/docker"
+cp -a "$REPO_ROOT/resources/skills/docker" "$OWN_PROJ/.claude/skills/docker"
+# Lockfile records only .agents/skills/docker
+cat << EOF > "$OWN_PROJ/.agent-skills.lock.json"
+{
+  "version": 2,
+  "generated_at": "2026-09-20T00:00:00Z",
+  "skills": {
+    "docker": {
+      "version": "1.0.0",
+      "source": "canonical",
+      "content_hash": "dummyhash",
+      "target_path": ".agents/skills/docker",
+      "targets": [
+        { "path": ".agents/skills/docker", "agents": ["codex-cli", "antigravity-cli"] }
+      ]
+    }
+  }
+}
+EOF
+
+# Direct invocation of remove_project on unmanaged target must fail without --force
+if bash -c "source '$REPO_ROOT/scripts/ai-skills.sh' && remove_project 'docker' '$OWN_PROJ/.claude/skills' '$OWN_PROJ'" >/dev/null 2>&1; then
+    log_fail "remove_project deleted unmanaged .claude target without --force"
+fi
+[ -d "$OWN_PROJ/.claude/skills/docker" ] || log_fail "Unmanaged .claude/skills/docker was deleted prematurely"
+
+# With FORCE_REPLACE=true, it succeeds
+bash -c "source '$REPO_ROOT/scripts/ai-skills.sh' && FORCE_REPLACE=true remove_project 'docker' '$OWN_PROJ/.claude/skills' '$OWN_PROJ'" >/dev/null
+[ ! -d "$OWN_PROJ/.claude/skills/docker" ] || log_fail "Forced remove_project failed to remove .claude/skills/docker"
+rm -rf "$OWN_PROJ"
+log_ok "remove_project strictly enforces exact target path ownership and protects unmanaged targets"
+
+# Test 2.20: Explicit remove scopes (default: global only; --project: project only; --all-scopes: both)
+log_info "Testing explicit remove scopes (global only vs --project vs --all-scopes)..."
+SCOPE_HOME="$SANDBOX_DIR/scope_home"
+SCOPE_PROJ="$SANDBOX_DIR/scope_proj"
+mkdir -p "$SCOPE_HOME" "$SCOPE_PROJ"
+
+# 1. Setup: install globally to claude and locally to project
+HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" add ponytail --global claude >/dev/null
+(cd "$SCOPE_PROJ" && HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" add ponytail --project >/dev/null)
+[ -L "$SCOPE_HOME/.claude/skills/ponytail" ] || log_fail "Global symlink missing before scope test"
+[ -d "$SCOPE_PROJ/.agents/skills/ponytail" ] || log_fail "Project copy missing before scope test"
+
+# 2. Test default remove (global only): project copy must remain intact!
+(cd "$SCOPE_PROJ" && HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" remove ponytail --global claude >/dev/null)
+[ ! -e "$SCOPE_HOME/.claude/skills/ponytail" ] || log_fail "Global symlink was not removed by default remove"
+[ -d "$SCOPE_PROJ/.agents/skills/ponytail" ] || log_fail "Default remove mistakenly deleted project copy!"
+
+# 3. Test remove --project: global symlink must remain intact!
+HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" add ponytail --global claude >/dev/null
+[ -L "$SCOPE_HOME/.claude/skills/ponytail" ] || log_fail "Failed to re-add global symlink"
+(cd "$SCOPE_PROJ" && HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" remove ponytail --project >/dev/null)
+[ ! -d "$SCOPE_PROJ/.agents/skills/ponytail" ] || log_fail "remove --project failed to delete project copy"
+[ -L "$SCOPE_HOME/.claude/skills/ponytail" ] || log_fail "remove --project mistakenly deleted global symlink!"
+
+# 4. Test remove --all-scopes: both must be removed!
+(cd "$SCOPE_PROJ" && HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" add ponytail --project >/dev/null)
+(cd "$SCOPE_PROJ" && HOME="$SCOPE_HOME" "$AI_SKILLS_BIN" remove ponytail --all-scopes >/dev/null)
+[ ! -e "$SCOPE_HOME/.claude/skills/ponytail" ] || log_fail "remove --all-scopes did not remove global symlink"
+[ ! -d "$SCOPE_PROJ/.agents/skills/ponytail" ] || log_fail "remove --all-scopes did not remove project copy"
+rm -rf "$SCOPE_HOME" "$SCOPE_PROJ"
+log_ok "Explicit remove scopes verified: default=global, --project=project, --all-scopes=both"
+
+# Test 2.21: Project-aware recommendation engine
+log_info "Testing project-aware recommendation engine..."
+REC_PROJ="$SANDBOX_DIR/rec_proj"
+mkdir -p "$REC_PROJ"
+cat << 'EOF' > "$REC_PROJ/package.json"
+{
+  "name": "mock-service",
+  "dependencies": {
+    "@nestjs/core": "^10.0.0",
+    "bullmq": "^5.0.0",
+    "next": "^14.0.0"
+  }
+}
+EOF
+
+REC_OUT=$(HOME="$MOCK_HOME" "$AI_SKILLS_BIN" recommend --project "$REC_PROJ")
+CLEAN_OUT=$(echo "$REC_OUT" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
+if ! echo "$CLEAN_OUT" | grep -q "NestJS (local: nestjs)"; then
+    log_fail "recommendation missed covered NestJS"
+fi
+if ! echo "$CLEAN_OUT" | grep -q "BullMQ (local: bullmq)"; then
+    log_fail "recommendation missed covered BullMQ"
+fi
+if ! echo "$CLEAN_OUT" | grep -q "Missing Coverage: nextjs"; then
+    log_fail "recommendation missed missing nextjs"
+fi
+if ! echo "$CLEAN_OUT" | grep -q "Candidate: nextjs-runtime-debugging"; then
+    log_fail "recommendation failed to suggest nextjs candidate"
+fi
+if ! echo "$CLEAN_OUT" | grep -q "Recommendation is advisory only"; then
+    log_fail "recommendation missing advisory policy"
+fi
+rm -rf "$REC_PROJ"
+log_ok "Project-aware recommendation engine accurately analyzes stack and proposes advisory candidates"
 
 # ------------------------------------------------------------------------------
 # 3. Test sync-editors.sh integration

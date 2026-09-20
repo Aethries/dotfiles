@@ -12,12 +12,12 @@
       "curation_policy": "strict"
     },
     "official-vendor": {
-      "name": "Official Vendor Policy & Specs",
+      "name": "Official Vendor First",
       "type": "policy",
-      "url": "https://github.com/anthropics/skills",
-      "description": "Multi-vendor policy source aggregating first-party specifications from Anthropic, Google, and OpenAI",
-      "trust_level": "trusted",
-      "curation_policy": "vendor-verified"
+      "description": "Prefer the original first-party repository maintained by the technology owner.",
+      "trust_level": "highest",
+      "curation_policy": "vendor-first",
+      "priority": 100
     },
     "anthropic-skills": {
       "name": "Anthropic Official Skills",

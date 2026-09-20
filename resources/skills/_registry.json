@@ -485,7 +485,7 @@
         "feature-spec-writer",
         "architecture-guardrails"
       ],
-      "content_hash": "sha256:a188efbf729d6014439d7ed784db378c248893bb6d02a6752326f9e6214bf65d",
+      "content_hash": "sha256:a38c32fb6082f0d7db0c73c70a5248212e355265c96c509ad05c61160cc546ac",
       "domain": "leadership",
       "capabilities": [
         "implementation-planning",
@@ -521,7 +521,7 @@
         "layer1"
       ],
       "dependencies": [],
-      "content_hash": "sha256:a66e74b22731fe1a18e0fb5802d31eabbdfb8f77a00464bb1e492fe5684c5e08",
+      "content_hash": "sha256:edc02ada1bad5ad85559cdacce8a55502ed1f8edee990c40311c432692451a23",
       "domain": "tooling",
       "capabilities": [
         "agent-skill-authoring",
@@ -713,15 +713,16 @@
         "layer2"
       ],
       "dependencies": [
+        "project-context",
         "source-quality",
+        "architecture-guardrails",
         "security-guardrails",
         "quality-gate",
-        "project-context",
-        "architecture-guardrails",
-        "codebase-memory",
         "codegraph",
+        "codebase-memory",
+        "rtk",
         "caveman",
-        "rtk"
+        "ponytail"
       ],
       "content_hash": "sha256:d7971a17eb71ed358fdbf77af7987abcc1c718492689701e13376df410615537",
       "domain": "implementation",
