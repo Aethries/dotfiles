@@ -130,6 +130,21 @@ grep -q 'system.stateVersion = "23.11"' "$MACHINE_DIR/configuration.nix"
 grep -q './custom.nix' "$MACHINE_DIR/configuration.nix"
 grep -q 'intel-graphics.nix' "$MACHINE_DIR/hardware-extra.nix"
 
+cat > "$MACHINE_DIR/configuration.nix" <<'EOF'
+{
+  imports = [
+    ../configuration.nix
+    ./hardware-configuration.nix
+  ];
+  system.stateVersion = "23.11";
+}
+EOF
+main
+grep -q './hardware-extra.nix' "$MACHINE_DIR/configuration.nix"
+if [ "$(grep -Fc './hardware-extra.nix' "$MACHINE_DIR/configuration.nix")" -ne 1 ]; then
+    exit 1
+fi
+
 detected_machine_dir="$TEST_ROOT/detected-machine"
 detected_configuration="$TEST_ROOT/detected-configuration.nix"
 cat > "$detected_configuration" <<'EOF'
