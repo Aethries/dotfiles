@@ -216,5 +216,7 @@ in
     rtk
     codebase-memory-mcp
     fuzzel
+
+    sshfs
   ];
 }
