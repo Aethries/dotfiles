@@ -548,7 +548,7 @@ binds {
     Mod+R hotkey-overlay-title="Screen Recorder: Noctalia" {
         spawn-sh "noctalia msg plugin noctalia/screen_recorder:service all toggle"
     }
-    Super+Escape hotkey-overlay-title="Lock the Screen: Noctalia" {
+    Super+Escape allow-inhibiting=false hotkey-overlay-title="Lock the Screen: Noctalia" {
         spawn-sh "noctalia msg session lock"
     }
     // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
@@ -1028,7 +1028,7 @@ binds {
     //
     // The allow-inhibiting=false property can be applied to other binds as well,
     // which ensures niri always processes them, even when an inhibitor is active.
-    Mod+Escape allow-inhibiting=false {
+    Mod+Shift+Escape allow-inhibiting=false {
         toggle-keyboard-shortcuts-inhibit
     }
     // The quit action will show a confirmation dialog to avoid accidental exits.
