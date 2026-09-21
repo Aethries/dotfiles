@@ -29,6 +29,13 @@ error() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+GATEWAY_ENV="$REPO_ROOT/resources/ai/gateway.env"
+if [ -f "$GATEWAY_ENV" ]; then
+    # shellcheck disable=SC1090,SC1091
+    source "$GATEWAY_ENV"
+fi
+
 CERTS_DIR="$REPO_ROOT/resources/certs"
 SECRETS_DIR="$REPO_ROOT/secrets"
 
