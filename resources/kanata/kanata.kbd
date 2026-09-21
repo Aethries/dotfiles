@@ -248,7 +248,8 @@
   n9 (fork M-9 C-M-9 (lctl rctl))
 
   ;; One-shot actions that automatically return to normal mode
-  niri_center (multi (macro M-c 50) @to_norm)
+  niri_center (fork (multi (macro M-c 50) @to_norm) (multi (macro M-S-c 50) @to_norm) (lsft rsft))
+  niri_fit    (multi (macro M-x 50) @to_norm)
   niri_proj   (multi (macro M-p 50) @to_norm)
   niri_shot   (multi (macro M-s 50) @to_norm)
   niri_rec    (multi (macro M-r 50) @to_norm)
@@ -420,7 +421,7 @@
   grv  @n1  @n2  @n3  @n4  @n5  @n6  @n7  @n8  @n9  M-0  M--  M-=  bspc
   @tab_to_norm M-q w e  @niri_rec @niri_term y @u_nav @norm_preserve @niri_over @niri_proj [ ] \
   @caps_nav_layer a    @niri_shot @niri_menu M-f g @h_niri @j_niri @k_niri @l_niri ; apos @ret_to_norm
-  lsft z    x    @niri_center @niri_clip b n @m_nav , . @niri_slash rsft
+  lsft z    @niri_fit @niri_center @niri_clip b n @m_nav , . @niri_slash rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
