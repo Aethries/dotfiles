@@ -1,23 +1,23 @@
 themes {
   noctalia {
     fg "#f2f2f3"
-    bg "#031d3a"
-    black "#082649"
+    bg "#1d1c21"
+    black "#26252c"
     red "#fd4663"
-    green "#76b4fc"
-    yellow "#7b76fc"
-    blue "#be76fc"
-    magenta "#82bbfc"
-    cyan "#8782fc"
+    green "#8371f0"
+    yellow "#b45fda"
+    blue "#cc66bc"
+    magenta "#a093ec"
+    cyan "#d096e9"
     white "#f2f2f3"
     orange "#fd8446"
 
     text_unselected {
       base "#f2f2f3"
-      background "#031d3a"
+      background "#1d1c21"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
@@ -25,17 +25,17 @@ themes {
       base "#ffffff"
       background "#4d3f74"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
     list_unselected {
       base "#f2f2f3"
-      background "#031d3a"
+      background "#1d1c21"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
@@ -43,17 +43,17 @@ themes {
       base "#ffffff"
       background "#4d3f74"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
     table_cell_unselected {
       base "#f2f2f3"
-      background "#031d3a"
+      background "#1d1c21"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
@@ -61,26 +61,26 @@ themes {
       base "#ffffff"
       background "#4d3f74"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
     ribbon_unselected {
       base "#f2f2f3"
-      background "#082649"
+      background "#26252c"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
 
     ribbon_selected {
       base "#ffffff"
-      background "#76b4fc"
+      background "#8371f0"
       emphasis_0 "#fd8446"
-      emphasis_1 "#8782fc"
-      emphasis_2 "#76b4fc"
+      emphasis_1 "#d096e9"
+      emphasis_2 "#8371f0"
       emphasis_3 "#fd4663"
     }
   }
