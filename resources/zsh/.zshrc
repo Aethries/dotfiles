@@ -569,6 +569,8 @@ alias c.='antigravity-ide .'
 alias code.='antigravity-ide .'
 alias c='clear'
 alias grep='grep --color=auto'
+alias zreset="$HOME/Workspaces/dotfiles/scripts/reset-zellij.sh"
+alias zj-reset="$HOME/Workspaces/dotfiles/scripts/reset-zellij.sh"
 
 # ------------------------------------------------------------------------------
 # Universal Smart Archive Extractor
