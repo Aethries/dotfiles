@@ -9,6 +9,8 @@ export VISUAL="nvim"
 
 # Path additions
 export PATH="$HOME/.local/bin:$HOME/.nix-profile/bin:$PATH"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+[[ -d "$ZSH_CACHE_DIR/completions" ]] || mkdir -p "$ZSH_CACHE_DIR/completions"
 
 # History Configuration
 HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
@@ -561,8 +563,12 @@ fi
 alias n='nvim'
 alias v='nvim'
 alias n.='nvim .'
-alias nv='neovide --frame none'
-alias nv.='neovide --frame none .'
+function nv() {
+  setsid -f neovide --frame none "$@" >/dev/null 2>&1
+}
+function nv.() {
+  setsid -f neovide --frame none . "$@" >/dev/null 2>&1
+}
 alias code='antigravity-ide'
 alias ide='antigravity-ide'
 alias c.='antigravity-ide .'
