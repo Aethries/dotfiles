@@ -61,7 +61,7 @@ CustomXkbOption=
 # Force Enabled Addons
 EnabledAddons=
 # Force Disabled Addons
-DisabledAddons=
+DisabledAddons=spell
 # Preload input method to be used by default
 PreloadInputMethod=True
 # Allow input method in the password field

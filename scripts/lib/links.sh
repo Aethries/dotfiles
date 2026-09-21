@@ -69,6 +69,7 @@ link_configs() {
         if [ -d "$REPO_ROOT/resources/fcitx5/conf" ]; then
             safe_link "$REPO_ROOT/resources/fcitx5/conf/bamboo.conf" "$USER_HOME/.config/fcitx5/conf/bamboo.conf"
             safe_link "$REPO_ROOT/resources/fcitx5/conf/classicui.conf" "$USER_HOME/.config/fcitx5/conf/classicui.conf"
+            safe_link "$REPO_ROOT/resources/fcitx5/conf/keyboard.conf" "$USER_HOME/.config/fcitx5/conf/keyboard.conf"
         fi
     fi
 
