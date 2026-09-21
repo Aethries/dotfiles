@@ -94,11 +94,11 @@ return {
         nmap("<leader>ca", vim.lsp.buf.code_action, "Code Action")
       end
 
-      local lspconfig = require("lspconfig")
       for server, config in pairs(opts.servers) do
         config.capabilities = vim.tbl_deep_extend("force", {}, capabilities, config.capabilities or {})
         config.on_attach = on_attach
-        lspconfig[server].setup(config)
+        vim.lsp.config(server, config)
+        vim.lsp.enable(server)
       end
     end,
   },
