@@ -30,7 +30,7 @@ Host geton-old
     ServerAliveInterval 30
     ServerAliveCountMax 5
 
-Host geton-new 
+Host geton-stg 
     HostName 77.112.24.116
     User ubuntu
     IdentityFile ~/.ssh/gt_stg.pem

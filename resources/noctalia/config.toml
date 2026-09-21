@@ -272,19 +272,19 @@ transition_duration = 3800
 transition_on_startup = true
 
     [wallpaper.default]
-    path = "~/Pictures/Wallpapers/5479363.jpg"
+    path = "~/Pictures/Wallpapers/wallhaven-5yr1p8.png"
 
     [wallpaper.last]
-    path = "~/Pictures/Wallpapers/5479363.jpg"
+    path = "~/Pictures/Wallpapers/wallhaven-5yr1p8.png"
 
     [wallpaper.monitor.HDMI-A-2]
     fill_color = "primary"
 
     [wallpaper.monitors.HDMI-A-1]
-    path = "~/Pictures/Wallpapers/5479363.jpg"
+    path = "~/Pictures/Wallpapers/wallhaven-5yr1p8.png"
 
     [wallpaper.monitors.HDMI-A-2]
-    path = "~/Pictures/Wallpapers/5479363.jpg"
+    path = "~/Pictures/Wallpapers/wallhaven-5yr1p8.png"
 
 [widget.clock]
 scroll_repeat = "gesture"
