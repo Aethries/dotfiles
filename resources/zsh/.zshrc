@@ -276,6 +276,9 @@ alias kns="k9s"
 # Phone Connect CLI
 alias phone="kdeconnect-cli"
 
+# SSH
+alias ssh="TERM=xterm-256color ssh"
+
 # ------------------------------------------------------------------------------
 # Dotfiles & System Management (Thao tác ở bất cứ đâu)
 # ------------------------------------------------------------------------------

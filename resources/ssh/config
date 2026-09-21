@@ -22,3 +22,17 @@ Host *.1bitlab.io 1bitlab.io
     User git
     IdentityFile ~/.ssh/id_ed25519_1bitlab
     IdentitiesOnly yes
+
+Host geton-old
+    HostName 20.40.54.222
+    User ubuntu
+    IdentityFile ~/.ssh/geton_old.pem
+    ServerAliveInterval 30
+    ServerAliveCountMax 5
+
+Host geton-new 
+    HostName 77.112.24.116
+    User ubuntu
+    IdentityFile ~/.ssh/gt_stg.pem
+    ServerAliveInterval 30
+    ServerAliveCountMax 5
