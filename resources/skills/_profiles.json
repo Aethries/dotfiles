@@ -31,7 +31,8 @@
         "caveman",
         "ponytail",
         "codegraph",
-        "codebase-memory"
+        "codebase-memory",
+        "agent-squad-orchestrator"
       ]
     },
     "core": {

@@ -2,6 +2,46 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": 1,
   "skills": {
+    "agent-squad-orchestrator": {
+      "name": "agent-squad-orchestrator",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Multi-role squad orchestrator across Codex CLI, Antigravity CLI/IDE, and Claude Code CLI with model tiering, cross-provider routing, and evidence-based verification.",
+      "tags": [
+        "orchestration",
+        "squad",
+        "multi-agent",
+        "cross-provider",
+        "workflow"
+      ],
+      "dependencies": [
+        "project-context",
+        "quality-gate"
+      ],
+      "content_hash": "sha256:1ba32beee39cce153965c7e2edc225e7e0794e2da76c9ec33e95b70f30068dd8",
+      "domain": "orchestration",
+      "capabilities": [
+        "squad-orchestration",
+        "cross-provider-routing",
+        "role-handover-contracts",
+        "evidence-based-verification",
+        "model-tiering"
+      ],
+      "triggers": [
+        "orchestrate-squad",
+        "agent-squad",
+        "multi-agent",
+        "delegate-task",
+        "squad-run",
+        "cross-provider"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
     "caveman": {
       "name": "caveman",
       "version": "1.0.0",
