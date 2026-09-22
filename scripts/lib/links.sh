@@ -47,6 +47,10 @@ link_configs() {
     safe_link "$REPO_ROOT/resources/noctalia/config.toml" "$USER_HOME/.config/noctalia/config.toml"
     safe_link "$REPO_ROOT/resources/kitty" "$USER_HOME/.config/kitty"
     safe_link "$REPO_ROOT/resources/antigravity" "$USER_HOME/.config/antigravity"
+    if [ -f "$REPO_ROOT/resources/codex/config.toml" ]; then
+        mkdir -p "$USER_HOME/.codex"
+        safe_link "$REPO_ROOT/resources/codex/config.toml" "$USER_HOME/.codex/config.toml"
+    fi
 
     if [ -f "$REPO_ROOT/resources/starship/starship.toml" ]; then
         safe_link "$REPO_ROOT/resources/starship/starship.toml" "$USER_HOME/.config/starship.toml"
@@ -159,6 +163,7 @@ link_configs() {
         "$USER_HOME/.config/noctalia/config.toml" \
         "$USER_HOME/.config/kitty" \
         "$USER_HOME/.config/antigravity" \
+        "$USER_HOME/.codex/config.toml" \
         "$USER_HOME/.config/starship.toml" \
         "$USER_HOME/.zshrc" \
         "$USER_HOME/.zimrc" \

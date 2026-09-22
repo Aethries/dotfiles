@@ -207,6 +207,7 @@ in
     # Editors & AI Tools
     # ----------------------------------------------------------
     neovide
+    vscode
     antigravity
     antigravityIde
     antigravityCli

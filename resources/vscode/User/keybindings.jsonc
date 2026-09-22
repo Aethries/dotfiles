@@ -1,0 +1,16 @@
+// ==============================================================================
+// VS Code Keybindings
+// Managed declaratively by dotfiles (Aethries/dotfiles)
+// ==============================================================================
+[
+  // Disable Toggle Tab Key Moves Focus (VS Code default ctrl+m)
+  {
+    "key": "ctrl+m",
+    "command": "-editor.action.toggleTabFocusMode"
+  },
+  // Prevent ctrl+m from executing command to avoid conflict in terminal/editor
+  {
+    "key": "ctrl+m",
+    "command": ""
+  }
+]

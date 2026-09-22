@@ -92,6 +92,8 @@ CANDIDATE_PATHS=(
     ".gemini"
     ".antigravity-ide"
     ".antigravity"
+    ".config/Code"
+    ".vscode"
     ".9router"
     ".omniroute"
     ".codex"
@@ -477,7 +479,7 @@ cmd_restore() {
     trap 'finish_restore_runtime $?' EXIT
 
     # Terminate running apps to prevent lock conflicts and memory overwriting restored data
-    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "chatgpt" "ChatGPT" "9router/cli.js" "omniroute")
+    local app_patterns=("chrome" "google-chrome" "jira-app" "slack" "telegram-desktop" "discord" "feishu" "lark" "kdeconnect" "beekeeper-studio" "obsidian" "antigravity" "antigravity-ide" "code" "vscode" "chatgpt" "ChatGPT" "9router/cli.js" "omniroute")
     local closed_any=false
     for proc in "${app_patterns[@]}"; do
         if pgrep -u "$UID" -f "$proc" >/dev/null 2>&1; then
@@ -548,7 +550,7 @@ cmd_restore() {
 
     # Remove stale singleton lockfiles from Chrome, Slack, Discord, Antigravity, etc.
     find "$USER_HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true # BEST_EFFORT: stale application locks are optional cleanup targets.
-    rm -f "$USER_HOME/.antigravity-ide/code.lock" 2>/dev/null || true # BEST_EFFORT: the lock may already be absent when the IDE is stopped.
+    rm -f "$USER_HOME/.antigravity-ide/code.lock" "$USER_HOME/.config/Code/code.lock" 2>/dev/null || true # BEST_EFFORT: the lock may already be absent when the IDE is stopped.
     rm -f "$USER_HOME/.gemini/antigravity-cli/knowledge/knowledge.lock" 2>/dev/null || true # BEST_EFFORT: the lock may already be absent when the CLI is stopped.
     rm -f "$USER_HOME/.gemini/antigravity-cli/presence"/*.lock 2>/dev/null || true # BEST_EFFORT: presence locks are optional runtime cleanup targets.
     rm -f "$USER_HOME/.gemini/antigravity/knowledge/knowledge.lock" 2>/dev/null || true # BEST_EFFORT: the lock may already be absent when the IDE is stopped.
@@ -557,7 +559,7 @@ cmd_restore() {
 
     echo
     success "Secret Vault restored successfully!"
-    echo "  All Chrome profiles, Keyrings, Telegram, Slack, Antigravity 2.0 / CLI / IDE, and SSH keys are ready."
+    echo "  All Chrome profiles, Keyrings, Telegram, Slack, Antigravity 2.0 / CLI / IDE, VS Code, and SSH keys are ready."
     echo "  Session services are being restarted; launch your apps again when this command finishes."
 
     finish_restore_runtime 0
@@ -573,12 +575,12 @@ cmd_clean() {
                 force=true
                 shift
                 ;;
-            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|router|omniroute|phone|jira)
+            all|chrome|telegram|git|chat|ssh|gnupg|dev|notes|antigravity|vscode|router|omniroute|phone|jira)
                 categories+=("$1")
                 shift
                 ;;
             *)
-                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, router, omniroute, all)"
+                error "Unknown category or option: $1 (valid: chrome, telegram, git, chat, ssh, dev, jira, router, omniroute, antigravity, vscode, all)"
                 ;;
         esac
     done
@@ -594,6 +596,7 @@ cmd_clean() {
         ["dev"]=".config/.jira .jira .config/jira-app .docker/config.json .npmrc .codex .config/ChatGPT"
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
+        ["vscode"]=".config/Code .vscode"
         ["router"]=".9router"
         ["omniroute"]=".omniroute"
         ["phone"]=".config/kdeconnect"
@@ -607,11 +610,11 @@ cmd_clean() {
         read -r -p "Enter choice [1-3] (default 1): " choice
         case "${choice:-1}" in
             1) categories=("chrome" "telegram" "git") ;;
-            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone") ;;
+            2) categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "vscode" "router" "omniroute" "phone") ;;
             *) echo "Operation cancelled."; return 0 ;;
         esac
     elif [[ " ${categories[*]} " =~ " all " ]]; then
-        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "router" "omniroute" "phone")
+        categories=("chrome" "jira" "telegram" "git" "chat" "ssh" "gnupg" "dev" "notes" "antigravity" "vscode" "router" "omniroute" "phone")
     fi
 
     local target_paths=()

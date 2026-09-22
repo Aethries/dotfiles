@@ -146,6 +146,8 @@ test "$(readlink "$HOME/.antigravity-ide/User/settings.json")" = \
     "$REPO_ROOT/resources/antigravity/User/settings.jsonc"
 test "$(readlink "$HOME/.gemini/config/mcp_config.json")" = \
     "$REPO_ROOT/resources/gemini/mcp_config.json"
+test "$(readlink "$HOME/.codex/config.toml")" = \
+    "$REPO_ROOT/resources/codex/config.toml"
 test "$(readlink "$XDG_DATA_HOME/godot/export_templates")" = "$TEST_TEMPLATES"
 log_ok "Editor configuration sync is isolated and repo-owned"
 

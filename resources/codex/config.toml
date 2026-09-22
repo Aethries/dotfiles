@@ -1,0 +1,168 @@
+model = "gpt-5.6-luna"
+model_reasoning_effort = "xhigh"
+approvals_reviewer = "user"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+[projects."/home/loc"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/loc/Downloads"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/line/backend"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/line"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/fantia"]
+trust_level = "trusted"
+
+[projects."/home/loc/Documents/Codex/2026-09-18/documents-plugin-documents-openai-primary-runtime"]
+trust_level = "trusted"
+
+[projects."/home/loc/Documents/Codex/2026-09-18/sta"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/geton"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/you-image"]
+trust_level = "trusted"
+
+[projects."/home/loc/Documents/Codex/2026-09-20/s"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/onecli"]
+trust_level = "trusted"
+
+[tui.model_availability_nux]
+"gpt-5.6-sol" = 1
+gpt-6-astra = 2
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+[mcp_servers.node_repl]
+command = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120.0
+
+[mcp_servers.node_repl.env]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+CODEX_CLI_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/codex"
+CODEX_HOME = "/home/loc/.codex"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex:/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/home/loc/.codex/plugins/cache/openai-bundled/browser/26.901.31953/scripts/browser-service.mjs"}'
+
+[mcp_servers.codebase_memory]
+command = "codebase-memory-mcp"
+
+[mcp_servers.jira]
+command = "npx"
+args = ["-y", "jira-mcp"]
+
+[mcp_servers.atlassian]
+url = "https://mcp.atlassian.com/v2/mcp"
+
+[desktop]
+followUpQueueMode = "steer"
+conversationDetailMode = "STEPS_COMMANDS"
+ambient-suggestions-enabled = false
+preventSleepWhileRunning = true
+hotkey-window-projectless-default-enabled = false
+notifications-turn-mode = "always"
+toys-confetti-enabled = false
+external-agent-import-sync-enabled = true
+appearanceTheme = "dark"
+appearanceDarkCodeThemeId = "xcode"
+usePointerCursors = true
+reduced-motion-preference = "on"
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "persistent"]
+browser-show-full-url = false
+
+[desktop.appearanceDarkChromeTheme]
+accent = "#5482ff"
+accentSource = "custom"
+contrast = 55
+ink = "#ffffff"
+opaqueWindows = true
+surface = "#1f1f24"
+
+[desktop.appearanceDarkChromeTheme.fonts]
+code = '"JetBrainsMono Nerd Font"'
+ui = '"JetBrainsMono Nerd Font"'
+
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "#67b7a4"
+diffRemoved = "#fc6a5d"
+skill = "#5482ff"
+
+[marketplaces.openai-bundled]
+source_type = "local"
+source = "/home/loc/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+source_type = "local"
+source = "/home/loc/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[features]
+memories = true
+
+[memories]
+generate_memories = true
+use_memories = true
+
+[browser_use.default_origin_policy]
+full_cdp_access = "allow"
+
+[hooks.state]
+
+[hooks.state."browser@openai-bundled:plugin.json#hooks[0]:stop:0:0"]
+trusted_hash = "sha256:317a07045dfc95aef2e80c55428a2f817e2768be867e3b1ef29a73da8636ae7f"
+
+[hooks.state."chrome@openai-bundled:plugin.json#hooks[0]:stop:0:0"]
+trusted_hash = "sha256:317a07045dfc95aef2e80c55428a2f817e2768be867e3b1ef29a73da8636ae7f"

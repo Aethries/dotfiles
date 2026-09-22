@@ -101,11 +101,23 @@ safe_link \
     "$REPO_ROOT/resources/antigravity/User/keybindings.jsonc" \
     "$TARGET_HOME/.antigravity-ide/User/keybindings.json"
 safe_link \
+    "$REPO_ROOT/resources/vscode/User/settings.jsonc" \
+    "$TARGET_HOME/.config/Code/User/settings.json"
+safe_link \
+    "$REPO_ROOT/resources/vscode/User/keybindings.jsonc" \
+    "$TARGET_HOME/.config/Code/User/keybindings.json"
+safe_link \
     "$REPO_ROOT/resources/gemini/mcp_config.json" \
     "$TARGET_HOME/.gemini/config/mcp_config.json"
 safe_link \
     "$REPO_ROOT/resources/gemini/mcp_config.json" \
     "$TARGET_HOME/.gemini/antigravity/mcp_config.json"
+
+if [ -d "$TARGET_HOME/.antigravity-ide/extensions/noctalia.noctaliatheme-0.0.5-universal" ]; then
+    safe_link \
+        "$TARGET_HOME/.antigravity-ide/extensions/noctalia.noctaliatheme-0.0.5-universal" \
+        "$TARGET_HOME/.vscode/extensions/noctalia.noctaliatheme-0.0.5"
+fi
 
 if [ -f "$REPO_ROOT/resources/git/ignore" ]; then
     safe_link "$REPO_ROOT/resources/git/ignore" "$TARGET_HOME/.config/git/ignore"
@@ -115,16 +127,10 @@ if [ -f "$REPO_ROOT/resources/git/.gitconfig" ]; then
     safe_link "$REPO_ROOT/resources/git/.gitconfig" "$TARGET_HOME/.gitconfig"
 fi
 
-if [ -d "$TARGET_HOME/.codex" ]; then
-    CODEX_TOML="$TARGET_HOME/.codex/config.toml"
-    if [ -f "$CODEX_TOML" ] && ! grep -q "codebase_memory" "$CODEX_TOML" 2>/dev/null; then
-        cat << 'EOF' >> "$CODEX_TOML"
-
-[mcp_servers.codebase_memory]
-command = "codebase-memory-mcp"
-args = []
-EOF
-    fi
+if [ -f "$REPO_ROOT/resources/codex/config.toml" ]; then
+    safe_link \
+        "$REPO_ROOT/resources/codex/config.toml" \
+        "$TARGET_HOME/.codex/config.toml"
 fi
 
 if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
@@ -180,18 +186,22 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.antigravity-ide/User/settings.json" \
         "$TARGET_HOME/.antigravity-ide/User/keybindings.json" \
         "$TARGET_HOME/.antigravity-ide/User/prompts/AGENTS.md" \
+        "$TARGET_HOME/.config/Code/User/settings.json" \
+        "$TARGET_HOME/.config/Code/User/keybindings.json" \
+        "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md" \
+        "$TARGET_HOME/.codex/config.toml" \
+        "$TARGET_HOME/.vscode/extensions/noctalia.noctaliatheme-0.0.5" \
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
         "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
         "$TARGET_HOME/.claude/CLAUDE.md" \
         "$TARGET_HOME/.config/nvim/AGENTS.md" \
-        "$TARGET_HOME/.config/zed/prompts/AGENTS.md" \
-        "$TARGET_HOME/.config/Code/User/prompts/AGENTS.md"; do
+        "$TARGET_HOME/.config/zed/prompts/AGENTS.md"; do
         [ -e "$managed_path" ] || [ -L "$managed_path" ] || continue
         # REQUIRED: these exact files/symlinks are written by this synchronization run.
         chown -h "$TARGET_USER:" "$managed_path"
     done
 fi
-success "Neovim, Antigravity, Godot MCP, AI skills and template links are synchronized"
+success "Neovim, Antigravity, VS Code, Codex, Godot MCP, AI skills and template links are synchronized"
 
 if [ "$SYNC_EXTENSIONS" = false ]; then
     exit 0
