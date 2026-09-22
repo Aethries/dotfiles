@@ -90,4 +90,9 @@
 
 	"workbench.list.mouseWheelScrollSensitivity": 6,
 	"terminal.integrated.mouseWheelScrollSensitivity": 6,
+	"prisma.hidePrisma6Prompts": true,
+
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma",
+	},
 }
