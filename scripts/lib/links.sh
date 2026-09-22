@@ -140,9 +140,6 @@ link_configs() {
     safe_link "$REPO_ROOT/scripts/cleanup.sh" "$USER_HOME/.local/bin/cleanup"
     safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/init-9router"
     safe_link "$REPO_ROOT/scripts/init-9router.sh" "$USER_HOME/.local/bin/9router-init"
-    safe_link "$REPO_ROOT/scripts/init-agency.sh" "$USER_HOME/.local/bin/init-agency"
-    safe_link "$REPO_ROOT/scripts/init-agency.sh" "$USER_HOME/.local/bin/agency-init"
-    safe_link "$REPO_ROOT/scripts/ninerouter-token.sh" "$USER_HOME/.local/bin/ninerouter-token"
     safe_link "$REPO_ROOT/scripts/init-omniroute.sh" "$USER_HOME/.local/bin/init-omniroute"
     safe_link "$REPO_ROOT/scripts/sync-omniroute.sh" "$USER_HOME/.local/bin/sync-omniroute"
     safe_link "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" "$USER_HOME/.local/bin/reconcile-ai-gateways"
@@ -200,9 +197,6 @@ link_configs() {
         "$USER_HOME/.local/bin/cleanup" \
         "$USER_HOME/.local/bin/init-9router" \
         "$USER_HOME/.local/bin/9router-init" \
-        "$USER_HOME/.local/bin/init-agency" \
-        "$USER_HOME/.local/bin/agency-init" \
-        "$USER_HOME/.local/bin/ninerouter-token" \
         "$USER_HOME/.local/bin/init-omniroute" \
         "$USER_HOME/.local/bin/sync-omniroute" \
         "$USER_HOME/.local/bin/reconcile-ai-gateways" \

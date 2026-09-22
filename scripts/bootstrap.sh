@@ -45,14 +45,6 @@ reconcile_gateways() {
     fi
 }
 
-prepare_agency() {
-    info "Preparing Agency orchestration..."
-    # Agency installation is safe to complete before vault restore; the key
-    # and model validation run when the local secret becomes available.
-    "$REPO_ROOT/scripts/init-agency.sh" --defer-secret \
-        || error "Agency preparation failed during bootstrap."
-}
-
 report_completion() {
     echo
     echo "============================================================"
@@ -90,7 +82,6 @@ main() {
     rebuild_system
     sync_editor_configs
     reconcile_gateways
-    prepare_agency
     report_completion
 }
 

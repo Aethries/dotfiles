@@ -122,7 +122,6 @@ in
     unzip
     p7zip
     lsof
-    tmux # Required by Agency worktree sessions
 
     # ----------------------------------------------------------
     # Modern Terminal & Fullstack/DevOps Utilities
