@@ -1,8 +1,21 @@
-model = "gpt-5.6-luna"
+model = "cx/gpt-5.6-luna"
 model_reasoning_effort = "xhigh"
+model_provider = "nine_router"
 approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
+
+[model_providers.nine_router]
+name = "9Router local gateway"
+base_url = "http://127.0.0.1:20128/v1"
+wire_api = "responses"
+request_max_retries = 2
+stream_max_retries = 2
+
+[model_providers.nine_router.auth]
+command = "ninerouter-token"
+timeout_ms = 5000
+refresh_interval_ms = 0
 [projects."/home/loc"]
 trust_level = "trusted"
 
@@ -47,23 +60,24 @@ gpt-6-astra = 2
 url = "https://developers.openai.com/mcp"
 
 [mcp_servers.node_repl]
+args = []
 command = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node_repl"
-startup_timeout_sec = 120.0
+startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
-BROWSER_USE_TINYSKY_ENABLED = "1"
-CODEX_CLI_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/codex"
-CODEX_HOME = "/home/loc/.codex"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
 NODE_REPL_NODE_MODULE_DIRS = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
 NODE_REPL_NODE_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex:/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
+CODEX_HOME = "/home/loc/.codex"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
 NODE_REPL_TRUSTED_SERVICES = '{"browser":"/home/loc/.codex/plugins/cache/openai-bundled/browser/26.901.31953/scripts/browser-service.mjs"}'
+CODEX_CLI_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/codex"
 
 [mcp_servers.codebase_memory]
 command = "codebase-memory-mcp"
@@ -144,9 +158,6 @@ enabled = true
 enabled = true
 
 [plugins."chrome@openai-bundled"]
-enabled = true
-
-[plugins."sites@openai-bundled"]
 enabled = true
 
 [features]

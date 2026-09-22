@@ -98,6 +98,7 @@ CANDIDATE_PATHS=(
     ".omniroute"
     ".codex"
     ".config/ChatGPT"
+    ".config/9router/agency.env"
 )
 
 EXCLUDE_PATTERNS=(
@@ -548,6 +549,10 @@ cmd_restore() {
     chmod 600 "$USER_HOME/.omniroute/storage.sqlite" 2>/dev/null || true # BEST_EFFORT: the optional OmniRoute database may not be part of this vault.
     fi
 
+    if [ -f "$USER_HOME/.config/9router/agency.env" ]; then
+        chmod 600 "$USER_HOME/.config/9router/agency.env"
+    fi
+
     # Remove stale singleton lockfiles from Chrome, Slack, Discord, Antigravity, etc.
     find "$USER_HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true # BEST_EFFORT: stale application locks are optional cleanup targets.
     rm -f "$USER_HOME/.antigravity-ide/code.lock" "$USER_HOME/.config/Code/code.lock" 2>/dev/null || true # BEST_EFFORT: the lock may already be absent when the IDE is stopped.
@@ -597,7 +602,7 @@ cmd_clean() {
         ["notes"]=".config/obsidian .config/Postman .config/beekeeper-studio"
         ["antigravity"]=".gemini .antigravity-ide .antigravity"
         ["vscode"]=".config/Code .vscode"
-        ["router"]=".9router"
+        ["router"]=".9router .config/9router/agency.env"
         ["omniroute"]=".omniroute"
         ["phone"]=".config/kdeconnect"
     )
