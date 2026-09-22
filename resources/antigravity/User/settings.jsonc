@@ -4,80 +4,90 @@
 // Clean, portable, no hardcoded paths (R01 compliant)
 // ==============================================================================
 {
-  // Font & Typography
-  "editor.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
-  "editor.fontLigatures": true,
-  "editor.lineHeight": 1.5,
-  "editor.letterSpacing": -0.95,
+	// Font & Typography
+	"editor.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
+	"editor.fontLigatures": true,
+	"editor.letterSpacing": -0.95,
 
-  // Smooth animations & rendering
-  "editor.cursorSmoothCaretAnimation": "on",
-  "editor.smoothScrolling": true,
-  "workbench.list.smoothScrolling": true,
-  "editor.cursorBlinking": "expand",
-  "editor.cursorWidth": 3,
-  "editor.cursorStyle": "line",
-  "editor.lineNumbers": "relative",
-  "editor.minimap.enabled": false,
-  "editor.stickyScroll.enabled": false,
+	// Smooth animations & rendering
+	"editor.cursorSmoothCaretAnimation": "on",
+	"editor.smoothScrolling": true,
+	"workbench.list.smoothScrolling": true,
+	"editor.cursorBlinking": "expand",
+	"editor.cursorWidth": 3,
+	"editor.cursorStyle": "line",
+	"editor.lineNumbers": "relative",
+	"editor.minimap.enabled": false,
+	"editor.stickyScroll.enabled": false,
 
-  // Theme & Icons (tokens managed by Noctalia)
-  "workbench.colorTheme": "NoctaliaTheme",
-  "workbench.iconTheme": "material-icon-theme",
+	// Theme & Icons (tokens managed by Noctalia)
+	"workbench.colorTheme": "NoctaliaTheme",
+	"workbench.iconTheme": "material-icon-theme",
 
-  // Formatting & Linting
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "prettier.tabWidth": 4,
-  "prettier.useTabs": true,
+	// Formatting & Linting
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"prettier.tabWidth": 4,
+	"prettier.useTabs": true,
 
-  // Godot 4 / GDScript (the extension can start a headless LSP per workspace)
-  "godotTools.editorPath.godot4": "godot",
-  "godotTools.lsp.serverHost": "127.0.0.1",
-  "godotTools.lsp.serverPort": 6005,
-  "godotTools.lsp.headless": true,
-  "godotTools.lsp.autoReconnect.enabled": true,
+	// Godot 4 / GDScript (the extension can start a headless LSP per workspace)
+	"godotTools.editorPath.godot4": "godot",
+	"godotTools.lsp.serverHost": "127.0.0.1",
+	"godotTools.lsp.serverPort": 6005,
+	"godotTools.lsp.headless": true,
+	"godotTools.lsp.autoReconnect.enabled": true,
 
-  // Language Specific
-  "[json]": {
-    "editor.quickSuggestions": { "strings": true },
-    "editor.suggest.insertMode": "replace",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[go]": {
-    "editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
-    "editor.defaultFormatter": "golang.go"
-  },
-  "[gdscript]": {
-    "editor.defaultFormatter": "geequlim.godot-tools",
-    "editor.formatOnSave": true,
-    "editor.insertSpaces": false,
-    "editor.tabSize": 4
-  },
-  "[lua]": {
-    "editor.semanticHighlighting.enabled": true,
-    "editor.defaultFormatter": "sumneko.lua"
-  },
-  "[nix]": {
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "jnoortheen.nix-ide"
-  },
-  "[markdown]": {
-    "editor.wordWrap": "on",
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
-  },
+	// Language Specific
+	"[json]": {
+		"editor.quickSuggestions": { "strings": true },
+		"editor.suggest.insertMode": "replace",
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+	},
+	"[go]": {
+		"editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
+		"editor.defaultFormatter": "golang.go",
+	},
+	"[gdscript]": {
+		"editor.defaultFormatter": "geequlim.godot-tools",
+		"editor.formatOnSave": true,
+		"editor.insertSpaces": false,
+		"editor.tabSize": 4,
+	},
+	"[lua]": {
+		"editor.semanticHighlighting.enabled": true,
+		"editor.defaultFormatter": "sumneko.lua",
+	},
+	"[nix]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "jnoortheen.nix-ide",
+	},
+	"[markdown]": {
+		"editor.wordWrap": "on",
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+	},
 
-  // Git & SCM
-  "git.confirmSync": false,
-  "git.enableSmartCommit": true,
-  "scm.compactFolders": false,
-  "explorer.confirmDelete": false,
-  "explorer.confirmDragAndDrop": false,
+	// Git & SCM
+	"git.confirmSync": false,
+	"git.enableSmartCommit": true,
+	"scm.compactFolders": false,
+	"explorer.confirmDelete": false,
+	"explorer.confirmDragAndDrop": false,
 
-  // Telemetry & Update
-  "telemetry.telemetryLevel": "off",
-  "update.mode": "none"
+	// Telemetry & Update
+	"telemetry.telemetryLevel": "off",
+	"update.mode": "none",
+
+	"workbench.tree.renderIndentGuides": "always",
+	"workbench.tree.indent": 20,
+	"editor.fastScrollSensitivity": 10,
+	"editor.mouseWheelScrollSensitivity": 7,
+
+	"workbench.list.fastScrollSensitivity": 10,
+	"terminal.integrated.fastScrollSensitivity": 10,
+
+	"workbench.list.mouseWheelScrollSensitivity": 6,
+	"terminal.integrated.mouseWheelScrollSensitivity": 6,
 }
