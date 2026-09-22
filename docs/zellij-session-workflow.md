@@ -86,12 +86,11 @@ session-name argument and is not split by the shell.
 shown. Existing sessions are attached with:
 
 ```sh
-zellij attach -- "session-name"
+zellij attach "session-name"
 ```
 
-The `--` separator protects names beginning with a dash. The launcher does not
-recreate, rename, or apply a layout to an existing session. Zellij's own
-serialization and resurrection settings remain in `resources/zellij/config.kdl`.
+The launcher does not recreate, rename, or apply a layout to an existing session.
+Zellij's own serialization and resurrection settings remain in `resources/zellij/config.kdl`.
 
 If `fzf` is unavailable, the launcher uses a deterministic fallback:
 
@@ -187,4 +186,4 @@ List sessions directly and inspect the exact name:
 zellij list-sessions --short --no-formatting
 ```
 
-Then retry with the launcher or `zellij attach -- "exact-name"`.
+Then retry with the launcher or `zellij attach "exact-name"`.

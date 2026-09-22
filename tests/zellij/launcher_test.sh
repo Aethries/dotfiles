@@ -148,8 +148,7 @@ export FAKE_FZF_OUTPUT=$'\n\nproject-alpha'
 [ -f "$RECORD_ZELLIJ_CALLS" ] || log_fail "Case 4: zellij attach not called"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
 [ "${args[0]}" = "attach" ] || log_fail "Case 4: expected attach"
-[ "${args[1]}" = "--" ] || log_fail "Case 4: expected -- protection"
-[ "${args[2]}" = "project-alpha" ] || log_fail "Case 4: expected project-alpha"
+[ "${args[1]}" = "project-alpha" ] || log_fail "Case 4: expected project-alpha"
 log_ok "Case 4 passed"
 
 log_info "Case 5: Exited session selected -> exact resurrection/attach argv"
@@ -159,7 +158,7 @@ export FAKE_ZELLIJ_LIST_EXIT=0
 export FAKE_FZF_OUTPUT=$'\n\nmain'
 "$LAUNCHER"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
-[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "--" ] && [ "${args[2]}" = "main" ] || log_fail "Case 5: resurrection attach mismatch"
+[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "main" ] || log_fail "Case 5: resurrection attach mismatch"
 log_ok "Case 5 passed"
 
 log_info "Case 6: Several sessions -> newest is initially highlighted (passed top of list to fzf)"
@@ -179,7 +178,7 @@ export FAKE_ZELLIJ_LIST_OUTPUT="$FIXTURES_DIR/list_sessions_multiple.txt"
 export FAKE_ZELLIJ_LIST_EXIT=0
 "$LAUNCHER" --latest
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
-[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "--" ] && [ "${args[2]}" = "project-beta" ] || log_fail "Case 7: wrong session attached for --latest"
+[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "project-beta" ] || log_fail "Case 7: wrong session attached for --latest"
 log_ok "Case 7 passed"
 
 log_info "Case 8: --latest without sessions -> picker or documented fallback, never unnamed create"
@@ -203,7 +202,7 @@ export FAKE_ZELLIJ_LIST_EXIT=0
 export FAKE_FZF_OUTPUT=$'\n\nmy project'
 "$LAUNCHER"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
-[ "${args[2]}" = "my project" ] || log_fail "Case 9: session name with space was split: '${args[2]}'"
+[ "${args[1]}" = "my project" ] || log_fail "Case 9: session name with space was split: '${args[1]}'"
 log_ok "Case 9 passed"
 
 log_info "Case 10: Invalid/empty name -> useful error, no session created"
@@ -231,7 +230,7 @@ done
 PATH="$SANDBOX_DIR/no_fzf" "$LAUNCHER"
 rm -rf "$SANDBOX_DIR/no_fzf"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
-[ "${args[0]}" = "attach" ] && [ "${args[2]}" = "project-beta" ] || log_fail "Case 11: fallback did not attach newest"
+[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "project-beta" ] || log_fail "Case 11: fallback did not attach newest"
 log_ok "Case 11 passed"
 
 log_info "Case 12: zellij missing -> useful error and nonzero exit"
@@ -293,14 +292,14 @@ mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
 [ "${args[1]}" = 'work; rm -rf /; $(whoami)' ] || log_fail "Case 17: argument was expanded or corrupted"
 log_ok "Case 17 passed"
 
-log_info "Case 18: Existing name beginning with a dash -> protected by --"
+log_info "Case 18: Existing name beginning with a dash -> attached directly"
 reset_records
 export FAKE_ZELLIJ_LIST_OUTPUT="$FIXTURES_DIR/list_sessions_dash.txt"
 export FAKE_ZELLIJ_LIST_EXIT=0
 export FAKE_FZF_OUTPUT=$'\n\n-odd-session'
 "$LAUNCHER"
 mapfile -d '' args < "$RECORD_ZELLIJ_CALLS"
-[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "--" ] && [ "${args[2]}" = "-odd-session" ] || log_fail "Case 18: dash session not protected by --"
+[ "${args[0]}" = "attach" ] && [ "${args[1]}" = "-odd-session" ] || log_fail "Case 18: dash session attach mismatch"
 log_ok "Case 18 passed"
 
 echo

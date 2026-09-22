@@ -124,7 +124,7 @@ SESSIONS=("${CLEAN_SESSIONS[@]}")
 if [ "$MODE" = "latest" ]; then
     if [ ${#SESSIONS[@]} -gt 0 ]; then
         # Newest session is the first element
-        exec zellij attach -- "${SESSIONS[0]}"
+        exec zellij attach "${SESSIONS[0]}"
     fi
     if [ "$FALLBACK_ON_EMPTY_LATEST" = "picker" ]; then
         MODE="picker"
@@ -139,7 +139,7 @@ if ! command -v fzf >/dev/null 2>&1; then
     echo "Notice: fzf is not installed. Using deterministic fallback." >&2
     if [ ${#SESSIONS[@]} -gt 0 ]; then
         echo "Attaching newest session: ${SESSIONS[0]}" >&2
-        exec zellij attach -- "${SESSIONS[0]}"
+        exec zellij attach "${SESSIONS[0]}"
     fi
     echo "No sessions exist. Starting plain shell." >&2
     exec zsh
@@ -190,7 +190,7 @@ run_picker() {
         ctrl-l)
             # Latest session
             if [ ${#SESSIONS[@]} -gt 0 ]; then
-                exec zellij attach -- "${SESSIONS[0]}"
+                exec zellij attach "${SESSIONS[0]}"
             fi
             echo "No active sessions exist." >&2
             exec zsh
@@ -210,13 +210,13 @@ run_picker() {
             # Enter key pressed
             if [ -n "$selection" ]; then
                 # An existing session was selected
-                exec zellij attach -- "$selection"
+                exec zellij attach "$selection"
             elif [ -n "$query" ]; then
                 # Query was entered and Enter pressed
                 # Check if it matches an existing session
                 for s in "${SESSIONS[@]}"; do
                     if [ "$s" = "$query" ]; then
-                        exec zellij attach -- "$s"
+                        exec zellij attach "$s"
                     fi
                 done
                 # Otherwise, treat as new session name

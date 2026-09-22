@@ -116,7 +116,7 @@ case "$KEY" in
                 echo "Connecting a second client enforces the smallest terminal geometry across clients."
                 read -r -p "Attach to '$PROJECT_NAME'? [Y/n] " confirm
                 if [[ "${confirm:-y}" =~ ^[Yy]$ ]]; then
-                    exec zellij attach -- "$PROJECT_NAME"
+                    exec zellij attach "$PROJECT_NAME"
                 else
                     echo "Attach aborted."
                     exit 0
