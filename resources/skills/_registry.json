@@ -1449,6 +1449,1458 @@
         "license": "MIT",
         "verified_by": "Aethries/dotfiles"
       }
+    },
+    "golang": {
+      "name": "golang",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Idiomatic Go systems programming: concurrency patterns, goroutines, channels, error wrapping, table-driven tests, gopls, and golangci-lint hygiene.",
+      "tags": [
+        "go",
+        "golang",
+        "backend",
+        "concurrency",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "go-concurrency",
+        "table-driven-tests",
+        "error-wrapping",
+        "gopls-hygiene"
+      ],
+      "triggers": [
+        "go",
+        "golang",
+        "goroutine",
+        "gopls"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "godot-gdscript": {
+      "name": "godot-gdscript",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Godot 4.x & GDScript 2.0 architecture: static typing, scene-tree composition, signal decoupling, state machines, and physics process vs idle process.",
+      "tags": [
+        "godot",
+        "gdscript",
+        "gamedev",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "gamedev",
+      "capabilities": [
+        "gdscript-typing",
+        "scene-tree-architecture",
+        "signal-decoupling",
+        "godot-physics"
+      ],
+      "triggers": [
+        "godot",
+        "gdscript",
+        "gamedev"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "shell-scripting": {
+      "name": "shell-scripting",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Defensive Bash & POSIX shell scripting: strict error handling, shellcheck static analysis, dynamic path resolution, trap cleanups, and atomic file operations.",
+      "tags": [
+        "bash",
+        "shell",
+        "posix",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "defensive-bash",
+        "shellcheck-hygiene",
+        "trap-cleanup",
+        "dynamic-paths"
+      ],
+      "triggers": [
+        "bash",
+        "sh",
+        "shell",
+        "shellcheck"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nextjs-app-router": {
+      "name": "nextjs-app-router",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Next.js App Router engineering: React Server Components (RSC), Server Actions, hydration boundaries, Route Handlers, and ISR/cache revalidation.",
+      "tags": [
+        "nextjs",
+        "react",
+        "frontend",
+        "fullstack",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "server-components",
+        "server-actions",
+        "route-handlers",
+        "cache-revalidation"
+      ],
+      "triggers": [
+        "nextjs",
+        "next.js",
+        "app-router",
+        "rsc"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tailwind-shadcn": {
+      "name": "tailwind-shadcn",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "TailwindCSS v4 & Shadcn UI component design: CSS design tokens, Radix UI headless accessible primitives, cn/clsx/tailwind-merge class composition, and variant-driven props.",
+      "tags": [
+        "tailwind",
+        "shadcn",
+        "radix",
+        "frontend",
+        "ui",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "tailwind-tokens",
+        "radix-primitives",
+        "cva-variants",
+        "accessibility"
+      ],
+      "triggers": [
+        "tailwind",
+        "tailwindcss",
+        "shadcn",
+        "radix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prisma": {
+      "name": "prisma",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Prisma ORM data modeling & transactions: schema design, relations, migration drift handling, interactive $transaction isolation, batching, and query performance tuning.",
+      "tags": [
+        "prisma",
+        "orm",
+        "database",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "prisma-schema",
+        "prisma-transactions",
+        "prisma-migrations",
+        "query-optimization"
+      ],
+      "triggers": [
+        "prisma",
+        "prisma-orm",
+        "prisma-migrate"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "kubernetes": {
+      "name": "kubernetes",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Kubernetes workload authoring & triage: declarative manifests, k9s diagnostics, Pod resource limits, readiness/liveness probes, ConfigMaps, Secrets, and Helm chart templating.",
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "devops",
+        "cloud",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "k8s-manifests",
+        "pod-diagnostics",
+        "probes-configuration",
+        "helm-templating"
+      ],
+      "triggers": [
+        "kubernetes",
+        "k8s",
+        "kubectl",
+        "k9s",
+        "helm"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "github-actions": {
+      "name": "github-actions",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "GitHub Actions CI/CD automation: workflow syntax, matrix builds, dependency caching, composite actions, secret hygiene, and artifact retention.",
+      "tags": [
+        "github-actions",
+        "ci-cd",
+        "devops",
+        "automation",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "ci-workflows",
+        "matrix-builds",
+        "action-caching",
+        "workflow-security"
+      ],
+      "triggers": [
+        "github-actions",
+        "workflows",
+        "ci-cd"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "playwright": {
+      "name": "playwright",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Playwright E2E testing: resilient user-facing locators, auto-waiting, page fixture management, network request interception/mocking, and trace viewer debugging.",
+      "tags": [
+        "playwright",
+        "e2e",
+        "testing",
+        "qa",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "e2e-testing",
+        "user-locators",
+        "test-fixtures",
+        "trace-debugging"
+      ],
+      "triggers": [
+        "playwright",
+        "e2e",
+        "browser-test"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "fastapi": {
+      "name": "fastapi",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Python FastAPI & Pydantic v2 engineering: async request handling, dependency injection (Depends), schema validation, Ruff linting/formatting, and OpenAPI contract generation.",
+      "tags": [
+        "fastapi",
+        "python",
+        "pydantic",
+        "backend",
+        "api",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "async-api",
+        "pydantic-models",
+        "dependency-injection",
+        "openapi-generation"
+      ],
+      "triggers": [
+        "fastapi",
+        "pydantic",
+        "uvicorn"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nestjs-cqrs-microservices": {
+      "name": "nestjs-cqrs-microservices",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NestJS microservices & CQRS architecture: Command/Query buses, Event handlers, Saga orchestration, and transport brokers.",
+      "tags": [
+        "nestjs",
+        "cqrs",
+        "microservices",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "cqrs-segregation",
+        "saga-orchestration",
+        "microservices-transports",
+        "domain-events"
+      ],
+      "triggers": [
+        "nestjs",
+        "cqrs",
+        "microservices",
+        "saga"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "aws-cloud-architect": {
+      "name": "aws-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "AWS cloud architecture & serverless patterns: IAM least privilege, ECS/Fargate, Lambda, S3 security & lifecycle, and EventBridge.",
+      "tags": [
+        "aws",
+        "cloud",
+        "serverless",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "aws-iam-least-privilege",
+        "ecs-fargate",
+        "lambda-serverless",
+        "eventbridge-pipelines"
+      ],
+      "triggers": [
+        "aws",
+        "lambda",
+        "ecs",
+        "fargate",
+        "s3"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "gcp-cloud-architect": {
+      "name": "gcp-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Google Cloud Platform architecture: Cloud Run serverless containers, Workload Identity federation, Cloud Pub/Sub, and Cloud Storage.",
+      "tags": [
+        "gcp",
+        "google-cloud",
+        "cloud-run",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "cloud-run",
+        "workload-identity",
+        "pubsub-messaging",
+        "gcs-security"
+      ],
+      "triggers": [
+        "gcp",
+        "google-cloud",
+        "cloud-run",
+        "pubsub"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "azure-cloud-architect": {
+      "name": "azure-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Microsoft Azure architecture: Azure Container Apps, AKS, Azure Functions, Entra ID Managed Identities, Key Vault, and Service Bus.",
+      "tags": [
+        "azure",
+        "cloud",
+        "container-apps",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "container-apps",
+        "managed-identities",
+        "azure-keyvault",
+        "service-bus"
+      ],
+      "triggers": [
+        "azure",
+        "entra-id",
+        "azure-functions",
+        "service-bus"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "domain-driven-design": {
+      "name": "domain-driven-design",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Strategic and tactical Domain-Driven Design (DDD): Bounded Contexts, Ubiquitous Language, Aggregate Roots, Entities, Value Objects, and Domain Events.",
+      "tags": [
+        "ddd",
+        "domain-driven-design",
+        "architecture",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "bounded-contexts",
+        "aggregate-roots",
+        "value-objects",
+        "domain-events"
+      ],
+      "triggers": [
+        "ddd",
+        "bounded-context",
+        "aggregate-root",
+        "value-object"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "unit-test-craftsman": {
+      "name": "unit-test-craftsman",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Unit testing craftsmanship: AAA pattern, boundary value analysis, test doubles, parameterized testing, and zero test leakage.",
+      "tags": [
+        "unit-test",
+        "testing",
+        "vitest",
+        "jest",
+        "layer2"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "aaa-pattern",
+        "boundary-analysis",
+        "test-doubles",
+        "parameterized-testing"
+      ],
+      "triggers": [
+        "unit-test",
+        "vitest",
+        "jest",
+        "test-case"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "qa-test-flow-engineer": {
+      "name": "qa-test-flow-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "QA test flow engineering: user journey test cases, regression test matrices, edge-case failure injection, and Gherkin/BDD scenarios.",
+      "tags": [
+        "qa",
+        "test-flow",
+        "bdd",
+        "regression",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "user-journeys",
+        "regression-matrices",
+        "failure-injection",
+        "gherkin-bdd"
+      ],
+      "triggers": [
+        "test-flow",
+        "qa",
+        "test-case",
+        "user-journey"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "flow-learning-codebase": {
+      "name": "flow-learning-codebase",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Codebase flow learning & reverse engineering: execution path tracing, sequence reconstruction, dependency topology mapping, and mental model synthesis.",
+      "tags": [
+        "codebase",
+        "learning",
+        "architecture",
+        "reverse-engineering",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "execution-tracing",
+        "sequence-reconstruction",
+        "dependency-topology",
+        "mental-models"
+      ],
+      "triggers": [
+        "source-learning",
+        "flow-learn",
+        "codebase-walkthrough",
+        "reverse-engineering"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "deep-debugger": {
+      "name": "deep-debugger",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Senior debugging & root-cause isolation: binary git bisecting, memory leak diagnosis, heap snapshot profiling, and race condition reproduction.",
+      "tags": [
+        "debug",
+        "senior",
+        "root-cause",
+        "profiling",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "git-bisect",
+        "heap-profiling",
+        "flamegraphs",
+        "race-condition-reproduction"
+      ],
+      "triggers": [
+        "debug",
+        "memory-leak",
+        "flamegraph",
+        "bisect",
+        "intermittent-bug"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "linux-server-admin": {
+      "name": "linux-server-admin",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Linux server administration & systems operations: systemd service management, journalctl logging, Nginx/Caddy reverse proxy tuning, and sysctl kernel optimization.",
+      "tags": [
+        "linux",
+        "server",
+        "systemd",
+        "nginx",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "systemd-sandboxing",
+        "reverse-proxy-tuning",
+        "journalctl-slicing",
+        "kernel-sysctl-optimization"
+      ],
+      "triggers": [
+        "server",
+        "systemd",
+        "nginx",
+        "linux-admin",
+        "journalctl"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "gitops-terraform": {
+      "name": "gitops-terraform",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "GitOps & Terraform / OpenTofu infrastructure as code: state locking, remote backends, module composition, drift detection, and ArgoCD synchronization.",
+      "tags": [
+        "terraform",
+        "opentofu",
+        "gitops",
+        "argocd",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "terraform-remote-state",
+        "module-composition",
+        "drift-detection",
+        "argocd-sync"
+      ],
+      "triggers": [
+        "terraform",
+        "opentofu",
+        "gitops",
+        "argocd"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "chrome-extension-advanced": {
+      "name": "chrome-extension-advanced",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Chrome Extension MV3 engineering: declarativeNetRequest rulesets, offscreen documents, side panel APIs, WebSocket persistence, and cross-context messaging.",
+      "tags": [
+        "chrome-extension",
+        "mv3",
+        "browser",
+        "frontend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "declarativeNetRequest",
+        "offscreen-documents",
+        "side-panel",
+        "mv3-messaging"
+      ],
+      "triggers": [
+        "chrome-extension",
+        "manifest-v3",
+        "declarativeNetRequest",
+        "offscreen"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "mcp-server-author": {
+      "name": "mcp-server-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Model Context Protocol (MCP) server development: tool definitions, resource providers, prompt templates, and stdio/SSE transports.",
+      "tags": [
+        "mcp",
+        "ai-agent",
+        "tooling",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "mcp-tool-definition",
+        "stdio-transport",
+        "sse-transport",
+        "schema-validation"
+      ],
+      "triggers": [
+        "mcp",
+        "mcp-server",
+        "tool-definition"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rag-pipeline-architect": {
+      "name": "rag-pipeline-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Retrieval-Augmented Generation (RAG) architecture: hybrid retrieval, semantic chunking, cross-encoder reranking, and vector indexing.",
+      "tags": [
+        "rag",
+        "vector-db",
+        "embeddings",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "hybrid-search",
+        "semantic-chunking",
+        "cross-encoder-reranking",
+        "hnsw-indexing"
+      ],
+      "triggers": [
+        "rag",
+        "embeddings",
+        "pgvector",
+        "qdrant",
+        "vector-search"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "eval-harness-designer": {
+      "name": "eval-harness-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "LLM & agent evaluation harness design: benchmark datasets, tool-calling accuracy verification, and hallucination scoring.",
+      "tags": [
+        "eval",
+        "benchmarking",
+        "llm",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "eval-benchmarks",
+        "tool-accuracy-metrics",
+        "llm-judge",
+        "regression-testing"
+      ],
+      "triggers": [
+        "eval",
+        "benchmark",
+        "llm-judge",
+        "prompt-eval"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prompt-injection-defense": {
+      "name": "prompt-injection-defense",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "AI agent security & prompt injection defense: indirect injection mitigation, delimiter framing, and data exfiltration defense.",
+      "tags": [
+        "security",
+        "prompt-injection",
+        "ai-safety",
+        "layer0"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "delimiter-framing",
+        "exfiltration-defense",
+        "human-confirmation-gate",
+        "payload-sanitization"
+      ],
+      "triggers": [
+        "prompt-injection",
+        "jailbreak",
+        "agent-security"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "api-security-auditor": {
+      "name": "api-security-auditor",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "API security auditing & OWASP API Top 10 defense: BOLA/IDOR, mass assignment, JWT token safety, and SSRF prevention.",
+      "tags": [
+        "security",
+        "owasp",
+        "api-security",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "security",
+      "capabilities": [
+        "bola-prevention",
+        "mass-assignment-defense",
+        "jwt-hardening",
+        "ssrf-blocking"
+      ],
+      "triggers": [
+        "owasp",
+        "api-security",
+        "bola",
+        "idor",
+        "ssrf"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "opentelemetry-tracing": {
+      "name": "opentelemetry-tracing",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "OpenTelemetry (OTel) observability: distributed tracing, span context propagation, baggage, semantic attributes, and metrics instrumentation.",
+      "tags": [
+        "opentelemetry",
+        "otel",
+        "tracing",
+        "observability",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "w3c-trace-context",
+        "semantic-attributes",
+        "distributed-tracing",
+        "otlp-export"
+      ],
+      "triggers": [
+        "opentelemetry",
+        "otel",
+        "trace",
+        "tracing",
+        "span"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "database-query-optimizer": {
+      "name": "database-query-optimizer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Database query optimization & planner analysis: EXPLAIN (ANALYZE, BUFFERS), sequential scan reduction, and composite/partial/GIN indexing.",
+      "tags": [
+        "database",
+        "sql",
+        "query-optimization",
+        "performance",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "explain-analyze",
+        "index-tuning",
+        "lock-triage",
+        "pool-sizing"
+      ],
+      "triggers": [
+        "explain",
+        "slow-query",
+        "query-optimizer",
+        "postgres-performance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tanstack-query-state": {
+      "name": "tanstack-query-state",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "TanStack Query (React Query) v5 server-state management: query key factories, optimistic mutations, prefetching, and cache invalidation.",
+      "tags": [
+        "tanstack-query",
+        "react-query",
+        "frontend",
+        "state",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "query-key-factories",
+        "optimistic-mutations",
+        "prefetching",
+        "cache-gc"
+      ],
+      "triggers": [
+        "tanstack-query",
+        "react-query",
+        "usequery",
+        "usemutation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "trpc-fullstack": {
+      "name": "trpc-fullstack",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "tRPC end-to-end type safety: router architecture, procedure middlewares, input validation (Zod), context injection, and HTTP batching.",
+      "tags": [
+        "trpc",
+        "fullstack",
+        "typescript",
+        "rpc",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "router-hierarchy",
+        "procedure-middleware",
+        "zod-validation",
+        "http-batching"
+      ],
+      "triggers": [
+        "trpc",
+        "rpc",
+        "type-safe-api"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "grpc-protobuf-engineer": {
+      "name": "grpc-protobuf-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "gRPC & Protocol Buffers engineering: binary serialization, service definitions (.proto), streaming RPCs, and backwards compatibility.",
+      "tags": [
+        "grpc",
+        "protobuf",
+        "rpc",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "protobuf-evolution",
+        "unary-and-streaming",
+        "deadline-propagation",
+        "grpc-interceptors"
+      ],
+      "triggers": [
+        "grpc",
+        "protobuf",
+        "proto"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "redis-distributed-patterns": {
+      "name": "redis-distributed-patterns",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Redis distributed patterns: Redlock locking, sliding-window rate limiting, Redis Streams consumer groups, and cache stampede defense.",
+      "tags": [
+        "redis",
+        "distributed-locks",
+        "rate-limiting",
+        "streams",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "redlock-locking",
+        "sliding-window-limiter",
+        "redis-streams",
+        "stampede-defense"
+      ],
+      "triggers": [
+        "redis",
+        "redlock",
+        "rate-limit",
+        "redis-stream"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "transactional-outbox-pattern": {
+      "name": "transactional-outbox-pattern",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Transactional Outbox Pattern & reliable messaging: eliminating dual-write bugs, outbox tables, CDC via Debezium, and idempotent consumers.",
+      "tags": [
+        "outbox-pattern",
+        "cdc",
+        "messaging",
+        "reliability",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "dual-write-elimination",
+        "outbox-table-design",
+        "cdc-wal-capture",
+        "idempotent-consumers"
+      ],
+      "triggers": [
+        "outbox",
+        "dual-write",
+        "cdc",
+        "debezium"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "git-advanced-workflow": {
+      "name": "git-advanced-workflow",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Git workflows: Git worktrees for concurrent branch development, interactive rebase surgery, automated git bisect, and sparse checkouts.",
+      "tags": [
+        "git",
+        "worktree",
+        "rebase",
+        "bisect",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "git-worktrees",
+        "interactive-rebase",
+        "git-bisect-run",
+        "sparse-checkouts"
+      ],
+      "triggers": [
+        "git-worktree",
+        "git-rebase",
+        "git-bisect",
+        "sparse-checkout"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "docker-multiarch-builder": {
+      "name": "docker-multiarch-builder",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Docker Buildx & multi-architecture image engineering: cross-platform compilation (amd64/arm64), BuildKit cache mounts, and rootless containers.",
+      "tags": [
+        "docker",
+        "buildx",
+        "multiarch",
+        "containers",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "multiarch-builds",
+        "buildkit-cache-mounts",
+        "distroless-scratch",
+        "rootless-containers"
+      ],
+      "triggers": [
+        "buildx",
+        "multiarch",
+        "docker-build",
+        "buildkit"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "helm-chart-architect": {
+      "name": "helm-chart-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Production Helm v3 chart engineering: template authoring, values.schema.json validation, umbrella chart composition, and lifecycle hooks.",
+      "tags": [
+        "helm",
+        "kubernetes",
+        "k8s",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "values-schema-validation",
+        "helm-template-helpers",
+        "umbrella-charts",
+        "lifecycle-hooks"
+      ],
+      "triggers": [
+        "helm",
+        "helm-chart",
+        "values.yaml",
+        "umbrella-chart"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "cicd-security-hardening": {
+      "name": "cicd-security-hardening",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "CI/CD pipeline security & supply-chain defense: OpenID Connect cloud auth, action commit SHA pinning, SLSA provenance, and secret scanning.",
+      "tags": [
+        "security",
+        "ci-cd",
+        "oidc",
+        "supply-chain",
+        "devops",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "oidc-federation",
+        "action-sha-pinning",
+        "slsa-provenance",
+        "secret-scanning-pr"
+      ],
+      "triggers": [
+        "ci-cd-security",
+        "oidc",
+        "supply-chain",
+        "action-pinning"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prd-author": {
+      "name": "prd-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Product Requirements Document (PRD) authoring: problem formulation, user personas, success metrics (KPIs/OKRs), and MoSCoW prioritization.",
+      "tags": [
+        "prd",
+        "product",
+        "planning",
+        "management",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "problem-formulation",
+        "kpi-okr-metrics",
+        "moscow-scoping",
+        "edge-case-mapping"
+      ],
+      "triggers": [
+        "prd",
+        "product-requirements",
+        "user-story",
+        "feature-spec"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "agile-sprint-planner": {
+      "name": "agile-sprint-planner",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Agile sprint planning & task decomposition: user story mapping, acceptance criteria (Definition of Done), story points, and dependency graphs.",
+      "tags": [
+        "agile",
+        "sprint",
+        "planning",
+        "task-breakdown",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "invest-user-stories",
+        "definition-of-done",
+        "critical-path-mapping",
+        "task-sizing"
+      ],
+      "triggers": [
+        "sprint-plan",
+        "task-breakdown",
+        "acceptance-criteria",
+        "user-story"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tech-debt-strategist": {
+      "name": "tech-debt-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Technical debt assessment & remediation planning: categorizing debt, interest calculation, risk-vs-reward prioritization, and refactoring roadmaps.",
+      "tags": [
+        "tech-debt",
+        "refactoring",
+        "architecture",
+        "planning",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "debt-categorization",
+        "interest-quantification",
+        "boy-scout-planning",
+        "refactoring-roadmaps"
+      ],
+      "triggers": [
+        "tech-debt",
+        "refactoring-plan",
+        "legacy-code",
+        "debt-audit"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "event-driven-architect": {
+      "name": "event-driven-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Event-Driven Architecture (EDA) & Event Sourcing: broker selection, schema registries, idempotency keys, dead-letter routing, and backpressure.",
+      "tags": [
+        "eda",
+        "event-driven",
+        "architecture",
+        "messaging",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "domain-event-design",
+        "idempotency-ordering",
+        "dead-letter-queues",
+        "consumer-backpressure"
+      ],
+      "triggers": [
+        "eda",
+        "event-driven",
+        "event-sourcing",
+        "kafka",
+        "rabbitmq"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "microservices-decomposition": {
+      "name": "microservices-decomposition",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Microservices decomposition & migration: Strangler Fig pattern, database-per-service isolation, distributed Sagas, and circuit breakers.",
+      "tags": [
+        "microservices",
+        "strangler-fig",
+        "architecture",
+        "migration",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "ddd-service-boundaries",
+        "strangler-fig-pattern",
+        "distributed-sagas",
+        "fault-isolation"
+      ],
+      "triggers": [
+        "microservices",
+        "monolith-decomposition",
+        "strangler-fig",
+        "saga"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "caching-strategy-architect": {
+      "name": "caching-strategy-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Multi-tier caching architecture & invalidation: CDN edge caching, reverse proxy, distributed Redis, in-memory caches, and stampede prevention.",
+      "tags": [
+        "caching",
+        "redis",
+        "cdn",
+        "architecture",
+        "performance",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "multi-tier-topology",
+        "cache-access-patterns",
+        "invalidation-strategies",
+        "cache-stampede-defense"
+      ],
+      "triggers": [
+        "caching",
+        "cache-aside",
+        "write-through",
+        "cache-invalidation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
     }
   }
 }

@@ -347,6 +347,19 @@ function doctor() {
   fi
 }
 
+function ai-skills() {
+  if [ -n "${DOTFILES_DIR:-}" ] && [ -f "${DOTFILES_DIR}/scripts/ai-skills.sh" ]; then
+    "${DOTFILES_DIR}/scripts/ai-skills.sh" "$@"
+  elif command -v ai-skills >/dev/null 2>&1; then
+    command ai-skills "$@"
+  else
+    echo "ai-skills not found in dotfiles or PATH" >&2
+    return 1
+  fi
+}
+alias add-skills="ai-skills"
+
+
 # 9router MITM Root CA SSL Trust for Node.js / CLI tools
 if [ -f "$HOME/.9router/mitm/rootCA.crt" ]; then
   export NODE_EXTRA_CA_CERTS="$HOME/.9router/mitm/rootCA.crt"

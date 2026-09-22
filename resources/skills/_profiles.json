@@ -53,10 +53,19 @@
         "ponytail",
         "release-notes",
         "nestjs",
+        "nestjs-cqrs-microservices",
         "centrifugo",
         "bullmq",
         "postgresql",
-        "redis"
+        "redis",
+        "redis-distributed-patterns",
+        "golang",
+        "fastapi",
+        "prisma",
+        "trpc-fullstack",
+        "grpc-protobuf-engineer",
+        "transactional-outbox-pattern",
+        "database-query-optimizer"
       ]
     },
     "frontend": {
@@ -66,7 +75,11 @@
         "ponytail",
         "pixel-perfect-ui",
         "rtk",
-        "chrome-extension"
+        "chrome-extension",
+        "chrome-extension-advanced",
+        "nextjs-app-router",
+        "tailwind-shadcn",
+        "tanstack-query-state"
       ]
     },
     "devops": {
@@ -76,8 +89,17 @@
         "release-notes",
         "rtk",
         "vps-hardening",
+        "linux-server-admin",
         "docker",
-        "cloud-infra"
+        "docker-multiarch-builder",
+        "cloud-infra",
+        "kubernetes",
+        "helm-chart-architect",
+        "gitops-terraform",
+        "github-actions",
+        "cicd-security-hardening",
+        "git-advanced-workflow",
+        "shell-scripting"
       ]
     },
     "core-guardrails": {
@@ -97,7 +119,10 @@
       "description": "Layer 1 leadership skills: feature specifications, technical planning, and skill authoring",
       "skills": [
         "feature-spec-writer",
+        "prd-author",
         "technical-planner",
+        "agile-sprint-planner",
+        "tech-debt-strategist",
         "skill-author"
       ]
     },
@@ -106,6 +131,10 @@
       "description": "Layer 1 architecture, data modeling, API contracts, and test strategy",
       "skills": [
         "architecture-designer",
+        "domain-driven-design",
+        "event-driven-architect",
+        "microservices-decomposition",
+        "caching-strategy-architect",
         "data-model-architect",
         "api-contract-designer",
         "test-strategist"
@@ -125,6 +154,9 @@
       "skills": [
         "engineering-review",
         "incident-investigator",
+        "deep-debugger",
+        "flow-learning-codebase",
+        "opentelemetry-tracing",
         "reliability-engineer",
         "migration-strategist",
         "technical-researcher"
@@ -150,6 +182,44 @@
       "description": "Idiomatic Rust, Tokio async runtime, and memory safety patterns",
       "skills": [
         "rust"
+      ]
+    },
+    "godot": {
+      "name": "Godot Game Development",
+      "description": "Godot 4.x engine architecture and GDScript 2.0 static typing",
+      "skills": [
+        "godot-gdscript"
+      ]
+    },
+    "testing": {
+      "name": "Testing & QA Automation",
+      "description": "End-to-end browser testing, automation, and test strategies",
+      "skills": [
+        "test-strategist",
+        "unit-test-craftsman",
+        "qa-test-flow-engineer",
+        "playwright"
+      ]
+    },
+    "cloud": {
+      "name": "Cloud Providers & Architecture",
+      "description": "Multi-cloud architecture patterns across AWS, GCP, and Azure",
+      "skills": [
+        "aws-cloud-architect",
+        "gcp-cloud-architect",
+        "azure-cloud-architect",
+        "cloud-infra"
+      ]
+    },
+    "ai-engineering": {
+      "name": "AI & Agent Engineering",
+      "description": "MCP server creation, RAG systems, evaluation harnesses, and injection defense",
+      "skills": [
+        "mcp-server-author",
+        "rag-pipeline-architect",
+        "eval-harness-designer",
+        "prompt-injection-defense",
+        "api-security-auditor"
       ]
     }
   }
