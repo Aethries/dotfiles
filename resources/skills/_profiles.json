@@ -229,6 +229,28 @@
         "prompt-injection-defense",
         "api-security-auditor"
       ]
+    },
+    "senior-global": {
+      "name": "Senior Global Coding Baseline",
+      "description": "Lean cross-agent baseline for repository-first implementation, durable memory, source quality, security, and verification",
+      "skills": [
+        "ponytail",
+        "caveman",
+        "rtk",
+        "codegraph",
+        "codebase-memory",
+        "agent-memory-bootstrap",
+        "repo-first-implementation",
+        "senior-implementer",
+        "junior-coding-agent",
+        "project-context",
+        "source-quality",
+        "quality-gate",
+        "security-guardrails",
+        "architecture-guardrails",
+        "project-source-quality",
+        "detect-stack"
+      ]
     }
   }
 }

@@ -42,6 +42,46 @@
         "verified_by": "Aethries/dotfiles"
       }
     },
+    "agent-memory-bootstrap": {
+      "name": "agent-memory-bootstrap",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Load and maintain durable project context, decisions, conventions, and handoff state for coding-agent sessions.",
+      "tags": [
+        "memory",
+        "mcp",
+        "handoff",
+        "project-context",
+        "cross-agent"
+      ],
+      "dependencies": [
+        "project-context",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:c84ebf5af80d9d35622454642fa42089d47dffbad54e7c310ef9406c68c1c21a",
+      "domain": "memory",
+      "capabilities": [
+        "durable-project-memory",
+        "decision-recall",
+        "handoff-state",
+        "memory-hygiene",
+        "mcp-agnostic-memory"
+      ],
+      "triggers": [
+        "agent-memory",
+        "memory-bootstrap",
+        "project-memory",
+        "session-handoff",
+        "recall-decisions"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
     "caveman": {
       "name": "caveman",
       "version": "1.0.0",
@@ -3286,6 +3326,138 @@
         "imported_at": "2026-09-23T02:22:20Z"
       },
       "content_hash": "sha256:55ca89958995f5980fa73fa7407e9cede527c75f1bb5c989241515866ffb743e"
+    },
+    "detect-stack": {
+      "name": "detect-stack",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Analyze a codebase to detect its language, framework, conventions, and CI gates. Run this on first use in a project to generate stack context that all coding principle skills reference. Use when the user says \"detect stack,\" \"analyze this project,\" or \"what's this codebase using.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "what-to-detect",
+        "output",
+        "stack",
+        "secondary-languages",
+        "conventions"
+      ],
+      "triggers": [
+        "detect-stack",
+        "detect",
+        "stack"
+      ],
+      "provenance": {
+        "upstream_url": "https://github.com/JordanCoin/codingskills",
+        "upstream_path": "skills/detect-stack",
+        "commit": "d990b56b72f3f4203c13d1ef40e815893d9e7c54",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T04:00:28Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T04:00:28Z"
+      },
+      "content_hash": "sha256:3e4a1cefde06bba612f66d6face3a9b6db960a43f2e8ebb5566a766fa1be5d0b"
+    },
+    "project-source-quality": {
+      "name": "project-source-quality",
+      "version": "1.0.0",
+      "source": "canonical",
+      "domain": "guardrail",
+      "description": "Internal guardrail: Enforces project-native conventions, dependency choices, and functional correctness before and after production code changes.",
+      "tags": [
+        "guardrail",
+        "source-quality",
+        "conventions",
+        "implementation",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context",
+        "source-quality",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "capabilities": [
+        "project-convention-adherence",
+        "dependency-choice-discipline",
+        "naming-and-structure-consistency",
+        "functional-contract-preservation",
+        "minimal-diff-verification"
+      ],
+      "triggers": [
+        "project-source-quality",
+        "project-conventions",
+        "code-conformance",
+        "implementation-quality",
+        "wrong-file",
+        "wrong-dependency"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      },
+      "content_hash": "sha256:ed34e3ddc862af967f95c75f6887e648dfd09925de5a4a6c11ccdd787a9827c3"
+    },
+    "repo-first-implementation": {
+      "name": "repo-first-implementation",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Structured repository-first workflow for source changes, covering context, architecture, implementation, verification, and honest handoff.",
+      "tags": [
+        "workflow",
+        "implementation",
+        "architecture",
+        "conventions",
+        "quality"
+      ],
+      "dependencies": [
+        "agent-memory-bootstrap",
+        "project-context",
+        "project-source-quality",
+        "architecture-guardrails",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:72ed2276f6495265854ea051d7a85c35dfa194e56af457b8262e93c884ba6972",
+      "domain": "implementation",
+      "capabilities": [
+        "repository-first-discovery",
+        "architecture-reasoning",
+        "convention-preservation",
+        "minimal-diff-implementation",
+        "evidence-based-handoff"
+      ],
+      "triggers": [
+        "repo-first",
+        "structured-implementation",
+        "implementation-workflow",
+        "source-change-workflow",
+        "senior-coding-workflow"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
     }
   }
 }

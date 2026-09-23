@@ -190,6 +190,70 @@ done
 log_ok "All 6 Layer 0 Core Guardrail skills verified (frontmatter, token economy, content & registry)"
 
 # ------------------------------------------------------------------------------
+# 1.1.1 Validate lean cross-agent senior global baseline
+# ------------------------------------------------------------------------------
+log_info "Validating lean senior global baseline and project source-quality companion..."
+
+MEMORY_BOOTSTRAP_FILE="$REPO_ROOT/resources/skills/agent-memory-bootstrap/SKILL.md"
+[ -f "$MEMORY_BOOTSTRAP_FILE" ] || log_fail "Missing agent-memory-bootstrap skill"
+grep -Eiq '^name:[[:space:]]*agent-memory-bootstrap' "$MEMORY_BOOTSTRAP_FILE" || log_fail "agent-memory-bootstrap has invalid name"
+grep -Fq "If an Agent Memory MCP server is available" "$MEMORY_BOOTSTRAP_FILE" || log_fail "agent-memory-bootstrap missing MCP fallback rule"
+grep -Fq "Do not store secrets" "$MEMORY_BOOTSTRAP_FILE" || log_fail "agent-memory-bootstrap missing sensitive-data rule"
+grep -Fq "Current repository behavior and explicit task requirements outrank stale memory" "$MEMORY_BOOTSTRAP_FILE" || log_fail "agent-memory-bootstrap missing conflict precedence"
+[ "$(wc -w < "$MEMORY_BOOTSTRAP_FILE" | tr -d ' ')" -le 450 ] || log_fail "agent-memory-bootstrap exceeds token economy limit"
+
+REPO_FIRST_FILE="$REPO_ROOT/resources/skills/repo-first-implementation/SKILL.md"
+[ -f "$REPO_FIRST_FILE" ] || log_fail "Missing repo-first-implementation skill"
+grep -Eiq '^name:[[:space:]]*repo-first-implementation' "$REPO_FIRST_FILE" || log_fail "repo-first-implementation has invalid name"
+grep -Fq "Inspect at least two neighboring implementations" "$REPO_FIRST_FILE" || log_fail "repo-first-implementation missing local convention evidence"
+grep -Fq "Apply SOLID as a diagnostic" "$REPO_FIRST_FILE" || log_fail "repo-first-implementation missing SOLID boundary rule"
+grep -Fq "Report passed, failed, blocked, and not-run checks separately" "$REPO_FIRST_FILE" || log_fail "repo-first-implementation missing evidence reporting rule"
+[ "$(wc -w < "$REPO_FIRST_FILE" | tr -d ' ')" -le 450 ] || log_fail "repo-first-implementation exceeds token economy limit"
+
+PROJECT_QUALITY_FILE="$REPO_ROOT/resources/skills/project-source-quality/SKILL.md"
+[ -f "$PROJECT_QUALITY_FILE" ] || log_fail "Missing project-source-quality skill"
+grep -Eiq '^name:[[:space:]]*project-source-quality' "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality has invalid name"
+grep -Eiq '^description:[[:space:]]*"?Internal guardrail' "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality description must start with Internal guardrail"
+[ "$(wc -w < "$PROJECT_QUALITY_FILE" | tr -d ' ')" -le 350 ] || log_fail "project-source-quality exceeds token economy limit"
+grep -Fq "Inspect at least two nearby implementations" "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality missing convention evidence rule"
+grep -Fq "Derive names and placement from neighboring code" "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality missing naming rule"
+grep -Fq "State the input, output, error, and side-effect contract" "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality missing functional contract rule"
+grep -Fq "update CodeGraph/Codebase Memory" "$PROJECT_QUALITY_FILE" || log_fail "project-source-quality missing graph synchronization rule"
+jq -e '.skills["project-source-quality"]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "registry missing project-source-quality"
+jq -e '.skills["detect-stack"].source == "external" and .skills["detect-stack"].provenance.license == "MIT"' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "registry missing trusted detect-stack provenance"
+[ -f "$REPO_ROOT/resources/skills/detect-stack/SKILL.md" ] || log_fail "Missing imported detect-stack skill"
+
+SENIOR_GLOBAL_SKILLS=(
+    "ponytail"
+    "caveman"
+    "rtk"
+    "codegraph"
+    "codebase-memory"
+    "agent-memory-bootstrap"
+    "repo-first-implementation"
+    "senior-implementer"
+    "junior-coding-agent"
+    "project-context"
+    "source-quality"
+    "quality-gate"
+    "security-guardrails"
+    "architecture-guardrails"
+    "project-source-quality"
+    "detect-stack"
+)
+jq -e '.profiles["senior-global"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing senior-global profile"
+for global_skill in "${SENIOR_GLOBAL_SKILLS[@]}"; do
+    jq -e --arg s "$global_skill" '.profiles["senior-global"].skills | index($s)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "senior-global profile missing $global_skill"
+done
+
+for workflow_skill in "agent-memory-bootstrap" "repo-first-implementation"; do
+    jq -e --arg s "$workflow_skill" '.skills[$s]' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "registry missing $workflow_skill"
+    jq -e --arg s "$workflow_skill" '.profiles["senior-global"].skills | index($s)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "senior-global profile missing $workflow_skill"
+done
+
+log_ok "Senior-global workflow, memory bootstrap, project-source-quality, and external detect-stack verified"
+
+# ------------------------------------------------------------------------------
 # 1.2 Validate Layer 1 Senior Leadership Skills
 # ------------------------------------------------------------------------------
 log_info "Validating Layer 1 Senior Leadership skills & trigger boundaries..."
@@ -675,7 +739,7 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" remove ponytail --target all >/dev/null
 jq -e '.skills["ponytail"]' "$MOCK_PROJECT/.agent-skills.lock.json" >/dev/null && log_fail "Lockfile still has ponytail after removal"
 log_ok "ai-skills.sh remove cleans global targets and project directories with lockfile update"
 
-# Test 2.7: sync command (default: global-core profile)
+# Test 2.7: sync command (default: senior-global profile)
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/ponytail" ] || log_fail "sync command failed to link gemini ponytail"
 [ -L "$MOCK_HOME/.codex/skills/ponytail" ] || log_fail "sync command failed to link codex ponytail"
@@ -687,15 +751,19 @@ HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/rtk" ] || log_fail "sync command failed to link gemini rtk"
 [ -L "$MOCK_HOME/.codex/skills/rtk" ] || log_fail "sync command failed to link codex rtk"
 [ -L "$MOCK_HOME/.claude/skills/rtk" ] || log_fail "sync command failed to link claude rtk"
-# Verify junior-coding-agent is NOT linked in default global-core sync
-[ ! -e "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "default sync should not install deprecated junior-coding-agent"
+[ -L "$MOCK_HOME/.gemini/config/skills/project-context" ] || log_fail "sync command failed to link project-context"
+[ -L "$MOCK_HOME/.gemini/config/skills/agent-memory-bootstrap" ] || log_fail "sync command failed to link agent-memory-bootstrap"
+[ -L "$MOCK_HOME/.codex/skills/repo-first-implementation" ] || log_fail "sync command failed to link repo-first-implementation"
+[ -L "$MOCK_HOME/.codex/skills/project-source-quality" ] || log_fail "sync command failed to link project-source-quality"
+[ -L "$MOCK_HOME/.claude/skills/detect-stack" ] || log_fail "sync command failed to link detect-stack"
+[ -L "$MOCK_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "senior-global sync failed to preserve requested junior-coding-agent"
 
 # Test 2.7b: sync --all-canonical links entire registry
 HOME="$MOCK_HOME" "$AI_SKILLS_BIN" sync --all-canonical >/dev/null
 [ -L "$MOCK_HOME/.gemini/config/skills/release-notes" ] || log_fail "sync --all-canonical failed to link release-notes"
 [ -L "$MOCK_HOME/.codex/skills/release-notes" ] || log_fail "sync --all-canonical failed to link codex release-notes"
 [ -L "$MOCK_HOME/.claude/skills/release-notes" ] || log_fail "sync --all-canonical failed to link claude release-notes"
-log_ok "ai-skills.sh sync synchronizes global-core by default and supports --all-canonical"
+log_ok "ai-skills.sh sync synchronizes senior-global by default and supports --all-canonical"
 
 # Test 2.8: Batch selection & collision deduplication
 log_info "Testing batch skill installation and path deduplication..."
@@ -978,11 +1046,8 @@ fi
 if ! echo "$CLEAN_OUT" | grep -q "BullMQ (local: bullmq)"; then
     log_fail "recommendation missed covered BullMQ"
 fi
-if ! echo "$CLEAN_OUT" | grep -q "Missing Coverage: nextjs"; then
-    log_fail "recommendation missed missing nextjs"
-fi
-if ! echo "$CLEAN_OUT" | grep -q "Candidate: nextjs-runtime-debugging"; then
-    log_fail "recommendation failed to suggest nextjs candidate"
+if ! echo "$CLEAN_OUT" | grep -q "Next.js (local: nextjs-app-router)"; then
+    log_fail "recommendation missed covered Next.js"
 fi
 if ! echo "$CLEAN_OUT" | grep -q "Recommendation is advisory only"; then
     log_fail "recommendation missing advisory policy"
@@ -1461,8 +1526,13 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -L "$MOCK_SYNC_HOME/.gemini/config/skills/rtk" ] || log_fail "sync-editors.sh did not link rtk skill"
 [ -L "$MOCK_SYNC_HOME/.codex/skills/rtk" ] || log_fail "sync-editors.sh did not link codex rtk skill"
 [ -L "$MOCK_SYNC_HOME/.claude/skills/rtk" ] || log_fail "sync-editors.sh did not link claude rtk skill"
-# Verify junior-coding-agent is NOT linked by sync-editors.sh (uses global-core profile)
-[ ! -e "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh linked deprecated junior-coding-agent"
+# Verify senior-global-specific baseline is linked by sync-editors.sh
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/project-context" ] || log_fail "sync-editors.sh missed project-context"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/agent-memory-bootstrap" ] || log_fail "sync-editors.sh missed agent-memory-bootstrap"
+[ -L "$MOCK_SYNC_HOME/.claude/skills/repo-first-implementation" ] || log_fail "sync-editors.sh missed repo-first-implementation"
+[ -L "$MOCK_SYNC_HOME/.codex/skills/project-source-quality" ] || log_fail "sync-editors.sh missed project-source-quality"
+[ -L "$MOCK_SYNC_HOME/.claude/skills/detect-stack" ] || log_fail "sync-editors.sh missed detect-stack"
+[ -L "$MOCK_SYNC_HOME/.gemini/config/skills/junior-coding-agent" ] || log_fail "sync-editors.sh did not preserve requested junior-coding-agent"
 
 # Verify Editor Export Integration (CLAUDE.md, Neovim AGENTS.md, Zed AGENTS.md, VSCode/Antigravity AGENTS.md)
 [ -f "$MOCK_SYNC_HOME/.claude/CLAUDE.md" ] || log_fail "Missing .claude/CLAUDE.md"
@@ -1472,10 +1542,11 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 [ -f "$MOCK_SYNC_HOME/.config/Code/User/prompts/AGENTS.md" ] || log_fail "Missing .config/Code/User/prompts/AGENTS.md"
 grep -Fq "AI Agent Guidelines" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing header"
 grep -Fq "ponytail" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ponytail rule"
+grep -Fq "agent-memory-bootstrap" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing memory bootstrap rule"
+grep -Fq "repo-first-implementation" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing repo-first workflow rule"
 grep -Fq "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ownership marker"
 
 log_ok "sync-editors.sh links skills and exports editor rules automatically"
 
 echo
 log_ok "All AI Skills test assertions passed successfully!"
-

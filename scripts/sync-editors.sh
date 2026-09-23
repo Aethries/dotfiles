@@ -134,8 +134,8 @@ if [ -f "$REPO_ROOT/resources/codex/config.toml" ]; then
 fi
 
 if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
-    info "Synchronizing global-core AI agent skills"
-    "$REPO_ROOT/scripts/ai-skills.sh" sync --profile global-core
+    info "Synchronizing senior-global AI agent skills"
+    "$REPO_ROOT/scripts/ai-skills.sh" sync --profile senior-global
 
     info "Exporting baseline AI orchestration rules for editors"
     RULES_CONTENT="$("$REPO_ROOT/scripts/ai-skills.sh" export-rules)"

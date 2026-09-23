@@ -122,10 +122,10 @@ ai-skills remove junior-coding-agent
 
 ### `sync [--profile <name>] [--all-canonical]`
 Synchronizes skills across all configured global agent paths.
-By default, synchronizes the **`global-core`** profile (26 foundational skills).
+By default, synchronizes the **`senior-global`** profile (16 lean senior baseline skills).
 Use `--profile <name>` to sync a specific profile, or `--all-canonical` to sync the full registry.
 ```bash
-# Sync default global-core profile
+# Sync default senior-global profile
 ai-skills sync
 
 # Sync specific profile or everything
@@ -233,10 +233,10 @@ ai-skills remove junior-coding-agent --all-scopes
 
 ### `sync [--profile <name>] [--all-canonical]`
 Synchronizes skills across all configured global agent paths.
-By default, synchronizes the **`global-core`** profile (26 foundational skills).
+By default, synchronizes the **`senior-global`** profile (16 lean senior baseline skills).
 Use `--profile <name>` to sync a specific profile, or `--all-canonical` to sync the full registry.
 ```bash
-# Sync default global-core profile
+# Sync default senior-global profile
 ai-skills sync
 
 # Sync specific profile or everything
@@ -274,7 +274,10 @@ ai-skills doctor
 
 Skills are organized into composable profiles in `resources/skills/_profiles.json`:
 
-- `global-core`: Primary default sync profile (26 foundation skills: core guardrails, leadership, architecture, senior implementation, and standard operations).
+- `global-core`: Expanded engineering profile (27 foundation skills: core guardrails, leadership, architecture, senior implementation, and standard operations). Use explicitly when the broader baseline is desired.
+- `senior-global`: Lean cross-agent senior baseline with `agent-memory-bootstrap` and `repo-first-implementation`, plus project context, source quality, security, architecture, verification, CodeGraph, Codebase Memory, and stack detection. Sync with `ai-skills sync --profile senior-global`.
+- `agent-memory-bootstrap`: MCP-agnostic durable project context, decision recall, memory hygiene, and handoff protocol. See [`docs/agent-memory-mcp.md`](agent-memory-mcp.md) for the evaluated MCP design.
+- `repo-first-implementation`: Repository-first sequence for context discovery, local architecture reasoning, minimal implementation, verification, and evidence-based handoff.
 - `core`: Baseline minimalist rules (`ponytail`, `caveman`, `senior-implementer`, `rtk`).
 - `core-guardrails`: Layer 0 essential guardrails (`project-context`, `source-quality`, `architecture-guardrails`, `system-design-guardrails`, `security-guardrails`, `quality-gate`).
 - `senior-leadership`: Layer 1 specs and planning (`feature-spec-writer`, `technical-planner`, `skill-author`).

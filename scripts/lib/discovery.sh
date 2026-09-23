@@ -593,7 +593,7 @@ recommend_project_skills() {
 
     if [ "${#detected_techs[@]}" -eq 0 ]; then
         echo -e "  No specialized tech stack detected from standard project descriptors."
-        echo -e "  Recommended baseline: ${GREEN}global-core${RESET} (Ponytail, Senior Implementer, Caveman, RTK, CodeGraph, Codebase Memory)"
+        echo -e "  Recommended baseline: ${GREEN}senior-global${RESET} (project context, source quality, verification, security, architecture, memory, and implementation guardrails)"
         return 0
     fi
 
