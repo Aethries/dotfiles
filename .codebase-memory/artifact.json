@@ -1,11 +1,12 @@
 {
     "schema_version": 2,
-    "commit": "bbf59026eece2c2f7a188a6729008e0d6e63eaeb",
-    "indexed_at": "2026-09-23T10:13:25Z",
-    "project": "dotfiles",
-    "nodes": 3976,
-    "edges": 4515,
-    "original_size": 15007744,
-    "compressed_size": 792298,
-    "compression_level": 9
+    "commit": "9b42460c0710b53cb05277d6477b902f83270602",
+    "indexed_at": "2026-09-23T10:17:44Z",
+    "project": "home-loc-Workspaces-dotfiles",
+    "nodes": 6267,
+    "edges": 10924,
+    "original_size": 28966912,
+    "compressed_size": 3053582,
+    "compression_level": 3,
+    "reconcile_basis": "git-clean-head"
 }
