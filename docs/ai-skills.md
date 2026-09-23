@@ -276,7 +276,7 @@ Skills are organized into composable profiles in `resources/skills/_profiles.jso
 
 - `global-core`: Expanded engineering profile (27 foundation skills: core guardrails, leadership, architecture, senior implementation, and standard operations). Use explicitly when the broader baseline is desired.
 - `senior-global`: Lean cross-agent senior baseline with `agent-memory-bootstrap` and `repo-first-implementation`, plus project context, source quality, security, architecture, verification, CodeGraph, Codebase Memory, and stack detection. Sync with `ai-skills sync --profile senior-global`.
-- `agent-memory-bootstrap`: MCP-agnostic durable project context, decision recall, memory hygiene, and handoff protocol. See [`docs/agent-memory-mcp.md`](agent-memory-mcp.md) for the evaluated MCP design.
+- `agent-memory-bootstrap`: MCP-agnostic durable project context, decision recall, memory hygiene, and handoff protocol. See [`agentmemory.dev integration`](agent-memory-mcp.md) for the repository-owned integration.
 - `repo-first-implementation`: Repository-first sequence for context discovery, local architecture reasoning, minimal implementation, verification, and evidence-based handoff.
 - `core`: Baseline minimalist rules (`ponytail`, `caveman`, `senior-implementer`, `rtk`).
 - `core-guardrails`: Layer 0 essential guardrails (`project-context`, `source-quality`, `architecture-guardrails`, `system-design-guardrails`, `security-guardrails`, `quality-gate`).

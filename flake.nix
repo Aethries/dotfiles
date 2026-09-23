@@ -30,6 +30,10 @@
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       machineConfigPath = builtins.getEnv "DOTFILES_MACHINE_CONFIG";
+      repoRootValue = builtins.getEnv "DOTFILES_REPO_ROOT";
+      repoRoot = if repoRootValue == "" then null else repoRootValue;
+      primaryUserValue = builtins.getEnv "DOTFILES_PRIMARY_USER";
+      primaryUser = if primaryUserValue == "" then null else primaryUserValue;
       machineConfig =
         if machineConfigPath != "" && builtins.pathExists machineConfigPath then
           builtins.toPath machineConfigPath
@@ -78,7 +82,9 @@
       # Evaluation target for common modules. Real hardware stays in .machine/.
       nixosConfigurations.check = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs primaryUser repoRoot;
+        };
         modules = checkModules;
       };
 

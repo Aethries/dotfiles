@@ -268,6 +268,7 @@ check_required_user_service() {
 check_service "docker" "Docker Daemon"
 check_service "bluetooth" "Bluetooth Daemon"
 check_service "kanata-internal" "Kanata Keyboard Daemon"
+check_service "agentmemory" "agentmemory.dev"
 check_user_service "pipewire" "PipeWire Audio Server"
 check_user_service "wireplumber" "WirePlumber Session Manager"
 check_user_service "kanata-indicator" "Kanata Indicator & OSD Daemon"

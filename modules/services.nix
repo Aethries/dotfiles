@@ -5,6 +5,7 @@
     ./services/containers.nix
     ./services/audio.nix
     ./services/ai-gateways.nix
+    ./services/agent-memory.nix
   ];
 
   # ============================================================

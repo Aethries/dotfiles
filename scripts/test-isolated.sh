@@ -74,6 +74,7 @@ json_files=(
     "resources/antigravity/extensions.lock.json"
     "resources/antigravity/generated/noctalia-theme.json"
     "resources/gemini/mcp_config.json"
+    ".mcp.json"
 )
 jsonc_files=(
     "resources/antigravity/User/settings.jsonc"
@@ -85,7 +86,9 @@ for file in "${json_files[@]}"; do
     log_ok "Valid JSON: $file"
 done
 for file in "${jsonc_files[@]}"; do
-    sed '/^[[:space:]]*\/\//d' "$REPO_ROOT/$file" | jq empty
+    sed '/^[[:space:]]*\/\//d' "$REPO_ROOT/$file" \
+        | sed -z -E 's/,[[:space:]]*}/}/g; s/,[[:space:]]*\]/]/g' \
+        | jq empty
     log_ok "Valid JSONC: $file"
 done
 log_ok "All manifests parsed successfully"

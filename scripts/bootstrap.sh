@@ -4,6 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${DOTFILES_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+PRIMARY_USER="${SUDO_USER:-$(id -un)}"
 LIB_DIR="$SCRIPT_DIR/lib"
 
 # Keep the top-level script as orchestration; helpers are sourceable in isolation.
@@ -22,7 +23,11 @@ preflight() {
 
 rebuild_system() {
     info "Building NixOS..."
-    sudo env "DOTFILES_MACHINE_CONFIG=$MACHINE_CONFIG" nixos-rebuild switch \
+    sudo env \
+        "DOTFILES_MACHINE_CONFIG=$MACHINE_CONFIG" \
+        "DOTFILES_REPO_ROOT=$REPO_ROOT" \
+        "DOTFILES_PRIMARY_USER=$PRIMARY_USER" \
+        nixos-rebuild switch \
         --flake "$REPO_ROOT#check" \
         --impure
     success "NixOS configuration applied successfully!"

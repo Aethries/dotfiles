@@ -92,6 +92,16 @@ grep -Eiq '^name:[[:space:]]*codegraph' "$CODEGRAPH_FILE" || log_fail "codegraph
 # Assert MCP servers registered in resources/gemini/mcp_config.json
 grep -Fq '"codebase-memory"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "mcp_config.json missing codebase-memory"
 grep -Fq '"codegraph"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "mcp_config.json missing codegraph"
+grep -Fq '"agentmemory"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "mcp_config.json missing agentmemory"
+grep -Fq '[mcp_servers.agentmemory]' "$REPO_ROOT/resources/codex/config.toml" || log_fail "Codex config missing agentmemory"
+[ -f "$REPO_ROOT/.mcp.json" ] || log_fail "Missing Claude project MCP config"
+[ -f "$REPO_ROOT/pkgs/iii-engine.nix" ] || log_fail "Missing pkgs/iii-engine.nix"
+[ -f "$REPO_ROOT/resources/agent-memory/start.sh" ] || log_fail "Missing agentmemory service launcher"
+grep -Fq 'iii-engine.nix' "$REPO_ROOT/modules/packages.nix" || log_fail "modules/packages.nix missing iii-engine"
+grep -Fq 'systemd.services.agentmemory' "$REPO_ROOT/modules/services/agent-memory.nix" || log_fail "Missing agentmemory system service"
+grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/codex/config.toml" || log_fail "Codex config missing pinned agentmemory MCP"
+grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "Gemini config missing pinned agentmemory MCP"
+grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/.mcp.json" || log_fail "Claude config missing pinned agentmemory MCP"
 
 # Assert global gitignore has .codegraph/
 [ -f "$REPO_ROOT/resources/git/ignore" ] || log_fail "Missing resources/git/ignore"
@@ -1536,6 +1546,8 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 
 # Verify Editor Export Integration (CLAUDE.md, Neovim AGENTS.md, Zed AGENTS.md, VSCode/Antigravity AGENTS.md)
 [ -f "$MOCK_SYNC_HOME/.claude/CLAUDE.md" ] || log_fail "Missing .claude/CLAUDE.md"
+[ -f "$MOCK_SYNC_HOME/.codex/AGENTS.md" ] || log_fail "Missing .codex/AGENTS.md"
+[ -f "$MOCK_SYNC_HOME/.gemini/GEMINI.md" ] || log_fail "Missing .gemini/GEMINI.md"
 [ -f "$MOCK_SYNC_HOME/.config/nvim/AGENTS.md" ] || log_fail "Missing .config/nvim/AGENTS.md"
 [ -f "$MOCK_SYNC_HOME/.config/zed/prompts/AGENTS.md" ] || log_fail "Missing .config/zed/prompts/AGENTS.md"
 [ -f "$MOCK_SYNC_HOME/.antigravity-ide/User/prompts/AGENTS.md" ] || log_fail "Missing .antigravity-ide/User/prompts/AGENTS.md"
@@ -1543,6 +1555,9 @@ HOME="$MOCK_SYNC_HOME" "$SYNC_EDITORS_BIN" --no-extensions >/dev/null 2>&1
 grep -Fq "AI Agent Guidelines" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing header"
 grep -Fq "ponytail" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ponytail rule"
 grep -Fq "agent-memory-bootstrap" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing memory bootstrap rule"
+grep -Fq "Mandatory Agent Memory protocol" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing mandatory memory protocol"
+grep -Fq "Mandatory Agent Memory protocol" "$MOCK_SYNC_HOME/.codex/AGENTS.md" || log_fail "AGENTS.md missing mandatory memory protocol"
+grep -Fq "Mandatory Agent Memory protocol" "$MOCK_SYNC_HOME/.gemini/GEMINI.md" || log_fail "GEMINI.md missing mandatory memory protocol"
 grep -Fq "repo-first-implementation" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing repo-first workflow rule"
 grep -Fq "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$MOCK_SYNC_HOME/.claude/CLAUDE.md" || log_fail "CLAUDE.md missing ownership marker"
 

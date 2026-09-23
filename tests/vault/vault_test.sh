@@ -51,6 +51,9 @@ chmod +x "$SANDBOX_DIR/bin/gnome-keyring-daemon"
 
 cat << 'EOS' > "$SANDBOX_DIR/bin/systemctl"
 #!/usr/bin/env bash
+if [ "${1:-}" = "is-active" ] || [ "${2:-}" = "is-active" ]; then
+    exit 1
+fi
 exit 0
 EOS
 chmod +x "$SANDBOX_DIR/bin/systemctl"
@@ -206,5 +209,46 @@ chmod 555 "$HOME/.codex/plugins/.plugin-appserver/codex"
 [ "$(cat "$HOME/.codex/plugins/.plugin-appserver/codex")" = "vault-bin-content" ] || log_fail "Read-only executable was not overwritten"
 log_ok "Restore overwrites read-only files cleanly"
 
+log_info "15. Testing agentmemory scope encrypts state and settings without runtime caches..."
+AGENTMEMORY_DATA_DIR="$HOME/.local/share/agentmemory"
+mkdir -p "$AGENTMEMORY_DATA_DIR" "$HOME/.agentmemory/cache" "$HOME/.agentmemory/logs"
+echo "memory-record" > "$AGENTMEMORY_DATA_DIR/memories.json"
+echo "agentmemory-secret" > "$HOME/.agentmemory/.env"
+echo "runtime-cache" > "$HOME/.agentmemory/cache/ignored.txt"
+echo "runtime-log" > "$HOME/.agentmemory/logs/ignored.log"
+echo "runtime-pid" > "$HOME/.agentmemory/runtime.pid"
+AGENTMEMORY_VAULT="$SANDBOX_DIR/agentmemory.vault"
+AGENTMEMORY_DATA_DIR="$AGENTMEMORY_DATA_DIR" "$REPO_ROOT/scripts/vault.sh" backup --scope agentmemory "$AGENTMEMORY_VAULT" >/dev/null
+[ -f "$AGENTMEMORY_VAULT" ] || log_fail "Agentmemory backup did not create a vault file"
+AGENTMEMORY_LIST="$("$REPO_ROOT/scripts/vault.sh" list "$AGENTMEMORY_VAULT")"
+echo "$AGENTMEMORY_LIST" | grep -q "data/agentmemory/memories.json" || log_fail "Agentmemory state missing from vault"
+echo "$AGENTMEMORY_LIST" | grep -q "user/agentmemory/.env" || log_fail "Agentmemory settings missing from vault"
+if echo "$AGENTMEMORY_LIST" | grep -Eq "cache/ignored|logs/ignored|runtime\.pid"; then
+    log_fail "Agentmemory runtime cache/log/lock was included in vault"
+fi
+rm -rf "$AGENTMEMORY_DATA_DIR" "$HOME/.agentmemory"
+AGENTMEMORY_DATA_DIR="$AGENTMEMORY_DATA_DIR" "$REPO_ROOT/scripts/vault.sh" restore --scope agentmemory "$AGENTMEMORY_VAULT" >/dev/null
+[ "$(cat "$AGENTMEMORY_DATA_DIR/memories.json")" = "memory-record" ] || log_fail "Agentmemory state was not restored"
+[ "$(cat "$HOME/.agentmemory/.env")" = "agentmemory-secret" ] || log_fail "Agentmemory settings were not restored"
+[ ! -e "$HOME/.agentmemory/cache/ignored.txt" ] || log_fail "Agentmemory cache was restored"
+log_ok "Agentmemory Vault scope is encrypted, portable, and cache-free"
+
+log_info "16. Testing active agentmemory service is rejected for safe snapshots..."
+cat << 'EOS' > "$SANDBOX_DIR/bin/systemctl"
+#!/usr/bin/env bash
+if [ "${1:-}" = "is-active" ] || [ "${2:-}" = "is-active" ]; then
+    if [ "${3:-}" = "agentmemory.service" ]; then
+        exit 0
+    fi
+    exit 1
+fi
+exit 0
+EOS
+chmod +x "$SANDBOX_DIR/bin/systemctl"
+if AGENTMEMORY_DATA_DIR="$AGENTMEMORY_DATA_DIR" "$REPO_ROOT/scripts/vault.sh" backup --scope agentmemory "$SANDBOX_DIR/blocked.vault" >/dev/null 2>&1; then
+    log_fail "Active agentmemory service was not rejected"
+fi
+log_ok "Active agentmemory service is rejected before backup"
+
 echo
-log_ok "ALL 14 VAULT TEST CASES PASSED SUCCESSFULLY."
+log_ok "ALL 16 VAULT TEST CASES PASSED SUCCESSFULLY."

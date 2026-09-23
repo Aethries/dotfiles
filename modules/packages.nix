@@ -96,6 +96,7 @@ let
   lark = pkgs.callPackage ../pkgs/lark.nix { };
   rtk = pkgs.callPackage ../pkgs/rtk.nix { };
   codebase-memory-mcp = pkgs.callPackage ../pkgs/codebase-memory-mcp.nix { };
+  iii-engine = pkgs.callPackage ../pkgs/iii-engine.nix { };
 
 in
 {
@@ -156,7 +157,7 @@ in
     # ----------------------------------------------------------
     # Node.js, Package Managers & Version Management (NVM)
     # ----------------------------------------------------------
-    # nodejs_22 — managed by fnm instead; run: fnm install --lts
+    nodejs_22
     corepack
     pnpm
     yarn
@@ -216,6 +217,7 @@ in
     codexDesktop
     rtk
     codebase-memory-mcp
+    iii-engine
     fuzzel
 
     sshfs

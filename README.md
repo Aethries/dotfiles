@@ -158,7 +158,7 @@ Plaintext credentials stay strictly isolated in the uncommitted `secrets/` direc
   ./scripts/secrets.sh encrypt
   ./scripts/secrets.sh decrypt
   ```
-- **Local-only Vault**: The `vault` utility maintains a local-only encrypted backup (`secrets.vault`). There is no automated cloud sync—users control their backup destinations safely.
+- **Local-only Vault**: The `vault` utility maintains local-only encrypted backups (`secrets.vault`, `secrets.omniroute.vault`, and `secrets.agentmemory.vault`). Agent-memory state and private settings are encrypted by `vault backup --scope agentmemory`; repository configuration and reviewed Markdown remain Git-synchronised. There is no automated cloud sync—users control their backup destinations safely.
 
 ---
 

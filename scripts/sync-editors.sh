@@ -143,7 +143,7 @@ if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
     write_rule_file() {
         local target_file="$1"
         mkdir -p "$(dirname "$target_file")"
-        if [ -f "$target_file" ] && ! grep -q "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$target_file" 2>/dev/null; then
+        if [ -s "$target_file" ] && ! grep -q "<!-- managed-by: Aethries/dotfiles ai-skills -->" "$target_file" 2>/dev/null; then
             if [ "$FORCE_REPLACE" != true ] && [ "$ALLOW_BACKUP" != true ]; then
                 warn "Unmanaged rule file exists at '$target_file'. Skipping write to prevent overwriting user edits. Pass --replace or --backup to update."
                 return 0
@@ -160,6 +160,12 @@ if [ -x "$REPO_ROOT/scripts/ai-skills.sh" ]; then
 
     # 1. Claude Code (CLAUDE.md)
     write_rule_file "$TARGET_HOME/.claude/CLAUDE.md"
+
+    # 1b. Codex CLI global instructions
+    write_rule_file "$TARGET_HOME/.codex/AGENTS.md"
+
+    # 1c. Antigravity CLI global instructions
+    write_rule_file "$TARGET_HOME/.gemini/GEMINI.md"
 
     # 2. Neovim (AGENTS.md)
     write_rule_file "$TARGET_HOME/.config/nvim/AGENTS.md"
@@ -194,6 +200,8 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         "$TARGET_HOME/.gemini/config/mcp_config.json" \
         "$TARGET_HOME/.gemini/antigravity/mcp_config.json" \
         "$TARGET_HOME/.claude/CLAUDE.md" \
+        "$TARGET_HOME/.codex/AGENTS.md" \
+        "$TARGET_HOME/.gemini/GEMINI.md" \
         "$TARGET_HOME/.config/nvim/AGENTS.md" \
         "$TARGET_HOME/.config/zed/prompts/AGENTS.md"; do
         [ -e "$managed_path" ] || [ -L "$managed_path" ] || continue
@@ -201,7 +209,7 @@ if [ "$TARGET_USER" != "$(id -un)" ]; then
         chown -h "$TARGET_USER:" "$managed_path"
     done
 fi
-success "Neovim, Antigravity, VS Code, Codex, Godot MCP, AI skills and template links are synchronized"
+success "Agent Memory MCP, Neovim, Antigravity, VS Code, Codex, Godot MCP, AI skills and template links are synchronized"
 
 if [ "$SYNC_EXTENSIONS" = false ]; then
     exit 0

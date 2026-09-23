@@ -153,6 +153,221 @@ EXCLUDE_PATTERNS=(
     "*.sock"
 )
 
+agentmemory_data_dir() {
+    local data_dir="${AGENTMEMORY_DATA_DIR:-${XDG_DATA_HOME:-$USER_HOME/.local/share}/agentmemory}"
+
+    case "$data_dir" in
+        /*) ;;
+        *) error "AGENTMEMORY_DATA_DIR must be an absolute path: $data_dir" ;;
+    esac
+
+    if [ "$(basename -- "$data_dir")" != "agentmemory" ] || [ "$data_dir" = "/agentmemory" ]; then
+        error "AGENTMEMORY_DATA_DIR must name a dedicated agentmemory directory: $data_dir"
+    fi
+
+    if [ "$(realpath -m -- "$data_dir")" != "$data_dir" ]; then
+        error "AGENTMEMORY_DATA_DIR must be normalized and must not contain '.' or '..': $data_dir"
+    fi
+
+    if [ -L "$data_dir" ]; then
+        error "Refusing to follow a symlinked AGENTMEMORY_DATA_DIR: $data_dir"
+    fi
+
+    printf '%s\n' "$data_dir"
+}
+
+agentmemory_user_dir() {
+    printf '%s\n' "$USER_HOME/.agentmemory"
+}
+
+ensure_agentmemory_quiescent() {
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet agentmemory.service 2>/dev/null; then
+        error "agentmemory.service is active. Stop it before an agentmemory vault operation to protect the database snapshot."
+    fi
+
+    if command -v pgrep >/dev/null 2>&1 && pgrep -u "$UID" -f '[a]gentmemory/agentmemory' >/dev/null 2>&1; then
+        error "An agentmemory runtime process is active. Stop it before an agentmemory vault operation to protect the database snapshot."
+    fi
+}
+
+AGENTMEMORY_STAGE=""
+AGENTMEMORY_TMP_OUT=""
+
+finish_agentmemory_backup() {
+    local status="$1"
+
+    if [ -n "$AGENTMEMORY_STAGE" ] && [ -d "$AGENTMEMORY_STAGE" ]; then
+        rm -rf "$AGENTMEMORY_STAGE"
+    fi
+    if [ -n "$AGENTMEMORY_TMP_OUT" ]; then
+        rm -f "$AGENTMEMORY_TMP_OUT"
+    fi
+
+    return "$status"
+}
+
+stage_agentmemory_path() {
+    local source_path="$1"
+    local target_path="$2"
+
+    if [ -e "$source_path" ]; then
+        if [ -L "$source_path" ]; then
+            error "Refusing to archive a symlinked agentmemory path: $source_path"
+        fi
+        cp -a -- "$source_path" "$target_path"
+    else
+        mkdir -p "$target_path"
+    fi
+}
+
+cmd_backup_agentmemory() {
+    local out_file="$1"
+    local data_dir
+    local user_dir
+    data_dir="$(agentmemory_data_dir)"
+    user_dir="$(agentmemory_user_dir)"
+
+    ensure_agentmemory_quiescent
+
+    if [ ! -d "$data_dir" ]; then
+        error "Agentmemory data directory not found: $data_dir. Start the service once or set AGENTMEMORY_DATA_DIR explicitly."
+    fi
+
+    info "Starting agentmemory Vault backup for user '$TARGET_USER'..."
+    echo "  + State: $data_dir"
+    if [ -d "$user_dir" ]; then
+        echo "  + User settings: $user_dir"
+    else
+        echo "  + User settings: none (an empty profile will be restored)"
+    fi
+
+    mkdir -p "$(dirname "$out_file")"
+    AGENTMEMORY_TMP_OUT="$out_file.tmp"
+    rm -f "$AGENTMEMORY_TMP_OUT"
+    AGENTMEMORY_STAGE="$(mktemp -d)"
+    trap 'finish_agentmemory_backup $?' EXIT
+
+    mkdir -p "$AGENTMEMORY_STAGE/data" "$AGENTMEMORY_STAGE/user"
+    stage_agentmemory_path "$data_dir" "$AGENTMEMORY_STAGE/data/agentmemory"
+    stage_agentmemory_path "$user_dir" "$AGENTMEMORY_STAGE/user/agentmemory"
+
+    # Runtime caches, logs, locks, and downloaded binaries are not durable
+    # memory and must not be copied into a portable Vault snapshot.
+    rm -rf \
+        "$AGENTMEMORY_STAGE/user/agentmemory/bin" \
+        "$AGENTMEMORY_STAGE/user/agentmemory/cache" \
+        "$AGENTMEMORY_STAGE/user/agentmemory/logs" \
+        "$AGENTMEMORY_STAGE/user/agentmemory/tmp"
+    find "$AGENTMEMORY_STAGE" -type f \( -name '*.pid' -o -name '*.sock' \) -delete
+
+    if find "$AGENTMEMORY_STAGE" -type l -print -quit | grep -q .; then
+        error "Refusing to archive symlinks in agentmemory state."
+    fi
+
+    echo
+    echo "This vault contains the agentmemory database and user settings."
+    echo "Please set a strong Master Password to encrypt this vault:"
+
+    if ! (cd "$AGENTMEMORY_STAGE" && tar -cf - data user) \
+        | zstd -T0 -12 \
+        | age --passphrase --output "$AGENTMEMORY_TMP_OUT"; then
+        error "Agentmemory Vault backup failed."
+    fi
+
+    mv -f "$AGENTMEMORY_TMP_OUT" "$out_file"
+    chmod 600 "$out_file"
+    local size
+    size="$(du -h "$out_file" | cut -f1)"
+
+    AGENTMEMORY_STAGE=""
+    AGENTMEMORY_TMP_OUT=""
+    trap - EXIT
+
+    echo
+    success "Agentmemory Vault created successfully: $out_file ($size)"
+}
+
+validate_agentmemory_archive() {
+    local archive="$1"
+    local member
+    local members="${archive}.members"
+
+    if ! tar -tf "$archive" > "$members"; then
+        error "Could not read the agentmemory Vault archive manifest."
+    fi
+
+    while IFS= read -r member; do
+        case "$member" in
+            data|data/|data/agentmemory|data/agentmemory/*|user|user/|user/agentmemory|user/agentmemory/*) ;;
+            *) error "Unexpected path in agentmemory Vault archive: $member" ;;
+        esac
+        case "$member" in
+            /*|*/../*|../*|*/..|..|*/./*|./*)
+                error "Unsafe path in agentmemory Vault archive: $member"
+                ;;
+        esac
+    done < "$members"
+}
+
+cmd_restore_agentmemory() {
+    local in_file="$1"
+    local data_dir
+    local user_dir
+    data_dir="$(agentmemory_data_dir)"
+    user_dir="$(agentmemory_user_dir)"
+
+    ensure_agentmemory_quiescent
+    info "Restoring agentmemory Vault from: $in_file..."
+    echo "  + State: $data_dir"
+    echo "  + User settings: $user_dir"
+
+    RESTORE_TMP="$(mktemp -d)"
+    trap 'finish_restore_runtime $?' EXIT
+
+    local archive="$RESTORE_TMP/agentmemory.tar"
+    if ! decrypt_vault "$in_file" | zstd -d > "$archive"; then
+        error "Failed to decrypt or decompress agentmemory Vault."
+    fi
+    if ! tar -tf "$archive" >/dev/null; then
+        error "Agentmemory Vault does not contain a valid tar archive."
+    fi
+    validate_agentmemory_archive "$archive"
+
+    if ! tar --no-same-owner --no-same-permissions -C "$RESTORE_TMP" -xf "$archive"; then
+        error "Failed to extract agentmemory Vault."
+    fi
+
+    if [ ! -d "$RESTORE_TMP/data/agentmemory" ] || [ -L "$RESTORE_TMP/data/agentmemory" ]; then
+        error "Agentmemory Vault is missing a safe state directory."
+    fi
+    if [ ! -d "$RESTORE_TMP/user/agentmemory" ] || [ -L "$RESTORE_TMP/user/agentmemory" ]; then
+        error "Agentmemory Vault is missing a safe user-settings directory."
+    fi
+    if find "$RESTORE_TMP/data/agentmemory" "$RESTORE_TMP/user/agentmemory" -type l -print -quit | grep -q .; then
+        error "Refusing to restore symlinks from agentmemory Vault."
+    fi
+
+    if [ -e "$data_dir" ]; then
+        ensure_user_owned "$data_dir"
+    else
+        mkdir -p "$data_dir"
+    fi
+    if [ -e "$user_dir" ]; then
+        ensure_user_owned "$user_dir"
+    else
+        mkdir -p "$user_dir"
+    fi
+
+    cp -a --remove-destination --no-preserve=ownership "$RESTORE_TMP/data/agentmemory"/. "$data_dir"/
+    cp -a --remove-destination --no-preserve=ownership "$RESTORE_TMP/user/agentmemory"/. "$user_dir"/
+    chmod 700 "$data_dir" "$user_dir"
+
+    finish_restore_runtime 0
+    trap - EXIT
+    echo
+    success "Agentmemory Vault restored successfully. Start agentmemory.service after verifying the state."
+}
+
 ensure_user_owned() {
     local path="$1"
 
@@ -228,6 +443,9 @@ default_vault_for_scope() {
         omniroute)
             printf '%s\n' "$REPO_ROOT/secrets.omniroute.vault"
             ;;
+        agentmemory)
+            printf '%s\n' "$REPO_ROOT/secrets.agentmemory.vault"
+            ;;
         *)
             error "Unknown vault scope: $scope"
             ;;
@@ -257,6 +475,11 @@ cmd_backup() {
 
     out_file="${out_file:-$(default_vault_for_scope "$scope")}"
 
+    if [ "$scope" = "agentmemory" ]; then
+        cmd_backup_agentmemory "$out_file"
+        return 0
+    fi
+
     local candidate_paths=()
     case "$scope" in
         all)
@@ -266,7 +489,7 @@ cmd_backup() {
             candidate_paths=(".omniroute")
             ;;
         *)
-            error "Unknown vault scope: $scope (valid: all, omniroute)"
+            error "Unknown vault scope: $scope (valid: all, omniroute, agentmemory)"
             ;;
     esac
 
@@ -389,6 +612,11 @@ cmd_restore() {
 
     if [ ! -f "$in_file" ]; then
         error "Vault file not found: $in_file"
+    fi
+
+    if [ "$scope" = "agentmemory" ]; then
+        cmd_restore_agentmemory "$in_file"
+        return 0
     fi
 
     info "Restoring Secret Vault (scope: $scope) from: $in_file..."
@@ -711,8 +939,8 @@ usage() {
     echo "Usage: $0 {backup|restore|clean|list} [args]"
     echo
     echo "Commands:"
-    echo "  backup   [--scope scope] [file]   Encrypt and bundle to local vault file (default: secrets.vault or secrets.omniroute.vault)"
-    echo "  restore  [--scope scope] [file]   Decrypt and unpack local vault file (default: secrets.vault or secrets.omniroute.vault)"
+    echo "  backup   [--scope scope] [file]   Encrypt and bundle to local vault file (default: secrets.vault, secrets.omniroute.vault, or secrets.agentmemory.vault)"
+    echo "  restore  [--scope scope] [file]   Decrypt and unpack local vault file (default: secrets.vault, secrets.omniroute.vault, or secrets.agentmemory.vault)"
     echo "  list     [file]                   List contents of encrypted vault"
     echo "  clean    [args]                   Wipe local auth sessions to test vault restore"
     echo

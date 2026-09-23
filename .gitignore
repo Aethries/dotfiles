@@ -39,3 +39,7 @@ scratch/
 .sandbox/
 result
 result-*
+
+# Agent Memory runtime database, vector index, and diagnostics
+.agent-memory/
+data/memory-store/

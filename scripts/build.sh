@@ -23,6 +23,7 @@ error() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MACHINE_CONFIG="$REPO_ROOT/.machine/configuration.nix"
+PRIMARY_USER="${SUDO_USER:-$(id -un)}"
 
 ACTION="${1:-switch}"
 shift 2>/dev/null || true # BEST_EFFORT: the first two positional parameters are consumed when no extra rebuild flags exist.
@@ -64,7 +65,11 @@ info "Building and applying NixOS configuration ($ACTION)..."
 echo "  Configuration : $MACHINE_CONFIG"
 echo "  Action        : $ACTION"
 
-sudo env "DOTFILES_MACHINE_CONFIG=$MACHINE_CONFIG" nixos-rebuild "$ACTION" \
+sudo env \
+    "DOTFILES_MACHINE_CONFIG=$MACHINE_CONFIG" \
+    "DOTFILES_REPO_ROOT=$REPO_ROOT" \
+    "DOTFILES_PRIMARY_USER=$PRIMARY_USER" \
+    nixos-rebuild "$ACTION" \
     --flake "$REPO_ROOT#check" \
     --impure \
     "$@"

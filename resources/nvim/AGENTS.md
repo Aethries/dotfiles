@@ -34,12 +34,12 @@ When encountering specialized tasks, inspect the corresponding `SKILL.md` from y
 - **Server Hardening**: `vps-hardening` (SSH, UFW, fail2ban, systemd sandboxing)
 - **Skill Authoring**: `skill-author` (Creating standardized agent skills packages)
 
-## 4. Memory protocol
-- If an Agent Memory MCP is configured, recall only project/task-relevant decisions, conventions, failures, and handoffs before editing.
-- If unavailable, use existing repo-owned memory, specs, plans, and ADRs; do not invent a memory directory without evidence.
-- Store only durable, verified facts. Never store secrets, credentials, raw source, full transcripts, speculative guesses, or noisy command output.
-- Repository behavior and explicit user requirements outrank stale memory. Mark superseded decisions instead of duplicating them.
-- Memory retrieval is context, not proof. Source inspection and verification remain mandatory.
+## 4. Mandatory Agent Memory protocol
+- For every repository task beyond a trivial explanation, use the `agent_memory` MCP before editing: call `summarize_project_context` or `project_bank_view` with a compact limit, then call targeted `recall_memory` or `semantic_search` with at most 5 results and no debug payload.
+- Before handoff, call `close_session` with a concise verified summary. Store only durable decisions, conventions, failure lessons, and handoff state; never store secrets, credentials, raw source, full transcripts, speculative guesses, or noisy command output.
+- Treat memory as context, not proof. Current source, tests, and explicit user requirements outrank stale memory; supersede old decisions instead of duplicating them.
+- If the MCP is unavailable for a repository change, stop before editing and report the blocker. Read repository-owned docs only for diagnosis; do not claim the memory protocol ran.
+- Keep recall small to protect context: project summary limit <= 6, targeted recall limit <= 5, search/RAG limit <= 6.
 
 ## 5. Efficiency and safety
 - `ponytail`: smallest working diff; reuse existing abstractions before adding code.
