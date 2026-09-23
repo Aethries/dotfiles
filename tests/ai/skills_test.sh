@@ -109,6 +109,8 @@ grep -Fq ".codegraph/" "$REPO_ROOT/resources/git/ignore" || log_fail "resources/
 
 # Assert Zsh CLI has cg function
 grep -Fq "function cg()" "$REPO_ROOT/resources/zsh/.zshrc" || log_fail "resources/zsh/.zshrc missing cg() function"
+grep -Fq "function agentmemory-vault()" "$REPO_ROOT/resources/zsh/.zshrc" || log_fail "resources/zsh/.zshrc missing agentmemory-vault() function"
+grep -Fq "alias amvault='agentmemory-vault'" "$REPO_ROOT/resources/zsh/.zshrc" || log_fail "resources/zsh/.zshrc missing amvault alias"
 
 # Assert Nix package exists
 [ -f "$REPO_ROOT/pkgs/codebase-memory-mcp.nix" ] || log_fail "Missing pkgs/codebase-memory-mcp.nix"

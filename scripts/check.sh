@@ -30,6 +30,7 @@ cmp resources/zellij/layouts/default.kdl resources/zellij/layouts/dotfiles.kdl
 
 # Run isolated unit test suites
 bash tests/vault/vault_test.sh >/dev/null
+bash tests/vault/agentmemory_wrapper_test.sh >/dev/null
 bash tests/zellij/launcher_test.sh >/dev/null
 bash tests/ai/omniroute_test.sh >/dev/null
 bash tests/ai/skills_test.sh >/dev/null

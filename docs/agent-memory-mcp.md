@@ -72,22 +72,20 @@ database and user-level agentmemory settings are kept out of Git and can be
 carried in the local encrypted Vault:
 
 ```sh
-# Stop the service first; the command refuses a live process to avoid a partial
-# SQLite/WAL or iii state snapshot.
-sudo systemctl stop agentmemory.service
-AGENTMEMORY_DATA_DIR=/var/lib/agentmemory \
-  ./scripts/vault.sh backup --scope agentmemory
+# The wrapper stops and restarts the service safely around the operation.
+agentmemory-vault backup
 
-# On a target machine, restore while the service is stopped, then start it.
-AGENTMEMORY_DATA_DIR=/var/lib/agentmemory \
-  ./scripts/vault.sh restore --scope agentmemory
-sudo systemctl start agentmemory.service
+# On a target machine, restore the encrypted state with the same command shape.
+agentmemory-vault restore
 ```
 
 The default encrypted file is `secrets.agentmemory.vault`, which is ignored by
 Git. It contains the state directory and `~/.agentmemory` settings (including a
 private `.env` when present), while runtime caches, logs, PIDs, sockets, and
 downloaded binaries are excluded. `config.env`, MCP wiring, skills, and
-reviewed Markdown remain secret-free repository files. This is a local/manual
-encrypted backup boundary, not automatic cloud or Vault-server synchronisation;
-no rclone or remote secret backend is invoked.
+reviewed Markdown remain secret-free repository files. The Zsh function
+`agentmemory-vault` delegates to `scripts/agentmemory-vault.sh`, which preserves
+the service's initial state and uses `sudo systemctl stop/start` only when the
+service was active. This is a local/manual encrypted backup boundary, not
+automatic cloud or Vault-server synchronisation; no rclone or remote secret
+backend is invoked.

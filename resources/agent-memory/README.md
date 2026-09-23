@@ -38,22 +38,20 @@ Keep mutable state and private settings outside Git, then create the encrypted
 local snapshot with:
 
 ```sh
-sudo systemctl stop agentmemory.service
-AGENTMEMORY_DATA_DIR=/var/lib/agentmemory \
-  ./scripts/vault.sh backup --scope agentmemory
+agentmemory-vault backup
 ```
 
 The matching restore command is:
 
 ```sh
-AGENTMEMORY_DATA_DIR=/var/lib/agentmemory \
-  ./scripts/vault.sh restore --scope agentmemory
-sudo systemctl start agentmemory.service
+agentmemory-vault restore
 ```
 
 The default file is `secrets.agentmemory.vault` and is ignored by Git. The
 scope encrypts the service state and `~/.agentmemory` settings, including a
 private `.env` if present, while omitting caches, logs, locks, sockets, and
 downloaded binaries. The command refuses to run while the service/process is
-active so a database snapshot is not silently inconsistent. This is a
-local/manual encrypted backup, not automatic cloud or Vault-server sync.
+downloaded binaries. The Zsh wrapper stops the service only when it was active,
+restores it after the operation, and preserves the service's original state.
+This is a local/manual encrypted backup, not automatic cloud or Vault-server
+sync.

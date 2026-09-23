@@ -237,6 +237,28 @@ function cg() {
   esac
 }
 
+# Agent Memory Vault lifecycle wrapper. It resolves the repository from the
+# current Git worktree so backup/restore can be called from any project path.
+function agentmemory-vault() {
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "agentmemory-vault: run from the dotfiles repository or set DOTFILES_REPO_ROOT" >&2
+    return 1
+  }
+  if [[ -n "${DOTFILES_REPO_ROOT:-}" ]]; then
+    repo_root="$DOTFILES_REPO_ROOT"
+  fi
+
+  local wrapper="$repo_root/scripts/agentmemory-vault.sh"
+  if [[ ! -x "$wrapper" ]]; then
+    echo "agentmemory-vault: wrapper not found or not executable: $wrapper" >&2
+    return 1
+  fi
+
+  "$wrapper" "$@"
+}
+alias amvault='agentmemory-vault'
+
 # Eza: Modern replacement for ls
 if command -v eza >/dev/null 2>&1; then
   alias ls='eza --icons=auto'
