@@ -80,7 +80,14 @@
         "chrome-extension-advanced",
         "nextjs-app-router",
         "tailwind-shadcn",
-        "tanstack-query-state"
+        "tanstack-query-state",
+        "ui-ux-pro-max",
+        "design",
+        "design-system",
+        "ui-styling",
+        "brand",
+        "banner-design",
+        "slides"
       ]
     },
     "devops": {

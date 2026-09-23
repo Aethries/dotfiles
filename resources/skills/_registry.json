@@ -2941,6 +2941,351 @@
         "license": "MIT",
         "verified_by": "Aethries/dotfiles"
       }
+    },
+    "ui-ux-pro-max": {
+      "name": "ui-ux-pro-max",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "UI/UX design intelligence for web, mobile, and desktop. This skill should be used when designing, building, reviewing, or fixing interfaces, including pages, components, design systems, accessibility, interaction, responsive layout, typography, color, charts, and stack-specific UI implementation. Searchable local data: 79 searchable styles (50 active), 192 product palettes and reasoning profiles, 74 font pairings, 119 UX guidelines, 105 icons, 17 GSAP presets, 25 chart types, and 22 stacks.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-apply",
+        "rule-categories-by-priority",
+        "running-the-search-tool",
+        "workflow",
+        "query-contract"
+      ],
+      "triggers": [
+        "ui-ux-pro-max",
+        "pro",
+        "max"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/ui-ux-pro-max",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:35Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:35Z"
+      },
+      "content_hash": "sha256:8887030e4e4f52befc3620c67e82c3823c51a771b46a11afb6965a6bfc29cd18"
+    },
+    "banner-design": {
+      "name": "banner-design",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Design banners for social media, ads, website heroes, creative assets, and print. Multiple art direction options with optional generated or supplied visuals. Actions: design, create, generate banner. Platforms: Facebook, Twitter/X, LinkedIn, YouTube, Instagram, Google Display, website hero, print. Styles: minimalist, gradient, bold typography, photo-based, illustrated, geometric, retro, glassmorphism, 3D, neon, duotone, editorial, collage.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-activate",
+        "available-resources",
+        "workflow",
+        "step-1-gather-requirements-askuserquestion-",
+        "step-2-research-art-direction"
+      ],
+      "triggers": [
+        "banner-design",
+        "banner",
+        "design"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/banner-design",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:40Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:40Z"
+      },
+      "content_hash": "sha256:089f94d0ef4c8612c61570eda10d18024799e67508e8df53f78c4aaa51438c4c"
+    },
+    "brand": {
+      "name": "brand",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Brand voice, visual identity, messaging frameworks, asset management, brand consistency. Activate for branded content, tone of voice, marketing assets, brand compliance, style guides.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "script-paths",
+        "quick-start",
+        "brand-sync-workflow",
+        "subcommands"
+      ],
+      "triggers": [
+        "brand"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/brand",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:40Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:40Z"
+      },
+      "content_hash": "sha256:560a3d27ce70ea0eb71902aa42bb5a407ddf517898d526e759140341558fbd2d"
+    },
+    "slides": {
+      "name": "slides",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "subcommands",
+        "script-paths",
+        "references-knowledge-base-",
+        "routing"
+      ],
+      "triggers": [
+        "slides"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/slides",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:41Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:41Z"
+      },
+      "content_hash": "sha256:b203ce667d649874862cdb48f4448fafa437fff227a60c493d3dcfa0d3b50cb7"
+    },
+    "ui-styling": {
+      "name": "ui-styling",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs. Use when building user interfaces, implementing design systems, creating responsive layouts, adding accessible components (dialogs, dropdowns, forms, tables), customizing themes and colors, implementing dark mode, generating visual designs and posters, or establishing consistent styling patterns across applications.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "reference",
+        "when-to-use-this-skill",
+        "core-stack",
+        "component-layer-shadcn-ui",
+        "styling-layer-tailwind-css"
+      ],
+      "triggers": [
+        "ui-styling",
+        "styling"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/ui-styling",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:42Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:42Z"
+      },
+      "content_hash": "sha256:295709d398b8f3c492625068a6bd540b4122fe034b7ee04fdf55879e57619d92"
+    },
+    "design": {
+      "name": "design",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, or MuAPI AI), corporate identity program (50 deliverables, CIP mockups), HTML presentations (Chart.js), banner design (22 styles, social/ads/web/print), icon design (15 styles, SVG, Gemini 3.1 Pro), social photos (HTML→screenshot, multi-platform). Actions: design logo, create CIP, generate mockups, build slides, design banner, generate icon, create social photos, social media images, brand identity, design system. Platforms: Facebook, Twitter, LinkedIn, YouTube, Instagram, Pinterest, TikTok, Threads, Google Ads.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "sub-skill-routing",
+        "script-paths",
+        "logo-design-built-in-",
+        "logo-generate-design-brief"
+      ],
+      "triggers": [
+        "design"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/design",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:22:10Z"
+        },
+        "semantic_review": {
+          "status": "completed",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [
+            {
+              "existing": "banner-design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "domain-driven-design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "system-design-guardrails",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            }
+          ],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:22:10Z"
+      },
+      "content_hash": "sha256:bbedfa024edfdaaa15943855098f8dd69b022fd4cebee3ae7b8d7a10c2b5b68d"
+    },
+    "design-system": {
+      "name": "design-system",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Token architecture, component specifications, and slide generation. Three-layer tokens (primitive→semantic→component), CSS variables, spacing/typography scales, component specs, strategic slide creation. Use for design tokens, systematic design, brand-compliant presentations.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "token-architecture",
+        "three-layer-structure",
+        "script-paths",
+        "quick-start"
+      ],
+      "triggers": [
+        "design-system",
+        "design",
+        "system"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/design-system",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:22:20Z"
+        },
+        "semantic_review": {
+          "status": "completed",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [
+            {
+              "existing": "banner-design",
+              "score": 0.6,
+              "classification": "review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            }
+          ],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:22:20Z"
+      },
+      "content_hash": "sha256:55ca89958995f5980fa73fa7407e9cede527c75f1bb5c989241515866ffb743e"
     }
   }
 }
