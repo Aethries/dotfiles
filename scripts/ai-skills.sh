@@ -830,7 +830,12 @@ When encountering specialized tasks, inspect the corresponding `SKILL.md` from y
 - If the MCP is unavailable for a repository change, stop before editing and report the blocker. Read repository-owned docs only for diagnosis; do not claim the memory protocol ran.
 - Keep recall small to protect context: project summary limit <= 6, targeted recall limit <= 5, search/RAG limit <= 6.
 
-## 5. Efficiency and safety
+## 5. Local JEV preflight
+- For every user prompt, run the local `jev_preflight` MCP tool before answering or taking action. The tool uses `http://localhost:20128/v1/systemone` and sends no API key.
+- Codex and Claude Code also enforce this through the repository `UserPromptSubmit` hook. If the local JEV endpoint fails, stop and report the preflight failure instead of silently continuing.
+- Antigravity must use the `jev-local` MCP server for the same preflight. Treat the typed result as advisory context; keep the normal chat model on `/v1`, preserve the original request, and continue applying all safety, approval, and repository rules.
+
+## 6. Efficiency and safety
 - `ponytail`: smallest working diff; reuse existing abstractions before adding code.
 - `rtk`: filter noisy terminal output when available.
 - `security-guardrails`: no hardcoded secrets; validate inputs and authorization boundaries.

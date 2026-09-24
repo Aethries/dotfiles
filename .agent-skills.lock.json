@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Aethries/dotfiles/main/resources/skills/_lock.schema.json",
+  "version": 2,
+  "generated_at": "2026-09-24T03:22:25Z",
+  "skills": {
+    "typesafe-ai": {
+      "version": "1.0.0",
+      "source": "external",
+      "content_hash": "sha256:d7a2e910cbd2a2ea2aedd00893c4e371720f5fd0f8234c95ffb9db6ac838baa6",
+      "target_path": ".claude/skills/typesafe-ai",
+      "targets": [
+        {
+          "path": ".agents/skills/typesafe-ai",
+          "agents": [
+            "antigravity-cli",
+            "antigravity-ide",
+            "codex-cli"
+          ]
+        },
+        {
+          "path": ".claude/skills/typesafe-ai",
+          "agents": [
+            "claude-code"
+          ]
+        }
+      ]
+    }
+  }
+}

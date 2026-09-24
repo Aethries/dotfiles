@@ -6,6 +6,14 @@
       "env": {
         "AGENTMEMORY_URL": "http://127.0.0.1:3111"
       }
+    },
+    "jev-local": {
+      "command": "bash",
+      "args": ["scripts/jev-mcp.sh"],
+      "env": {
+        "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
+        "JEV_MODEL": "oc/jev-1.13-free"
+      }
     }
   }
 }

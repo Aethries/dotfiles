@@ -249,7 +249,8 @@
         "security-guardrails",
         "architecture-guardrails",
         "project-source-quality",
-        "detect-stack"
+        "detect-stack",
+        "typesafe-ai"
       ]
     }
   }

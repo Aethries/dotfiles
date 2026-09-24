@@ -25,6 +25,14 @@
     "jira": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v2/mcp"]
+    },
+    "jev-local": {
+      "command": "/home/loc/Workspaces/dotfiles/scripts/jev-mcp.sh",
+      "args": [],
+      "env": {
+        "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
+        "JEV_MODEL": "oc/jev-1.13-free"
+      }
     }
   }
 }

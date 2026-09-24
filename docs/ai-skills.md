@@ -58,6 +58,23 @@ The adapter engine (`scripts/lib/agents.sh`) discovers and configures supported 
 
 ---
 
+## 3.1 Local JEV preflight
+
+The repository keeps the normal chat model on 9Router's OpenAI-compatible `/v1`
+endpoint and uses local TypeSafe Jev as a typed preflight layer at
+`http://localhost:20128/v1/systemone`. The request contains `state`, `model`, and
+typed `questions`; it intentionally sends no API key.
+
+- Codex: `.codex/hooks.json` runs the fail-closed `UserPromptSubmit` hook.
+- Claude Code: `.claude/settings.json` runs the same hook for submitted prompts
+  and prompt expansions.
+- Antigravity: `resources/gemini/mcp_config.json` exposes `jev-local`; the
+  managed global rules require calling `jev_preflight` before each request.
+- `.mcp.json` exposes the same stdio server for project-scoped MCP clients.
+
+Jev supplies structured judgment only. It is not a replacement for the chat
+model, repository tools, approval policy, or Agent Memory workflow.
+
 ## 4. CLI v2 Command Reference
 
 Run `ai-skills` (or `./scripts/ai-skills.sh`):
@@ -122,7 +139,7 @@ ai-skills remove junior-coding-agent
 
 ### `sync [--profile <name>] [--all-canonical]`
 Synchronizes skills across all configured global agent paths.
-By default, synchronizes the **`senior-global`** profile (16 lean senior baseline skills).
+By default, synchronizes the **`senior-global`** profile (17 lean senior baseline skills, including TypeSafe/Jev guidance).
 Use `--profile <name>` to sync a specific profile, or `--all-canonical` to sync the full registry.
 ```bash
 # Sync default senior-global profile
@@ -233,7 +250,7 @@ ai-skills remove junior-coding-agent --all-scopes
 
 ### `sync [--profile <name>] [--all-canonical]`
 Synchronizes skills across all configured global agent paths.
-By default, synchronizes the **`senior-global`** profile (16 lean senior baseline skills).
+By default, synchronizes the **`senior-global`** profile (17 lean senior baseline skills, including TypeSafe/Jev guidance).
 Use `--profile <name>` to sync a specific profile, or `--all-canonical` to sync the full registry.
 ```bash
 # Sync default senior-global profile

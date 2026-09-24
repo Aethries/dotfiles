@@ -75,6 +75,8 @@ json_files=(
     "resources/antigravity/generated/noctalia-theme.json"
     "resources/gemini/mcp_config.json"
     ".mcp.json"
+    ".codex/hooks.json"
+    ".claude/settings.json"
 )
 jsonc_files=(
     "resources/antigravity/User/settings.jsonc"

@@ -103,6 +103,24 @@ grep -Fq 'pkgs.which}/bin' "$REPO_ROOT/modules/services/agent-memory.nix" || log
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/codex/config.toml" || log_fail "Codex config missing pinned agentmemory MCP"
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "Gemini config missing pinned agentmemory MCP"
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/.mcp.json" || log_fail "Claude config missing pinned agentmemory MCP"
+grep -Fq '[mcp_servers.jev_local]' "$REPO_ROOT/resources/codex/config.toml" || log_fail "Codex config missing local JEV MCP"
+grep -Fq '"jev-local"' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "Gemini config missing local JEV MCP"
+grep -Fq '"jev-local"' "$REPO_ROOT/.mcp.json" || log_fail "Claude config missing local JEV MCP"
+[ -f "$REPO_ROOT/.codex/hooks.json" ] || log_fail "Missing Codex JEV preflight hook"
+[ -f "$REPO_ROOT/.claude/settings.json" ] || log_fail "Missing Claude Code JEV preflight hook"
+jq -e '.hooks.UserPromptSubmit[0].hooks[0].type == "command"' "$REPO_ROOT/.codex/hooks.json" >/dev/null || log_fail "Codex JEV hook schema is invalid"
+jq -e '.hooks.UserPromptSubmit[0].hooks[0].type == "command"' "$REPO_ROOT/.claude/settings.json" >/dev/null || log_fail "Claude JEV hook schema is invalid"
+grep -Fq 'jev_preflight' "$REPO_ROOT/scripts/ai-skills.sh" || log_fail "Global AI rules missing JEV preflight requirement"
+for jev_script in \
+    "$REPO_ROOT/scripts/lib/jev-client.mjs" \
+    "$REPO_ROOT/scripts/lib/jev-hook.mjs" \
+    "$REPO_ROOT/scripts/jev-preflight-hook.mjs" \
+    "$REPO_ROOT/scripts/jev-mcp.mjs"; do
+    node --check "$jev_script" || log_fail "JEV script failed syntax check: $jev_script"
+done
+if grep -Fq 'Authorization' "$REPO_ROOT/scripts/lib/jev-client.mjs"; then
+    log_fail "JEV client must not send an Authorization header"
+fi
 
 # Assert global gitignore has .codegraph/
 [ -f "$REPO_ROOT/resources/git/ignore" ] || log_fail "Missing resources/git/ignore"
@@ -253,6 +271,7 @@ SENIOR_GLOBAL_SKILLS=(
     "architecture-guardrails"
     "project-source-quality"
     "detect-stack"
+    "typesafe-ai"
 )
 jq -e '.profiles["senior-global"]' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "_profiles.json missing senior-global profile"
 for global_skill in "${SENIOR_GLOBAL_SKILLS[@]}"; do
@@ -264,7 +283,10 @@ for workflow_skill in "agent-memory-bootstrap" "repo-first-implementation"; do
     jq -e --arg s "$workflow_skill" '.profiles["senior-global"].skills | index($s)' "$REPO_ROOT/resources/skills/_profiles.json" >/dev/null || log_fail "senior-global profile missing $workflow_skill"
 done
 
-log_ok "Senior-global workflow, memory bootstrap, project-source-quality, and external detect-stack verified"
+jq -e '.skills["typesafe-ai"].source == "external" and .skills["typesafe-ai"].provenance.upstream_url == "https://github.com/typesafe-ai/skills"' "$REPO_ROOT/resources/skills/_registry.json" >/dev/null || log_fail "registry missing trusted TypeSafe/Jev provenance"
+[ -f "$REPO_ROOT/resources/skills/typesafe-ai/SKILL.md" ] || log_fail "Missing imported typesafe-ai skill"
+grep -Fq "Jev" "$REPO_ROOT/resources/skills/typesafe-ai/SKILL.md" || log_fail "typesafe-ai skill missing Jev guidance"
+log_ok "Senior-global workflow, memory bootstrap, project-source-quality, TypeSafe/Jev, and external detect-stack verified"
 
 # ------------------------------------------------------------------------------
 # 1.2 Validate Layer 1 Senior Leadership Skills

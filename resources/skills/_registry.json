@@ -3458,6 +3458,51 @@
         "license": "MIT",
         "verified_by": "Aethries/dotfiles"
       }
+    },
+    "typesafe-ai": {
+      "name": "typesafe-ai",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "ai-engineering",
+      "description": "Design TypeSafe System One workflows with Jev typed judgments and probabilities; read current docs and cookbooks, then compose and verify AI-backed decisions.",
+      "tags": [
+        "imported",
+        "typesafe",
+        "jev",
+        "system-one"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "read-the-live-docs",
+        "find-the-useful-shape",
+        "design-the-judgments",
+        "compose-and-verify"
+      ],
+      "triggers": [
+        "typesafe-ai",
+        "typesafe"
+      ],
+      "provenance": {
+        "upstream_url": "https://github.com/typesafe-ai/skills",
+        "upstream_path": "skills/typesafe-ai",
+        "commit": "65a39f393687675ce170e6094757de20370365b9",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-24T03:20:59Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-24T03:20:59Z"
+      },
+      "content_hash": "sha256:d7a2e910cbd2a2ea2aedd00893c4e371720f5fd0f8234c95ffb9db6ac838baa6"
     }
   }
 }

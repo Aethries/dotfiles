@@ -50,6 +50,8 @@ jq empty \
     resources/antigravity/extensions.lock.json \
     resources/gemini/mcp_config.json \
     .mcp.json \
+    .codex/hooks.json \
+    .claude/settings.json \
     resources/static/default.code-profile
 jq -e '
     .extensions
