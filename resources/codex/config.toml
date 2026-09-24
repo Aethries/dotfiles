@@ -50,23 +50,24 @@ gpt-6-astra = 2
 url = "https://developers.openai.com/mcp"
 
 [mcp_servers.node_repl]
+args = []
 command = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node_repl"
-startup_timeout_sec = 120.0
+startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
-BROWSER_USE_TINYSKY_ENABLED = "1"
-CODEX_CLI_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/codex"
-CODEX_HOME = "/home/loc/.codex"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
 NODE_REPL_NODE_MODULE_DIRS = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
 NODE_REPL_NODE_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex:/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/cua_node/lib/node_modules"
+CODEX_HOME = "/home/loc/.codex"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
 NODE_REPL_TRUSTED_SERVICES = '{"browser":"/home/loc/.codex/plugins/cache/openai-bundled/browser/26.901.31953/scripts/browser-service.mjs"}'
+CODEX_CLI_PATH = "/nix/store/29dpazqbn54dfgz18mbq7kr50nqqshl3-chatgpt-unwrapped-26.901.31953/lib/chatgpt/resources/codex"
 
 [mcp_servers.codebase_memory]
 command = "codebase-memory-mcp"
@@ -185,3 +186,26 @@ trusted_hash = "sha256:317a07045dfc95aef2e80c55428a2f817e2768be867e3b1ef29a73da8
 
 [hooks.state."chrome@openai-bundled:plugin.json#hooks[0]:stop:0:0"]
 trusted_hash = "sha256:317a07045dfc95aef2e80c55428a2f817e2768be867e3b1ef29a73da8636ae7f"
+
+[hooks.state."/home/loc/.codex/hooks.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:8ae1a100380833c21f4b9c1442b3923c1ed392864caabd69b509a630e48bd429"
+
+[hooks.state."/home/loc/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:2e01f988c74f873884e082fba6513a0cb342c1d5972f77bbbad7495057c34a6b"
+
+[hooks.state."/home/loc/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:9dc13001f11c98499c607d2f0761d553d30b577a736e219143cd9a4b2cfe9b32"
+
+[hooks.state."/home/loc/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:765b6b2861d6eb81d162ac68ebbc5708eb760b6eda06ec725331504111c89557"
+
+[hooks.state."/home/loc/.codex/hooks.json:permission_request:0:0"]
+trusted_hash = "sha256:8c83f36ceb755305dc20fceeca2026be99e1b341f3d1e2b896ae26b1cf15432a"
+# 9Remote MCP (9remote)
+[mcp_servers."9remote"]
+url = "http://127.0.0.1:2208/mcp"
+[mcp_servers."9remote".http_headers]
+Authorization = "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c2b039584"
+[mcp_servers."9remote".env_http_headers]
+"x-9remote-session" = "NINE_REMOTE_SESSION_ID"
+# /9Remote MCP
