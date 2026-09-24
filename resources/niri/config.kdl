@@ -551,6 +551,9 @@ binds {
     Super+Escape allow-inhibiting=false hotkey-overlay-title="Lock the Screen: Noctalia" {
         spawn-sh "noctalia msg session lock"
     }
+    Super+BackSpace allow-inhibiting=false allow-when-locked=true hotkey-overlay-title="Suspend System" {
+        spawn-sh "systemctl suspend"
+    }
     // Warpd: Modal Keyboard-Driven Pointer & Mouse Emulation (Issue #28)
     Mod+Alt+P allow-inhibiting=false hotkey-overlay-title="Mouse: Warpd Hint Mode" {
         spawn-sh "fcitx5-remote -c 2>/dev/null; pkill -x warpd 2>/dev/null; warpd --hint"
