@@ -55,6 +55,7 @@ fi
 OMNIROUTE_PORT="${OMNIROUTE_PORT:-20129}"
 OMNIROUTE_HOST="${OMNIROUTE_HOST:-127.0.0.1}"
 ROUTER_9_PORT="${ROUTER_9_PORT:-20128}"
+AI_GATEWAY_STARTUP_TIMEOUT="${AI_GATEWAY_STARTUP_TIMEOUT:-60}"
 OMNIROUTE_PINNED_VERSION="${OMNIROUTE_PINNED_VERSION:-3.8.50}"
 
 FORCE=false
@@ -198,14 +199,22 @@ if command -v systemctl >/dev/null 2>&1; then
     success "OmniRoute systemd user service is active."
 fi
 
-# Verify port listeners with retry timeout (9router Next.js startup takes a few seconds to bind socket)
-if ! wait_for_port "$ROUTER_9_PORT" 20; then
-    error "9Router is not listening on expected port $ROUTER_9_PORT."
+# Verify port listeners with a readiness timeout (9Router's Next.js startup can
+# take longer than systemd's Type=simple activation boundary).
+if ! wait_for_port "$ROUTER_9_PORT" "$AI_GATEWAY_STARTUP_TIMEOUT"; then
+    error "9Router is not listening on expected port $ROUTER_9_PORT after ${AI_GATEWAY_STARTUP_TIMEOUT}s. Check: journalctl --user -u 9router -n 20"
 fi
 success "9Router is listening on port $ROUTER_9_PORT."
 
-if ! wait_for_port "$OMNIROUTE_PORT" 20; then
-    error "OmniRoute is not listening on expected port $OMNIROUTE_PORT."
+if ! is_port_loopback_only "$ROUTER_9_PORT"; then
+    ROUTER_9_LISTENERS="$(get_port_listeners "$ROUTER_9_PORT" | tr '\n' ' ')"
+    error "CRITICAL SECURITY RISK: 9Router has non-loopback listener(s): $ROUTER_9_LISTENERS! It MUST bind to loopback 127.0.0.1 only."
+fi
+ROUTER_9_LISTENERS="$(get_port_listeners "$ROUTER_9_PORT" | tr '\n' ' ')"
+success "9Router loopback-only binding verified ($ROUTER_9_LISTENERS)."
+
+if ! wait_for_port "$OMNIROUTE_PORT" "$AI_GATEWAY_STARTUP_TIMEOUT"; then
+    error "OmniRoute is not listening on expected port $OMNIROUTE_PORT after ${AI_GATEWAY_STARTUP_TIMEOUT}s. Check: journalctl --user -u omniroute -n 20"
 fi
 
 # Verify strict loopback-only isolation for OmniRoute (every listener must be loopback)

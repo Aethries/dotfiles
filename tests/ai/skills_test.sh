@@ -99,6 +99,7 @@ grep -Fq '[mcp_servers.agentmemory]' "$REPO_ROOT/resources/codex/config.toml" ||
 [ -f "$REPO_ROOT/resources/agent-memory/start.sh" ] || log_fail "Missing agentmemory service launcher"
 grep -Fq 'iii-engine.nix' "$REPO_ROOT/modules/packages.nix" || log_fail "modules/packages.nix missing iii-engine"
 grep -Fq 'systemd.services.agentmemory' "$REPO_ROOT/modules/services/agent-memory.nix" || log_fail "Missing agentmemory system service"
+grep -Fq 'pkgs.which}/bin' "$REPO_ROOT/modules/services/agent-memory.nix" || log_fail "agentmemory service PATH missing which dependency"
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/codex/config.toml" || log_fail "Codex config missing pinned agentmemory MCP"
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/resources/gemini/mcp_config.json" || log_fail "Gemini config missing pinned agentmemory MCP"
 grep -Fq '@agentmemory/mcp@0.9.29' "$REPO_ROOT/.mcp.json" || log_fail "Claude config missing pinned agentmemory MCP"
@@ -1235,6 +1236,44 @@ cp "$REPO_ROOT/resources/skills/_registry.json" "$GATE_REG_DIR/_registry.json"
 
 NEST_CAND_PATH="$REPO_ROOT/tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices"
 
+# The candidate currently overlaps multiple canonical skills. Import approval
+# requires one completed semantic review per selected overlap target.
+OVERLAP_TARGETS_JSON="$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && detect_metadata_overlap '$NEST_CAND_PATH' '$GATE_REG_DIR/_registry.json'")"
+echo "$OVERLAP_TARGETS_JSON" | jq -e 'length > 1 and any(.[]; .existing == "nestjs")' >/dev/null \
+    || log_fail "Expected the semantic fixture to overlap multiple canonical skills: $OVERLAP_TARGETS_JSON"
+
+build_multi_review_json() {
+    local primary_existing="$1"
+    local primary_decision="$2"
+    local primary_action="$3"
+    local primary_reason="$4"
+    local secondary_decision="$5"
+    local secondary_action="$6"
+    local secondary_reason="$7"
+
+    jq -c \
+        --arg candidate "nestjs-database-transaction-best-practices" \
+        --arg primary_existing "$primary_existing" \
+        --arg primary_decision "$primary_decision" \
+        --arg primary_action "$primary_action" \
+        --arg primary_reason "$primary_reason" \
+        --arg secondary_decision "$secondary_decision" \
+        --arg secondary_action "$secondary_action" \
+        --arg secondary_reason "$secondary_reason" \
+        'map(
+            .existing as $existing
+            | {
+                review_type: "semantic",
+                status: "completed",
+                candidate: $candidate,
+                existing: $existing,
+                decision: (if $existing == $primary_existing then $primary_decision else $secondary_decision end),
+                recommended_action: (if $existing == $primary_existing then $primary_action else $secondary_action end),
+                reason: (if $existing == $primary_existing then $primary_reason else $secondary_reason end)
+            }
+        )' <<<"$OVERLAP_TARGETS_JSON"
+}
+
 # Preview on overlapping candidate succeeds and marks Semantic Review: REQUIRED
 OVERLAP_PREVIEW=$(HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_CAND_PATH" --preview 2>&1)
 CLEAN_OVERLAP=$(echo "$OVERLAP_PREVIEW" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
@@ -1245,17 +1284,15 @@ if HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SK
     log_fail "ai-skills import --approve succeeded on overlapping candidate without semantic review"
 fi
 
-# Approve on overlapping candidate WITH completed semantic review succeeds
-MOCK_SEM_JSON='{
-  "review_type": "semantic",
-  "status": "completed",
-  "candidate": "nestjs-database-transaction-best-practices",
-  "existing": "nestjs",
-  "decision": "PARTIAL_OVERLAP",
-  "recommended_action": "COMPANION",
-  "reason": "Specialized companion for transaction boundaries",
-  "evidence": ["Both touch NestJS transactions"]
-}'
+# Approve on overlapping candidate WITH completed reviews for every target succeeds
+MOCK_SEM_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "PARTIAL_OVERLAP" \
+    "COMPANION" \
+    "Specialized companion for transaction boundaries" \
+    "PARTIAL_OVERLAP" \
+    "COMPANION" \
+    "Specialized companion for the overlapping database workflow")"
 APPROVE_SEM_OUT=$(SEMANTIC_REVIEW_JSON="$MOCK_SEM_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$GATE_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_CAND_PATH" --approve 2>&1)
 echo "$APPROVE_SEM_OUT" | grep -Fq "Successfully imported skill" || log_fail "Approve with valid semantic review failed: $APPROVE_SEM_OUT"
 
@@ -1372,11 +1409,19 @@ TEST_F_JSON='{
   "recommended_action": "REUSE",
   "reason": "Conflicting ownership and workflow rules"
 }'
+TEST_F_MULTI_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "CONFLICT" \
+    "REUSE" \
+    "Conflicting ownership and workflow rules" \
+    "KEEP_BOTH" \
+    "CREATE" \
+    "Distinct companion workflow")"
 TEST_F_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_F_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_F_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test F: validate_semantic_review rejected valid CONFLICT payload"
 
 # F1: Preview succeeds (exit 0), shows conflict reason, prints NO approve command, does not mutate
-TEST_F_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_F_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
+TEST_F_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_F_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
 F_PREV_STATUS=$?
 [ $F_PREV_STATUS -eq 0 ] || log_fail "Test F: preview failed with exit code $F_PREV_STATUS: $TEST_F_PREVIEW"
 echo "$TEST_F_PREVIEW" | grep -Fq "Conflicting ownership and workflow rules" || log_fail "Test F: preview did not show conflict reason"
@@ -1386,7 +1431,7 @@ echo "$TEST_F_PREVIEW" | grep -Fq "To import into canonical library, execute:" &
 jq -e '.skills["nestjs-database-transaction-best-practices"]' "$T30_REG_DIR/_registry.json" >/dev/null 2>&1 && log_fail "Test F: preview mutated registry"
 
 # F2: Approve fails (exit 1) and does not mutate
-if TEST_F_OUT=$(SEMANTIC_REVIEW_JSON="$TEST_F_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1); then
+if TEST_F_OUT=$(SEMANTIC_REVIEW_JSON="$TEST_F_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1); then
     log_fail "Test F: import --approve succeeded despite CONFLICT decision"
 fi
 echo "$TEST_F_OUT" | grep -Fq "semantic review found a conflict" || log_fail "Test F: missing conflict explanation in error output: $TEST_F_OUT"
@@ -1402,11 +1447,19 @@ TEST_G_JSON='{
   "recommended_action": "REPLACE",
   "reason": "Candidate fully replaces the existing scope"
 }'
+TEST_G_MULTI_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "SUPERSEDES" \
+    "REPLACE" \
+    "Candidate fully replaces the existing scope" \
+    "KEEP_BOTH" \
+    "CREATE" \
+    "Distinct companion workflow")"
 TEST_G_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_G_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_G_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test G: validate_semantic_review rejected valid SUPERSEDES payload"
 
 # G1: Preview indicates SUPERSEDES and REPLACE with target name indicating replacement
-TEST_G_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
+TEST_G_PREVIEW=$(SEMANTIC_REVIEW_JSON="$TEST_G_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --preview 2>&1)
 CLEAN_G_PREVIEW=$(echo "$TEST_G_PREVIEW" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
 echo "$CLEAN_G_PREVIEW" | grep -Fq "decision: SUPERSEDES" || log_fail "Test G: preview missing decision: SUPERSEDES: $TEST_G_PREVIEW"
 echo "$CLEAN_G_PREVIEW" | grep -Fq "action: REPLACE" || log_fail "Test G: preview missing action: REPLACE: $TEST_G_PREVIEW"
@@ -1418,13 +1471,13 @@ mkdir -p "$T30_REG_DIR/nestjs"
 echo "ORIGINAL_NESTJS_CONTENT" > "$T30_REG_DIR/nestjs/ORIGINAL_MARKER"
 
 # Without --replace flag, approve must fail
-if SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve >/dev/null 2>&1; then
+if SEMANTIC_REVIEW_JSON="$TEST_G_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve >/dev/null 2>&1; then
     log_fail "Test G: import --approve succeeded for SUPERSEDES without --replace flag"
 fi
 [ -f "$T30_REG_DIR/nestjs/ORIGINAL_MARKER" ] || log_fail "Test G: original marker deleted despite failed approve"
 
 # With --approve --replace, replacement must succeed
-TEST_G_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_G_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace 2>&1)
+TEST_G_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_G_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace 2>&1)
 echo "$TEST_G_APPROVE" | grep -Fq "Successfully imported skill 'nestjs'" || log_fail "Test G: approve --replace failed: $TEST_G_APPROVE"
 
 # Verify filesystem result:
@@ -1445,15 +1498,15 @@ jq -e '.skills["nestjs"].provenance.semantic_review.recommended_action == "REPLA
 jq -e '.skills["nestjs-database-transaction-best-practices"]' "$T30_REG_DIR/_registry.json" >/dev/null 2>&1 && log_fail "Test G: duplicate candidate entry in registry"
 
 # G3: SUPERSEDES + EXTEND blocks automatic import
-TEST_G_EXTEND_JSON='{
-  "review_type": "semantic",
-  "status": "completed",
-  "existing": "nestjs",
-  "decision": "SUPERSEDES",
-  "recommended_action": "EXTEND",
-  "reason": "Candidate extends existing scope"
-}'
-if SEMANTIC_REVIEW_JSON="$TEST_G_EXTEND_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace >/dev/null 2>&1; then
+TEST_G_EXTEND_MULTI_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "SUPERSEDES" \
+    "EXTEND" \
+    "Candidate extends existing scope" \
+    "KEEP_BOTH" \
+    "CREATE" \
+    "Distinct companion workflow")"
+if SEMANTIC_REVIEW_JSON="$TEST_G_EXTEND_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve --replace >/dev/null 2>&1; then
     log_fail "Test G: import --approve succeeded for EXTEND action"
 fi
 
@@ -1471,9 +1524,17 @@ TEST_H_JSON='{
   "recommended_action": "CREATE",
   "reason": "Different workflow and scope"
 }'
+TEST_H_MULTI_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "KEEP_BOTH" \
+    "CREATE" \
+    "Different workflow and scope" \
+    "KEEP_BOTH" \
+    "CREATE" \
+    "Distinct companion workflow")"
 TEST_H_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_H_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_H_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test H: validate_semantic_review rejected valid KEEP_BOTH payload"
-TEST_H_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_H_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1)
+TEST_H_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_H_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1)
 echo "$TEST_H_APPROVE" | grep -Fq "Successfully imported skill" || log_fail "Test H: approve failed for KEEP_BOTH: $TEST_H_APPROVE"
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.decision == "KEEP_BOTH"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test H: registry missing decision=KEEP_BOTH"
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.recommended_action == "CREATE"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test H: registry missing recommended_action=CREATE"
@@ -1490,9 +1551,17 @@ TEST_I_JSON='{
   "recommended_action": "COMPANION",
   "reason": "Specialized companion workflow"
 }'
+TEST_I_MULTI_JSON="$(build_multi_review_json \
+    "nestjs" \
+    "PARTIAL_OVERLAP" \
+    "COMPANION" \
+    "Specialized companion workflow" \
+    "PARTIAL_OVERLAP" \
+    "COMPANION" \
+    "Distinct companion workflow")"
 TEST_I_VAL=$(bash -c "source '$REPO_ROOT/scripts/lib/curate.sh' && validate_semantic_review '$TEST_I_JSON' 'nestjs-database-transaction-best-practices' 'nestjs'")
 echo "$TEST_I_VAL" | jq -e '.valid == true' >/dev/null || log_fail "Test I: validate_semantic_review rejected valid PARTIAL_OVERLAP payload"
-TEST_I_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_I_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1)
+TEST_I_APPROVE=$(SEMANTIC_REVIEW_JSON="$TEST_I_MULTI_JSON" HOME="$MOCK_HOME" REPO_ROOT="$SANDBOX_DIR" SKILLS_SRC="$T30_REG_DIR" "$AI_SKILLS_BIN" import "$NEST_FIXTURE_PATH" --approve 2>&1)
 echo "$TEST_I_APPROVE" | grep -Fq "Successfully imported skill" || log_fail "Test I: approve failed for PARTIAL_OVERLAP: $TEST_I_APPROVE"
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.decision == "PARTIAL_OVERLAP"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test I: registry missing decision=PARTIAL_OVERLAP"
 jq -e '.skills["nestjs-database-transaction-best-practices"].provenance.semantic_review.recommended_action == "COMPANION"' "$T30_REG_DIR/_registry.json" >/dev/null || log_fail "Test I: registry missing recommended_action=COMPANION"

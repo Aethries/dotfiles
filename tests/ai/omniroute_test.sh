@@ -252,6 +252,8 @@ log_ok "omniroute.service is synchronized with gateway.env constants and include
 
 ROUTER_SERVICE="$REPO_ROOT/resources/systemd/user/9router.service"
 [ -f "$ROUTER_SERVICE" ] || log_fail "9Router service template missing at $ROUTER_SERVICE"
+grep -q -- "--port $ROUTER_9_PORT" "$ROUTER_SERVICE" || log_fail "9Router service is not pinned to port $ROUTER_9_PORT"
+grep -q -- "--host 127.0.0.1" "$ROUTER_SERVICE" || log_fail "9Router service is not pinned to loopback host 127.0.0.1"
 if grep -riE '(rootCA|mitm|generate-ca)' "$OMNI_SERVICE"; then
     log_fail "OmniRoute service unexpectedly contains MITM Root CA configuration!"
 fi
@@ -604,6 +606,28 @@ MOCK_LOG_FILE="$MOCK_LOG" \
 [ "$(cat "$MOCK_STATE/unit_omniroute.service")" = "active" ] || log_fail "Reconciliation did not start omniroute.service!"
 [ "$(cat "$MOCK_STATE/unit_9router.service")" = "active" ] || log_fail "Reconciliation did not start 9router.service!"
 log_ok "Reconciliation converged stopped services into active state."
+
+# Test M.1: Public 9Router bindings must be rejected by reconciliation
+PUBLIC_SS_BIN="$SANDBOX_DIR/public-ss-bin"
+mkdir -p "$PUBLIC_SS_BIN"
+cat << 'EOS' > "$PUBLIC_SS_BIN/ss"
+#!/usr/bin/env bash
+if [[ "$*" == *":20128"* ]]; then
+    echo "LISTEN 0 512 0.0.0.0:20128 0.0.0.0:*"
+else
+    echo "LISTEN 0 512 127.0.0.1:20129 0.0.0.0:*"
+fi
+EOS
+chmod +x "$PUBLIC_SS_BIN/ss"
+
+if HOME="$RECON_HOME" \
+   PATH="$PUBLIC_SS_BIN:$MOCK_BIN:$ORIGINAL_PATH" \
+   MOCK_STATE_DIR="$MOCK_STATE" \
+   MOCK_LOG_FILE="$MOCK_LOG" \
+   "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" >/dev/null 2>&1; then
+    log_fail "Reconciler accepted a public 9Router listener!"
+fi
+log_ok "Reconciliation rejects non-loopback 9Router bindings."
 
 # Test L: Missing OmniRoute binary triggers init-omniroute
 rm -f "$RECON_HOME/.local/bin/omniroute"

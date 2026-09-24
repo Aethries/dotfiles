@@ -29,7 +29,8 @@ in
         StateDirectoryMode = "0700";
         Environment = [
           "HOME=${agentMemoryHome}"
-          "PATH=${pkgs.nodejs_22}/bin:${iiiEngine}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin"
+          # The upstream CLI uses the external `which` command to discover iii.
+          "PATH=${pkgs.nodejs_22}/bin:${iiiEngine}/bin:${pkgs.which}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin"
         ];
         Restart = "on-failure";
         RestartSec = "5s";

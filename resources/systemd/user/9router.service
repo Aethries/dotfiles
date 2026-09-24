@@ -15,7 +15,8 @@ Environment="NODE_PATH=%h/.local/lib/node_modules"
 ExecStartPre=/bin/sh -c 'test -x "${HOME}/.local/bin/9router" || (echo "9router binary not found at ~/.local/bin/9router. Run init-9router first." >&2; exit 1)'
 # --tray requires a running compositor/display. Omit it here; the tray icon
 # can be launched separately once the desktop session is fully up.
-ExecStart=%h/.local/bin/9router --skip-update
+# 9Router is a local gateway; keep both its port and bind address explicit.
+ExecStart=%h/.local/bin/9router --skip-update --port 20128 --host 127.0.0.1
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

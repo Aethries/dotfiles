@@ -87,14 +87,18 @@ Every candidate evaluated from external sources (`official-vendor`, `anthropic-s
 ```bash
 # 1. Preview mode evaluates heuristic overlap without modifying registry or disk
 ai-skills import tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices --preview
-# Output: Flags DUPLICATE against 'nestjs', indicates Semantic Review: REQUIRED
+# Output: Flags semantic review as REQUIRED for every overlapping canonical skill
 
 # 2. Approve mode enforces the semantic review gate
 ai-skills import tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices --approve
 # Output: Aborts with exit code 1:
 # "Import cannot be approved. Semantic review is required because this candidate overlaps existing skills."
 
-# 3. Supplying completed semantic review permits approval
-SEMANTIC_REVIEW_JSON='{"review_type":"semantic","status":"completed","candidate":"nestjs-database-transaction-best-practices","existing":"nestjs","decision":"DUPLICATE","recommended_action":"REUSE","reason":"Duplicates canonical nestjs","evidence":["both cover DI and transactions"]}' \
+# 3. Supplying completed semantic reviews for every overlap target permits approval
+SEMANTIC_REVIEW_JSON='[
+  {"review_type":"semantic","status":"completed","candidate":"nestjs-database-transaction-best-practices","existing":"nestjs","decision":"DUPLICATE","recommended_action":"REUSE","reason":"Duplicates canonical nestjs"},
+  {"review_type":"semantic","status":"completed","candidate":"nestjs-database-transaction-best-practices","existing":"nestjs-cqrs-microservices","decision":"KEEP_BOTH","recommended_action":"CREATE","reason":"Distinct companion workflow"},
+  {"review_type":"semantic","status":"completed","candidate":"nestjs-database-transaction-best-practices","existing":"database-query-optimizer","decision":"KEEP_BOTH","recommended_action":"CREATE","reason":"Distinct companion workflow"}
+]' \
 ai-skills import tests/ai/fixtures/semantic/nestjs-database-transaction-best-practices --approve --replace
 ```
