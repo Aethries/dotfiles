@@ -50,6 +50,20 @@ reconcile_gateways() {
     fi
 }
 
+sync_ag_kit() {
+    info "Synchronizing Antigravity Kit (.agents)..."
+    local init_script="${DOTFILES_INIT_AG_KIT_SCRIPT:-$REPO_ROOT/scripts/init-ag-kit.sh}"
+    if [ -f "$init_script" ]; then
+        if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+            sudo -u "$SUDO_USER" -H "$init_script" \
+                || warn "Antigravity Kit synchronization failed or was skipped."
+        else
+            "$init_script" \
+                || warn "Antigravity Kit synchronization failed or was skipped."
+        fi
+    fi
+}
+
 report_completion() {
     echo
     echo "============================================================"
@@ -87,6 +101,7 @@ main() {
     rebuild_system
     sync_editor_configs
     reconcile_gateways
+    sync_ag_kit
     report_completion
 }
 

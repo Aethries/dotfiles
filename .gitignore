@@ -43,3 +43,9 @@ result-*
 # Agent Memory runtime database, vector index, and diagnostics
 .agent-memory/
 data/memory-store/
+
+# Antigravity Kit backups and conflict reports
+.agents/.ag-kit/backups/
+.agents/.ag-kit/conflicts/
+.agents/.ag-kit/reports/
+.ag-kit-backups/

@@ -80,6 +80,11 @@ if [ "$ACTION" = "switch" ] || [ "$ACTION" = "test" ]; then
 
     info "Reconciling AI Gateways (9Router & OmniRoute)..."
     "$REPO_ROOT/scripts/reconcile-ai-gateways.sh" || error "AI Gateways reconciliation failed."
+
+    if [ -x "$REPO_ROOT/scripts/init-ag-kit.sh" ]; then
+        info "Synchronizing Antigravity Kit (.agents)..."
+        "$REPO_ROOT/scripts/init-ag-kit.sh" || warn "Antigravity Kit sync failed or was skipped."
+    fi
 fi
 
 trap - ERR
