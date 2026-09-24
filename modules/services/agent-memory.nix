@@ -32,8 +32,9 @@ in
           # The upstream CLI uses the external `which` command to discover iii.
           "PATH=${pkgs.nodejs_22}/bin:${iiiEngine}/bin:${pkgs.which}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin"
         ];
-        Restart = "on-failure";
+        Restart = "always";
         RestartSec = "5s";
+        TimeoutStopSec = "10s";
         NoNewPrivileges = true;
         PrivateTmp = true;
         UMask = "0077";

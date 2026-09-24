@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "44aa3033c7209426a4393c1d5c98e70fe1534044",
-    "indexed_at": "2026-09-24T05:46:21Z",
+    "commit": "40cd64cf0661c8237f2be8bbe69f55538edbad9c",
+    "indexed_at": "2026-09-24T05:57:21Z",
     "project": "home-loc-Workspaces-dotfiles",
     "nodes": 10583,
-    "edges": 16593,
+    "edges": 16592,
     "original_size": 36241408,
-    "compressed_size": 4532329,
+    "compressed_size": 4526199,
     "compression_level": 3
 }
