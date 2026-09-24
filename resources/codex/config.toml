@@ -39,6 +39,9 @@ trust_level = "trusted"
 [projects."/home/loc/Workspaces/onecli"]
 trust_level = "trusted"
 
+[projects."/home/loc/Workspaces"]
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.6-sol" = 1
 gpt-6-astra = 2
