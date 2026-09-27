@@ -151,28 +151,6 @@ function 1111() {
 }
 
 # ------------------------------------------------------------------------------
-# Dotfiles & Secrets Management
-# ------------------------------------------------------------------------------
-if [[ -z "${DOTFILES_DIR:-}" ]]; then
-	if [[ -L "${ZDOTDIR:-$HOME}/.zshrc" ]]; then
-		DOTFILES_DIR="$(cd "$(dirname "$(readlink -f "${ZDOTDIR:-$HOME}/.zshrc")")/../.." && pwd)"
-	elif [[ -d "$HOME/Workspaces/dotfiles" ]]; then
-		DOTFILES_DIR="$HOME/Workspaces/dotfiles"
-	elif [[ -d "$HOME/dotfiles" ]]; then
-		DOTFILES_DIR="$HOME/dotfiles"
-	else
-		DOTFILES_DIR="$HOME/.config/dotfiles"
-	fi
-fi
-export DOTFILES_DIR
-
-alias dots="cd \"$DOTFILES_DIR\""
-alias vault-save="\"$DOTFILES_DIR/scripts/vault.sh\" backup"
-alias vault-load="\"$DOTFILES_DIR/scripts/vault.sh\" restore"
-alias secrets-enc="\"$DOTFILES_DIR/scripts/secrets.sh\" encrypt"
-alias secrets-dec="\"$DOTFILES_DIR/scripts/secrets.sh\" decrypt"
-
-# ------------------------------------------------------------------------------
 # Integrations (Yazi, FZF, NVM)
 # ------------------------------------------------------------------------------
 # Yazi (cwd integration)
