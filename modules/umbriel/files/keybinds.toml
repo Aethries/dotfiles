@@ -11,7 +11,7 @@
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
 
 # System & Session
-"Mod+BackSpace" = "spawn:systemctl suspend"
+"Mod+BackSpace" = "spawn:noctalia msg session lock"
 "Mod+Shift+R" = "config-reload"
 
 # Workspace Navigation

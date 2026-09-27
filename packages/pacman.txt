@@ -58,6 +58,7 @@ gnome-keyring
 libsecret
 seahorse
 wl-clipboard
+xwayland-satellite
 pipewire
 pipewire-audio
 pipewire-pulse
