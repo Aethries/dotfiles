@@ -53,7 +53,7 @@ install_yay() {
 }
 
 install_yay
-"$SCRIPTS/packages.sh"
+bash "$SCRIPTS/packages.sh"
 
 # Install Node / NVM / npm
 log "Configuring Node.js"
@@ -80,9 +80,9 @@ fi
 success "Zsh configured"
 
 # Modules setup
-"$DOTFILES/modules/shell/setup.sh"
-"$DOTFILES/modules/umbriel/setup.sh"
-"$DOTFILES/modules/greeter/setup.sh"
+bash "$DOTFILES/modules/shell/setup.sh"
+bash "$DOTFILES/modules/umbriel/setup.sh"
+bash "$DOTFILES/modules/greeter/setup.sh"
 
 # Done
 success "Dotfiles setup completed"
