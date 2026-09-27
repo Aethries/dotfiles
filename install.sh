@@ -68,6 +68,7 @@ success "Zsh configured"
 
 # Modules setup
 bash "$DOTFILES/modules/fonts/setup.sh"
+bash "$DOTFILES/modules/fcitx5/setup.sh"
 bash "$DOTFILES/modules/shell/setup.sh"
 bash "$DOTFILES/modules/kitty/setup.sh"
 bash "$DOTFILES/modules/node/setup.sh"

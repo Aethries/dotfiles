@@ -6,7 +6,7 @@ files = [
 ]
 
 [general]
-autostart = ["noctalia"]
+autostart = ["noctalia", "fcitx5 -d"]
 mod_key = "super"
 xwayland = true
 show_cheatsheet = false

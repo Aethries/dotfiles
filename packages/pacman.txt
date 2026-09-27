@@ -62,3 +62,8 @@ pipewire-audio
 pipewire-pulse
 wireplumber
 networkmanager
+fcitx5
+fcitx5-bamboo
+fcitx5-gtk
+fcitx5-qt
+fcitx5-configtool
