@@ -31,13 +31,25 @@ get_sessions() {
 RAW_SESSIONS="$(get_sessions 2>/dev/null || true)"
 mapfile -t SESSIONS < <(echo "$RAW_SESSIONS" | grep -v '^[[:space:]]*$' || true)
 
+launch_zellij() {
+	set +e
+	zellij "$@"
+	local rc=$?
+	if [[ $rc -ne 0 ]]; then
+		echo "" >&2
+		echo "Zellij exited with code $rc. Falling back to plain zsh..." >&2
+		exec zsh
+	fi
+	exit 0
+}
+
 # If fzf is missing, fallback to attach latest or prompt for deliberate name
 if ! command -v fzf >/dev/null 2>&1; then
 	if [[ ${#SESSIONS[@]} -gt 0 ]]; then
-		exec zellij attach "${SESSIONS[0]}"
+		launch_zellij attach "${SESSIONS[0]}"
 	fi
 	read -r -p "No Zellij sessions. Enter session name [main]: " name
-	exec zellij --session "${name:-main}"
+	launch_zellij --session "${name:-main}"
 fi
 
 HEADER="[Enter] Attach session | [Ctrl+N] New session | [Ctrl+Z] Plain shell | [Esc] Exit"
@@ -78,26 +90,26 @@ case "$key" in
 			read -r -p "Enter name for new session: " new_name
 		fi
 		if [[ -n "$new_name" ]]; then
-			exec zellij --session "$new_name"
+			launch_zellij --session "$new_name"
 		fi
 		exit 0
 		;;
 	*)
 		if [[ -n "$selection" ]]; then
-			exec zellij attach "$selection"
+			launch_zellij attach "$selection"
 		elif [[ -n "$query" ]]; then
 			# Check if query matches an existing session
 			for s in "${SESSIONS[@]}"; do
 				if [[ "$s" == "$query" ]]; then
-					exec zellij attach "$s"
+					launch_zellij attach "$s"
 				fi
 			done
-			exec zellij --session "$query"
+			launch_zellij --session "$query"
 		else
 			# No selection & no query:
 			if [[ ${#SESSIONS[@]} -eq 0 ]]; then
 				read -r -p "No Zellij sessions. Enter session name [main]: " name
-				exec zellij --session "${name:-main}"
+				launch_zellij --session "${name:-main}"
 			fi
 			exit 0
 		fi
