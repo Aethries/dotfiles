@@ -134,6 +134,22 @@ alias paste="wl-paste"
 alias ports="sudo ss -tulpn | grep LISTEN"
 alias myip="curl -s https://ifconfig.me && echo"
 
+# Cloudflare Tools
+function tunnel() {
+	if [[ -z "${1:-}" ]]; then
+		echo "Usage: tunnel <port>"
+		return 1
+	fi
+	cloudflared tunnel --url "http://localhost:$1"
+}
+
+function 1111() {
+	if ! systemctl is-active --quiet warp-svc 2>/dev/null; then
+		sudo systemctl start warp-svc
+	fi
+	warp-cli "$@"
+}
+
 # ------------------------------------------------------------------------------
 # Dotfiles & Secrets Management
 # ------------------------------------------------------------------------------

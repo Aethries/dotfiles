@@ -11,6 +11,7 @@ lsof
 age
 sqlite
 zstd
+cloudflared
 
 # Terminal
 neovim

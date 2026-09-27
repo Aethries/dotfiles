@@ -16,3 +16,6 @@ noctalia-greeter
 antigravity
 antigravity-ide
 antigravity-cli
+
+# Network
+cloudflare-warp-bin
