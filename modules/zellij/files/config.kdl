@@ -9,7 +9,8 @@ keybinds clear-defaults=true {
 		bind "Ctrl t" "Ctrl Shift t" { NewTab; }
 		bind "Ctrl w" "Ctrl Shift w" { CloseFocus; }
 		bind "Ctrl Shift q" { CloseTab; }
-		bind "Ctrl r" "Ctrl Shift r" { SwitchToMode "RenameTab"; TabNameInput 0; }
+		bind "Ctrl r" { SwitchToMode "RenameTab"; TabNameInput 0; }
+		bind "Ctrl Shift r" { SwitchToMode "RenamePane"; PaneNameInput 0; }
 		bind "Ctrl Shift [" "Ctrl Shift Left" { GoToPreviousTab; }
 		bind "Ctrl Shift ]" "Ctrl Shift Right" { GoToNextTab; }
 		bind "Ctrl 1" "Ctrl Shift 1" { GoToTab 1; }
