@@ -1,0 +1,9 @@
+[keybinds]
+"Mod+T" = "spawn:kitty"
+"Mod+B" = "spawn:google-chrome"
+"Mod+L" = "window-focus-left"
+"Mod+H" = "window-focus-right"
+"Mod+Q" = "window-close"
+"Mod+M" = "window-toggle-maximize"
+"Mod+J" = "workspace-next"
+"Mod+K" = "workspace-previous"

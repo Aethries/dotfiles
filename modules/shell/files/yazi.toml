@@ -1,0 +1,15 @@
+[opener]
+edit = [
+	{
+		run = 'nvim "$@"', block = true, for = "unix"
+	}
+]
+
+[open]
+rules = [
+	{ mine = "text/*", use = "edit"  },
+	{ mine = "application/json", use = "edit"  },
+	{ mine = "application/x-shellscript", use = "edit"  },
+	{ mine = "application/x-yaml", use = "edit"  },
+	{ mine = "application/x-toml", use = "edit"  },
+]

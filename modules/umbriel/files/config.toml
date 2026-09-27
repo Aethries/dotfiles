@@ -1,0 +1,14 @@
+[include]
+files = [
+	"appereance.toml",
+	"noctalia.toml",
+	"keybinds.toml",
+]
+
+[general]
+autostart = ["noctalia"]
+mod_key = "super"
+xwayland = true
+show_cheatsheet = false
+focus_on_active = false
+

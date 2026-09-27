@@ -1,0 +1,37 @@
+# Base
+git
+curl
+wget
+unzip
+zip
+tar
+rsync
+openssh
+
+# Terminal
+neovim
+zellij
+zsh
+fzf
+ripgrep
+fd
+jq
+yazi
+starship
+zoxide
+
+# Development
+base-devel
+gcc
+make
+cmake
+pkgconf
+nvm
+
+# Desktop
+wl-clipboard
+pipewire
+pipewire-audio
+pipewire-pulse
+wireplumber
+networkmanager
