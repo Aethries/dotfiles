@@ -22,6 +22,18 @@ jq
 yazi
 starship
 zoxide
+eza
+bat
+bottom
+lazygit
+lazydocker
+trash-cli
+tealdeer
+dust
+duf
+gping
+git-delta
+fastfetch
 
 # Development
 base-devel
