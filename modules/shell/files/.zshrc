@@ -123,6 +123,7 @@ alias c='clear'
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"
 export ELECTRON_OZONE_PLATFORM_HINT="auto"
+export NODE_EXTRA_CA_CERTS="$HOME/.9router/mitm/rootCA.crt"
 
 # ------------------------------------------------------------------------------
 # Clipboard, Network & System

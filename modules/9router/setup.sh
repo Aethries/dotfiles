@@ -13,11 +13,16 @@ log "Setting up 9router Local AI Gateway & Proxy"
 # Ensure user directories exist
 mkdir -p "$HOME/.9router/mitm"
 mkdir -p "$HOME/.config/systemd/user"
+mkdir -p "$HOME/.config/environment.d"
 
-# Link systemd user service
+# Link systemd user service & environment
 link_file \
 	"$MODULE_DIR/files/9router.service" \
 	"$HOME/.config/systemd/user/9router.service"
+
+link_file \
+	"$MODULE_DIR/files/20-9router.conf" \
+	"$HOME/.config/environment.d/20-9router.conf"
 
 # Sync Root CA certificate if present
 CERT_SRC="$MODULE_DIR/files/certs/9router-rootCA.crt"
