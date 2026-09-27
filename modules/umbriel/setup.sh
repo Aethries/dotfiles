@@ -32,4 +32,8 @@ link_file \
 	"$MODULE_DIR/files/noctalia.toml" \
 	"$HOME/.config/umbriel/noctalia.toml"
 
+link_file \
+	"$MODULE_DIR/files/chrome-flags.conf" \
+	"$HOME/.config/chrome-flags.conf"
+
 success "Umbriel configured"

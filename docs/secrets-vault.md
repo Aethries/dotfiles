@@ -42,8 +42,8 @@ Hệ thống bảo mật được chia thành 2 phân hệ độc lập:
    - Cặp khóa GPG cá nhân dùng để ký commit Git và cơ sở dữ liệu tín nhiệm (`trustdb`).
 8. **GitHub CLI** (`~/.config/gh`):
    - Token xác thực tài khoản GitHub trong file `hosts.yml`.
-9. **Git Identity** (`~/.gitconfig`):
-   - Danh tính tác giả Git (name, email, signing key, aliases).
+9. **Git Identity & Config** (`~/.gitconfig`, `~/.config/git`):
+   - Danh tính tác giả Git (name, email, signing key, aliases, URL routing cho tổ chức, global ignore).
 10. **Docker Registry** (`~/.docker/config.json`):
     - Token xác thực đăng nhập Docker Hub và các Private Container Registries.
 11. **Shell History** (`~/.zsh_history`):
@@ -106,4 +106,8 @@ Khi đóng gói các ứng dụng ở Mục 2, `vault.sh` tự động lọc b�
 
 # 3. Xem danh sách các file/folder có trong file vault
 ./scripts/vault.sh list [duong-dan/secrets.vault]
+
+# 4. Xóa session credentials cục bộ để kiểm tra khôi phục (có bước xác nhận an toàn)
+./scripts/vault.sh clean [category|all]
 ```
+

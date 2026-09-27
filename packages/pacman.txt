@@ -7,6 +7,9 @@ zip
 tar
 rsync
 openssh
+age
+sqlite
+zstd
 
 # Terminal
 neovim
@@ -30,6 +33,9 @@ nvm
 
 # Desktop
 greetd
+gnome-keyring
+libsecret
+seahorse
 wl-clipboard
 pipewire
 pipewire-audio

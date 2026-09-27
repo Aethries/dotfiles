@@ -31,6 +31,12 @@ fi
 
 sudo cp "$MODULE_DIR/files/config.toml" /etc/greetd/config.toml
 
+# Deploy greetd PAM configuration (auto-unlock gnome-keyring)
+if [[ -f /etc/pam.d/greetd && ! -f /etc/pam.d/greetd.bak ]]; then
+	sudo cp -a /etc/pam.d/greetd /etc/pam.d/greetd.bak
+fi
+sudo cp "$MODULE_DIR/files/pam-greetd" /etc/pam.d/greetd
+
 # Enable greetd service
 if command_exists systemctl; then
 	sudo systemctl enable greetd.service

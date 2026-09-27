@@ -71,6 +71,7 @@ bash "$DOTFILES/modules/shell/setup.sh"
 bash "$DOTFILES/modules/node/setup.sh"
 bash "$DOTFILES/modules/umbriel/setup.sh"
 bash "$DOTFILES/modules/greeter/setup.sh"
+bash "$DOTFILES/modules/antigravity/setup.sh"
 
 # Done
 success "Dotfiles setup completed"

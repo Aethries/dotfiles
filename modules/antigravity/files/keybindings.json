@@ -1,0 +1,7 @@
+[
+	// Disable Toggle Tab Key Moves Focus (VS Code default ctrl+m)
+	{
+		"key": "ctrl+m",
+		"command": "-editor.action.toggleTabFocusMode"
+	}
+]

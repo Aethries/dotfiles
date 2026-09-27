@@ -12,6 +12,11 @@ log "Setting up Node.js"
 # NVM is not compatible with 'set -u'
 set +u
 
+# Clean up incompatible prefix/globalconfig settings in ~/.npmrc that break NVM initialization
+if [[ -f "$HOME/.npmrc" ]]; then
+	sed -i -E '/^\s*(prefix|globalconfig)\s*=/d' "$HOME/.npmrc"
+fi
+
 # Initialize NVM
 if [[ -f /usr/share/nvm/init-nvm.sh ]]; then
 	source /usr/share/nvm/init-nvm.sh
@@ -24,7 +29,7 @@ fi
 
 log "Configuring Node.js LTS"
 nvm install --lts
-nvm use --lts
+nvm use --delete-prefix 'lts/*'
 nvm alias default 'lts/*'
 
 set -u
