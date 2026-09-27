@@ -17,3 +17,8 @@
 # Workspace Navigation
 "Mod+J" = "workspace-next"
 "Mod+K" = "workspace-previous"
+
+# Window Sizing
+"Mod+Minus" = "window-modify-primary-extent:-0.05"
+"Mod+Equal" = "window-modify-primary-extent:+0.05"
+"Mod+Plus" = "window-modify-primary-extent:+0.05"

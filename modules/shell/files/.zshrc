@@ -120,7 +120,6 @@ alias c='clear'
 # ------------------------------------------------------------------------------
 # Input Method (Fcitx5 Wayland)
 # ------------------------------------------------------------------------------
-export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"
 export ELECTRON_OZONE_PLATFORM_HINT="auto"
