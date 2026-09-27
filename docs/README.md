@@ -16,7 +16,7 @@ Chào mừng bạn đến với tài liệu hướng dẫn kỹ thuật của h�
 | **Trình Giả Lập Terminal** | [docs/terminal.md](file:///home/loc/Workspaces/dotfiles/docs/terminal.md) | Cấu hình Kitty tăng tốc GPU, phông chữ JetBrains Mono Nerd và kho themes. |
 | **Multiplexer Dòng Lệnh** | [docs/multiplexer.md](file:///home/loc/Workspaces/dotfiles/docs/multiplexer.md) | Quản lý phiên làm việc Zellij, layouts và các WASM plugins ghim sẵn. |
 | **Trình Soạn Thảo Mã Nguồn** | [docs/editor.md](file:///home/loc/Workspaces/dotfiles/docs/editor.md) | Neovim Lua IDE hoàn chỉnh với LSP, Treesitter, Snacks, lazy-lock. |
-| **Workflow & Tiện Ích CLI** | [docs/workflow.md](file:///home/loc/Workspaces/dotfiles/docs/workflow.md) | Chuyển đổi project siêu tốc `pj`, cấu hình Git và bộ công cụ dòng lệnh hiện đại. |
+| **Workflow & Tiện Ích CLI** | [docs/workflow.md](file:///home/loc/Workspaces/dotfiles/docs/workflow.md) | Cấu hình Git toàn cục và bộ công cụ dòng lệnh hiện đại. |
 | **Hạ Tầng AI & Agent Skills** | [docs/ai.md](file:///home/loc/Workspaces/dotfiles/docs/ai.md) | Proxy 9Router, Root CA, DNS loopback và kho 80+ kỹ năng AI agent. |
 | **Quản Lý Gói Phần Mềm** | [docs/packages.md](file:///home/loc/Workspaces/dotfiles/docs/packages.md) | Danh mục quản lý gói phần mềm Pacman, AUR (yay) và NPM (Node.js). |
 

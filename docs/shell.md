@@ -45,5 +45,4 @@ Tài liệu này mô tả cấu hình môi trường dòng lệnh tương tác, 
 - `alias cat="bat --paging=never"`
 - `alias lg="lazygit"`
 - `alias ld="lazydocker"`
-- `alias pj="$HOME/.local/bin/pj"`
 - Đảm bảo `$HOME/.local/bin` nằm trong `$PATH`.
