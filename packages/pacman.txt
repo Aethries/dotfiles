@@ -29,6 +29,7 @@ pkgconf
 nvm
 
 # Desktop
+greetd
 wl-clipboard
 pipewire
 pipewire-audio

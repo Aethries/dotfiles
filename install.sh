@@ -82,6 +82,7 @@ success "Zsh configured"
 # Modules setup
 "$DOTFILES/modules/shell/setup.sh"
 "$DOTFILES/modules/umbriel/setup.sh"
+"$DOTFILES/modules/greeter/setup.sh"
 
 # Done
 success "Dotfiles setup completed"

@@ -2,3 +2,7 @@ google-chrome
 umbriel-git
 noctalia-greeter
 
+# AI
+antigravity
+antigravity-ide
+antigravity-cli
