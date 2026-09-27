@@ -1,0 +1,16 @@
+[Unit]
+Description=9router Local AI Gateway & Proxy Service
+After=default.target
+
+[Service]
+Type=simple
+Environment="NODE_EXTRA_CA_CERTS=%h/.9router/mitm/rootCA.crt"
+ExecStartPre=/bin/sh -lc 'command -v 9router >/dev/null 2>&1 || (echo "9router binary not found" >&2; exit 1)'
+ExecStart=/bin/sh -lc 'exec 9router --skip-update --port 20128 --host 127.0.0.1'
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
