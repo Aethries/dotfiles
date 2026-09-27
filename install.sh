@@ -55,19 +55,6 @@ install_yay() {
 install_yay
 bash "$SCRIPTS/packages.sh"
 
-# Install Node / NVM / npm
-log "Configuring Node.js"
-if [[ -f /usr/share/nvm/init-nvm.sh ]]; then
-	source /usr/share/nvm/init-nvm.sh
-else
-	error "NVM is not installed"
-fi
-
-nvm install --lts
-nvm alias default 'lts/*'
-
-success "Node.js LTS configured"
-
 # ZSH
 log "Configuring shell"
 
@@ -81,6 +68,7 @@ success "Zsh configured"
 
 # Modules setup
 bash "$DOTFILES/modules/shell/setup.sh"
+bash "$DOTFILES/modules/node/setup.sh"
 bash "$DOTFILES/modules/umbriel/setup.sh"
 bash "$DOTFILES/modules/greeter/setup.sh"
 
