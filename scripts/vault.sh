@@ -165,9 +165,32 @@ restore_vault() {
 		pkill -TERM -u "$UID" -f '[g]nome-keyring-daemon' 2>/dev/null || true
 	fi
 
+	# Preserve standalone ssh config and gitconfig if they exist as regular files
+	local saved_ssh_config=""
+	if [[ -f "$HOME/.ssh/config" && ! -L "$HOME/.ssh/config" ]]; then
+		saved_ssh_config="$(cat "$HOME/.ssh/config")"
+	fi
+
+	local saved_gitconfig=""
+	if [[ -f "$HOME/.gitconfig" && ! -L "$HOME/.gitconfig" ]]; then
+		saved_gitconfig="$(cat "$HOME/.gitconfig")"
+	fi
+
 	age --decrypt "$source_file" \
 		| zstd -d \
 		| tar --no-same-owner -C "$HOME" -xf -
+
+	# Restore preserved standalone configs if archive contained legacy broken symlinks
+	if [[ -n "$saved_ssh_config" ]]; then
+		rm -f "$HOME/.ssh/config"
+		echo "$saved_ssh_config" > "$HOME/.ssh/config"
+	fi
+
+	if [[ -n "$saved_gitconfig" ]]; then
+		rm -f "$HOME/.gitconfig"
+		echo "$saved_gitconfig" > "$HOME/.gitconfig"
+	fi
+
 
 	# Permissions
 	if [[ -d "$HOME/.ssh" ]]; then
