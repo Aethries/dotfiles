@@ -1,13 +1,19 @@
+# ==============================================================================
+# Custom Keybinds (Extends /usr/share/umbriel/config.toml)
+# ==============================================================================
+
 [keybinds]
-"Mod+T" = "spawn:kitty"
-"Mod+B" = "spawn:google-chrome-stable"
+# Launchers
+"Mod+T" = { action = "spawn:kitty", repeat = false }
+"Mod+Return" = { action = "spawn:kitty", repeat = false }
+"Mod+B" = { action = "spawn:google-chrome-stable", repeat = false }
 "Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
+
+# System & Session
 "Mod+BackSpace" = "spawn:systemctl suspend"
-"Mod+L" = "window-focus-right"
-"Mod+H" = "window-focus-left"
-"Mod+Q" = "window-close"
-"Mod+M" = "window-toggle-maximize"
+"Mod+Shift+R" = "config-reload"
+
+# Workspace Navigation
 "Mod+J" = "workspace-next"
 "Mod+K" = "workspace-previous"
-"Mod+Shift+R" = "config-reload"

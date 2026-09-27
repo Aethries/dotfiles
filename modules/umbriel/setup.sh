@@ -10,30 +10,15 @@ source "$DOTFILES/scripts/links.sh"
 
 log "Configuring umbriel"
 
-# Umbriel
-if [[ ! -d "$HOME/.config/umbriel" ]]; then
-	mkdir -p "$HOME/.config/umbriel"
-fi
+mkdir -p "$HOME/.config/umbriel"
 
-# Config
 link_file \
 	"$MODULE_DIR/files/config.toml" \
 	"$HOME/.config/umbriel/config.toml"
 
 link_file \
-	"$MODULE_DIR/files/appearance.toml" \
-	"$HOME/.config/umbriel/appearance.toml"
-
-link_file \
 	"$MODULE_DIR/files/keybinds.toml" \
 	"$HOME/.config/umbriel/keybinds.toml"
 
-link_file \
-	"$MODULE_DIR/files/noctalia.toml" \
-	"$HOME/.config/umbriel/noctalia.toml"
-
-link_file \
-	"$MODULE_DIR/files/chrome-flags.conf" \
-	"$HOME/.config/chrome-flags.conf"
 
 success "Umbriel configured"

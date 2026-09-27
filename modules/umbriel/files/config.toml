@@ -1,7 +1,11 @@
+# ==============================================================================
+# Umbriel Compositor Configuration
+# Extends system default: /usr/share/umbriel/config.toml
+# ==============================================================================
+
 [include]
 files = [
-	"appearance.toml",
-	"noctalia.toml",
+	"/usr/share/umbriel/config.toml",
 	"keybinds.toml",
 ]
 
@@ -10,4 +14,3 @@ autostart = ["noctalia", "fcitx5 -d"]
 mod_key = "super"
 xwayland = true
 show_cheatsheet = false
-
