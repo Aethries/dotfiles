@@ -1,0 +1,134 @@
+// =============================================================================
+// Zellij Configuration
+// Single-surface architecture: Kitty renders UI, Zellij manages all tabs/panes
+// =============================================================================
+
+keybinds clear-defaults=true {
+	normal {
+		// --- Tab Management ---
+		bind "Ctrl t" "Ctrl Shift t" { NewTab; }
+		bind "Ctrl w" "Ctrl Shift w" { CloseFocus; }
+		bind "Ctrl Shift q" { CloseTab; }
+		bind "Ctrl r" "Ctrl Shift r" { SwitchToMode "RenameTab"; TabNameInput 0; }
+		bind "Ctrl Shift [" "Ctrl Shift Left" { GoToPreviousTab; }
+		bind "Ctrl Shift ]" "Ctrl Shift Right" { GoToNextTab; }
+		bind "Ctrl 1" "Ctrl Shift 1" { GoToTab 1; }
+		bind "Ctrl 2" "Ctrl Shift 2" { GoToTab 2; }
+		bind "Ctrl 3" "Ctrl Shift 3" { GoToTab 3; }
+		bind "Ctrl 4" "Ctrl Shift 4" { GoToTab 4; }
+		bind "Ctrl 5" "Ctrl Shift 5" { GoToTab 5; }
+		bind "Ctrl 6" "Ctrl Shift 6" { GoToTab 6; }
+		bind "Ctrl 7" "Ctrl Shift 7" { GoToTab 7; }
+		bind "Ctrl 8" "Ctrl Shift 8" { GoToTab 8; }
+		bind "Ctrl 9" "Ctrl Shift 9" { GoToTab 9; }
+
+		// --- Pane Management ---
+		bind "Ctrl n" "Ctrl Shift n" { NewPane; }
+		bind "Ctrl Shift d" { NewPane "Down"; }
+		bind "Ctrl Shift f" { ToggleFocusFullscreen; }
+		bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
+		bind "Ctrl Shift p" { ToggleFloatingPanes; }
+
+		// --- Pane Navigation (Vim style & Arrows) ---
+		bind "Ctrl Shift h" "Ctrl Shift Left" { MoveFocusOrTab "Left"; }
+		bind "Ctrl Shift l" "Ctrl Shift Right" { MoveFocusOrTab "Right"; }
+		bind "Ctrl Shift j" "Ctrl Shift Down" { MoveFocus "Down"; }
+		bind "Ctrl Shift k" "Ctrl Shift Up" { MoveFocus "Up"; }
+
+		// --- Resize Panes ---
+		bind "Ctrl Shift =" "Ctrl Shift +" { Resize "Increase"; }
+		bind "Ctrl Shift -" { Resize "Decrease"; }
+
+		// --- Layout & View ---
+		bind "Ctrl Shift Space" { NextSwapLayout; }
+
+		// --- Search & Scroll ---
+		bind "Ctrl s" { SwitchToMode "EnterSearch"; SearchInput 0; }
+		bind "Ctrl b" { SwitchToMode "Scroll"; }
+
+		// --- Session Management ---
+		bind "Ctrl q" { Detach; }
+		bind "Ctrl o" {
+			LaunchOrFocusPlugin "session-manager" {
+				floating true
+				move_to_focused_tab true
+			}
+		}
+
+		// --- Safety / Mode Switch ---
+		bind "Ctrl g" { SwitchToMode "Locked"; }
+	}
+
+	locked {
+		bind "Ctrl g" { SwitchToMode "Normal"; }
+	}
+
+	scroll {
+		bind "Esc" "Ctrl c" { ScrollToBottom; SwitchToMode "Normal"; }
+		bind "j" "Down" { ScrollDown; }
+		bind "k" "Up" { ScrollUp; }
+		bind "d" { HalfPageScrollDown; }
+		bind "u" { HalfPageScrollUp; }
+		bind "PageDown" { PageScrollDown; }
+		bind "PageUp" { PageScrollUp; }
+		bind "g" { ScrollToTop; }
+		bind "G" { ScrollToBottom; }
+		bind "/" { SwitchToMode "EnterSearch"; SearchInput 0; }
+		bind "e" { EditScrollback; SwitchToMode "Normal"; }
+	}
+
+	entersearch {
+		bind "Esc" "Ctrl c" { SwitchToMode "Scroll"; }
+		bind "Enter" { SwitchToMode "Search"; }
+	}
+
+	search {
+		bind "Esc" "Ctrl c" { SwitchToMode "Normal"; }
+		bind "n" { Search "down"; }
+		bind "p" { Search "up"; }
+		bind "c" { SearchToggleOption "CaseSensitivity"; }
+		bind "w" { SearchToggleOption "Wrap"; }
+		bind "o" { SearchToggleOption "WholeWord"; }
+	}
+
+	renametab {
+		bind "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+		bind "Enter" "Ctrl c" { SwitchToMode "Normal"; }
+	}
+
+	renamepane {
+		bind "Esc" { UndoRenamePane; SwitchToMode "Normal"; }
+		bind "Enter" "Ctrl c" { SwitchToMode "Normal"; }
+	}
+}
+
+// -----------------------------------------------------------------------------
+// UI Settings
+// -----------------------------------------------------------------------------
+default_layout "default"
+default_shell "zsh"
+
+simplified_ui false
+pane_frames true
+ui {
+	pane_frames {
+		rounded_corners true
+		hide_session_name false
+	}
+}
+
+mouse_mode true
+copy_on_select true
+scroll_buffer_size 10000
+show_startup_tips false
+show_release_notes false
+auto_layout true
+
+// Protocols
+support_kitty_keyboard_protocol true
+
+// Session resurrection & persistence
+on_force_close "detach"
+session_serialization true
+serialize_pane_viewport true
+scrollback_lines_to_serialize 2000
