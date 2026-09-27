@@ -8,12 +8,20 @@ source "$SCRIPTS/common.sh"
 
 log "Starting dotfiles setup"
 
-# Bootstrap
+# Prevent running as root
+if [[ $EUID -eq 0 ]]; then
+	error "Do not run install.sh as root/sudo! Please run as regular user: ./install.sh"
+fi
+
+# Bootstrap sudo credentials and keep alive
 sudo -v
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+SUDO_LOOP_PID=$!
+trap 'kill "$SUDO_LOOP_PID" 2>/dev/null || true' EXIT
 
 install_yay() {
 	if command_exists yay; then
-		success "yay altrady installed"
+		success "yay already installed"
 		yay --version
 		return
 	fi
@@ -71,9 +79,7 @@ fi
 
 success "Zsh configured"
 
-# Link
-"$SCRIPTS/links.sh"
-
+# Modules setup
 "$DOTFILES/modules/shell/setup.sh"
 "$DOTFILES/modules/umbriel/setup.sh"
 

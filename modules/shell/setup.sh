@@ -22,7 +22,7 @@ else
 	success "Oh My Zsh already installed"
 fi
 
-sudo mkdir -p "$ZSH_CUSTOM/plugins"
+mkdir -p "$ZSH_CUSTOM/plugins"
 
 # autosuggestions
 if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions"  ]]; then

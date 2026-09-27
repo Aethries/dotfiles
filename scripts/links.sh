@@ -4,7 +4,7 @@ link_file() {
 	local source="$1"
 	local target="$2"
 
-	sudo mkdir -p "$(dirname "$target")"
+	mkdir -p "$(dirname "$target")"
 
 	if [[ -L "$target" ]]; then
 		if [[ "$(readlink -f "$target")" == "$(readlink -f "$source")" ]]; then
@@ -24,7 +24,7 @@ link_dir() {
 	local source="$1"
 	local target="$2"
 
-	sudo mkdir -p "$(dirname "$target")"
+	mkdir -p "$(dirname "$target")"
 
 	if [[ -L "$target" ]]; then
 		if [[ "$(readlink -f "$target")" == "$(readlink -f "$source")" ]]; then

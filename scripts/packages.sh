@@ -23,7 +23,7 @@ install_pacman_packages() {
 
 	read_packages "$PACKAGES/pacman.txt"
 	if [[ "${#packages[@]}" -eq 0 ]]; then
-		success "pacman packages is emtpy"
+		success "pacman packages list is empty"
 		return
 	fi
 
@@ -41,11 +41,11 @@ install_aur_packages() {
 
 	read_packages "$PACKAGES/aur.txt"
 	if [[ "${#packages[@]}" -eq 0 ]]; then
-		success "AUR packages is emtpy"
+		success "AUR packages list is empty"
 		return
 	fi
 
-	yay -S --needed --noconfirm "${packages[@]}"
+	yay -S --needed --noconfirm --sudoloop "${packages[@]}"
 
 	success "AUR packages installed"
 }
