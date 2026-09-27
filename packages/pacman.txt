@@ -34,6 +34,14 @@ duf
 gping
 git-delta
 fastfetch
+kitty
+
+# Fonts
+ttf-jetbrains-mono-nerd
+inter-font
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
 
 # Development
 base-devel
