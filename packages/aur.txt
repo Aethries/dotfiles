@@ -1,4 +1,14 @@
+# Desktop & Applications
 google-chrome
+telegram-desktop
+slack-desktop
+larksuite-bin
+obsidian
+postman-bin
+beekeeper-studio-bin
+docker
+
+# System & Compositor
 umbriel-git
 noctalia-greeter
 
