@@ -21,6 +21,10 @@
    * **Bộ lọc tương thích Telex:** Cấu hình thuật toán `tap-hold-press` với thời gian trễ `tapping-term` (~180ms) để loại bỏ hoàn toàn hiện tượng xung đột với bộ gõ tiếng Việt Fcitx5 Bamboo.
 2. Cài đặt `warpd`:
    * Trải lưới checkpoint 2 chữ cái phủ toàn bộ màn hình Wayland. Người dùng chỉ cần gõ 2 chữ cái tương ứng là con trỏ chuột sẽ lập tức nhảy đến vị trí đó và thực hiện click chuột trái/phải hoặc bắt đầu kéo thả mà không cần chạm tay vào chuột.
+3. Tối ưu tốc độ lặp phím và độ nhạy Caret (Repeat Delay & Rate):
+   * Cấu hình thời gian trễ nhận giữ phím cực thấp (`repeat_delay = 180ms`) và tốc độ lặp cao (`repeat_rate = 50Hz`) trong compositor Umbriel.
+   * Giúp việc di chuyển con trỏ (caret), xóa ký tự và cuộn trang phản hồi ngay tức thì, tạo cảm giác gõ và điều hướng mượt mà tối đa.
+   * Đồng bộ hóa với Kanata `tap-time 160ms` và `hold-time 180ms` để layer Navigation (Space + HJKL) kích hoạt liền mạch.
 
 ---
 
@@ -29,6 +33,7 @@
 ### 3.1. Các file cần tạo và sửa đổi
 
 * **[MODIFY]** [packages/aur.txt](file:///home/loc/Workspaces/dotfiles/packages/aur.txt): Thêm `kanata-bin` và `warpd`.
+* **[MODIFY]** [modules/umbriel/files/config.toml](file:///home/loc/Workspaces/dotfiles/modules/umbriel/files/config.toml): Cấu hình `repeat_delay = 180` và `repeat_rate = 50` trong `[input.keyboard]`.
 * **[NEW]** `modules/kanata/files/kanata.kbd`: File cấu hình layout phím, tap-hold timings và layer navigation.
 * **[NEW]** `modules/kanata/files/kanata.service`: Systemd service chạy ngầm.
 * **[NEW]** `modules/kanata/setup.sh`: Script thiết lập udev rules cho `/dev/uinput` và kích hoạt service.
@@ -82,6 +87,17 @@
   _      _      _      _      _        left   down   up     rght
   _
 )
+```
+
+### 3.3. Cấu hình tốc độ lặp phím trong `modules/umbriel/files/config.toml`
+
+Thêm cấu hình bàn phím để tối ưu độ nhạy caret:
+
+```toml
+[input.keyboard]
+repeat_delay = 180
+repeat_rate = 50
+xkb.layout = "us"
 ```
 
 ---

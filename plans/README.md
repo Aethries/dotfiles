@@ -30,11 +30,16 @@ flowchart TD
         P01 -. Theme Engine .-> P10
         P04 -. Checkpoint Nav .-> P10
     end
+
+    subgraph G5["Giai đoạn 5: AI Tooling & Agentic Engineering"]
+        P06 --> P11["11. AI Developer Tooling & Agentic Workflow"]
+        P10 --> P11
+    end
 ```
 
 ---
 
-## 2. Danh mục 10 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 11 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
@@ -43,13 +48,14 @@ Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**
 | **01** | [01-noctalia-desktop-shell-va-umbriel.md](file:///home/loc/Workspaces/dotfiles/plans/01-noctalia-desktop-shell-va-umbriel.md) | Khôi phục `modules/noctalia` (sửa broken symlink), quản lý Notification/OSD/Wallpaper native, hoàn thiện window rules & keybinds Umbriel | ⏳ Sẵn sàng |
 | **02** | [02-session-environment-va-webrtc-screensharing.md](file:///home/loc/Workspaces/dotfiles/plans/02-session-environment-va-webrtc-screensharing.md) | Chuẩn hóa `~/.config/environment.d/` toàn cục, cờ Wayland Ozone & PipeWire WebRTC capturer cho Chrome, Slack, Lark | ⏳ Chờ 01 |
 | **03** | [03-clipboard-manager-cliphist.md](file:///home/loc/Workspaces/dotfiles/plans/03-clipboard-manager-cliphist.md) | Quản lý lịch sử clipboard Wayland qua `cliphist`, systemd user service, tích hợp Noctalia launcher và FZF | ⏳ Chờ 01 |
-| **04** | [04-kanata-kernel-keyboard-va-warpd-hint-navigation.md](file:///home/loc/Workspaces/dotfiles/plans/04-kanata-kernel-keyboard-va-warpd-hint-navigation.md) | Remapping phím tầng kernel (`kanata` home-row mods, tương thích Telex Fcitx5 Bamboo) & điều khiển chuột bàn phím (`warpd` hint mode) | ⏳ Chờ 01 |
+| **04** | [04-kanata-kernel-keyboard-va-warpd-hint-navigation.md](file:///home/loc/Workspaces/dotfiles/plans/04-kanata-kernel-keyboard-va-warpd-hint-navigation.md) | Remapping phím tầng kernel (`kanata` home-row mods, tương thích Telex Fcitx5 Bamboo), tối ưu repeat delay/rate (180ms/50Hz) & điều khiển chuột bàn phím (`warpd` hint mode) | ⏳ Chờ 01 |
 | **05** | [05-git-identity-ssh-signing-va-security.md](file:///home/loc/Workspaces/dotfiles/plans/05-git-identity-ssh-signing-va-security.md) | Hoàn thiện `modules/git`, SSH `ed25519` commit signing, `git-credential-libsecret`, `includeIf`, `gitleaks` pre-commit | ⏳ Chờ 02 |
 | **06** | [06-mise-va-uv-runtime-management.md](file:///home/loc/Workspaces/dotfiles/plans/06-mise-va-uv-runtime-management.md) | Thay thế NVM bằng `mise` quản lý Node, Python, Rust, Go, IaC; kết hợp `uv` quản trị môi trường Python siêu tốc | ⏳ Chờ 02 |
 | **07** | [07-cloud-aws-gcp-va-database-cli.md](file:///home/loc/Workspaces/dotfiles/plans/07-cloud-aws-gcp-va-database-cli.md) | Bộ công cụ AWS SSO (`granted`), GCP ADC, OpenTofu và Universal Database CLI (`usql`, `pgcli`, `iredis`) | ⏳ Chờ 06 |
 | **08** | [08-tailscale-mesh-network-va-remote-helpers.md](file:///home/loc/Workspaces/dotfiles/plans/08-tailscale-mesh-network-va-remote-helpers.md) | Mạng riêng ảo Tailscale Mesh, Tailscale SSH, MagicDNS, SSHFS helpers (`ssh-mount`, `ssh-sync`) và Mosh | ⏳ Chờ 05 |
 | **09** | [09-sunshine-headless-remote-desktop.md](file:///home/loc/Workspaces/dotfiles/plans/09-sunshine-headless-remote-desktop.md) | Remote desktop máy trạm độ trễ thấp với Sunshine (GPU encoder, HDMI Dummy Plug 4K) qua Tailscale IP nội bộ | ⏳ Chờ 08 |
 | **10** | [10-neovim-ecosystem-va-dong-bo-theme-noctalia.md](file:///home/loc/Workspaces/dotfiles/plans/10-neovim-ecosystem-va-dong-bo-theme-noctalia.md) | Xây dựng `modules/nvim` hoàn chỉnh (Lazy.nvim, Mason LSP, `flash.nvim`) và đồng bộ theme toàn hệ thống qua Noctalia | ⏳ Chờ 04, 06 |
+| **11** | [11-ai-developer-tooling-va-agentic-workflow.md](file:///home/loc/Workspaces/dotfiles/plans/11-ai-developer-tooling-va-agentic-workflow.md) | Hệ sinh thái AI Engineering: AG Kit, Ponytail YAGNI, RTK Ultra token compression, Caveman mode, CodeGraph MCP & Codebase MCP | ⏳ Chờ 06, 10 |
 
 ---
 

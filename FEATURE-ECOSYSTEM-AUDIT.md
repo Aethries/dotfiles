@@ -97,7 +97,8 @@ Trình ánh xạ phím phần cứng chạy ở tầng kernel qua `/dev/uinput`,
 - Home-row mods: Biến các phím `A`, `S`, `D`, `F` thành `Super`, `Alt`, `Ctrl`, `Shift` khi giữ đè; gõ bình thường khi bấm nhả nhanh.
 - Dual-role phím CapsLock: Bấm nhả hoạt động như `Escape`, giữ đè hoạt động như `Control`.
 - Layer navigation: Giữ Space để biến các phím `H/J/K/L` thành cụm mũi tên di chuyển, kèm `Home`, `End`, `PageUp`, `PageDown` ngay trên hàng cơ sở.
-- **Lưu ý tương thích bộ gõ tiếng Việt (Fcitx5 Bamboo)**: Với tốc độ gõ Telex cao, cần tinh chỉnh `tap-hold-press` hoặc `chord` và thiết lập `tapping-term` (~160-200ms) để không vô tình kích hoạt Modifier khi gõ các ký tự lặp (`aa`, `dd`, `as`...).
+- Lưu ý tương thích bộ gõ tiếng Việt (Fcitx5 Bamboo): Với tốc độ gõ Telex cao, cần tinh chỉnh `tap-hold-press` hoặc `chord` và thiết lập `tapping-term` (~160-200ms) để không vô tình kích hoạt Modifier khi gõ các ký tự lặp (`aa`, `dd`, `as`...).
+- **Tối ưu tốc độ lặp phím và độ nhạy Caret (Repeat Delay & Rate)**: Giảm thời gian trễ nhận phím giữ (`repeat_delay = 180ms`) và tăng tốc độ lặp (`repeat_rate = 50Hz`) trong cấu hình compositor Umbriel và virtual device của Kanata để nhận diện caret tức thì, giúp thao tác di chuyển con trỏ và xóa ký tự phản hồi mượt mà, không giật khựng.
 - Triển khai: Cài `kanata-bin` (AUR), cấu hình udev rule cho `/dev/uinput`, chạy dưới dạng systemd user/system service.
 
 #### 8. Warpd — Trải Checkpoint/Hint điều khiển chuột bằng bàn phím
@@ -243,6 +244,16 @@ Bổ sung lớp remote filesystem và remote development:
   - `ssh-forward <host> <local-port> <remote-port>`
   - `ssh-project <host> <path>`
 - Kết hợp `mosh` cho các kết nối mạng chập chờn khi di chuyển.
+
+#### 21b. AI Developer Tooling & Agentic Engineering
+
+Tối ưu hóa môi trường lập trình cùng AI cho Antigravity IDE và Gemini CLI:
+- **AG Kit (`.agents/`)**: Hệ thống Agent, Skills, Rules và Memory cross-session đồng bộ hóa phong cách pair programming.
+- **Ponytail Principle**: Tiêu chuẩn code YAGNI cực hạn — minimal working diff, tái sử dụng abstraction sẵn có, hạn chế tối đa over-engineering và code thừa.
+- **RTK Ultra**: Token compression, tự động lọc nhiễu stdout/stderr từ terminal (build logs, test outputs) trước khi đưa vào context window của LLM.
+- **Caveman Communication**: Giao thức phản hồi cô đọng tối đa, loại bỏ từ ngữ xã giao, phản hồi theo mô hình telegraphic `[thing] [action] [reason]. [next step].`
+- **CodeGraph MCP**: Local MCP server phân tích cấu trúc AST Tree-sitter + SQLite, tính toán chính xác blast radius của thay đổi mà không cần nạp toàn bộ repo.
+- **Codebase MCP**: Index bộ nhớ symbol nhanh, tra cứu định nghĩa và phụ thuộc không tiêu hao context.
 
 ---
 
@@ -419,6 +430,7 @@ chafa
 8. **Tailscale mesh network** và thiết lập **Sunshine remote desktop** (kèm HDMI Dummy Plug 4K).
 9. **Hoàn thiện `modules/nvim`** (Lazy.nvim, Mason, Treesitter, `flash.nvim`).
 10. **Đồng bộ theme** bằng cơ chế template của Noctalia sang Kitty, Zellij và Neovim.
+11. **AI Developer Tooling & Agentic Workflow** (tích hợp AG Kit, Ponytail YAGNI, RTK Ultra token compression, Caveman mode, CodeGraph MCP & Codebase MCP).
 
 ---
 
@@ -430,6 +442,7 @@ chafa
 2. Tạo module `modules/env/` quản lý `~/.config/environment.d/00-wayland.conf` thiết lập biến môi trường Wayland, Ozone, Fcitx5 cấp session.
 3. Bổ sung cờ WebRTC PipeWire vào `~/.config/chrome-flags.conf` và `~/.config/electron-flags.conf` để hỗ trợ screen sharing trong Slack, Lark, Chrome.
 4. Cập nhật `modules/umbriel/files/config.toml` và `keybinds.toml`:
+   - Cấu hình repeat delay (`180ms`) và repeat rate (`50Hz`) cho trải nghiệm caret nhạy mượt.
    - Gắn phím tắt chụp ảnh / chú thích qua `noctalia msg screenshot-annotate`.
    - Gắn phím tắt điều khiển âm lượng, microphone OSD.
    - Thêm window rules cho float windows và dialogs.
@@ -466,6 +479,13 @@ chafa
    - Cấu hình `telescope.nvim` / `snacks.nvim` và `flash.nvim`.
 2. Tạo profile VS Code chuẩn cho local và remote development.
 3. Cấu hình Noctalia template engine (`noctalia msg templates-apply`) để xuất màu đồng bộ tự động sang Kitty (`kitty.conf`), Zellij (`config.kdl`) và Neovim.
+
+### Giai đoạn 5 — AI Developer Tooling & Agentic Workflow
+
+1. Cấu hình CodeGraph MCP (Tree-sitter SQLite AST) và Codebase MCP vào Antigravity IDE và Gemini CLI.
+2. Chuẩn hóa bộ quy tắc AG Kit (`.agents/rules/`, `.agents/skills/`, `.agents/memory/`).
+3. Tích hợp bộ lọc terminal RTK Ultra giảm hao phí token khi build/test.
+4. Áp dụng phong cách phản hồi Caveman và tiêu chuẩn Ponytail YAGNI cho toàn bộ luồng sinh mã.
 
 ---
 
