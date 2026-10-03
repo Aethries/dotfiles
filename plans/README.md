@@ -23,18 +23,14 @@ flowchart TD
         P08 --> P09["09. Sunshine Headless Streaming"]
     end
 
-    subgraph G4["Giai đoạn 4: Editor & Visual Harmony"]
-        P10["10. Neovim Ecosystem & Theme Sync"]
-    end
-
     subgraph G5["Giai đoạn 5: AI Tooling & Agentic Engineering"]
-        P10 --> P11["11. AI Developer Tooling & Agentic Workflow"]
+        P11["11. AI Developer Tooling & Agentic Workflow"]
     end
 ```
 
 ---
 
-## 2. Danh mục 8 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 7 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
@@ -43,7 +39,6 @@ Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**
 | **07** | [07-cloud-aws-gcp-va-database-cli.md](file:///home/loc/Workspaces/dotfiles/plans/07-cloud-aws-gcp-va-database-cli.md) | Bộ công cụ AWS SSO (`granted`), GCP ADC, OpenTofu và Universal Database CLI (`usql`, `pgcli`, `iredis`) | ⏳ Sẵn sàng |
 | **08** | [08-tailscale-mesh-network-va-remote-helpers.md](file:///home/loc/Workspaces/dotfiles/plans/08-tailscale-mesh-network-va-remote-helpers.md) | Mạng riêng ảo Tailscale Mesh, Tailscale SSH, MagicDNS, SSHFS helpers (`ssh-mount`, `ssh-sync`) và Mosh | ⏳ Sẵn sàng |
 | **09** | [09-sunshine-headless-remote-desktop.md](file:///home/loc/Workspaces/dotfiles/plans/09-sunshine-headless-remote-desktop.md) | Remote desktop máy trạm độ trễ thấp với Sunshine (GPU encoder, HDMI Dummy Plug 4K) qua Tailscale IP nội bộ | ⏳ Chờ 08 |
-| **10** | [10-neovim-ecosystem-va-dong-bo-theme-noctalia.md](file:///home/loc/Workspaces/dotfiles/plans/10-neovim-ecosystem-va-dong-bo-theme-noctalia.md) | Xây dựng `modules/nvim` hoàn chỉnh (Lazy.nvim, Mason LSP, `flash.nvim`) và đồng bộ theme toàn hệ thống qua Noctalia | ✅ Hoàn thành |
 | **11** | [11-ai-developer-tooling-va-agentic-workflow.md](file:///home/loc/Workspaces/dotfiles/plans/11-ai-developer-tooling-va-agentic-workflow.md) | Hệ sinh thái AI Engineering: AG Kit, Superpowers, Ponytails, UI/UX Pro Max, Graphify, Caveman, Addy Osmani, Understand Anything, Archify & Impeccable | ⏳ Sẵn sàng |
 | **12** | [12-modern-shell-terminal-va-cli-ecosystem.md](file:///home/loc/Workspaces/dotfiles/plans/12-modern-shell-terminal-va-cli-ecosystem.md) | Terminal Workstation: Lazydocker, Bat, Superfile, Git-Delta, Resource Monitoring (btm/dust/duf) & Data CLI | ⏳ Sẵn sàng |
 | **13** | [13-unified-system-keymaps-va-shortcuts.md](file:///home/loc/Workspaces/dotfiles/plans/13-unified-system-keymaps-va-shortcuts.md) | Hệ thống Phím tắt Toàn cục: Umbriel Window Nav, Zellij Split, Modal Editor, Kanata Dual-role & Warpd Mouse | ⏳ Sẵn sàng |
