@@ -1,6 +1,10 @@
 {
+	// Theme & Colors
+	"workbench.colorTheme": "NoctaliaTheme",
+
 	// Font & Typography
 	"editor.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
+	"terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
 	"editor.fontLigatures": true,
 	"editor.letterSpacing": -0.95,
 
@@ -11,7 +15,6 @@
 	"editor.cursorBlinking": "expand",
 	"editor.cursorWidth": 3,
 	"editor.cursorStyle": "line",
-	"editor.lineNumbers": "relative",
 	"editor.minimap.enabled": false,
 	"editor.stickyScroll.enabled": false,
 
@@ -89,4 +92,6 @@
 	"[prisma]": {
 		"editor.defaultFormatter": "Prisma.prisma",
 	},
+
+	"markdown.preview.doubleClickToSwitchToEditor": false,
 }

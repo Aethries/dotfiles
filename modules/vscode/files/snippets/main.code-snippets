@@ -1,0 +1,703 @@
+{
+	"React Function Component (Named Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "rfc",
+		"body": [
+			"export function ${TM_FILENAME_BASE}() {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component with named export"
+	},
+	"React Function Component with Props (Named Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "rfc-prop",
+		"body": [
+			"export function ${TM_FILENAME_BASE}({ $1 }) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component with props and named export"
+	},
+	"React Function Component with Props TypeScript (Named Export)": {
+		"scope": "typescriptreact",
+		"prefix": "ts-rfc-prop",
+		"body": [
+			"interface ${TM_FILENAME_BASE}Props {",
+			"  $1",
+			"}",
+			"",
+			"export function ${TM_FILENAME_BASE}({ $2 }: ${TM_FILENAME_BASE}Props) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component with TypeScript props and named export"
+	},
+	"React Function Component (Default Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "rfcd",
+		"body": [
+			"function ${TM_FILENAME_BASE}() {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}",
+			"",
+			"export default ${TM_FILENAME_BASE}"
+		],
+		"description": "React function component with default export"
+	},
+	"React Function Component with Props (Default Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "rfcd-prop",
+		"body": [
+			"function ${TM_FILENAME_BASE}({ $1 }) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}",
+			"",
+			"export default ${TM_FILENAME_BASE}"
+		],
+		"description": "React function component with props and default export"
+	},
+	"React Function Component with Props TypeScript (Default Export)": {
+		"scope": "typescriptreact",
+		"prefix": "ts-rfcd-prop",
+		"body": [
+			"interface ${TM_FILENAME_BASE}Props {",
+			"  $1",
+			"}",
+			"",
+			"function ${TM_FILENAME_BASE}({ $2 }: ${TM_FILENAME_BASE}Props) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}",
+			"",
+			"export default ${TM_FILENAME_BASE}"
+		],
+		"description": "React function component with TypeScript props and default export"
+	},
+	"React Function Component (No Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "fc",
+		"body": [
+			"function ${TM_FILENAME_BASE}() {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component without export"
+	},
+	"React Function Component with Props (No Export)": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "fc-prop",
+		"body": [
+			"function ${TM_FILENAME_BASE}({ $1 }) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component with props without export"
+	},
+	"React Function Component with Props TypeScript (No Export)": {
+		"scope": "typescriptreact",
+		"prefix": "ts-fc-prop",
+		"body": [
+			"interface ${TM_FILENAME_BASE}Props {",
+			"  $1",
+			"}",
+			"",
+			"function ${TM_FILENAME_BASE}({ $2 }: ${TM_FILENAME_BASE}Props) {",
+			"  return (",
+			"    <div>",
+			"      $0",
+			"    </div>",
+			"  )",
+			"}"
+		],
+		"description": "React function component with TypeScript props without export"
+	},
+	"useState Hook": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "ust",
+		"body": [
+			"const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState($2)"
+		],
+		"description": "useState hook"
+	},
+	"useState Hook TypeScript": {
+		"scope": "typescriptreact",
+		"prefix": "ts-ust",
+		"body": [
+			"const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState<${2:type}>($3)"
+		],
+		"description": "useState hook with TypeScript type"
+	},
+	"useEffect Hook": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "uef",
+		"body": [
+			"useEffect(() => {",
+			"  $0",
+			"}, [$1])"
+		],
+		"description": "useEffect hook"
+	},
+	"useEffect Hook TypeScript": {
+		"scope": "typescriptreact",
+		"prefix": "ts-uef",
+		"body": [
+			"useEffect(() => {",
+			"  $0",
+			"}, [$1])"
+		],
+		"description": "useEffect hook TypeScript"
+	},
+	"useMemo Hook": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "umemo",
+		"body": [
+			"const ${1:memoizedValue} = useMemo(() => {",
+			"  return $0",
+			"}, [$2])"
+		],
+		"description": "useMemo hook"
+	},
+	"useMemo Hook TypeScript": {
+		"scope": "typescriptreact",
+		"prefix": "ts-umemo",
+		"body": [
+			"const ${1:memoizedValue} = useMemo<${2:type}>(() => {",
+			"  return $0",
+			"}, [$3])"
+		],
+		"description": "useMemo hook with TypeScript type"
+	},
+	"useCallback Hook": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "ucb",
+		"body": [
+			"const ${1:callback} = useCallback(() => {",
+			"  $0",
+			"}, [$2])"
+		],
+		"description": "useCallback hook"
+	},
+	"useCallback Hook TypeScript": {
+		"scope": "typescriptreact",
+		"prefix": "ts-ucb",
+		"body": [
+			"const ${1:callback} = useCallback<${2:type}>(() => {",
+			"  $0",
+			"}, [$3])"
+		],
+		"description": "useCallback hook with TypeScript type"
+	},
+	"useRef Hook": {
+		"scope": "javascriptreact,typescriptreact",
+		"prefix": "urf",
+		"body": [
+			"const ${1:ref} = useRef($2)"
+		],
+		"description": "useRef hook"
+	},
+	"useRef Hook TypeScript": {
+		"scope": "typescriptreact",
+		"prefix": "ts-urf",
+		"body": [
+			"const ${1:ref} = useRef<${2:type}>($3)"
+		],
+		"description": "useRef hook with TypeScript type"
+	},
+	"NestJS Controller": {
+		"scope": "typescript",
+		"prefix": "ns-ctrl",
+		"body": [
+			"import { Controller, Get } from '@nestjs/common'",
+			"",
+			"@Controller('${1:path}')",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @Get()",
+			"  ${2:findAll}() {",
+			"    return '$0'",
+			"  }",
+			"}"
+		],
+		"description": "NestJS controller"
+	},
+	"NestJS Controller CRUD": {
+		"scope": "typescript",
+		"prefix": "ns-ctrl-crud",
+		"body": [
+			"import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common'",
+			"",
+			"@Controller('${1:path}')",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @Get()",
+			"  findAll() {",
+			"    return 'This action returns all ${1:path}'",
+			"  }",
+			"",
+			"  @Get(':id')",
+			"  findOne(@Param('id') id: string) {",
+			"    return `This action returns a #${id} ${1:path}`",
+			"  }",
+			"",
+			"  @Post()",
+			"  create(@Body() createDto: any) {",
+			"    return 'This action adds a new ${1:path}'",
+			"  }",
+			"",
+			"  @Put(':id')",
+			"  update(@Param('id') id: string, @Body() updateDto: any) {",
+			"    return `This action updates a #${id} ${1:path}`",
+			"  }",
+			"",
+			"  @Delete(':id')",
+			"  remove(@Param('id') id: string) {",
+			"    return `This action removes a #${id} ${1:path}`",
+			"  }",
+			"}"
+		],
+		"description": "NestJS controller with CRUD operations"
+	},
+	"NestJS Controller with Param": {
+		"scope": "typescript",
+		"prefix": "ns-ctrl-param",
+		"body": [
+			"import { Controller, Get, Param } from '@nestjs/common'",
+			"",
+			"@Controller('${1:path}')",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @Get(':${2:id}')",
+			"  ${3:findOne}(@Param('${2:id}') ${2:id}: ${4:string}) {",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS controller with route parameter"
+	},
+	"NestJS Controller with Query": {
+		"scope": "typescript",
+		"prefix": "ns-ctrl-query",
+		"body": [
+			"import { Controller, Get, Query } from '@nestjs/common'",
+			"",
+			"@Controller('${1:path}')",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @Get()",
+			"  ${2:findAll}(@Query('${3:key}') ${3:key}: ${4:string}) {",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS controller with query parameter"
+	},
+	"NestJS Controller with Body": {
+		"scope": "typescript",
+		"prefix": "ns-ctrl-body",
+		"body": [
+			"import { Controller, Post, Body } from '@nestjs/common'",
+			"",
+			"@Controller('${1:path}')",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @Post()",
+			"  ${2:create}(@Body() ${3:createDto}: ${4:any}) {",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS controller with request body"
+	},
+	"NestJS Service": {
+		"scope": "typescript",
+		"prefix": "ns-se",
+		"body": [
+			"import { Injectable } from '@nestjs/common'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} {",
+			"  ${1:method}() {",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS service"
+	},
+	"NestJS Service CRUD": {
+		"scope": "typescript",
+		"prefix": "ns-se-crud",
+		"body": [
+			"import { Injectable } from '@nestjs/common'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} {",
+			"  findAll() {",
+			"    return 'This action returns all items'",
+			"  }",
+			"",
+			"  findOne(id: string) {",
+			"    return `This action returns a #${id} item`",
+			"  }",
+			"",
+			"  create(createDto: any) {",
+			"    return 'This action adds a new item'",
+			"  }",
+			"",
+			"  update(id: string, updateDto: any) {",
+			"    return `This action updates a #${id} item`",
+			"  }",
+			"",
+			"  remove(id: string) {",
+			"    return `This action removes a #${id} item`",
+			"  }",
+			"}"
+		],
+		"description": "NestJS service with CRUD methods"
+	},
+	"NestJS Module": {
+		"scope": "typescript",
+		"prefix": "ns-module",
+		"body": [
+			"import { Module } from '@nestjs/common'",
+			"",
+			"@Module({",
+			"  controllers: [],",
+			"  providers: [],",
+			"  exports: [],",
+			"})",
+			"export class ${TM_FILENAME_BASE} {}"
+		],
+		"description": "NestJS module"
+	},
+	"NestJS DTO": {
+		"scope": "typescript",
+		"prefix": "ns-dto",
+		"body": [
+			"export class ${TM_FILENAME_BASE} {",
+			"  $0",
+			"}"
+		],
+		"description": "NestJS DTO class"
+	},
+	"NestJS Entity": {
+		"scope": "typescript",
+		"prefix": "ns-entity",
+		"body": [
+			"import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'",
+			"",
+			"@Entity()",
+			"export class ${TM_FILENAME_BASE} {",
+			"  @PrimaryGeneratedColumn()",
+			"  id: number",
+			"",
+			"  $0",
+			"}"
+		],
+		"description": "NestJS TypeORM entity"
+	},
+	"NestJS Guard": {
+		"scope": "typescript",
+		"prefix": "ns-guard",
+		"body": [
+			"import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} implements CanActivate {",
+			"  canActivate(context: ExecutionContext): boolean {",
+			"    const request = context.switchToHttp().getRequest()",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS guard"
+	},
+	"NestJS Interceptor": {
+		"scope": "typescript",
+		"prefix": "ns-interceptor",
+		"body": [
+			"import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common'",
+			"import { Observable } from 'rxjs'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} implements NestInterceptor {",
+			"  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {",
+			"    return next.handle()",
+			"  }",
+			"}"
+		],
+		"description": "NestJS interceptor"
+	},
+	"NestJS Middleware": {
+		"scope": "typescript",
+		"prefix": "ns-middleware",
+		"body": [
+			"import { Injectable, NestMiddleware } from '@nestjs/common'",
+			"import { Request, Response, NextFunction } from 'express'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} implements NestMiddleware {",
+			"  use(req: Request, res: Response, next: NextFunction) {",
+			"    $0",
+			"    next()",
+			"  }",
+			"}"
+		],
+		"description": "NestJS middleware"
+	},
+	"NestJS Pipe": {
+		"scope": "typescript",
+		"prefix": "ns-pipe",
+		"body": [
+			"import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common'",
+			"",
+			"@Injectable()",
+			"export class ${TM_FILENAME_BASE} implements PipeTransform {",
+			"  transform(value: any, metadata: ArgumentMetadata) {",
+			"    return $0",
+			"  }",
+			"}"
+		],
+		"description": "NestJS pipe"
+	},
+	"NestJS Exception Filter": {
+		"scope": "typescript",
+		"prefix": "ns-exception-filter",
+		"body": [
+			"import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common'",
+			"",
+			"@Catch(HttpException)",
+			"export class ${TM_FILENAME_BASE} implements ExceptionFilter {",
+			"  catch(exception: HttpException, host: ArgumentsHost) {",
+			"    const ctx = host.switchToHttp()",
+			"    const response = ctx.getResponse()",
+			"    const request = ctx.getRequest()",
+			"    const status = exception.getStatus()",
+			"",
+			"    response.status(status).json({",
+			"      statusCode: status,",
+			"      timestamp: new Date().toISOString(),",
+			"      path: request.url,",
+			"    })",
+			"  }",
+			"}"
+		],
+		"description": "NestJS exception filter"
+	},
+	"TypeScript Interface": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-itf",
+		"body": [
+			"interface ${1:InterfaceName} {",
+			"  $0",
+			"}"
+		],
+		"description": "TypeScript interface"
+	},
+	"TypeScript Type": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-type",
+		"body": [
+			"type ${1:TypeName} = $0"
+		],
+		"description": "TypeScript type alias"
+	},
+	"TypeScript Enum": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-enum",
+		"body": [
+			"enum ${1:EnumName} {",
+			"  $0",
+			"}"
+		],
+		"description": "TypeScript enum"
+	},
+	"TypeScript Tuple": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-tuple",
+		"body": [
+			"type ${1:TupleName} = [${2:type1}, ${3:type2}]"
+		],
+		"description": "TypeScript tuple type"
+	},
+	"TypeScript Union": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-union",
+		"body": [
+			"type ${1:UnionName} = ${2:type1} | ${3:type2}"
+		],
+		"description": "TypeScript union type"
+	},
+	"TypeScript Record": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-record",
+		"body": [
+			"type ${1:RecordName} = Record<${2:string}, ${3:any}>"
+		],
+		"description": "TypeScript Record type"
+	},
+	"TypeScript Partial": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-partial",
+		"body": [
+			"type ${1:PartialName} = Partial<${2:Type}>"
+		],
+		"description": "TypeScript Partial utility type"
+	},
+	"TypeScript Readonly": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-readonly",
+		"body": [
+			"type ${1:ReadonlyName} = Readonly<${2:Type}>"
+		],
+		"description": "TypeScript Readonly utility type"
+	},
+	"TypeScript Omit": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-omit",
+		"body": [
+			"type ${1:OmitName} = Omit<${2:Type}, '${3:key}'>"
+		],
+		"description": "TypeScript Omit utility type"
+	},
+	"TypeScript Pick": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-pick",
+		"body": [
+			"type ${1:PickName} = Pick<${2:Type}, '${3:key}'>"
+		],
+		"description": "TypeScript Pick utility type"
+	},
+	"TypeScript Promise": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-promise",
+		"body": [
+			"Promise<${1:Type}>"
+		],
+		"description": "TypeScript Promise type"
+	},
+	"TypeScript Generic": {
+		"scope": "typescript,typescriptreact",
+		"prefix": "ts-generic",
+		"body": [
+			"<${1:T}>"
+		],
+		"description": "TypeScript generic type parameter"
+	},
+	"Console Log": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "csl",
+		"body": [
+			"console.log($0)"
+		],
+		"description": "Console log"
+	},
+	"Async Function": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "asfn",
+		"body": [
+			"async function ${1:name}($2) {",
+			"  $0",
+			"}"
+		],
+		"description": "Async function"
+	},
+	"Async Arrow Function": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "asfnr",
+		"body": [
+			"const ${1:name} = async ($2) => {",
+			"  $0",
+			"}"
+		],
+		"description": "Async arrow function"
+	},
+	"Normal Function": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "nfn",
+		"body": [
+			"function ${1:name}($2) {",
+			"  $0",
+			"}"
+		],
+		"description": "Normal function"
+	},
+	"Arrow Function": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "afn",
+		"body": [
+			"($1) => $0"
+		],
+		"description": "Arrow function"
+	},
+	"Object Spread": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "object-spread",
+		"body": [
+			"{ ...${1:obj}, $0 }"
+		],
+		"description": "Object spread operator"
+	},
+	"Array Spread": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "array-spread",
+		"body": [
+			"[...${1:arr}, $0]"
+		],
+		"description": "Array spread operator"
+	},
+	"Destructure Object": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "destructure-object",
+		"body": [
+			"const { ${1:prop} } = ${2:obj}"
+		],
+		"description": "Destructure object"
+	},
+	"Destructure Array": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "destructure-array",
+		"body": [
+			"const [${1:first}, ${2:second}] = ${3:arr}"
+		],
+		"description": "Destructure array"
+	},
+	"Try Catch": {
+		"scope": "javascript,typescript,javascriptreact,typescriptreact",
+		"prefix": "try-catch",
+		"body": [
+			"try {",
+			"  $0",
+			"} catch (error) {",
+			"  $1",
+			"}"
+		],
+		"description": "Try catch block"
+	}
+}

@@ -26,4 +26,8 @@ link_dir \
 	"$MODULE_DIR/files/scripts" \
 	"$HOME/.config/zellij/scripts"
 
+link_dir \
+	"$MODULE_DIR/files/themes" \
+	"$HOME/.config/zellij/themes"
+
 success "Zellij configured"

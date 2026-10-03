@@ -20,5 +20,9 @@ link_file \
 	"$MODULE_DIR/files/keybinds.toml" \
 	"$HOME/.config/umbriel/keybinds.toml"
 
+link_file \
+	"$MODULE_DIR/files/noctalia.toml" \
+	"$HOME/.config/umbriel/noctalia.toml"
+
 
 success "Umbriel configured"

@@ -83,9 +83,10 @@ if command -v bat >/dev/null 2>&1; then
 	alias catp='bat'
 fi
 
-# Lazygit & Lazydocker
+# Lazygit, Lazydocker & Superfile
 alias lg="lazygit"
 alias ld="lazydocker"
+alias spf="superfile"
 
 # System Monitoring & Resource Usage
 alias bottom="btm"
@@ -180,6 +181,11 @@ fi
 
 if [[ -f /usr/share/fzf/completion.zsh ]]; then
 	source /usr/share/fzf/completion.zsh
+fi
+
+# FZF Theme (Synced with Noctalia)
+if [[ -f "$HOME/.config/fzf/themes/noctalia.sh" ]]; then
+	source "$HOME/.config/fzf/themes/noctalia.sh"
 fi
 
 # NVM

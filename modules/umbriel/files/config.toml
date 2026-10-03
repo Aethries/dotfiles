@@ -9,6 +9,11 @@ files = [
 	"keybinds.toml",
 ]
 
+[include.optional]
+files = [
+  "noctalia.toml",
+]
+
 [general]
 autostart = ["noctalia", "fcitx5 -d"]
 mod_key = "super"
@@ -25,6 +30,14 @@ extent_presets = [0.333, 0.5, 0.667, 1.0]
 # Window Rules
 # ==============================================================================
 [[window_rule]]
+match.app_id = "^(pavucontrol|org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|imv|mpv)$"
+default_floating = true
+
+[[window_rule]]
+match.app_id = "^(org.freedesktop.impl.portal.desktop.*|xdg-desktop-portal.*|polkit-gnome-authentication-agent-1)$"
+default_floating = true
+
+[[window_rule]]
 match.app_id = "^(google-chrome.*|chromium.*|antigravity.*)$"
 default_scrolling_extent = 1.0
 
@@ -34,4 +47,13 @@ default_scrolling_extent = 1.0
 [input.keyboard]
 repeat_delay = 180
 repeat_rate = 50
+
+# ==============================================================================
+# Outputs
+# ==============================================================================
+[output.HDMI-A-1]
+mode = "1920x1080@120"
+scale = 1.0
+
+
 

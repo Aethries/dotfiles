@@ -22,6 +22,7 @@ ripgrep
 fd
 jq
 yazi
+superfile
 starship
 zoxide
 eza
@@ -54,11 +55,13 @@ pkgconf
 nvm
 
 # Desktop
+noctalia
 greetd
 gnome-keyring
 libsecret
 seahorse
 wl-clipboard
+libnotify
 xwayland-satellite
 pipewire
 pipewire-audio
