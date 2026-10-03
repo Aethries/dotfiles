@@ -7,3 +7,4 @@
 
 ## User
 - [user] Fast caret repeat delay (180ms/50Hz) and AI workflow (Ponytail, RTK Ultra, Caveman, MCPs) → user-preferences.md
+- [user] Strict execution: no unauthorized commit/push per-message, no silent changes, strict conventions, 100% unused cleanup → user-preferences.md

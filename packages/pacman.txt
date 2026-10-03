@@ -53,6 +53,8 @@ make
 cmake
 pkgconf
 nvm
+gitleaks
+pinentry
 
 # Desktop
 noctalia

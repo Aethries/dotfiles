@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Pre-commit hook: scan staged changes for secrets before commit
+if command -v gitleaks >/dev/null 2>&1; then
+	if ! gitleaks protect --staged -v; then
+		echo ""
+		echo "✗ Commit blocked by gitleaks pre-commit hook!"
+		echo "  Please remove detected secrets or update .gitleaksignore before committing."
+		exit 1
+	fi
+fi
