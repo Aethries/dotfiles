@@ -14,11 +14,9 @@ golang.go
 jnoortheen.nix-ide
 ms-azuretools.vscode-containers
 ms-azuretools.vscode-docker
-noctalia.noctaliatheme
 pkief.material-icon-theme
 prisma.prisma
 simkimsia.custom-local-formatters
 styled-components.vscode-styled-components
 sumneko.lua
 tamasfe.even-better-toml
-zixfel.ag-auto-click-scroll

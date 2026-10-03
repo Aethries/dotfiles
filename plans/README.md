@@ -12,6 +12,8 @@ flowchart TD
         P01["01. Noctalia Shell & Umbriel"] --> P02["02. Session Env & WebRTC"]
         P01 --> P03["03. Clipboard Manager (cliphist)"]
         P01 --> P04["04. Kanata & Warpd Navigation"]
+        P04 --> P13["13. Unified System Keymaps"]
+        P01 --> P14["14. Appearance & Visual Harmony"]
     end
 
     subgraph G2["Giai đoạn 2: Developer Tooling & Multi-Runtime"]
@@ -40,7 +42,7 @@ flowchart TD
 
 ---
 
-## 2. Danh mục 12 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 14 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
@@ -58,6 +60,8 @@ Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**
 | **10** | [10-neovim-ecosystem-va-dong-bo-theme-noctalia.md](file:///home/loc/Workspaces/dotfiles/plans/10-neovim-ecosystem-va-dong-bo-theme-noctalia.md) | Xây dựng `modules/nvim` hoàn chỉnh (Lazy.nvim, Mason LSP, `flash.nvim`) và đồng bộ theme toàn hệ thống qua Noctalia | ⏳ Chờ 04, 06 |
 | **11** | [11-ai-developer-tooling-va-agentic-workflow.md](file:///home/loc/Workspaces/dotfiles/plans/11-ai-developer-tooling-va-agentic-workflow.md) | Hệ sinh thái AI Engineering: AG Kit, Ponytail YAGNI, RTK Ultra token compression, Caveman mode, CodeGraph MCP & Codebase MCP | ⏳ Chờ 06, 10 |
 | **12** | [12-modern-shell-terminal-va-cli-ecosystem.md](file:///home/loc/Workspaces/dotfiles/plans/12-modern-shell-terminal-va-cli-ecosystem.md) | Terminal Workstation: Lazydocker, Bat, Superfile, Git-Delta, Resource Monitoring (btm/dust/duf) & Data CLI | ⏳ Sẵn sàng |
+| **13** | [13-unified-system-keymaps-va-shortcuts.md](file:///home/loc/Workspaces/dotfiles/plans/13-unified-system-keymaps-va-shortcuts.md) | Hệ thống Phím tắt Toàn cục: Umbriel Window Nav, Zellij Split, Modal Editor, Kanata Dual-role & Warpd Mouse | ⏳ Sẵn sàng |
+| **14** | [14-appearance-scaling-fonts-va-visual-harmony.md](file:///home/loc/Workspaces/dotfiles/plans/14-appearance-scaling-fonts-va-visual-harmony.md) | Quản trị Giao diện & Hiển thị: Wayland Display Scale, UI Scale 0.9, Fontconfig JetBrains Mono, Cursor 24px & GTK/Qt Dark Mode | ⏳ Sẵn sàng |
 
 ---
 
