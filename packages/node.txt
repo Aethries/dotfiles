@@ -1,1 +1,3 @@
-9router
+9router@latest
+9remote@latest
+@vudovn/ag-kit@latest

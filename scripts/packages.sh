@@ -27,7 +27,7 @@ install_pacman_packages() {
 		return
 	fi
 
-	sudo pacman -S --needed --noconfirm "${packages[@]}"
+	sudo pacman -Syu --needed --noconfirm "${packages[@]}"
 	success "Pacman packages installed"
 }
 
@@ -45,7 +45,7 @@ install_aur_packages() {
 		return
 	fi
 
-	yay -S --needed --noconfirm --sudoloop "${packages[@]}"
+	yay -Syu --needed --noconfirm --sudoloop "${packages[@]}"
 
 	success "AUR packages installed"
 }
