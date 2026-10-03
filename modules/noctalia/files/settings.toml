@@ -71,7 +71,6 @@ widget_order = [ "lockscreen-login-box@HDMI-A-1", "lockscreen-login-box@HDMI-A-2
 enabled = [
     "noctalia/notes",
     "noctalia/umbriel-companion",
-    "noctalia/screen_recorder",
     "levi/warp",
     "oldirtty/color_picker",
     "vn1k/cursor",
@@ -83,7 +82,8 @@ enabled = [
     "fel/ocr",
     "yocraft/qrcode",
     "cleboost/ssh-launcher",
-    "davemhammer/tailscale"
+    "davemhammer/tailscale",
+    "noctalia/screen_recorder"
 ]
 
 [shell]

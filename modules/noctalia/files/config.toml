@@ -54,3 +54,8 @@ enabled = true
 kind = "git"
 location = "https://github.com/noctalia-dev/community-plugins"
 name = "community"
+
+[plugin_settings."noctalia/screen_recorder"]
+video_encoder = "cpu"
+video_source = "focused"
+filename_pattern = "%Y_%m_%d_%H_%M_%S"

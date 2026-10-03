@@ -9,11 +9,11 @@ Tài liệu này tổng hợp toàn bộ lộ trình triển khai 11 kế hoạc
 ```mermaid
 flowchart TD
     subgraph G1["Giai đoạn 1: Desktop, Session & Core Input"]
-        P01["01. Noctalia Shell & Umbriel"] --> P02["02. Session Env & WebRTC"]
-        P01 --> P03["03. Clipboard Manager (cliphist)"]
-        P01 --> P04["04. Kanata & Warpd Navigation"]
+        P02["02. Session Env & WebRTC"]
+        P03["03. Clipboard Manager (cliphist)"]
+        P04["04. Kanata & Warpd Navigation"]
         P04 --> P13["13. Unified System Keymaps"]
-        P01 --> P14["14. Appearance & Visual Harmony"]
+        P14["14. Appearance & Visual Harmony"]
     end
 
     subgraph G2["Giai đoạn 2: Developer Tooling & Multi-Runtime"]
@@ -30,7 +30,6 @@ flowchart TD
 
     subgraph G4["Giai đoạn 4: Editor & Visual Harmony"]
         P06 --> P10["10. Neovim Ecosystem & Theme Sync"]
-        P01 -. Theme Engine .-> P10
         P04 -. Checkpoint Nav .-> P10
     end
 
@@ -42,13 +41,12 @@ flowchart TD
 
 ---
 
-## 2. Danh mục 14 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 13 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
 | Thứ tự | File Kế hoạch | Tên Chức năng & Trọng tâm | Trạng thái |
 |:---:|---|---|:---:|
-| **01** | [01-noctalia-desktop-shell-va-umbriel.md](file:///home/loc/Workspaces/dotfiles/plans/01-noctalia-desktop-shell-va-umbriel.md) | Khôi phục `modules/noctalia` (sửa broken symlink), quản lý Notification/OSD/Wallpaper native, hoàn thiện window rules & keybinds Umbriel | ✅ Đã hoàn thành |
 | **02** | [02-session-environment-va-webrtc-screensharing.md](file:///home/loc/Workspaces/dotfiles/plans/02-session-environment-va-webrtc-screensharing.md) | Chuẩn hóa `~/.config/environment.d/` toàn cục, cờ Wayland Ozone & PipeWire WebRTC capturer cho Chrome, Slack, Lark | ⏳ Sẵn sàng |
 | **03** | [03-clipboard-manager-cliphist.md](file:///home/loc/Workspaces/dotfiles/plans/03-clipboard-manager-cliphist.md) | Quản lý lịch sử clipboard Wayland qua `cliphist`, systemd user service, tích hợp Noctalia launcher và FZF | ⏳ Sẵn sàng |
 | **04** | [04-kanata-kernel-keyboard-va-warpd-hint-navigation.md](file:///home/loc/Workspaces/dotfiles/plans/04-kanata-kernel-keyboard-va-warpd-hint-navigation.md) | Remapping phím tầng kernel (`kanata` home-row mods, tương thích Telex Fcitx5 Bamboo), tối ưu repeat delay/rate (180ms/50Hz) & điều khiển chuột bàn phím (`warpd` hint mode) | ⏳ Sẵn sàng |

@@ -16,10 +16,11 @@
 "Mod+Shift+N" = "spawn:noctalia msg notification-dnd-toggle"
 "Mod+Shift+R" = "config-reload"
 
-# Screenshot & Annotation
+# Screenshot & Screen Recording
 "Print" = "spawn:noctalia msg screenshot-fullscreen"
 "Mod+Print" = "spawn:noctalia msg screenshot-region"
-"Mod+Shift+S" = "spawn:noctalia msg screenshot-annotate"
+"Mod+S" = "spawn:noctalia msg screenshot-annotate"
+"Mod+R" = "spawn:noctalia msg plugin noctalia/screen_recorder:service all toggle"
 
 # Audio & Media OSD
 "XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"

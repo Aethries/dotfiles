@@ -56,6 +56,20 @@ nvm
 
 # Desktop
 noctalia
+gpu-screen-recorder
+intel-media-driver
+libva-utils
+libreoffice-fresh
+libreoffice-fresh-vi
+nautilus
+gvfs
+gvfs-mtp
+gvfs-smb
+sushi
+file-roller
+adw-gtk-theme
+ffmpegthumbnailer
+loupe
 greetd
 gnome-keyring
 libsecret

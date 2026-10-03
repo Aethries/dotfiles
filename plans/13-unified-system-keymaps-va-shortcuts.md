@@ -51,7 +51,8 @@
 * `Mod + Shift + 1 .. 9`: Di chuyển cửa sổ đang chọn sang Workspace tương ứng.
 * `Mod + N`: Mở bảng thông báo (Notification Center).
 * `Mod + Shift + N`: Bật/Tắt Do Not Disturb (DND).
-* `Mod + Shift + S`: Đóng băng màn hình và chụp ảnh chú thích (Screenshot Annotation).
+* `Mod + S`: Đóng băng màn hình và chụp ảnh chú thích (Screenshot Annotation).
+* `Mod + R`: Bật/Tắt quay màn hình (Screen Recording toggle qua `noctalia/screen_recorder`).
 * `Mod + V`: Mở lịch sử Clipboard (`cliphist`).
 * `Mod + BackSpace`: Khóa màn hình (Lock screen).
 
