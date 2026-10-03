@@ -11,8 +11,8 @@ keybinds clear-defaults=true {
 		bind "Ctrl Shift q" { CloseTab; }
 		bind "Ctrl r" { SwitchToMode "RenameTab"; TabNameInput 0; }
 		bind "Ctrl Shift r" { SwitchToMode "RenamePane"; PaneNameInput 0; }
-		bind "Ctrl Shift [" "Ctrl Shift Left" { GoToPreviousTab; }
-		bind "Ctrl Shift ]" "Ctrl Shift Right" { GoToNextTab; }
+		bind "Ctrl Shift [" { GoToPreviousTab; }
+		bind "Ctrl Shift ]" { GoToNextTab; }
 		bind "Ctrl 1" "Ctrl Shift 1" { GoToTab 1; }
 		bind "Ctrl 2" "Ctrl Shift 2" { GoToTab 2; }
 		bind "Ctrl 3" "Ctrl Shift 3" { GoToTab 3; }
@@ -26,19 +26,50 @@ keybinds clear-defaults=true {
 		// --- Pane Management ---
 		bind "Ctrl n" "Ctrl Shift n" { NewPane; }
 		bind "Ctrl Shift d" { NewPane "Down"; }
+		bind "Ctrl Shift \\" { NewPane "Right"; }
 		bind "Ctrl Shift f" { ToggleFocusFullscreen; }
 		bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
 		bind "Ctrl Shift p" { ToggleFloatingPanes; }
 
-		// --- Pane Navigation (Vim style & Arrows) ---
+		// --- Seamless Neovim / Zellij Pane Navigation ---
+		bind "Ctrl h" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus_or_tab";
+				payload "left";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl j" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus";
+				payload "down";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl k" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus";
+				payload "up";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl l" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus_or_tab";
+				payload "right";
+				move_mod "ctrl";
+			};
+		}
+
+		// --- Unconditional Zellij Navigation (bypass editor) ---
 		bind "Ctrl Shift h" "Ctrl Shift Left" { MoveFocusOrTab "Left"; }
 		bind "Ctrl Shift l" "Ctrl Shift Right" { MoveFocusOrTab "Right"; }
 		bind "Ctrl Shift j" "Ctrl Shift Down" { MoveFocus "Down"; }
 		bind "Ctrl Shift k" "Ctrl Shift Up" { MoveFocus "Up"; }
 
 		// --- Resize Panes ---
-		bind "Ctrl Shift =" "Ctrl Shift +" { Resize "Increase"; }
-		bind "Ctrl Shift -" { Resize "Decrease"; }
+		bind "Ctrl =" "Ctrl +" { Resize "Increase"; }
+		bind "Ctrl -" { Resize "Decrease"; }
 
 		// --- Layout & View ---
 		bind "Ctrl Shift Space" { NextSwapLayout; }
