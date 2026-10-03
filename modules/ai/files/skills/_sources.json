@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "sources": {
+    "canonical": {
+      "name": "Dotfiles Canonical Skills",
+      "type": "local",
+      "path": "resources/skills",
+      "url": "https://github.com/Aethries/dotfiles",
+      "description": "Repo-owned canonical skills maintained directly within dotfiles",
+      "trust_level": "trusted",
+      "curation_policy": "strict"
+    },
+    "official-vendor": {
+      "name": "Official Vendor First",
+      "type": "policy",
+      "description": "Prefer the original first-party repository maintained by the technology owner.",
+      "trust_level": "highest",
+      "curation_policy": "vendor-first",
+      "priority": 100
+    },
+    "anthropic-skills": {
+      "name": "Anthropic Official Skills",
+      "type": "git",
+      "url": "https://github.com/anthropics/skills",
+      "description": "Standard agent skills authored and maintained by Anthropic",
+      "trust_level": "trusted",
+      "curation_policy": "vendor-verified"
+    },
+    "skills-sh": {
+      "name": "Skills.sh Community Registry",
+      "type": "registry",
+      "url": "https://skills.sh",
+      "description": "Open public skill catalog for autonomous coding agents",
+      "trust_level": "community",
+      "curation_policy": "curated-audit"
+    },
+    "agentic-awesome-skills": {
+      "name": "Agentic Awesome Skills",
+      "type": "git",
+      "url": "https://github.com/sickn33/agentic-awesome-skills",
+      "description": "Curated collection of community and enterprise agent skills",
+      "trust_level": "community",
+      "curation_policy": "curated-audit"
+    },
+    "github-search": {
+      "name": "GitHub Curated Discovery",
+      "type": "search",
+      "url": "https://github.com/search?q=topic%3Aagent-skills",
+      "description": "General discovery endpoint for open source agent skills",
+      "trust_level": "unverified",
+      "curation_policy": "manual-review-required"
+    }
+  }
+}

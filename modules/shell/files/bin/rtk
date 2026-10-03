@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""
+RTK Ultra - Rust Token Killer & Output Compression Filter.
+Reduces token consumption from terminal command outputs for AI pair programming.
+"""
+
+import sys
+import os
+import re
+import subprocess
+
+ANSI_REGEX = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+PROGRESS_REGEX = re.compile(r"(\r|\[\s*\d+%\s*\]|Download(ing)?|\bETA\b|Progress:)")
+PASS_REGEX = re.compile(
+    r"^\s*(?:[✓✔]|ok|PASS|\[PASS\]|passed|test [^\n]+ \.\.\. ok)\b",
+    re.IGNORECASE,
+)
+SUMMARY_REGEX = re.compile(
+    r"^\s*(?:FAIL|FAILED|Error|Warning|Summary|Test Suites:|Tests:|Snapshots:|Time:|Ran \d+ tests|failures:)",
+    re.IGNORECASE,
+)
+
+
+def strip_ansi(text: str) -> str:
+    return ANSI_REGEX.sub("", text)
+
+
+def filter_stream(lines: list[str], max_lines: int = 400) -> str:
+    cleaned = []
+    pass_count = 0
+
+    for line in lines:
+        raw = strip_ansi(line)
+        # Skip carriage return progress bars
+        if "\r" in line and not any(k in raw.lower() for k in ["error", "fail"]):
+            parts = [p.strip() for p in raw.split("\r") if p.strip()]
+            raw = parts[-1] if parts else ""
+        if not raw.strip():
+            continue
+
+        # Check for passing test lines to collapse
+        if PASS_REGEX.search(raw) and not SUMMARY_REGEX.search(raw):
+            pass_count += 1
+            continue
+
+        if pass_count > 0:
+            if pass_count <= 3:
+                cleaned.append(f"  [✓ {pass_count} tests passed]")
+            else:
+                cleaned.append(f"  [✓ {pass_count} passing tests collapsed by rtk]")
+            pass_count = 0
+
+        cleaned.append(raw)
+
+    if pass_count > 0:
+        cleaned.append(f"  [✓ {pass_count} passing tests collapsed by rtk]")
+
+    if len(cleaned) > max_lines:
+        keep_head = max_lines // 2
+        keep_tail = max_lines // 4
+        truncated_count = len(cleaned) - keep_head - keep_tail
+        summary = (
+            cleaned[:keep_head]
+            + [f"\n--- [rtk: collapsed {truncated_count} lines of verbose output] ---\n"]
+            + cleaned[-keep_tail:]
+        )
+        return "\n".join(summary)
+
+    return "\n".join(cleaned)
+
+
+def main():
+    if len(sys.argv) == 1:
+        # Piped mode: read from sys.stdin
+        if sys.stdin.isatty():
+            print("Usage: rtk <command> [args...] OR <command> | rtk")
+            sys.exit(0)
+        content = sys.stdin.readlines()
+        filtered = filter_stream(content)
+        if filtered:
+            print(filtered)
+        sys.exit(0)
+
+    arg1 = sys.argv[1]
+    if arg1 in ("-h", "--help"):
+        print("RTK Ultra - Token Compression Filter")
+        print("Usage:")
+        print("  rtk <command> [args...]")
+        print("  <command> | rtk")
+        print("\nExamples:")
+        print("  rtk git status -s")
+        print("  rtk git diff")
+        print("  rtk cargo test")
+        print("  rtk npm test")
+        sys.exit(0)
+
+    if arg1 in ("-v", "--version"):
+        print("rtk ultra 1.0.0")
+        sys.exit(0)
+
+    # Execution mode
+    cmd = sys.argv[1:]
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+        )
+        lines = []
+        if proc.stdout:
+            for line in proc.stdout:
+                lines.append(line)
+        proc.wait()
+
+        filtered = filter_stream(lines)
+        if filtered:
+            print(filtered)
+        sys.exit(proc.returncode)
+    except FileNotFoundError:
+        sys.stderr.write(f"rtk: command not found: {cmd[0]}\n")
+        sys.exit(127)
+    except KeyboardInterrupt:
+        sys.exit(130)
+
+
+if __name__ == "__main__":
+    main()

@@ -130,4 +130,15 @@ link_file \
 	"$MODULE_DIR/files/bat/config" \
 	"$HOME/.config/bat/config"
 
+# Link CLI utilities (RTK Ultra, etc.)
+if [[ -d "$MODULE_DIR/files/bin" ]]; then
+	mkdir -p "$HOME/.local/bin"
+	for bin_file in "$MODULE_DIR/files/bin"/*; do
+		if [[ -f "$bin_file" ]]; then
+			chmod +x "$bin_file"
+			link_file "$bin_file" "$HOME/.local/bin/$(basename "$bin_file")"
+		fi
+	done
+fi
+
 success "Shell configured"

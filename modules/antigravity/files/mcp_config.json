@@ -1,0 +1,64 @@
+{
+  "mcpServers": {
+    "9remote": {
+      "url": "http://127.0.0.1:2208/mcp",
+      "headers": {
+        "Authorization": "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c2b039584"
+      }
+    },
+    "agent-memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentmemory/mcp@0.9.29"
+      ],
+      "env": {
+        "AGENTMEMORY_URL": "http://127.0.0.1:3111"
+      }
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v2/mcp"
+    },
+    "codebase-memory": {
+      "command": "uvx",
+      "args": [
+        "codebase-memory-mcp"
+      ],
+      "env": {}
+    },
+    "codegraph": {
+      "command": "uvx",
+      "args": [
+        "code-review-graph",
+        "mcp"
+      ],
+      "env": {}
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "jev-local": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "\"/home/loc/Workspaces/dotfiles/scripts/jev-mcp.sh\""
+      ],
+      "env": {
+        "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
+        "JEV_MODEL": "oc/jev-1.13-free"
+      }
+    },
+    "jira": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.atlassian.com/v2/mcp"
+      ]
+    }
+  }
+}
