@@ -1,4 +1,4 @@
-;; Kanata configuration with Navigation & Visual Modes
+;; Kanata configuration with Navigation, Visual & Mouse Modes
 (defcfg
   process-unmapped-keys yes
 )
@@ -7,46 +7,56 @@
 
 (defalias
   ;; Chuyển đổi giữa các Layer
-  to-nav   (layer-switch nav)
-  cap-nav  (fork caps @to-nav (lsft rsft))
-  to-base  (layer-switch base)
-  to-vis   (layer-switch visual)
+  to-nav    (layer-switch nav)
+  cap-nav   (fork caps @to-nav (lsft rsft))
+  to-base   (layer-switch base)
+  to-vis    (layer-switch visual)
+
+  ;; Kích hoạt chuột Warpd (Super + ;) và chuyển Kanata sang mouse layer
+  warp-m    (multi (release-key lsft) (release-key rsft) (macro M-scln) (layer-switch mouse))
+  scln-base (fork scln (multi (macro M-scln) (layer-switch mouse)) (lmet rmet))
+
+  ;; Phím Enter / Tab trong Nav mode: Nhận phím thật vào IDE rồi mới về Normal mode
+  ret-base  (multi ret (layer-switch base))
+  tab-base  (multi tab (layer-switch base))
 
   ;; --- Navigation Mode Aliases ---
   ;; Điều hướng Tab khi giữ Shift + h / l trong nav layer
-  ;; Shift đang được giữ liên tục:
-  ;; h: gửi C-tab (kết hợp với Shift đang giữ thành Ctrl+Shift+Tab) mà không làm ngắt Shift
-  ;; l: tạm thời nhả Shift trong lúc gửi C-tab rồi phục hồi lại Shift
-  h-nav    (fork left C-tab (lsft rsft))
-  l-nav    (fork rght (unshift lctl tab) (lsft rsft))
+  h-nav     (fork left C-tab (lsft rsft))
+  l-nav     (fork rght (unshift lctl tab) (lsft rsft))
 
   ;; Phím $ (Shift + 4) hoặc 4 về End
-  end-nav  (fork end (unshift end) (lsft rsft))
+  end-nav   (fork end (unshift end) (lsft rsft))
 
   ;; x: Del (xóa tới) / Shift + x: Backspace (xóa lùi)
-  x-nav    (fork del (unshift bspc) (lsft rsft))
+  x-nav     (fork del (unshift bspc) (lsft rsft))
 
   ;; g: Đầu file (Ctrl+Home) / Shift + g: Cuối file (Ctrl+End)
-  g-nav    (fork C-home (unshift lctl end) (lsft rsft))
+  g-nav     (fork C-home (unshift lctl end) (lsft rsft))
 
   ;; z: Undo (Ctrl+z) / Shift + z: Redo (Ctrl+y)
-  z-nav    (fork C-z (unshift lctl y) (lsft rsft))
-
-  ;; Kích hoạt chuột Warpd (Super + ;) và trả Kanata về base layer để Warpd nhận phím gốc
-  warp-m   (multi (release-key lsft) (release-key rsft) (macro M-scln) (layer-switch base))
+  z-nav     (fork C-z (unshift lctl y) (lsft rsft))
 
   ;; --- Visual Mode Aliases ---
   ;; Thao tác vùng chọn: Copy / Cut / Paste / Delete rồi quay lại nav mode
-  vis-y    (multi (release-key lsft) (release-key rsft) C-c (layer-switch nav))
-  vis-c    (multi (release-key lsft) (release-key rsft) C-x (layer-switch nav))
-  vis-p    (multi (release-key lsft) (release-key rsft) C-v (layer-switch nav))
-  vis-del  (multi (release-key lsft) (release-key rsft) bspc (layer-switch nav))
+  vis-y     (multi (release-key lsft) (release-key rsft) C-c (layer-switch nav))
+  vis-c     (multi (release-key lsft) (release-key rsft) C-x (layer-switch nav))
+  vis-p     (multi (release-key lsft) (release-key rsft) C-v (layer-switch nav))
+  vis-del   (multi (release-key lsft) (release-key rsft) bspc (layer-switch nav))
 
   ;; Bôi đen đầu / cuối tài liệu trong Visual mode
-  g-vis    (fork C-S-home (multi (release-key lsft) (release-key rsft) C-S-end) (lsft rsft))
+  g-vis     (fork C-S-home (multi (release-key lsft) (release-key rsft) C-S-end) (lsft rsft))
 
   ;; Bôi đen cuối dòng trong Visual mode
-  end-vis  (fork S-end (multi (release-key lsft) (release-key rsft) S-end) (lsft rsft))
+  end-vis   (fork S-end (multi (release-key lsft) (release-key rsft) S-end) (lsft rsft))
+
+  ;; --- Mouse Mode Aliases ---
+  ;; Phím n: Gửi Esc tắt Warpd và chuyển Kanata sang nav layer
+  m-to-nav  (multi (macro esc) (layer-switch nav))
+  m-exit    (multi (macro esc) (layer-switch base))
+  m-i       (multi (macro i)   (layer-switch base))
+  m-c       (multi (macro c)   (layer-switch base))
+  m-slash   (multi (macro /)   (layer-switch base))
 )
 
 ;; -------------------------------------------------------------
@@ -54,6 +64,7 @@
 ;; -------------------------------------------------------------
 (deflayermap (base)
   caps @cap-nav
+  scln @scln-base
 )
 
 ;; -------------------------------------------------------------
@@ -62,9 +73,12 @@
 (deflayermap (nav)
   ;; Thoát về normal mode
   caps @to-base
-  ret  @to-base
   esc  @to-base
   i    @to-base
+
+  ;; Enter và Tab: gửi phím thực vào IDE rồi quay về normal mode
+  ret  @ret-base
+  tab  @tab-base
 
   ;; Mũi tên điều hướng cơ bản
   h    @h-nav
@@ -151,4 +165,20 @@
   p    @vis-p
   del  @vis-del
   bspc @vis-del
+)
+
+;; -------------------------------------------------------------
+;; 4. Mouse Layer (Active when Warpd is running)
+;; -------------------------------------------------------------
+(deflayermap (mouse)
+  ;; Phím n: Tắt Warpd và chuyển sang nav mode
+  n    @m-to-nav
+
+  ;; Phím thoát Warpd về base typing mode
+  esc  @m-exit
+  caps @m-exit
+  ret  @m-exit
+  i    @m-i
+  c    @m-c
+  /    @m-slash
 )

@@ -53,8 +53,8 @@ screen: unbind
 # Gõ 'f' để hiện lại các điểm hint khi đang ở trong mouse mode
 hint: f
 
-# Hint Density & Generation (Alphanumeric 36 chars -> 1296 target points)
-hint_chars: abcdefghijklmnopqrstuvwxyz0123456789
+# Hint Density & Generation (Alphanumeric 35 chars excluding 'n' -> 1225 target points)
+hint_chars: abcdefghijklmopqrstuvwxyz0123456789
 hint_size: 11
 hint_border_radius: 2
 
