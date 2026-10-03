@@ -53,7 +53,7 @@
 * `Mod + Shift + N`: Bật/Tắt Do Not Disturb (DND).
 * `Mod + S`: Đóng băng màn hình và chụp ảnh chú thích (Screenshot Annotation).
 * `Mod + R`: Bật/Tắt quay màn hình (Screen Recording toggle qua `noctalia/screen_recorder`).
-* `Mod + V`: Mở lịch sử Clipboard (`cliphist`).
+* `Mod + V`: Mở lịch sử Clipboard (`clipse` trong cửa sổ Kitty nổi).
 * `Mod + BackSpace`: Khóa màn hình (Lock screen).
 
 #### 2. Điều hướng Terminal Multiplexer (Zellij / Kitty)

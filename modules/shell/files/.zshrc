@@ -15,7 +15,7 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 
 # Path additions
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
 
 # History
 HISTFILE="$HOME/.zsh_history"
@@ -106,9 +106,10 @@ if command -v gping >/dev/null 2>&1; then
 	alias ping="gping"
 fi
 
-# Clipboard History
-alias clip="cliphist-picker"
-alias clip-wipe="cliphist wipe"
+# Clipboard Manager (Clipse)
+alias clip="clip-picker"
+alias clip-tui="clipse"
+alias clip-clear="clipse -clear"
 
 # ------------------------------------------------------------------------------
 # Editor & IDE Quick Launchers

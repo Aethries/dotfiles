@@ -1,14 +1,13 @@
 [Unit]
-Description=Cliphist Clipboard History Watcher
+Description=Clipse Clipboard Manager Listener
 PartOf=graphical-session.target
 After=graphical-session.target
 
 [Service]
-Type=simple
+Type=oneshot
+RemainAfterExit=yes
 Environment="PATH=%h/.local/bin:%h/go/bin:/usr/local/bin:/usr/bin:/bin"
-ExecStart=/bin/sh -c 'exec wl-paste --watch cliphist store'
-Restart=on-failure
-RestartSec=2s
+ExecStart=%h/.local/bin/clipse -listen
 
 [Install]
 WantedBy=default.target

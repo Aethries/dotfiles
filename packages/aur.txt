@@ -13,6 +13,7 @@ visual-studio-code-bin
 umbriel-git
 xdg-desktop-portal-umbriel-git
 noctalia-greeter
+clipse
 
 # AI
 antigravity
