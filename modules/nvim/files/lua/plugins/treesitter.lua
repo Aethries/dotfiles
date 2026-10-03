@@ -8,8 +8,11 @@ return {
       ensure_installed = {
         "bash",
         "c",
+        "css",
         "diff",
+        "dockerfile",
         "go",
+        "graphql",
         "html",
         "javascript",
         "json",
@@ -17,10 +20,12 @@ return {
         "luadoc",
         "markdown",
         "markdown_inline",
+        "prisma",
         "python",
         "query",
         "regex",
         "rust",
+        "sql",
         "toml",
         "tsx",
         "typescript",
@@ -45,5 +50,32 @@ return {
         require("nvim-treesitter").setup(opts)
       end
     end,
+  },
+
+  -- Treesitter Context: Sticky function/class header pinned at top while scrolling
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = {
+      max_lines = 3,
+      min_window_height = 20,
+      multiline_threshold = 1,
+      trim_scope = "outer",
+      mode = "cursor",
+    },
+    keys = {
+      {
+        "[k",
+        function()
+          require("treesitter-context").go_to_context(vim.v.count1)
+        end,
+        desc = "Nhảy lên đầu khối context (Treesitter)",
+      },
+      {
+        "<leader>tc",
+        "<cmd>TSContextToggle<cr>",
+        desc = "Bật/Tắt thanh ngữ cảnh dính (Sticky Context)",
+      },
+    },
   },
 }

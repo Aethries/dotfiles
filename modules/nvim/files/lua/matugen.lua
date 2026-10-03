@@ -1,4 +1,4 @@
- local M = {}
+local M = {}
 
 function M.setup()
   local ok, base16 = pcall(require, 'base16-colorscheme')
@@ -29,34 +29,82 @@ function M.setup()
     vim.api.nvim_set_hl(0, group, opts)
   end
 
+  -- Window & Split chrome
+  hi('WinSeparator',            { fg = '#474240',          bg = 'NONE' })
+  hi('VertSplit',               { fg = '#474240',          bg = 'NONE' })
+  hi('CursorLine',              { bg = '#32302f' })
+  hi('CursorLineNr',            { fg = '#fabd2f',          bold = true })
+  hi('LineNr',                  { fg = '#76706c' })
+  hi('SignColumn',              { bg = 'NONE' })
+
+  -- Floating Windows
+  hi('NormalFloat',             { fg = '#fbf1c7',          bg = '#32302f' })
+  hi('FloatBorder',             { fg = '#76706c',          bg = '#32302f' })
+  hi('FloatTitle',              { fg = '#282828',          bg = '#b8bb26', bold = true })
+
+  -- Popup & Autocompletion Menu (Pmenu)
+  hi('Pmenu',                   { fg = '#fbf1c7',          bg = '#32302f' })
+  hi('PmenuSel',                { fg = '#282828',          bg = '#b8bb26', bold = true })
+  hi('PmenuSbar',               { bg = '#3c3836' })
+  hi('PmenuThumb',              { bg = '#76706c' })
+
+  -- Diagnostics
+  hi('DiagnosticError',         { fg = '#fb4934' })
+  hi('DiagnosticWarn',          { fg = '#fabd2f' })
+  hi('DiagnosticInfo',          { fg = '#83a598' })
+  hi('DiagnosticHint',          { fg = '#96e9c9' })
+  hi('DiagnosticUnderlineError',{ sp = '#fb4934',          undercurl = true })
+  hi('DiagnosticUnderlineWarn', { sp = '#fabd2f',          undercurl = true })
+  hi('DiagnosticUnderlineInfo', { sp = '#83a598',          undercurl = true })
+  hi('DiagnosticUnderlineHint', { sp = '#96e9c9',          undercurl = true })
+
+  -- Git Signs & Diffs
+  hi('GitSignsAdd',             { fg = '#b8bb26' })
+  hi('GitSignsChange',          { fg = '#83a598' })
+  hi('GitSignsDelete',          { fg = '#fb4934' })
+  hi('DiffAdd',                 { fg = '#b8bb26',          bg = '#32302f' })
+  hi('DiffChange',              { fg = '#83a598',          bg = '#32302f' })
+  hi('DiffDelete',              { fg = '#fb4934',          bg = '#32302f' })
+  hi('DiffText',                { fg = '#fabd2f',          bg = '#474240', bold = true })
+
+  -- Indent Blankline
+  hi('IblIndent',               { fg = '#3c3836' })
+  hi('IblScope',                { fg = '#76706c' })
+
+  -- Bufferline
+  hi('BufferLineFill',          { bg = '#282828' })
+  hi('BufferLineBackground',    { fg = '#76706c',          bg = '#32302f' })
+  hi('BufferLineBufferSelected',{ fg = '#fbf1c7',          bg = '#282828', bold = true })
+  hi('BufferLineSeparator',     { fg = '#282828',          bg = '#32302f' })
+  hi('BufferLineSeparatorSelected', { fg = '#282828',      bg = '#282828' })
+  hi('BufferLineIndicatorSelected', { fg = '#b8bb26',      bg = '#282828' })
+
   -- telescope.nvim
   hi('TelescopeNormal',         { fg = '#fbf1c7',          bg = '#282828' })
-  hi('TelescopeBorder',         { fg = '#76706c',             bg = '#282828' })
-  hi('TelescopePromptNormal',   { fg = '#fbf1c7',          bg = '#282828' })
-  hi('TelescopePromptBorder',   { fg = '#76706c',             bg = '#282828' })
-  hi('TelescopePromptPrefix',   { fg = '#b8bb26',             bg = '#282828' })
-  hi('TelescopePromptCounter',  { fg = '#ebdbb2',  bg = '#282828' })
-  hi('TelescopePromptTitle',    { fg = '#282828',             bg = '#b8bb26' })
-  hi('TelescopePreviewTitle',   { fg = '#282828',             bg = '#fabd2f' })
-  hi('TelescopeResultsTitle',   { fg = '#282828',             bg = '#83a598' })
+  hi('TelescopeBorder',         { fg = '#76706c',          bg = '#282828' })
+  hi('TelescopePromptNormal',   { fg = '#fbf1c7',          bg = '#32302f' })
+  hi('TelescopePromptBorder',   { fg = '#76706c',          bg = '#32302f' })
+  hi('TelescopePromptPrefix',   { fg = '#b8bb26',          bg = '#32302f' })
+  hi('TelescopePromptCounter',  { fg = '#ebdbb2',          bg = '#32302f' })
+  hi('TelescopePromptTitle',    { fg = '#282828',          bg = '#b8bb26', bold = true })
+  hi('TelescopePreviewTitle',   { fg = '#282828',          bg = '#fabd2f', bold = true })
+  hi('TelescopeResultsTitle',   { fg = '#282828',          bg = '#83a598', bold = true })
   hi('TelescopeSelection',      { fg = '#fbf1c7',          bg = '#474240' })
-  hi('TelescopeSelectionCaret', { fg = '#b8bb26',             bg = '#474240' })
-  hi('TelescopeMatching',       { fg = '#b8bb26',             bold = true })
+  hi('TelescopeSelectionCaret', { fg = '#b8bb26',          bg = '#474240' })
+  hi('TelescopeMatching',       { fg = '#fabd2f',          bold = true })
 
   -- mini.pick
-  hi('MiniPickNormal',         { fg = '#fbf1c7',          bg = '#282828' })
-  hi('MiniPickBorder',         { fg = '#76706c',             bg = '#282828' })
-  hi('MiniPickPrompt',   { fg = '#fbf1c7',          bg = '#282828' })
-  hi('MiniPickPromptPrefix',   { fg = '#b8bb26',             bg = '#282828' })
-  hi('MiniPickBorderText',    { fg = '#282828',             bg = '#b8bb26' })
-  hi('MiniPickMatchCurrent',      { fg = '#fbf1c7',          bg = '#474240' })
-  hi('MiniPickPromptCaret', { fg = '#b8bb26',             bg = '#474240' })
-  hi('MiniPickMatchRanges',       { fg = '#b8bb26',             bold = true })
+  hi('MiniPickNormal',          { fg = '#fbf1c7',          bg = '#282828' })
+  hi('MiniPickBorder',          { fg = '#76706c',          bg = '#282828' })
+  hi('MiniPickPrompt',          { fg = '#fbf1c7',          bg = '#282828' })
+  hi('MiniPickPromptPrefix',    { fg = '#b8bb26',          bg = '#282828' })
+  hi('MiniPickBorderText',      { fg = '#282828',          bg = '#b8bb26' })
+  hi('MiniPickMatchCurrent',    { fg = '#fbf1c7',          bg = '#474240' })
+  hi('MiniPickPromptCaret',     { fg = '#b8bb26',          bg = '#474240' })
+  hi('MiniPickMatchRanges',     { fg = '#b8bb26',          bold = true })
 end
 
 -- Register a signal handler for SIGUSR1 (matugen updates).
--- The handler re-requires this module, which re-runs the code below, so the
--- previous handle is stopped first; otherwise handlers double on every signal.
 if _G.__matugen_signal then
   _G.__matugen_signal:stop()
   _G.__matugen_signal:close()

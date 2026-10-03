@@ -24,6 +24,14 @@ return {
       ensure_installed = {
         "lua_ls",
         "ts_ls",
+        "tailwindcss",
+        "html",
+        "cssls",
+        "emmet_language_server",
+        "eslint",
+        "prismals",
+        "dockerls",
+        "docker_compose_language_service",
         "pyright",
         "rust_analyzer",
         "gopls",
@@ -33,7 +41,6 @@ return {
         "taplo",
         "marksman",
       },
-      automatic_installation = true,
     },
   },
 
@@ -47,10 +54,14 @@ return {
       "hrsh7th/cmp-path",
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
+      "rafamadriz/friendly-snippets",
     },
     opts = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
+
+      -- Load friendly-snippets (WebStorm/VSCode snippet catalog)
+      require("luasnip.loaders.from_vscode").lazy_load()
 
       return {
         snippet = {
@@ -92,6 +103,38 @@ return {
         }, {
           { name = "buffer" },
         }),
+        window = {
+          completion = cmp.config.window.bordered({
+            border = "rounded",
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
+          }),
+          documentation = cmp.config.window.bordered({
+            border = "rounded",
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,Search:None",
+          }),
+        },
+        formatting = {
+          fields = { "abbr", "kind", "menu" },
+          format = function(entry, item)
+            local icons = {
+              Text = "󰉿", Method = "󰆧", Function = "󰊕", Constructor = "",
+              Field = "󰜢", Variable = "󰀫", Class = "󰠱", Interface = "",
+              Module = "", Property = "󰜢", Unit = "󰑭", Value = "󰎠",
+              Enum = "", Keyword = "󰌋", Snippet = "", Color = "󰏘",
+              File = "󰈙", Reference = "󰈇", Folder = "󰉋", EnumMember = "",
+              Constant = "󰏿", Struct = "󰙅", Event = "", Operator = "󰆕",
+              TypeParameter = "󰅲",
+            }
+            item.kind = string.format("%s %s", icons[item.kind] or "", item.kind)
+            item.menu = ({
+              nvim_lsp = "[LSP]",
+              luasnip = "[Snip]",
+              buffer = "[Buf]",
+              path = "[Path]",
+            })[entry.source.name]
+            return item
+          end,
+        },
       }
     end,
   },
@@ -106,58 +149,169 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local on_attach = function(_, bufnr)
-        local map = function(mode, l, r, desc)
-          vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
-        end
+      -- Keymaps on LspAttach
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+        callback = function(args)
+          local bufnr = args.buf
+          local map = function(mode, l, r, desc)
+            vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
+          end
 
-        map("n", "gd", vim.lsp.buf.definition, "Đi tới định nghĩa (Definition)")
-        map("n", "gD", vim.lsp.buf.declaration, "Đi tới khai báo (Declaration)")
-        map("n", "gr", vim.lsp.buf.references, "Tìm các vị trí tham chiếu (References)")
-        map("n", "gi", vim.lsp.buf.implementation, "Đi tới triển khai (Implementation)")
-        map("n", "K", vim.lsp.buf.hover, "Xem tài liệu / kiểu dữ liệu (Hover Doc)")
-        map("n", "<leader>ca", vim.lsp.buf.code_action, "Gợi ý sửa lỗi nhanh (Code Action)")
-        map("n", "<leader>cr", vim.lsp.buf.rename, "Đổi tên symbol (Rename)")
-        map("n", "<leader>cd", vim.diagnostic.open_float, "Xem chi tiết lỗi (Diagnostic)")
-        map("n", "[d", vim.diagnostic.goto_prev, "Lỗi chẩn đoán trước đó")
-        map("n", "]d", vim.diagnostic.goto_next, "Lỗi chẩn đoán tiếp theo")
+          map("n", "gd", vim.lsp.buf.definition, "Đi tới định nghĩa (Definition)")
+          map("n", "gD", vim.lsp.buf.declaration, "Đi tới khai báo (Declaration)")
+          map("n", "gr", vim.lsp.buf.references, "Tìm các vị trí tham chiếu (References)")
+          map("n", "gi", vim.lsp.buf.implementation, "Đi tới triển khai (Implementation)")
+          map("n", "K", function() vim.lsp.buf.hover({ border = "rounded" }) end, "Xem tài liệu / kiểu dữ liệu (Hover Doc)")
+          map("i", "<C-k>", function() vim.lsp.buf.signature_help({ border = "rounded" }) end, "Chữ ký hàm (Signature Help)")
+          map({ "n", "v" }, "<leader>ca", function()
+            local ok, ap = pcall(require, "actions-preview")
+            if ok then
+              ap.code_actions()
+            else
+              vim.lsp.buf.code_action()
+            end
+          end, "Gợi ý sửa lỗi nhanh với xem trước (Code Action Preview)")
+          map("n", "<leader>cr", vim.lsp.buf.rename, "Đổi tên symbol (Rename)")
+          map("n", "<leader>cd", vim.diagnostic.open_float, "Xem chi tiết lỗi (Diagnostic)")
+          map("n", "[d", vim.diagnostic.goto_prev, "Lỗi chẩn đoán trước đó")
+          map("n", "]d", vim.diagnostic.goto_next, "Lỗi chẩn đoán tiếp theo")
+          map("n", "<leader>ci", vim.lsp.buf.incoming_calls, "Xem các hàm gọi tới đây (Incoming Calls)")
+          map("n", "<leader>co", vim.lsp.buf.outgoing_calls, "Xem các hàm được gọi từ đây (Outgoing Calls)")
+          map("n", "<leader>th", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+          end, "Bật/Tắt gợi ý kiểu dữ liệu (Inlay Hints)")
+        end,
+      })
+
+      -- Diagnostic signs with Nerd Font icons
+      local signs = { Error = " ", Warn = " ", Hint = "󰌵 ", Info = " " }
+      for type, icon in pairs(signs) do
+        local hl = "DiagnosticSign" .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
       end
 
-      -- Diagnostic styling
+      -- Diagnostic styling (virtual_text false for tiny-inline-diagnostic)
       vim.diagnostic.config({
-        virtual_text = { prefix = "●" },
+        virtual_text = false,
         signs = true,
         underline = true,
         update_in_insert = false,
         severity_sort = true,
-        float = { border = "rounded" },
+        float = {
+          border = "rounded",
+          source = "always",
+        },
       })
 
-      -- Default handler for all servers configured via mason-lspconfig
-      require("mason-lspconfig").setup_handlers({
-        function(server_name)
-          lspconfig[server_name].setup({
-            capabilities = capabilities,
-            on_attach = on_attach,
-          })
-        end,
-        ["lua_ls"] = function()
-          lspconfig.lua_ls.setup({
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = {
-              Lua = {
-                diagnostics = { globals = { "vim" } },
-                workspace = { checkThirdParty = false },
-                telemetry = { enable = false },
+      -- Global capabilities
+      vim.lsp.config("*", {
+        capabilities = capabilities,
+      })
+
+      -- Lua LSP custom settings
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            diagnostics = { globals = { "vim" } },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+          },
+        },
+      })
+
+      -- TypeScript / JavaScript Inlay Hints (WebStorm parity)
+      vim.lsp.config("ts_ls", {
+        settings = {
+          typescript = {
+            inlayHints = {
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
+            },
+          },
+          javascript = {
+            inlayHints = {
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
+            },
+          },
+        },
+      })
+
+      -- YAML LSP settings (GitHub Workflows, Compose, K8s schemas)
+      vim.lsp.config("yamlls", {
+        settings = {
+          yaml = {
+            schemaStore = { enable = false, url = "" },
+            schemas = {
+              ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*",
+              ["https://json.schemastore.org/github-action.json"] = ".github/action.{yml,yaml}",
+              ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "*docker-compose*.{yml,yaml}",
+              ["https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.0-standalone-strict/all.json"] = "*.k8s.{yml,yaml}",
+            },
+          },
+        },
+      })
+
+      -- JSON LSP settings (package.json, tsconfig schemas)
+      vim.lsp.config("jsonls", {
+        settings = {
+          json = {
+            schemas = {
+              {
+                fileMatch = { "package.json" },
+                url = "https://json.schemastore.org/package.json",
+              },
+              {
+                fileMatch = { "tsconfig*.json" },
+                url = "https://json.schemastore.org/tsconfig.json",
               },
             },
-          })
-        end,
+          },
+        },
       })
+
+      -- Emmet LSP filetypes
+      vim.lsp.config("emmet_language_server", {
+        filetypes = { "css", "html", "javascript", "javascriptreact", "less", "sass", "scss", "typescriptreact" },
+      })
+
+      -- Enable servers via modern native Neovim 0.11+ API
+      vim.lsp.enable({
+        "lua_ls",
+        "ts_ls",
+        "tailwindcss",
+        "html",
+        "cssls",
+        "emmet_language_server",
+        "eslint",
+        "prismals",
+        "dockerls",
+        "docker_compose_language_service",
+        "pyright",
+        "rust_analyzer",
+        "gopls",
+        "bashls",
+        "jsonls",
+        "yamlls",
+        "taplo",
+        "marksman",
+      })
+
+      -- Enable native Inlay Hints
+      vim.lsp.inlay_hint.enable(true)
     end,
   },
 
@@ -184,9 +338,14 @@ return {
         typescript = { "prettier" },
         javascriptreact = { "prettier" },
         typescriptreact = { "prettier" },
+        html = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
         json = { "prettier" },
+        jsonc = { "prettier" },
         yaml = { "prettier" },
         markdown = { "prettier" },
+        graphql = { "prettier" },
         sh = { "shfmt" },
         bash = { "shfmt" },
         rust = { "rustfmt" },

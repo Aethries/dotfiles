@@ -123,6 +123,12 @@ alias c.='antigravity-ide .'
 alias code.='antigravity-ide .'
 alias c='clear'
 
+# Neovide GUI launcher (fully detached from terminal, immune to terminal closing)
+function nv() {
+	nohup neovide --fork "$@" >/dev/null 2>&1 &!
+}
+alias nv.="nv ."
+
 # Zellij Multiplexer
 alias zreset="zellij delete-all-sessions --yes --force"
 

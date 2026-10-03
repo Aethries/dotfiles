@@ -8,10 +8,18 @@ require("config.options")
 -- 2. General Keymaps
 require("config.keymaps")
 
--- 3. Plugin Manager (Lazy.nvim)
+-- 3. Interactive Bilingual Cheatsheet (Command & Keymaps)
+pcall(require, "config.cheatsheet")
+
+-- 4. Plugin Manager (Lazy.nvim)
 require("config.lazy")
 
--- 4. Noctalia Matugen Dynamic Theme Integration
+-- 5. Noctalia Matugen Dynamic Theme Integration
 pcall(function()
   require("matugen").setup()
 end)
+
+-- 6. Neovide GUI Integration (VSCode / WebStorm Modern IDE Aesthetics)
+if vim.g.neovide then
+  pcall(require, "config.neovide")
+end
