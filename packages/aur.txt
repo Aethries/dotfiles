@@ -11,6 +11,7 @@ visual-studio-code-bin
 
 # System & Compositor
 umbriel-git
+xdg-desktop-portal-umbriel-git
 noctalia-greeter
 
 # AI

@@ -20,6 +20,10 @@ link_file \
 	"$MODULE_DIR/files/mimeapps.list" \
 	"$HOME/.config/mimeapps.list"
 
+link_file \
+	"$MODULE_DIR/files/electron-flags.conf" \
+	"$HOME/.config/electron-flags.conf"
+
 # Inject into active user session
 if [[ -f "$MODULE_DIR/files/00-wayland.conf" ]]; then
 	set -a
@@ -29,11 +33,11 @@ if [[ -f "$MODULE_DIR/files/00-wayland.conf" ]]; then
 fi
 
 if command_exists systemctl; then
-	systemctl --user import-environment QT_USE_PORTAL ELECTRON_OZONE_PLATFORM_HINT MOZ_ENABLE_WAYLAND QT_QPA_PLATFORM GDK_BACKEND CLUTTER_BACKEND SDL_VIDEODRIVER 2>/dev/null || true
+	systemctl --user import-environment QT_USE_PORTAL ELECTRON_OZONE_PLATFORM_HINT MOZ_ENABLE_WAYLAND QT_QPA_PLATFORM GDK_BACKEND CLUTTER_BACKEND SDL_VIDEODRIVER XMODIFIERS QT_IM_MODULE 2>/dev/null || true
 fi
 
 if command_exists dbus-update-activation-environment; then
-	dbus-update-activation-environment --systemd QT_USE_PORTAL ELECTRON_OZONE_PLATFORM_HINT MOZ_ENABLE_WAYLAND QT_QPA_PLATFORM GDK_BACKEND CLUTTER_BACKEND SDL_VIDEODRIVER 2>/dev/null || true
+	dbus-update-activation-environment --systemd QT_USE_PORTAL ELECTRON_OZONE_PLATFORM_HINT MOZ_ENABLE_WAYLAND QT_QPA_PLATFORM GDK_BACKEND CLUTTER_BACKEND SDL_VIDEODRIVER XMODIFIERS QT_IM_MODULE 2>/dev/null || true
 fi
 
 # Configure GNOME interface dark mode for GTK4/Libadwaita apps

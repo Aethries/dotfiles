@@ -1,6 +1,6 @@
 # Master Plan: Lộ trình Nâng cấp Hệ sinh thái Dotfiles Workstation
 
-Tài liệu này tổng hợp toàn bộ lộ trình triển khai 11 kế hoạch hành động chi tiết, được xây dựng dựa trên [FEATURE-ECOSYSTEM-AUDIT.md](file:///home/loc/Workspaces/dotfiles/FEATURE-ECOSYSTEM-AUDIT.md). Thứ tự đánh số từ `01` đến `11` đại diện cho thứ tự ưu tiên phụ thuộc kỹ thuật: kế hoạch trước làm nền tảng cho kế hoạch sau.
+Tài liệu này tổng hợp toàn bộ lộ trình triển khai các kế hoạch hành động chi tiết cho hệ sinh thái Dotfiles Workstation. Thứ tự đánh số đại diện cho thứ tự ưu tiên phụ thuộc kỹ thuật: kế hoạch trước làm nền tảng cho kế hoạch sau.
 
 ---
 
@@ -9,7 +9,6 @@ Tài liệu này tổng hợp toàn bộ lộ trình triển khai 11 kế hoạc
 ```mermaid
 flowchart TD
     subgraph G1["Giai đoạn 1: Desktop, Session & Core Input"]
-        P02["02. Session Env & WebRTC"]
         P03["03. Clipboard Manager (cliphist)"]
         P04["04. Kanata & Warpd Navigation"]
         P04 --> P13["13. Unified System Keymaps"]
@@ -17,10 +16,10 @@ flowchart TD
     end
 
     subgraph G2["Giai đoạn 2: Developer Tooling & Multi-Runtime"]
-        P02 --> P05["05. Git Identity & Security"]
-        P02 --> P06["06. mise & uv Multi-Runtime"]
+        P05["05. Git Identity & Security"]
+        P06["06. mise & uv Multi-Runtime"]
         P06 --> P07["07. Cloud CLI & Database Tools"]
-        P02 --> P12["12. Modern Shell & Terminal Tooling"]
+        P12["12. Modern Shell & Terminal Tooling"]
     end
 
     subgraph G3["Giai đoạn 3: Remote Workstation & Streaming"]
@@ -41,17 +40,16 @@ flowchart TD
 
 ---
 
-## 2. Danh mục 13 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 12 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
 | Thứ tự | File Kế hoạch | Tên Chức năng & Trọng tâm | Trạng thái |
 |:---:|---|---|:---:|
-| **02** | [02-session-environment-va-webrtc-screensharing.md](file:///home/loc/Workspaces/dotfiles/plans/02-session-environment-va-webrtc-screensharing.md) | Chuẩn hóa `~/.config/environment.d/` toàn cục, cờ Wayland Ozone & PipeWire WebRTC capturer cho Chrome, Slack, Lark | ⏳ Sẵn sàng |
 | **03** | [03-clipboard-manager-cliphist.md](file:///home/loc/Workspaces/dotfiles/plans/03-clipboard-manager-cliphist.md) | Quản lý lịch sử clipboard Wayland qua `cliphist`, systemd user service, tích hợp Noctalia launcher và FZF | ⏳ Sẵn sàng |
 | **04** | [04-kanata-kernel-keyboard-va-warpd-hint-navigation.md](file:///home/loc/Workspaces/dotfiles/plans/04-kanata-kernel-keyboard-va-warpd-hint-navigation.md) | Remapping phím tầng kernel (`kanata` home-row mods, tương thích Telex Fcitx5 Bamboo), tối ưu repeat delay/rate (180ms/50Hz) & điều khiển chuột bàn phím (`warpd` hint mode) | ⏳ Sẵn sàng |
-| **05** | [05-git-identity-ssh-signing-va-security.md](file:///home/loc/Workspaces/dotfiles/plans/05-git-identity-ssh-signing-va-security.md) | Hoàn thiện `modules/git`, SSH `ed25519` commit signing, `git-credential-libsecret`, `includeIf`, `gitleaks` pre-commit | ⏳ Chờ 02 |
-| **06** | [06-mise-va-uv-runtime-management.md](file:///home/loc/Workspaces/dotfiles/plans/06-mise-va-uv-runtime-management.md) | Thay thế NVM bằng `mise` quản lý Node, Python, Rust, Go, IaC; kết hợp `uv` quản trị môi trường Python siêu tốc | ⏳ Chờ 02 |
+| **05** | [05-git-identity-ssh-signing-va-security.md](file:///home/loc/Workspaces/dotfiles/plans/05-git-identity-ssh-signing-va-security.md) | Hoàn thiện `modules/git`, SSH `ed25519` commit signing, `git-credential-libsecret`, `includeIf`, `gitleaks` pre-commit | ⏳ Sẵn sàng |
+| **06** | [06-mise-va-uv-runtime-management.md](file:///home/loc/Workspaces/dotfiles/plans/06-mise-va-uv-runtime-management.md) | Thay thế NVM bằng `mise` quản lý Node, Python, Rust, Go, IaC; kết hợp `uv` quản trị môi trường Python siêu tốc | ⏳ Sẵn sàng |
 | **07** | [07-cloud-aws-gcp-va-database-cli.md](file:///home/loc/Workspaces/dotfiles/plans/07-cloud-aws-gcp-va-database-cli.md) | Bộ công cụ AWS SSO (`granted`), GCP ADC, OpenTofu và Universal Database CLI (`usql`, `pgcli`, `iredis`) | ⏳ Chờ 06 |
 | **08** | [08-tailscale-mesh-network-va-remote-helpers.md](file:///home/loc/Workspaces/dotfiles/plans/08-tailscale-mesh-network-va-remote-helpers.md) | Mạng riêng ảo Tailscale Mesh, Tailscale SSH, MagicDNS, SSHFS helpers (`ssh-mount`, `ssh-sync`) và Mosh | ⏳ Chờ 05 |
 | **09** | [09-sunshine-headless-remote-desktop.md](file:///home/loc/Workspaces/dotfiles/plans/09-sunshine-headless-remote-desktop.md) | Remote desktop máy trạm độ trễ thấp với Sunshine (GPU encoder, HDMI Dummy Plug 4K) qua Tailscale IP nội bộ | ⏳ Chờ 08 |
