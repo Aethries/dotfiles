@@ -1,0 +1,7 @@
+# Superfile Configuration (Noctalia Theme)
+theme = "noctalia"
+nerd_font = true
+show_pinned = true
+border_style = "rounded"
+editor = "nvim"
+auto_check_update = false

@@ -1,0 +1,56 @@
+# ==============================================================================
+# Noctalia Desktop Shell Configuration
+# ==============================================================================
+
+[wallpaper]
+enabled = true
+fill_mode = "crop"
+
+[wallpaper.default]
+path = "/usr/share/noctalia/assets/noctalia-wallpaper.png"
+
+[notification]
+enable_daemon = true
+position = "top_right"
+history_retention_hours = 24
+keep_dismissed_in_history = true
+
+[osd]
+enabled = true
+position = "top_center"
+hide_delay_ms = 1400
+
+[audio]
+enable_sounds = true
+
+# ==============================================================================
+# Theme & Templates Synchronization
+# ==============================================================================
+[theme]
+builtin = "Noctalia"
+mode = "dark"
+wallpaper_scheme = "m3-content"
+
+[theme.templates]
+builtin_ids = [ "kitty", "umbriel", "starship", "gtk3", "gtk4" ]
+enable_builtin_templates = true
+enable_community_templates = true
+
+# ==============================================================================
+# Plugins Management & Synchronization
+# ==============================================================================
+[plugins]
+auto_update = "all"
+enabled = []
+
+[[plugins.source]]
+enabled = true
+kind = "git"
+location = "https://github.com/noctalia-dev/official-plugins"
+name = "official"
+
+[[plugins.source]]
+enabled = true
+kind = "git"
+location = "https://github.com/noctalia-dev/community-plugins"
+name = "community"

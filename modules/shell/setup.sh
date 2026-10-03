@@ -62,4 +62,40 @@ link_file \
 	"$MODULE_DIR/files/yazi.toml" \
 	"$HOME/.config/yazi/yazi.toml"
 
+link_file \
+	"$MODULE_DIR/files/yazi/theme.toml" \
+	"$HOME/.config/yazi/theme.toml"
+
+link_dir \
+	"$MODULE_DIR/files/yazi/flavors" \
+	"$HOME/.config/yazi/flavors"
+
+link_file \
+	"$MODULE_DIR/files/fastfetch/config.jsonc" \
+	"$HOME/.config/fastfetch/config.jsonc"
+
+link_dir \
+	"$MODULE_DIR/files/fastfetch/themes" \
+	"$HOME/.config/fastfetch/themes"
+
+link_file \
+	"$MODULE_DIR/files/lazygit/config.yml" \
+	"$HOME/.config/lazygit/config.yml"
+
+link_dir \
+	"$MODULE_DIR/files/lazygit/themes" \
+	"$HOME/.config/lazygit/themes"
+
+link_dir \
+	"$MODULE_DIR/files/fzf/themes" \
+	"$HOME/.config/fzf/themes"
+
+link_file \
+	"$MODULE_DIR/files/superfile/config.toml" \
+	"$HOME/.config/superfile/config.toml"
+
+link_dir \
+	"$MODULE_DIR/files/superfile/theme" \
+	"$HOME/.config/superfile/theme"
+
 success "Shell configured"

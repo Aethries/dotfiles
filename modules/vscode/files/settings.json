@@ -39,31 +39,31 @@
 		"editor.quickSuggestions": { "strings": true },
 		"editor.suggest.insertMode": "replace",
 		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"[go]": {
 		"editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
-		"editor.defaultFormatter": "golang.go",
+		"editor.defaultFormatter": "golang.go"
 	},
 	"[gdscript]": {
 		"editor.defaultFormatter": "geequlim.godot-tools",
 		"editor.formatOnSave": true,
 		"editor.insertSpaces": false,
-		"editor.tabSize": 4,
+		"editor.tabSize": 4
 	},
 	"[lua]": {
 		"editor.semanticHighlighting.enabled": true,
-		"editor.defaultFormatter": "sumneko.lua",
+		"editor.defaultFormatter": "sumneko.lua"
 	},
 	"[nix]": {
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2,
 		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "jnoortheen.nix-ide",
+		"editor.defaultFormatter": "jnoortheen.nix-ide"
 	},
 	"[markdown]": {
 		"editor.wordWrap": "on",
-		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
 	},
 
 	// Git & SCM
@@ -90,8 +90,6 @@
 	"prisma.hidePrisma6Prompts": true,
 
 	"[prisma]": {
-		"editor.defaultFormatter": "Prisma.prisma",
-	},
-
-	"markdown.preview.doubleClickToSwitchToEditor": false,
+		"editor.defaultFormatter": "Prisma.prisma"
+	}
 }
