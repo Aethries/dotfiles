@@ -1,0 +1,2 @@
+# Udev rules for Kanata to access /dev/uinput without full root privileges
+KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"

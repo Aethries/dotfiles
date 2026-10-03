@@ -69,6 +69,7 @@ success "Zsh configured"
 # Modules setup
 bash "$DOTFILES/modules/fonts/setup.sh"
 bash "$DOTFILES/modules/fcitx5/setup.sh"
+bash "$DOTFILES/modules/kanata/setup.sh"
 bash "$DOTFILES/modules/git/setup.sh"
 bash "$DOTFILES/modules/env/setup.sh"
 bash "$DOTFILES/modules/clipboard/setup.sh"

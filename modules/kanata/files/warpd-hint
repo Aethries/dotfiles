@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+LOG_FILE="/tmp/warpd.log"
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/warpd/config"
+
+# Nếu warpd đang chạy (trong mouse mode), đóng session (toggle off)
+if pgrep -x warpd >/dev/null 2>&1; then
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] warpd already running, toggling off session" >> "$LOG_FILE"
+	pkill -9 -x warpd 2>/dev/null || killall -9 warpd 2>/dev/null || true
+	exit 0
+fi
+
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] warpd-hint triggered with args: $*" >> "$LOG_FILE"
+echo "WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-unset} XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-unset}" >> "$LOG_FILE"
+
+WARPD_BIN="warpd"
+if [[ -x "$HOME/.local/bin/warpd" ]]; then
+	WARPD_BIN="$HOME/.local/bin/warpd"
+fi
+
+exec "$WARPD_BIN" -c "$CONFIG_FILE" --hint "$@" >> "$LOG_FILE" 2>&1

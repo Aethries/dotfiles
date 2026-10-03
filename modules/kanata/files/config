@@ -1,0 +1,70 @@
+# ==============================================================================
+# Warpd Configuration (Synced with Noctalia Gruvbox Theme)
+# ==============================================================================
+
+# Session & Exiting
+exit: esc
+hint_exit: esc
+
+# Mouse Click Actions
+# Space: click chuột trái (tiếp tục ở lại warpd)
+buttons: space , .
+# 'i': click chuột trái rồi thoát hoàn toàn warpd về desktop
+oneshot_buttons: i - /
+
+# Movement & Speed Tuning
+speed: 280
+max_speed: 4000
+acceleration: 900
+repeat_interval: 10
+
+# High-speed movement when holding 'a' (Accelerator)
+accelerator: a
+accelerator_acceleration: 7500
+
+# Pixel-hunting slow movement when holding 's' (Decelerator)
+decelerator: s
+decelerator_speed: 12
+
+# Vim-style cursor navigation
+left: h
+down: j
+up: k
+right: l
+
+# Drag Mode (Visual selection & mouse drag)
+# Gõ 'v' để bắt đầu kéo chuột (drag), gõ 'v' lần nữa để thả (drop)
+# Gõ 'c' để copy vùng bôi đen và thoát warpd
+drag: v
+drag_button: 1
+copy_and_exit: c
+
+# Scrolling (Vim-style d: down, u: up)
+scroll_down: d
+scroll_up: u
+scroll_speed: 350
+scroll_max_speed: 5000
+scroll_acceleration: 1600
+
+# Unbind conflicting keys to prioritize 's' for decelerator
+screen: unbind
+
+# In-session Jump Transitions (Inside Normal/Movement mode)
+# Gõ 'f' để hiện lại các điểm hint khi đang ở trong mouse mode
+hint: f
+
+# Hint Density & Generation (Alphanumeric 36 chars -> 1296 target points)
+hint_chars: abcdefghijklmnopqrstuvwxyz0123456789
+hint_size: 11
+hint_border_radius: 2
+
+# Visual Appearance & Noctalia Gruvbox Palette
+hint_font: JetBrainsMono Nerd Font
+hint_bgcolor: #282828
+hint_fgcolor: #fbf1c7
+
+cursor_color: #fb4934
+cursor_size: 10
+
+grid_color: #282828
+grid_border_color: #665c54

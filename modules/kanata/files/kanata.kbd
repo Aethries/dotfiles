@@ -1,0 +1,8 @@
+;; Kanata configuration (unmapped / passthrough - no custom key mappings)
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc)
+
+(deflayer base)
