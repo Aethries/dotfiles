@@ -38,6 +38,31 @@ gping
 git-delta
 fastfetch
 kitty
+procs
+yq
+fx
+onefetch
+curlie
+atuin
+visidata
+difftastic
+trippy
+bandwhich
+hyperfine
+direnv
+git-absorb
+gum
+dive
+skopeo
+ctop
+sd
+choose
+grex
+watchexec
+entr
+thefuck
+jnv
+doggo
 
 # Fonts
 ttf-jetbrains-mono-nerd

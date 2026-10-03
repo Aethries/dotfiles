@@ -24,3 +24,9 @@ antigravity-cli
 
 # Network
 cloudflare-warp-bin
+
+# Terminal & CLI Tools
+carapace-bin
+gh-dash-bin
+oxker-bin
+viddy-bin
