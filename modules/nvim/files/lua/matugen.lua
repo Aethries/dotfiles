@@ -1,7 +1,12 @@
  local M = {}
 
 function M.setup()
-  require('base16-colorscheme').setup({
+  local ok, base16 = pcall(require, 'base16-colorscheme')
+  if not ok then
+    return
+  end
+
+  base16.setup({
     base00 = '#282828',
     base01 = '#3c3836',
     base02 = '#474240',

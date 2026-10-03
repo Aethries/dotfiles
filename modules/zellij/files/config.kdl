@@ -31,11 +31,41 @@ keybinds clear-defaults=true {
 		bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
 		bind "Ctrl Shift p" { ToggleFloatingPanes; }
 
-		// --- Pane Navigation (Vim style & Arrows) ---
-		bind "Ctrl h" "Ctrl Shift h" "Ctrl Shift Left" { MoveFocusOrTab "Left"; }
-		bind "Ctrl l" "Ctrl Shift l" "Ctrl Shift Right" { MoveFocusOrTab "Right"; }
-		bind "Ctrl j" "Ctrl Shift j" "Ctrl Shift Down" { MoveFocus "Down"; }
-		bind "Ctrl k" "Ctrl Shift k" "Ctrl Shift Up" { MoveFocus "Up"; }
+		// --- Seamless Neovim / Zellij Pane Navigation ---
+		bind "Ctrl h" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus_or_tab";
+				payload "left";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl j" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus";
+				payload "down";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl k" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus";
+				payload "up";
+				move_mod "ctrl";
+			};
+		}
+		bind "Ctrl l" {
+			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+				name "move_focus_or_tab";
+				payload "right";
+				move_mod "ctrl";
+			};
+		}
+
+		// --- Unconditional Zellij Navigation (bypass editor) ---
+		bind "Ctrl Shift h" "Ctrl Shift Left" { MoveFocusOrTab "Left"; }
+		bind "Ctrl Shift l" "Ctrl Shift Right" { MoveFocusOrTab "Right"; }
+		bind "Ctrl Shift j" "Ctrl Shift Down" { MoveFocus "Down"; }
+		bind "Ctrl Shift k" "Ctrl Shift Up" { MoveFocus "Up"; }
 
 		// --- Resize Panes ---
 		bind "Ctrl =" "Ctrl +" { Resize "Increase"; }

@@ -1,14 +1,17 @@
 -- ==============================================================================
--- Neovim Base Configuration
+-- Neovim Modern Configuration (Lazy.nvim + Mason LSP + Noctalia Theme Sync)
 -- ==============================================================================
 
--- Typography for GUI frontends (Neovide, etc.)
-vim.opt.guifont = "JetBrainsMono Nerd Font:h10.5"
+-- 1. Core Options & Leader Key
+require("config.options")
 
--- Noctalia Matugen Dynamic Theme Integration
+-- 2. General Keymaps
+require("config.keymaps")
+
+-- 3. Plugin Manager (Lazy.nvim)
+require("config.lazy")
+
+-- 4. Noctalia Matugen Dynamic Theme Integration
 pcall(function()
   require("matugen").setup()
 end)
-
-local ok, matugen = pcall(require, 'matugen')
-if ok then matugen.setup() end

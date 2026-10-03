@@ -16,4 +16,10 @@ link_dir \
 	"$MODULE_DIR/files" \
 	"$HOME/.config/nvim"
 
+if command_exists nvim && command_exists git; then
+	log "Syncing Neovim plugins via Lazy.nvim"
+	nvim --headless "+Lazy! sync" +qa 2>/dev/null || warn "Lazy sync encountered warnings (plugins will install on first open)"
+	success "Neovim plugins synced"
+fi
+
 success "Neovim configured"
