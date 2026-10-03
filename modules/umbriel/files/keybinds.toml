@@ -12,6 +12,9 @@
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+V" = { action = "spawn:~/.local/bin/clip-picker", repeat = false }
 
+# Mouse Navigation (Warpd)
+"Mod+semicolon" = { action = "spawn:~/.local/bin/warpd-hint", repeat = false }
+
 # System & Session
 "Mod+BackSpace" = "spawn:noctalia msg session lock"
 "Mod+N" = "spawn:noctalia msg panel-toggle notifications"
