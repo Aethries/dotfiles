@@ -19,5 +19,5 @@ else
 fi
 
 if [[ -n "${selected:-}" ]]; then
-	echo "$selected" | cliphist decode | wl-copy
+	printf '%s\n' "$selected" | cliphist decode | wl-copy
 fi
