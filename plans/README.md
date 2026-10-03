@@ -14,8 +14,7 @@ flowchart TD
     end
 
     subgraph G2["Giai đoạn 2: Developer Tooling & Multi-Runtime"]
-        P06["06. mise & uv Multi-Runtime"]
-        P06 --> P07["07. Cloud CLI & Database Tools"]
+        P07["07. Cloud CLI & Database Tools"]
         P12["12. Modern Shell & Terminal Tooling"]
     end
 
@@ -25,24 +24,22 @@ flowchart TD
     end
 
     subgraph G4["Giai đoạn 4: Editor & Visual Harmony"]
-        P06 --> P10["10. Neovim Ecosystem & Theme Sync"]
+        P10["10. Neovim Ecosystem & Theme Sync"]
     end
 
     subgraph G5["Giai đoạn 5: AI Tooling & Agentic Engineering"]
-        P06 --> P11["11. AI Developer Tooling & Agentic Workflow"]
-        P10 --> P11
+        P10 --> P11["11. AI Developer Tooling & Agentic Workflow"]
     end
 ```
 
 ---
 
-## 2. Danh mục 9 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 8 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
 | Thứ tự | File Kế hoạch | Tên Chức năng & Trọng tâm | Trạng thái |
 |:---:|---|---|:---:|
-| **06** | [06-mise-va-uv-runtime-management.md](file:///home/loc/Workspaces/dotfiles/plans/06-mise-va-uv-runtime-management.md) | Thay thế NVM bằng `mise` quản lý Node, Python, Rust, Go, IaC; kết hợp `uv` quản trị môi trường Python siêu tốc | ✅ Hoàn thành |
 | **07** | [07-cloud-aws-gcp-va-database-cli.md](file:///home/loc/Workspaces/dotfiles/plans/07-cloud-aws-gcp-va-database-cli.md) | Bộ công cụ AWS SSO (`granted`), GCP ADC, OpenTofu và Universal Database CLI (`usql`, `pgcli`, `iredis`) | ⏳ Sẵn sàng |
 | **08** | [08-tailscale-mesh-network-va-remote-helpers.md](file:///home/loc/Workspaces/dotfiles/plans/08-tailscale-mesh-network-va-remote-helpers.md) | Mạng riêng ảo Tailscale Mesh, Tailscale SSH, MagicDNS, SSHFS helpers (`ssh-mount`, `ssh-sync`) và Mosh | ⏳ Sẵn sàng |
 | **09** | [09-sunshine-headless-remote-desktop.md](file:///home/loc/Workspaces/dotfiles/plans/09-sunshine-headless-remote-desktop.md) | Remote desktop máy trạm độ trễ thấp với Sunshine (GPU encoder, HDMI Dummy Plug 4K) qua Tailscale IP nội bộ | ⏳ Chờ 08 |
