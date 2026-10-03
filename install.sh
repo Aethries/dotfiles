@@ -85,6 +85,8 @@ bash "$DOTFILES/modules/umbriel/setup.sh"
 bash "$DOTFILES/modules/greeter/setup.sh"
 bash "$DOTFILES/modules/vscode/setup.sh"
 bash "$DOTFILES/modules/antigravity/setup.sh"
+bash "$DOTFILES/modules/codex/setup.sh"
+bash "$DOTFILES/modules/ai/setup.sh"
 bash "$DOTFILES/modules/9router/setup.sh"
 
 # Done

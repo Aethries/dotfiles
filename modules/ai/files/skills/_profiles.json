@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "profiles": {
+    "global-core": {
+      "name": "Global Core Engineering Baseline",
+      "description": "Foundational guardrails, senior roles, and essential developer workflow tools",
+      "skills": [
+        "architecture-guardrails",
+        "security-guardrails",
+        "system-design-guardrails",
+        "source-quality",
+        "project-context",
+        "quality-gate",
+        "feature-spec-writer",
+        "technical-planner",
+        "technical-researcher",
+        "architecture-designer",
+        "api-contract-designer",
+        "data-model-architect",
+        "test-strategist",
+        "engineering-review",
+        "skill-author",
+        "senior-implementer",
+        "pixel-perfect-ui",
+        "diagram-author",
+        "migration-strategist",
+        "incident-investigator",
+        "reliability-engineer",
+        "rtk",
+        "caveman",
+        "ponytail",
+        "codegraph",
+        "codebase-memory",
+        "agent-squad-orchestrator"
+      ]
+    },
+    "core": {
+      "name": "Core Essential Agent Skills",
+      "description": "Minimal baseline skills for concise, safe, anti-overengineered development",
+      "skills": [
+        "ponytail",
+        "caveman",
+        "senior-implementer",
+        "rtk"
+      ]
+    },
+    "backend": {
+      "name": "Backend & System Architecture",
+      "description": "Codebase indexing, AST navigation, and clean semantic releases",
+      "skills": [
+        "codebase-memory",
+        "codegraph",
+        "ponytail",
+        "release-notes",
+        "nestjs",
+        "nestjs-cqrs-microservices",
+        "centrifugo",
+        "bullmq",
+        "postgresql",
+        "redis",
+        "redis-distributed-patterns",
+        "golang",
+        "fastapi",
+        "prisma",
+        "trpc-fullstack",
+        "grpc-protobuf-engineer",
+        "transactional-outbox-pattern",
+        "database-query-optimizer"
+      ]
+    },
+    "frontend": {
+      "name": "Frontend & UI Design",
+      "description": "UI, component workflow, and strict code minimalism",
+      "skills": [
+        "ponytail",
+        "pixel-perfect-ui",
+        "rtk",
+        "chrome-extension",
+        "chrome-extension-advanced",
+        "nextjs-app-router",
+        "tailwind-shadcn",
+        "tanstack-query-state",
+        "ui-ux-pro-max",
+        "design",
+        "design-system",
+        "ui-styling",
+        "brand",
+        "banner-design",
+        "slides"
+      ]
+    },
+    "devops": {
+      "name": "DevOps & Infrastructure",
+      "description": "Infrastructure reliability, release notes, and token optimization",
+      "skills": [
+        "release-notes",
+        "rtk",
+        "vps-hardening",
+        "linux-server-admin",
+        "docker",
+        "docker-multiarch-builder",
+        "cloud-infra",
+        "kubernetes",
+        "helm-chart-architect",
+        "gitops-terraform",
+        "github-actions",
+        "cicd-security-hardening",
+        "git-advanced-workflow",
+        "shell-scripting"
+      ]
+    },
+    "core-guardrails": {
+      "name": "Core Engineering Guardrails",
+      "description": "Layer 0 essential guardrails enforced across architectural, security, and quality domains",
+      "skills": [
+        "project-context",
+        "source-quality",
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails",
+        "quality-gate"
+      ]
+    },
+    "senior-leadership": {
+      "name": "Senior Engineering Leadership",
+      "description": "Layer 1 leadership skills: feature specifications, technical planning, and skill authoring",
+      "skills": [
+        "feature-spec-writer",
+        "prd-author",
+        "technical-planner",
+        "agile-sprint-planner",
+        "tech-debt-strategist",
+        "skill-author"
+      ]
+    },
+    "architecture-design": {
+      "name": "Architecture & Systems Design",
+      "description": "Layer 1 architecture, data modeling, API contracts, and test strategy",
+      "skills": [
+        "architecture-designer",
+        "domain-driven-design",
+        "event-driven-architect",
+        "microservices-decomposition",
+        "caching-strategy-architect",
+        "data-model-architect",
+        "api-contract-designer",
+        "test-strategist"
+      ]
+    },
+    "implementation": {
+      "name": "Implementation & Coding Engine",
+      "description": "Layer 2 production-grade implementation, UI execution, and verification",
+      "skills": [
+        "senior-implementer",
+        "pixel-perfect-ui"
+      ]
+    },
+    "senior-operations": {
+      "name": "Senior Operations & Verification",
+      "description": "Layer 1 operations: engineering review, incident response, reliability, migrations, and technical research",
+      "skills": [
+        "engineering-review",
+        "incident-investigator",
+        "deep-debugger",
+        "flow-learning-codebase",
+        "opentelemetry-tracing",
+        "reliability-engineer",
+        "migration-strategist",
+        "technical-researcher"
+      ]
+    },
+    "artifacts": {
+      "name": "Visual Artifacts & Diagrams",
+      "description": "Layer 4 declarative diagram authoring across Mermaid, DBML, PlantUML, and draw.io",
+      "skills": [
+        "diagram-author"
+      ]
+    },
+    "nixos": {
+      "name": "NixOS & System Configuration",
+      "description": "NixOS flakes, modules, devShells, and Neovim Lua tooling",
+      "skills": [
+        "nixos",
+        "neovim-lua"
+      ]
+    },
+    "rust": {
+      "name": "Rust Systems Programming",
+      "description": "Idiomatic Rust, Tokio async runtime, and memory safety patterns",
+      "skills": [
+        "rust"
+      ]
+    },
+    "godot": {
+      "name": "Godot Game Development",
+      "description": "Godot 4.x engine architecture and GDScript 2.0 static typing",
+      "skills": [
+        "godot-gdscript"
+      ]
+    },
+    "testing": {
+      "name": "Testing & QA Automation",
+      "description": "End-to-end browser testing, automation, and test strategies",
+      "skills": [
+        "test-strategist",
+        "unit-test-craftsman",
+        "qa-test-flow-engineer",
+        "playwright"
+      ]
+    },
+    "cloud": {
+      "name": "Cloud Providers & Architecture",
+      "description": "Multi-cloud architecture patterns across AWS, GCP, and Azure",
+      "skills": [
+        "aws-cloud-architect",
+        "gcp-cloud-architect",
+        "azure-cloud-architect",
+        "cloud-infra"
+      ]
+    },
+    "ai-engineering": {
+      "name": "AI & Agent Engineering",
+      "description": "MCP server creation, RAG systems, evaluation harnesses, and injection defense",
+      "skills": [
+        "mcp-server-author",
+        "rag-pipeline-architect",
+        "eval-harness-designer",
+        "prompt-injection-defense",
+        "api-security-auditor"
+      ]
+    },
+    "senior-global": {
+      "name": "Senior Global Coding Baseline",
+      "description": "Lean cross-agent baseline for repository-first implementation, durable memory, source quality, security, and verification",
+      "skills": [
+        "ponytail",
+        "caveman",
+        "rtk",
+        "codegraph",
+        "codebase-memory",
+        "agent-memory-bootstrap",
+        "repo-first-implementation",
+        "senior-implementer",
+        "junior-coding-agent",
+        "project-context",
+        "source-quality",
+        "quality-gate",
+        "security-guardrails",
+        "architecture-guardrails",
+        "project-source-quality",
+        "detect-stack",
+        "typesafe-ai"
+      ]
+    }
+  }
+}

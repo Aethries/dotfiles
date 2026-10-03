@@ -34,4 +34,17 @@ for user_dir in "${TARGET_DIRS[@]}"; do
 		"$user_dir/snippets/main.code-snippets"
 done
 
+# Link MCP config for Antigravity, Antigravity CLI, and Gemini config
+link_file \
+	"$MODULE_DIR/files/mcp_config.json" \
+	"$HOME/.gemini/antigravity/mcp_config.json"
+
+link_file \
+	"$MODULE_DIR/files/mcp_config.json" \
+	"$HOME/.gemini/antigravity-cli/mcp_config.json"
+
+link_file \
+	"$MODULE_DIR/files/mcp_config.json" \
+	"$HOME/.gemini/config/mcp_config.json"
+
 success "Antigravity IDE configured"

@@ -1,0 +1,3508 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "skills": {
+    "agent-squad-orchestrator": {
+      "name": "agent-squad-orchestrator",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Multi-role squad orchestrator across Codex CLI, Antigravity CLI/IDE, and Claude Code CLI with model tiering, cross-provider routing, and evidence-based verification.",
+      "tags": [
+        "orchestration",
+        "squad",
+        "multi-agent",
+        "cross-provider",
+        "workflow"
+      ],
+      "dependencies": [
+        "project-context",
+        "quality-gate"
+      ],
+      "content_hash": "sha256:1ba32beee39cce153965c7e2edc225e7e0794e2da76c9ec33e95b70f30068dd8",
+      "domain": "orchestration",
+      "capabilities": [
+        "squad-orchestration",
+        "cross-provider-routing",
+        "role-handover-contracts",
+        "evidence-based-verification",
+        "model-tiering"
+      ],
+      "triggers": [
+        "orchestrate-squad",
+        "agent-squad",
+        "multi-agent",
+        "delegate-task",
+        "squad-run",
+        "cross-provider"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "agent-memory-bootstrap": {
+      "name": "agent-memory-bootstrap",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Load and maintain durable project context, decisions, conventions, and handoff state for coding-agent sessions.",
+      "tags": [
+        "memory",
+        "mcp",
+        "handoff",
+        "project-context",
+        "cross-agent"
+      ],
+      "dependencies": [
+        "project-context",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:c84ebf5af80d9d35622454642fa42089d47dffbad54e7c310ef9406c68c1c21a",
+      "domain": "memory",
+      "capabilities": [
+        "durable-project-memory",
+        "decision-recall",
+        "handoff-state",
+        "memory-hygiene",
+        "mcp-agnostic-memory"
+      ],
+      "triggers": [
+        "agent-memory",
+        "memory-bootstrap",
+        "project-memory",
+        "session-handoff",
+        "recall-decisions"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "caveman": {
+      "name": "caveman",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Ultra-terse, telegraphic communication style to minimize token usage.",
+      "tags": [
+        "communication",
+        "token-optimization",
+        "concise"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:c0b24c3b0d4975607671cce1fff3b31f0e21f2edfb9cac55e6356759cb5d7ef2",
+      "domain": "communication",
+      "capabilities": [
+        "ultra-terse-formatting",
+        "token-compression",
+        "telegraphic-communication"
+      ],
+      "triggers": [
+        "terse",
+        "concise-reply",
+        "compress-tokens",
+        "caveman-mode"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "codebase-memory": {
+      "name": "codebase-memory",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Persistent AST codebase memory and relationship index.",
+      "tags": [
+        "ast",
+        "indexing",
+        "memory",
+        "mcp"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:85049045767cebb953eec6d6c71a5b92932424c78f4835d8deee5c14288a85e3",
+      "domain": "ast",
+      "capabilities": [
+        "ast-indexing",
+        "relationship-graph",
+        "codebase-memory-mcp",
+        "import-hierarchy"
+      ],
+      "triggers": [
+        "codebase-memory",
+        "ast-index",
+        "symbol-graph",
+        "import-graph"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "codegraph": {
+      "name": "codegraph",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory AST knowledge graph navigation using CodeGraph / Codebase Memory MCP.",
+      "tags": [
+        "ast",
+        "graph",
+        "navigation",
+        "mcp"
+      ],
+      "dependencies": [
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:528783b7c62a53c64652af47d61cf26e1cf0d40304159a055dc8c87dd237fb24",
+      "domain": "ast",
+      "capabilities": [
+        "ast-graph-navigation",
+        "mcp-graph-query",
+        "symbol-tracing",
+        "call-hierarchy"
+      ],
+      "triggers": [
+        "codegraph",
+        "ast-navigation",
+        "call-hierarchy",
+        "trace-path"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "junior-coding-agent": {
+      "name": "junior-coding-agent",
+      "version": "1.0.0",
+      "source": "canonical",
+      "status": "deprecated",
+      "description": "[DEPRECATED in favor of senior-implementer] Careful junior developer behavior: scoped edits, approval protocols, no regressions.",
+      "tags": [
+        "workflow",
+        "safety",
+        "git",
+        "review",
+        "deprecated"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:0e9c68f1e50ee69aa15be422ed6008612c19291752cbd2f44421b386ae40b8c5",
+      "domain": "deprecated",
+      "capabilities": [
+        "scoped-edits",
+        "approval-protocol",
+        "small-commits"
+      ],
+      "triggers": [
+        "junior-dev",
+        "simple-fix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "ponytail": {
+      "name": "ponytail",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Anti-overengineering ruleset biasing agents toward minimal, standard-library-first code.",
+      "tags": [
+        "philosophy",
+        "yagni",
+        "anti-overengineering",
+        "simplification"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:8dd0c3f5e45532a9dd59dd0482ddcfad74dfe71f48b57bf46cc1f44ae6253dc4",
+      "domain": "philosophy",
+      "capabilities": [
+        "anti-overengineering",
+        "yagni-filtering",
+        "deletion-priority",
+        "code-simplification"
+      ],
+      "triggers": [
+        "refactor-simplify",
+        "ponytail-filter",
+        "yagni",
+        "remove-bloat",
+        "ship-oneliner"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "release-notes": {
+      "name": "release-notes",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Changelog and release notes guideline based on Semantic Versioning and Conventional Commits.",
+      "tags": [
+        "documentation",
+        "semver",
+        "changelog",
+        "release"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:993bcd6c723c513ced7b7c1637ae6e7691f83ee8604bb41d62ad5bdbfd5132d2",
+      "domain": "workflow",
+      "capabilities": [
+        "semver-governance",
+        "conventional-commits-changelog",
+        "release-notes-authoring"
+      ],
+      "triggers": [
+        "release-notes",
+        "changelog",
+        "semver-bump",
+        "generate-release"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rtk": {
+      "name": "rtk",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust Token Killer terminal output filter and token optimization workflow.",
+      "tags": [
+        "terminal",
+        "token-optimization",
+        "filter"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a4a8bed5dfe322bc64e468e5613ebdac00181b6f290afcfb68342165133bfff9",
+      "domain": "tooling",
+      "capabilities": [
+        "terminal-output-filtering",
+        "token-reduction",
+        "log-compression"
+      ],
+      "triggers": [
+        "rtk-filter",
+        "compress-logs",
+        "terminal-noise-filter",
+        "token-killer"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "project-context": {
+      "name": "project-context",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Mandatory codebase reconnaissance, dependency inspection, and convention adherence.",
+      "tags": [
+        "guardrail",
+        "reconnaissance",
+        "context",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:201ff9564b98ccc79a027def33f0fb93b829d9911c48f8af508beb72c131d6ba",
+      "domain": "guardrail",
+      "capabilities": [
+        "codebase-reconnaissance",
+        "dependency-inspection",
+        "convention-adherence"
+      ],
+      "triggers": [
+        "project-context",
+        "repo-conventions",
+        "dependency-discovery",
+        "reconnaissance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "source-quality": {
+      "name": "source-quality",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero tolerance for code duplication, dead code, and package manager drift.",
+      "tags": [
+        "guardrail",
+        "quality",
+        "clean-code",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:aed5ca07bd656fbbad951aa991c801f6c6d7ac426019ef248f1c5bbf1a6c45a6",
+      "domain": "guardrail",
+      "capabilities": [
+        "duplication-prevention",
+        "package-manager-integrity",
+        "ast-awareness"
+      ],
+      "triggers": [
+        "source-hygiene",
+        "code-duplication",
+        "package-lock-integrity",
+        "ast-check"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "architecture-guardrails": {
+      "name": "architecture-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Domain boundaries, clean layering, and unidirectional dependency graphs.",
+      "tags": [
+        "guardrail",
+        "architecture",
+        "layering",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:26790f784944bce857f84fef8b4b2c14187804c2a0005d80aa70d7b3a844b2ce",
+      "domain": "guardrail",
+      "capabilities": [
+        "layering-enforcement",
+        "bounded-context-validation",
+        "acyclic-dependency-verification"
+      ],
+      "triggers": [
+        "architecture-check",
+        "dependency-cycle",
+        "boundary-violation",
+        "layer-separation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "system-design-guardrails": {
+      "name": "system-design-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed systems constraints, idempotency, retry safety, and transaction boundaries.",
+      "tags": [
+        "guardrail",
+        "system-design",
+        "reliability",
+        "layer0"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:1dda9cd689b814d2c3d645df34d6313c13b4c928f5006ed078406f353987a407",
+      "domain": "guardrail",
+      "capabilities": [
+        "distributed-safety",
+        "idempotency-enforcement",
+        "retry-safety",
+        "transaction-boundaries"
+      ],
+      "triggers": [
+        "distributed-safety",
+        "idempotency-check",
+        "retry-safety",
+        "transaction-boundary"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "security-guardrails": {
+      "name": "security-guardrails",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero hardcoded secrets, input validation, and authorization boundaries.",
+      "tags": [
+        "guardrail",
+        "security",
+        "zero-trust",
+        "layer0"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:a514867e02370d40c2a60bc72fe28b6bd8dfa872dd5a09259386a3605d435f4b",
+      "domain": "guardrail",
+      "capabilities": [
+        "secret-leak-prevention",
+        "input-sanitization",
+        "strict-auth-boundaries"
+      ],
+      "triggers": [
+        "security-audit",
+        "secret-detection",
+        "auth-boundary",
+        "sanitization-check"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "quality-gate": {
+      "name": "quality-gate",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Non-negotiable verification sequence (lint, format, typecheck, test, build) before declaring work done.",
+      "tags": [
+        "guardrail",
+        "verification",
+        "testing",
+        "layer0"
+      ],
+      "dependencies": [
+        "source-quality"
+      ],
+      "content_hash": "sha256:163bf48b10faae42d146ffa1dcc18879a32420397fa2b053311c4c4df490764b",
+      "domain": "guardrail",
+      "capabilities": [
+        "5-step-verification",
+        "build-test-lint-audit",
+        "completion-readiness-gate"
+      ],
+      "triggers": [
+        "quality-gate",
+        "verify-completion",
+        "pre-merge-check",
+        "final-verification"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "feature-spec-writer": {
+      "name": "feature-spec-writer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate exhaustive, unambiguous product and feature specifications.",
+      "tags": [
+        "planning",
+        "specification",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "project-context"
+      ],
+      "content_hash": "sha256:13c869e9c67e90296cbfcba31ff96270ad5c9f317db98d7697da59891c21b784",
+      "domain": "leadership",
+      "capabilities": [
+        "feature-spec-authoring",
+        "prd-formulation",
+        "user-flow-definition",
+        "requirements-engineering",
+        "spec-markdown-generation"
+      ],
+      "triggers": [
+        "write-spec",
+        "specification",
+        "author-prd",
+        "feature-requirements",
+        "user-stories",
+        "spec-document"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "technical-planner": {
+      "name": "technical-planner",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate concrete, phased technical implementation plans from approved specs.",
+      "tags": [
+        "planning",
+        "architecture",
+        "technical-plan",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "feature-spec-writer",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:a38c32fb6082f0d7db0c73c70a5248212e355265c96c509ad05c61160cc546ac",
+      "domain": "leadership",
+      "capabilities": [
+        "implementation-planning",
+        "phased-execution-breakdown",
+        "plan-markdown-generation",
+        "architectural-sequencing"
+      ],
+      "triggers": [
+        "create-plan",
+        "author-plan",
+        "technical-plan",
+        "implementation-plan",
+        "plan-phases",
+        "breakdown-tasks",
+        "how-to-build"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "skill-author": {
+      "name": "skill-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author, standardize, and package new AI agent skills for the dotfiles ecosystem.",
+      "tags": [
+        "meta",
+        "skills",
+        "authoring",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:edc02ada1bad5ad85559cdacce8a55502ed1f8edee990c40311c432692451a23",
+      "domain": "tooling",
+      "capabilities": [
+        "agent-skill-authoring",
+        "skill-packaging",
+        "skill-validation",
+        "dotfiles-skill-standards"
+      ],
+      "triggers": [
+        "create-skill",
+        "author-skill",
+        "package-skill",
+        "skill-md"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "architecture-designer": {
+      "name": "architecture-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Evaluate system topology, bounded contexts, module boundaries, and synchronous vs asynchronous communication.",
+      "tags": [
+        "architecture",
+        "adr",
+        "systems-design",
+        "leadership",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:9075e03350ddf605ed0e0385750dc9020c032ded7b8c2ed19aceffef92b6c164",
+      "domain": "architecture",
+      "capabilities": [
+        "system-topology",
+        "bounded-contexts",
+        "adr-authoring",
+        "monolith-vs-microservices",
+        "async-sync-protocols"
+      ],
+      "triggers": [
+        "system-architecture",
+        "design-system",
+        "adr",
+        "microservices-boundary",
+        "high-level-design"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "data-model-architect": {
+      "name": "data-model-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Design relational (Postgres) and document (MongoDB) schemas, indexing strategies, foreign keys, and zero-downtime migrations.",
+      "tags": [
+        "database",
+        "schema",
+        "postgres",
+        "data-modeling",
+        "layer1"
+      ],
+      "dependencies": [
+        "architecture-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:54ac63d9fd96f3cf4bf93a912b5b1012e49a4194c69aaa871da993cf6511871e",
+      "domain": "database",
+      "capabilities": [
+        "relational-schema-design",
+        "document-schema-design",
+        "indexing-strategy",
+        "zero-downtime-migrations",
+        "concurrency-locking"
+      ],
+      "triggers": [
+        "data-model",
+        "schema-design",
+        "database-migration",
+        "erd",
+        "foreign-keys"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "api-contract-designer": {
+      "name": "api-contract-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Standardize API interfaces across REST, GraphQL, gRPC, and WebSockets with uniform error envelopes and idempotency.",
+      "tags": [
+        "api",
+        "rest",
+        "graphql",
+        "grpc",
+        "contract",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:68c23c2afb77a3b8307d7b5d878ec186d7e959eea4ef4e1ccb02e73fd0d04be7",
+      "domain": "architecture",
+      "capabilities": [
+        "api-contract-design",
+        "rest-schema",
+        "graphql-schema",
+        "grpc-contracts",
+        "idempotency-spec",
+        "pagination-contract"
+      ],
+      "triggers": [
+        "api-design",
+        "rest-endpoints",
+        "graphql-schema",
+        "grpc-proto",
+        "webhook-spec",
+        "error-envelope"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "test-strategist": {
+      "name": "test-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Formulate comprehensive test strategies, test pyramids, and edge-case matrices across unit, integration, and E2E boundaries.",
+      "tags": [
+        "testing",
+        "qa",
+        "test-strategy",
+        "edge-cases",
+        "layer1"
+      ],
+      "dependencies": [
+        "quality-gate",
+        "source-quality"
+      ],
+      "content_hash": "sha256:1623b9c5e2ea76239687c9710f2b85d5a6fc9a40b166b85702138a0d71969493",
+      "domain": "leadership",
+      "capabilities": [
+        "test-pyramid-strategy",
+        "edge-case-matrices",
+        "mocking-boundaries",
+        "e2e-integration-design"
+      ],
+      "triggers": [
+        "test-plan",
+        "test-strategy",
+        "edge-cases",
+        "mocking-strategy",
+        "test-matrix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "senior-implementer": {
+      "name": "senior-implementer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Disciplined senior implementation engineer executing approved specs and plans with CodeGraph and RTK.",
+      "tags": [
+        "implementation",
+        "coding",
+        "refactoring",
+        "layer2"
+      ],
+      "dependencies": [
+        "project-context",
+        "source-quality",
+        "architecture-guardrails",
+        "security-guardrails",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory",
+        "rtk",
+        "caveman",
+        "ponytail"
+      ],
+      "content_hash": "sha256:d7971a17eb71ed358fdbf77af7987abcc1c718492689701e13376df410615537",
+      "domain": "implementation",
+      "capabilities": [
+        "spec-execution",
+        "ast-guided-coding",
+        "5-step-quality-gate",
+        "minimal-diff-implementation"
+      ],
+      "triggers": [
+        "implement",
+        "execute-plan",
+        "implement-plan",
+        "execute-spec",
+        "write-production-code",
+        "fix-bug"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "pixel-perfect-ui": {
+      "name": "pixel-perfect-ui",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Senior Frontend and UI implementation specialist. Builds responsive, accessible components with 100% fidelity to mockups.",
+      "tags": [
+        "frontend",
+        "ui",
+        "css",
+        "components",
+        "accessibility",
+        "layer2"
+      ],
+      "dependencies": [
+        "source-quality",
+        "quality-gate"
+      ],
+      "content_hash": "sha256:770d4a3870833d26706d6b4d66b6c24fc3f55a3d13580f4816d315e579d05fd9",
+      "domain": "frontend",
+      "capabilities": [
+        "pixel-perfect-fidelity",
+        "design-system-compliance",
+        "accessible-components",
+        "skeleton-states",
+        "responsive-layout"
+      ],
+      "triggers": [
+        "frontend-ui",
+        "build-component",
+        "implement-component",
+        "mockup-to-code",
+        "responsive-styling",
+        "css-layout",
+        "figma",
+        "screenshot"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "engineering-review": {
+      "name": "engineering-review",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rigorous pull request and code change review. Categorizes findings into Blocker, Warning, and Suggestion against specs and repo standards.",
+      "tags": [
+        "review",
+        "pull-request",
+        "code-quality",
+        "verification",
+        "layer1"
+      ],
+      "dependencies": [
+        "security-guardrails",
+        "source-quality",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:576abf435196b65c85162331462073d62d59aa858fc9a415df410e8cd779a0d3",
+      "domain": "review",
+      "capabilities": [
+        "pr-review",
+        "diff-analysis",
+        "finding-categorization",
+        "spec-compliance-verification"
+      ],
+      "triggers": [
+        "review-pr",
+        "code-review",
+        "review-diff",
+        "pull-request-review",
+        "audit-changes"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "incident-investigator": {
+      "name": "incident-investigator",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Production incident triage, live troubleshooting, and root cause analysis with 5 Whys and blameless post-mortems.",
+      "tags": [
+        "incident",
+        "postmortem",
+        "triage",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:52891cbbddad828e955b32a27a183b55a72cc019f5564ba012243df8ad046bea",
+      "domain": "operations",
+      "capabilities": [
+        "incident-triage",
+        "telemetry-inspection",
+        "5-whys-rca",
+        "blameless-postmortem"
+      ],
+      "triggers": [
+        "production-incident",
+        "investigate",
+        "outage-triage",
+        "root-cause-analysis",
+        "postmortem",
+        "live-debugging",
+        "500-errors",
+        "production-error"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "reliability-engineer": {
+      "name": "reliability-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Site reliability engineering and system resilience design: circuit breakers, jittered backoff, DLQs, and SLOs.",
+      "tags": [
+        "sre",
+        "reliability",
+        "resilience",
+        "operations",
+        "layer1"
+      ],
+      "dependencies": [
+        "system-design-guardrails",
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:070068b7d4bd8ef58ef629faa25403b988d3be686fe8ef16a08f1c9a744dd9f5",
+      "domain": "operations",
+      "capabilities": [
+        "circuit-breakers",
+        "exponential-backoff",
+        "dead-letter-queues",
+        "slo-sli-definition",
+        "bulkhead-isolation"
+      ],
+      "triggers": [
+        "system-resilience",
+        "circuit-breaker",
+        "retry-backoff",
+        "slo-sli",
+        "fault-tolerance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "migration-strategist": {
+      "name": "migration-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Zero-downtime database, data model, and system migrations via multi-phase expand-contract patterns.",
+      "tags": [
+        "database",
+        "migration",
+        "expand-contract",
+        "zero-downtime",
+        "layer1"
+      ],
+      "dependencies": [
+        "data-model-architect",
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:acc4137b4c3e59a7e767d302064ef331fab461e7da9d8d8b9377c841e89d4e55",
+      "domain": "database",
+      "capabilities": [
+        "expand-contract-migrations",
+        "backfill-execution",
+        "zero-downtime-strategy",
+        "rollback-verification"
+      ],
+      "triggers": [
+        "database-migration",
+        "zero-downtime",
+        "schema-alteration",
+        "backfill-plan",
+        "expand-contract"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "technical-researcher": {
+      "name": "technical-researcher",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Conducts deep technical spikes, library/vendor evaluations, benchmarks, and trade-off matrices.",
+      "tags": [
+        "research",
+        "benchmarking",
+        "spikes",
+        "evaluation",
+        "layer1"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:da0d1229ac9930f34c95a64a41edab8db84de4fb1068954fc05965e613926dd4",
+      "domain": "leadership",
+      "capabilities": [
+        "technical-spikes",
+        "library-evaluation",
+        "benchmark-matrices",
+        "tradeoff-analysis"
+      ],
+      "triggers": [
+        "technical-research",
+        "evaluate-libraries",
+        "tech-spike",
+        "tradeoff-matrix",
+        "benchmark-comparison"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "diagram-author": {
+      "name": "diagram-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Author declarative architecture diagrams, visual schemas, and workflow charts in Mermaid, DBML, PlantUML, and draw.io XML.",
+      "tags": [
+        "diagrams",
+        "visualization",
+        "mermaid",
+        "dbml",
+        "plantuml",
+        "drawio",
+        "layer4"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5714729c75bc18a710f7557664b43be76ef1f65ef2f22bb789822627a6ea22e4",
+      "domain": "documentation",
+      "capabilities": [
+        "mermaid-diagrams",
+        "dbml-schemas",
+        "plantuml",
+        "drawio-xml",
+        "architecture-visuals"
+      ],
+      "triggers": [
+        "diagram",
+        "mermaid",
+        "visual-architecture",
+        "flowchart",
+        "sequence-diagram",
+        "er-diagram"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nestjs": {
+      "name": "nestjs",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NestJS enterprise architecture, modular structure, dependency injection, and interceptor/pipe patterns.",
+      "tags": [
+        "backend",
+        "typescript",
+        "nestjs",
+        "architecture",
+        "layer3"
+      ],
+      "dependencies": [
+        "architecture-guardrails"
+      ],
+      "content_hash": "sha256:d67ca357b8ebc0654105381d8c16fe3c98136502746b529e57c771701c31d1b7",
+      "domain": "backend",
+      "capabilities": [
+        "nestjs-modules",
+        "dependency-injection",
+        "interceptors-pipes",
+        "enterprise-backend"
+      ],
+      "triggers": [
+        "nestjs",
+        "nest-modules",
+        "nest-controller",
+        "nest-service",
+        "nest-backend"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "centrifugo": {
+      "name": "centrifugo",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Realtime messaging, WebSockets, channel permissions, and presence using Centrifugo and Centrifuge.",
+      "tags": [
+        "realtime",
+        "websockets",
+        "centrifugo",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:dbd0ebea717eeaa4ea099dc10fd59488018b60940010bb1185c713870b889058",
+      "domain": "backend",
+      "capabilities": [
+        "realtime-websockets",
+        "channel-permissions",
+        "presence-broadcast",
+        "pubsub-engine"
+      ],
+      "triggers": [
+        "centrifugo",
+        "realtime-websocket",
+        "live-updates",
+        "chat-broadcast"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "bullmq": {
+      "name": "bullmq",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Distributed job queues, background workers, scheduled jobs, and retry policies using BullMQ and Redis.",
+      "tags": [
+        "queues",
+        "workers",
+        "bullmq",
+        "redis",
+        "layer3"
+      ],
+      "dependencies": [
+        "system-design-guardrails"
+      ],
+      "content_hash": "sha256:526b8b04e4427e513303bdf5a1aaa35b28b6b7c804b219382010e16855890ea8",
+      "domain": "backend",
+      "capabilities": [
+        "job-queues",
+        "worker-concurrency",
+        "scheduled-jobs",
+        "redis-retry-policies"
+      ],
+      "triggers": [
+        "job-queue",
+        "bullmq",
+        "background-worker",
+        "delayed-tasks",
+        "redis-queue"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "postgresql": {
+      "name": "postgresql",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "PostgreSQL database performance tuning, indexing, connection pooling with PgBouncer, and query optimization.",
+      "tags": [
+        "database",
+        "postgresql",
+        "performance",
+        "pgbouncer",
+        "layer3"
+      ],
+      "dependencies": [
+        "data-model-architect"
+      ],
+      "content_hash": "sha256:6b3abe678f079fba470dabe6ddf38f69edd303d3d3e28710fa0488f23ab0420f",
+      "domain": "database",
+      "capabilities": [
+        "query-plan-analysis",
+        "indexing-strategy",
+        "vacuum-tuning",
+        "pgbouncer-pooling"
+      ],
+      "triggers": [
+        "postgres-tuning",
+        "slow-query",
+        "index-optimization",
+        "pgbouncer",
+        "explain-analyze"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "redis": {
+      "name": "redis",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Redis caching patterns, eviction policies, data structures, atomic operations, and pub/sub.",
+      "tags": [
+        "database",
+        "cache",
+        "redis",
+        "key-value",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:df2642e36c44028620f2cb253a79f020f94e9678f3b4d85af24bdde7cca8e669",
+      "domain": "backend",
+      "capabilities": [
+        "cache-patterns",
+        "eviction-policies",
+        "atomic-primitives",
+        "pubsub-messaging"
+      ],
+      "triggers": [
+        "redis-cache",
+        "cache-invalidation",
+        "distributed-lock",
+        "redis-pubsub"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "vps-hardening": {
+      "name": "vps-hardening",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Linux VPS and server hardening: SSH security, UFW firewall, Fail2ban, automatic updates, and systemd unit sandboxing.",
+      "tags": [
+        "security",
+        "devops",
+        "vps",
+        "linux",
+        "hardening",
+        "layer3"
+      ],
+      "dependencies": [
+        "security-guardrails"
+      ],
+      "content_hash": "sha256:a1420f81877daee9c578a973a3433697d3e2b0640d9a6c05f389779f6dd92132",
+      "domain": "infrastructure",
+      "capabilities": [
+        "ssh-hardening",
+        "ufw-firewall",
+        "fail2ban-setup",
+        "systemd-sandboxing"
+      ],
+      "triggers": [
+        "vps-hardening",
+        "server-security",
+        "ufw-setup",
+        "fail2ban",
+        "ssh-security"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "docker": {
+      "name": "docker",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Docker containerization, multi-stage builds, rootless containers, layer caching, and compose architectures.",
+      "tags": [
+        "devops",
+        "containers",
+        "docker",
+        "dockerfile",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f0b30dfe703c40f4e8ad4777b6cb2ce9aa13ba18bc8360dfa34cb8adb2c1ffa9",
+      "domain": "infrastructure",
+      "capabilities": [
+        "multi-stage-dockerfile",
+        "rootless-containers",
+        "layer-caching",
+        "compose-architecture"
+      ],
+      "triggers": [
+        "docker",
+        "dockerfile",
+        "docker-compose",
+        "container-hardening",
+        "containerize"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "cloud-infra": {
+      "name": "cloud-infra",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Cloud infrastructure design, Terraform/OpenTofu, serverless architectures, and multi-cloud patterns across AWS, GCP, and Cloudflare.",
+      "tags": [
+        "devops",
+        "cloud",
+        "terraform",
+        "aws",
+        "cloudflare",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:2afa5980a947f5b8b8e35e82db331a5439464b4fc90f5e1827d0d013bdb99675",
+      "domain": "infrastructure",
+      "capabilities": [
+        "terraform-opentofu",
+        "serverless-architecture",
+        "multi-cloud-patterns",
+        "edge-workers"
+      ],
+      "triggers": [
+        "cloud-infrastructure",
+        "terraform",
+        "opentofu",
+        "aws-infra",
+        "gcp-infra",
+        "cloudflare-workers"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nixos": {
+      "name": "nixos",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NixOS module design, Flakes configuration, Home Manager integrations, and reproducible devShells.",
+      "tags": [
+        "nixos",
+        "nix",
+        "flakes",
+        "declarative",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:5de12b5aace259631a1c651f4c730113a851924050e3beb10bed0b2a54b76c9c",
+      "domain": "infrastructure",
+      "capabilities": [
+        "nixos-flakes",
+        "home-manager-modules",
+        "nix-devshells",
+        "system-configuration"
+      ],
+      "triggers": [
+        "nixos",
+        "nix-flake",
+        "home-manager",
+        "devshell",
+        "nix-package"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "neovim-lua": {
+      "name": "neovim-lua",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Neovim Lua configuration, plugin development, LSP server setup, Treesitter, and keymap architecture.",
+      "tags": [
+        "editor",
+        "neovim",
+        "lua",
+        "lsp",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:f423e5ef37fc6c9ffbfb4f05b50a7e920a035e073f7113ae9dcacef03553444c",
+      "domain": "tooling",
+      "capabilities": [
+        "neovim-lua-config",
+        "lsp-configuration",
+        "treesitter-setup",
+        "keymap-architecture"
+      ],
+      "triggers": [
+        "neovim-config",
+        "lua-plugin",
+        "treesitter",
+        "lsp-setup",
+        "nvim-keymaps"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rust": {
+      "name": "rust",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Rust systems programming: memory safety, ownership/borrowing, Tokio async runtime, error handling, and Clippy hygiene.",
+      "tags": [
+        "rust",
+        "systems",
+        "tokio",
+        "async",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:3b638e5738c0498049327de6b1852baca9ec3068cf18436e8abf94f4cb1b5d4a",
+      "domain": "backend",
+      "capabilities": [
+        "rust-idioms",
+        "tokio-async",
+        "borrow-checker",
+        "clippy-hygiene",
+        "memory-safety"
+      ],
+      "triggers": [
+        "rust-code",
+        "cargo",
+        "tokio",
+        "clippy",
+        "borrow-checker"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "chrome-extension": {
+      "name": "chrome-extension",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Chrome Extension development using Manifest V3: service workers, content scripts, popup/options UI, and WebExtension APIs.",
+      "tags": [
+        "frontend",
+        "browser",
+        "chrome",
+        "extension",
+        "layer3"
+      ],
+      "dependencies": [],
+      "content_hash": "sha256:03dfd1469d511f30c3f825674496bcd0606452feec96a97b8de50a8c1c298028",
+      "domain": "frontend",
+      "capabilities": [
+        "manifest-v3",
+        "service-worker",
+        "content-scripts",
+        "extension-permissions"
+      ],
+      "triggers": [
+        "chrome-extension",
+        "manifest-v3",
+        "browser-extension",
+        "content-script"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "golang": {
+      "name": "golang",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Idiomatic Go systems programming: concurrency patterns, goroutines, channels, error wrapping, table-driven tests, gopls, and golangci-lint hygiene.",
+      "tags": [
+        "go",
+        "golang",
+        "backend",
+        "concurrency",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "go-concurrency",
+        "table-driven-tests",
+        "error-wrapping",
+        "gopls-hygiene"
+      ],
+      "triggers": [
+        "go",
+        "golang",
+        "goroutine",
+        "gopls"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "godot-gdscript": {
+      "name": "godot-gdscript",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Godot 4.x & GDScript 2.0 architecture: static typing, scene-tree composition, signal decoupling, state machines, and physics process vs idle process.",
+      "tags": [
+        "godot",
+        "gdscript",
+        "gamedev",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "gamedev",
+      "capabilities": [
+        "gdscript-typing",
+        "scene-tree-architecture",
+        "signal-decoupling",
+        "godot-physics"
+      ],
+      "triggers": [
+        "godot",
+        "gdscript",
+        "gamedev"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "shell-scripting": {
+      "name": "shell-scripting",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Defensive Bash & POSIX shell scripting: strict error handling, shellcheck static analysis, dynamic path resolution, trap cleanups, and atomic file operations.",
+      "tags": [
+        "bash",
+        "shell",
+        "posix",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "defensive-bash",
+        "shellcheck-hygiene",
+        "trap-cleanup",
+        "dynamic-paths"
+      ],
+      "triggers": [
+        "bash",
+        "sh",
+        "shell",
+        "shellcheck"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nextjs-app-router": {
+      "name": "nextjs-app-router",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Next.js App Router engineering: React Server Components (RSC), Server Actions, hydration boundaries, Route Handlers, and ISR/cache revalidation.",
+      "tags": [
+        "nextjs",
+        "react",
+        "frontend",
+        "fullstack",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "server-components",
+        "server-actions",
+        "route-handlers",
+        "cache-revalidation"
+      ],
+      "triggers": [
+        "nextjs",
+        "next.js",
+        "app-router",
+        "rsc"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tailwind-shadcn": {
+      "name": "tailwind-shadcn",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "TailwindCSS v4 & Shadcn UI component design: CSS design tokens, Radix UI headless accessible primitives, cn/clsx/tailwind-merge class composition, and variant-driven props.",
+      "tags": [
+        "tailwind",
+        "shadcn",
+        "radix",
+        "frontend",
+        "ui",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "tailwind-tokens",
+        "radix-primitives",
+        "cva-variants",
+        "accessibility"
+      ],
+      "triggers": [
+        "tailwind",
+        "tailwindcss",
+        "shadcn",
+        "radix"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prisma": {
+      "name": "prisma",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Prisma ORM data modeling & transactions: schema design, relations, migration drift handling, interactive $transaction isolation, batching, and query performance tuning.",
+      "tags": [
+        "prisma",
+        "orm",
+        "database",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "prisma-schema",
+        "prisma-transactions",
+        "prisma-migrations",
+        "query-optimization"
+      ],
+      "triggers": [
+        "prisma",
+        "prisma-orm",
+        "prisma-migrate"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "kubernetes": {
+      "name": "kubernetes",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Kubernetes workload authoring & triage: declarative manifests, k9s diagnostics, Pod resource limits, readiness/liveness probes, ConfigMaps, Secrets, and Helm chart templating.",
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "devops",
+        "cloud",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "k8s-manifests",
+        "pod-diagnostics",
+        "probes-configuration",
+        "helm-templating"
+      ],
+      "triggers": [
+        "kubernetes",
+        "k8s",
+        "kubectl",
+        "k9s",
+        "helm"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "github-actions": {
+      "name": "github-actions",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "GitHub Actions CI/CD automation: workflow syntax, matrix builds, dependency caching, composite actions, secret hygiene, and artifact retention.",
+      "tags": [
+        "github-actions",
+        "ci-cd",
+        "devops",
+        "automation",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "ci-workflows",
+        "matrix-builds",
+        "action-caching",
+        "workflow-security"
+      ],
+      "triggers": [
+        "github-actions",
+        "workflows",
+        "ci-cd"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "playwright": {
+      "name": "playwright",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Playwright E2E testing: resilient user-facing locators, auto-waiting, page fixture management, network request interception/mocking, and trace viewer debugging.",
+      "tags": [
+        "playwright",
+        "e2e",
+        "testing",
+        "qa",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "e2e-testing",
+        "user-locators",
+        "test-fixtures",
+        "trace-debugging"
+      ],
+      "triggers": [
+        "playwright",
+        "e2e",
+        "browser-test"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "fastapi": {
+      "name": "fastapi",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Python FastAPI & Pydantic v2 engineering: async request handling, dependency injection (Depends), schema validation, Ruff linting/formatting, and OpenAPI contract generation.",
+      "tags": [
+        "fastapi",
+        "python",
+        "pydantic",
+        "backend",
+        "api",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "async-api",
+        "pydantic-models",
+        "dependency-injection",
+        "openapi-generation"
+      ],
+      "triggers": [
+        "fastapi",
+        "pydantic",
+        "uvicorn"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "nestjs-cqrs-microservices": {
+      "name": "nestjs-cqrs-microservices",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "NestJS microservices & CQRS architecture: Command/Query buses, Event handlers, Saga orchestration, and transport brokers.",
+      "tags": [
+        "nestjs",
+        "cqrs",
+        "microservices",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "cqrs-segregation",
+        "saga-orchestration",
+        "microservices-transports",
+        "domain-events"
+      ],
+      "triggers": [
+        "nestjs",
+        "cqrs",
+        "microservices",
+        "saga"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "aws-cloud-architect": {
+      "name": "aws-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "AWS cloud architecture & serverless patterns: IAM least privilege, ECS/Fargate, Lambda, S3 security & lifecycle, and EventBridge.",
+      "tags": [
+        "aws",
+        "cloud",
+        "serverless",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "aws-iam-least-privilege",
+        "ecs-fargate",
+        "lambda-serverless",
+        "eventbridge-pipelines"
+      ],
+      "triggers": [
+        "aws",
+        "lambda",
+        "ecs",
+        "fargate",
+        "s3"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "gcp-cloud-architect": {
+      "name": "gcp-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Google Cloud Platform architecture: Cloud Run serverless containers, Workload Identity federation, Cloud Pub/Sub, and Cloud Storage.",
+      "tags": [
+        "gcp",
+        "google-cloud",
+        "cloud-run",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "cloud-run",
+        "workload-identity",
+        "pubsub-messaging",
+        "gcs-security"
+      ],
+      "triggers": [
+        "gcp",
+        "google-cloud",
+        "cloud-run",
+        "pubsub"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "azure-cloud-architect": {
+      "name": "azure-cloud-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Microsoft Azure architecture: Azure Container Apps, AKS, Azure Functions, Entra ID Managed Identities, Key Vault, and Service Bus.",
+      "tags": [
+        "azure",
+        "cloud",
+        "container-apps",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "cloud",
+      "capabilities": [
+        "container-apps",
+        "managed-identities",
+        "azure-keyvault",
+        "service-bus"
+      ],
+      "triggers": [
+        "azure",
+        "entra-id",
+        "azure-functions",
+        "service-bus"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "domain-driven-design": {
+      "name": "domain-driven-design",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Strategic and tactical Domain-Driven Design (DDD): Bounded Contexts, Ubiquitous Language, Aggregate Roots, Entities, Value Objects, and Domain Events.",
+      "tags": [
+        "ddd",
+        "domain-driven-design",
+        "architecture",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "bounded-contexts",
+        "aggregate-roots",
+        "value-objects",
+        "domain-events"
+      ],
+      "triggers": [
+        "ddd",
+        "bounded-context",
+        "aggregate-root",
+        "value-object"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "unit-test-craftsman": {
+      "name": "unit-test-craftsman",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Unit testing craftsmanship: AAA pattern, boundary value analysis, test doubles, parameterized testing, and zero test leakage.",
+      "tags": [
+        "unit-test",
+        "testing",
+        "vitest",
+        "jest",
+        "layer2"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "aaa-pattern",
+        "boundary-analysis",
+        "test-doubles",
+        "parameterized-testing"
+      ],
+      "triggers": [
+        "unit-test",
+        "vitest",
+        "jest",
+        "test-case"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "qa-test-flow-engineer": {
+      "name": "qa-test-flow-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "QA test flow engineering: user journey test cases, regression test matrices, edge-case failure injection, and Gherkin/BDD scenarios.",
+      "tags": [
+        "qa",
+        "test-flow",
+        "bdd",
+        "regression",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "testing",
+      "capabilities": [
+        "user-journeys",
+        "regression-matrices",
+        "failure-injection",
+        "gherkin-bdd"
+      ],
+      "triggers": [
+        "test-flow",
+        "qa",
+        "test-case",
+        "user-journey"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "flow-learning-codebase": {
+      "name": "flow-learning-codebase",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Codebase flow learning & reverse engineering: execution path tracing, sequence reconstruction, dependency topology mapping, and mental model synthesis.",
+      "tags": [
+        "codebase",
+        "learning",
+        "architecture",
+        "reverse-engineering",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "execution-tracing",
+        "sequence-reconstruction",
+        "dependency-topology",
+        "mental-models"
+      ],
+      "triggers": [
+        "source-learning",
+        "flow-learn",
+        "codebase-walkthrough",
+        "reverse-engineering"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "deep-debugger": {
+      "name": "deep-debugger",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Senior debugging & root-cause isolation: binary git bisecting, memory leak diagnosis, heap snapshot profiling, and race condition reproduction.",
+      "tags": [
+        "debug",
+        "senior",
+        "root-cause",
+        "profiling",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "git-bisect",
+        "heap-profiling",
+        "flamegraphs",
+        "race-condition-reproduction"
+      ],
+      "triggers": [
+        "debug",
+        "memory-leak",
+        "flamegraph",
+        "bisect",
+        "intermittent-bug"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "linux-server-admin": {
+      "name": "linux-server-admin",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Linux server administration & systems operations: systemd service management, journalctl logging, Nginx/Caddy reverse proxy tuning, and sysctl kernel optimization.",
+      "tags": [
+        "linux",
+        "server",
+        "systemd",
+        "nginx",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "systemd-sandboxing",
+        "reverse-proxy-tuning",
+        "journalctl-slicing",
+        "kernel-sysctl-optimization"
+      ],
+      "triggers": [
+        "server",
+        "systemd",
+        "nginx",
+        "linux-admin",
+        "journalctl"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "gitops-terraform": {
+      "name": "gitops-terraform",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "GitOps & Terraform / OpenTofu infrastructure as code: state locking, remote backends, module composition, drift detection, and ArgoCD synchronization.",
+      "tags": [
+        "terraform",
+        "opentofu",
+        "gitops",
+        "argocd",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "terraform-remote-state",
+        "module-composition",
+        "drift-detection",
+        "argocd-sync"
+      ],
+      "triggers": [
+        "terraform",
+        "opentofu",
+        "gitops",
+        "argocd"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "chrome-extension-advanced": {
+      "name": "chrome-extension-advanced",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Chrome Extension MV3 engineering: declarativeNetRequest rulesets, offscreen documents, side panel APIs, WebSocket persistence, and cross-context messaging.",
+      "tags": [
+        "chrome-extension",
+        "mv3",
+        "browser",
+        "frontend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "declarativeNetRequest",
+        "offscreen-documents",
+        "side-panel",
+        "mv3-messaging"
+      ],
+      "triggers": [
+        "chrome-extension",
+        "manifest-v3",
+        "declarativeNetRequest",
+        "offscreen"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "mcp-server-author": {
+      "name": "mcp-server-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Model Context Protocol (MCP) server development: tool definitions, resource providers, prompt templates, and stdio/SSE transports.",
+      "tags": [
+        "mcp",
+        "ai-agent",
+        "tooling",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "mcp-tool-definition",
+        "stdio-transport",
+        "sse-transport",
+        "schema-validation"
+      ],
+      "triggers": [
+        "mcp",
+        "mcp-server",
+        "tool-definition"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "rag-pipeline-architect": {
+      "name": "rag-pipeline-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Retrieval-Augmented Generation (RAG) architecture: hybrid retrieval, semantic chunking, cross-encoder reranking, and vector indexing.",
+      "tags": [
+        "rag",
+        "vector-db",
+        "embeddings",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "hybrid-search",
+        "semantic-chunking",
+        "cross-encoder-reranking",
+        "hnsw-indexing"
+      ],
+      "triggers": [
+        "rag",
+        "embeddings",
+        "pgvector",
+        "qdrant",
+        "vector-search"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "eval-harness-designer": {
+      "name": "eval-harness-designer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "LLM & agent evaluation harness design: benchmark datasets, tool-calling accuracy verification, and hallucination scoring.",
+      "tags": [
+        "eval",
+        "benchmarking",
+        "llm",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "eval-benchmarks",
+        "tool-accuracy-metrics",
+        "llm-judge",
+        "regression-testing"
+      ],
+      "triggers": [
+        "eval",
+        "benchmark",
+        "llm-judge",
+        "prompt-eval"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prompt-injection-defense": {
+      "name": "prompt-injection-defense",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "AI agent security & prompt injection defense: indirect injection mitigation, delimiter framing, and data exfiltration defense.",
+      "tags": [
+        "security",
+        "prompt-injection",
+        "ai-safety",
+        "layer0"
+      ],
+      "dependencies": [],
+      "domain": "ai-engineering",
+      "capabilities": [
+        "delimiter-framing",
+        "exfiltration-defense",
+        "human-confirmation-gate",
+        "payload-sanitization"
+      ],
+      "triggers": [
+        "prompt-injection",
+        "jailbreak",
+        "agent-security"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "api-security-auditor": {
+      "name": "api-security-auditor",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "API security auditing & OWASP API Top 10 defense: BOLA/IDOR, mass assignment, JWT token safety, and SSRF prevention.",
+      "tags": [
+        "security",
+        "owasp",
+        "api-security",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "security",
+      "capabilities": [
+        "bola-prevention",
+        "mass-assignment-defense",
+        "jwt-hardening",
+        "ssrf-blocking"
+      ],
+      "triggers": [
+        "owasp",
+        "api-security",
+        "bola",
+        "idor",
+        "ssrf"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "opentelemetry-tracing": {
+      "name": "opentelemetry-tracing",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "OpenTelemetry (OTel) observability: distributed tracing, span context propagation, baggage, semantic attributes, and metrics instrumentation.",
+      "tags": [
+        "opentelemetry",
+        "otel",
+        "tracing",
+        "observability",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "operations",
+      "capabilities": [
+        "w3c-trace-context",
+        "semantic-attributes",
+        "distributed-tracing",
+        "otlp-export"
+      ],
+      "triggers": [
+        "opentelemetry",
+        "otel",
+        "trace",
+        "tracing",
+        "span"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "database-query-optimizer": {
+      "name": "database-query-optimizer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Database query optimization & planner analysis: EXPLAIN (ANALYZE, BUFFERS), sequential scan reduction, and composite/partial/GIN indexing.",
+      "tags": [
+        "database",
+        "sql",
+        "query-optimization",
+        "performance",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "explain-analyze",
+        "index-tuning",
+        "lock-triage",
+        "pool-sizing"
+      ],
+      "triggers": [
+        "explain",
+        "slow-query",
+        "query-optimizer",
+        "postgres-performance"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tanstack-query-state": {
+      "name": "tanstack-query-state",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "TanStack Query (React Query) v5 server-state management: query key factories, optimistic mutations, prefetching, and cache invalidation.",
+      "tags": [
+        "tanstack-query",
+        "react-query",
+        "frontend",
+        "state",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "frontend",
+      "capabilities": [
+        "query-key-factories",
+        "optimistic-mutations",
+        "prefetching",
+        "cache-gc"
+      ],
+      "triggers": [
+        "tanstack-query",
+        "react-query",
+        "usequery",
+        "usemutation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "trpc-fullstack": {
+      "name": "trpc-fullstack",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "tRPC end-to-end type safety: router architecture, procedure middlewares, input validation (Zod), context injection, and HTTP batching.",
+      "tags": [
+        "trpc",
+        "fullstack",
+        "typescript",
+        "rpc",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "router-hierarchy",
+        "procedure-middleware",
+        "zod-validation",
+        "http-batching"
+      ],
+      "triggers": [
+        "trpc",
+        "rpc",
+        "type-safe-api"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "grpc-protobuf-engineer": {
+      "name": "grpc-protobuf-engineer",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "gRPC & Protocol Buffers engineering: binary serialization, service definitions (.proto), streaming RPCs, and backwards compatibility.",
+      "tags": [
+        "grpc",
+        "protobuf",
+        "rpc",
+        "backend",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "protobuf-evolution",
+        "unary-and-streaming",
+        "deadline-propagation",
+        "grpc-interceptors"
+      ],
+      "triggers": [
+        "grpc",
+        "protobuf",
+        "proto"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "redis-distributed-patterns": {
+      "name": "redis-distributed-patterns",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Redis distributed patterns: Redlock locking, sliding-window rate limiting, Redis Streams consumer groups, and cache stampede defense.",
+      "tags": [
+        "redis",
+        "distributed-locks",
+        "rate-limiting",
+        "streams",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "redlock-locking",
+        "sliding-window-limiter",
+        "redis-streams",
+        "stampede-defense"
+      ],
+      "triggers": [
+        "redis",
+        "redlock",
+        "rate-limit",
+        "redis-stream"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "transactional-outbox-pattern": {
+      "name": "transactional-outbox-pattern",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Transactional Outbox Pattern & reliable messaging: eliminating dual-write bugs, outbox tables, CDC via Debezium, and idempotent consumers.",
+      "tags": [
+        "outbox-pattern",
+        "cdc",
+        "messaging",
+        "reliability",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "backend",
+      "capabilities": [
+        "dual-write-elimination",
+        "outbox-table-design",
+        "cdc-wal-capture",
+        "idempotent-consumers"
+      ],
+      "triggers": [
+        "outbox",
+        "dual-write",
+        "cdc",
+        "debezium"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "git-advanced-workflow": {
+      "name": "git-advanced-workflow",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Advanced Git workflows: Git worktrees for concurrent branch development, interactive rebase surgery, automated git bisect, and sparse checkouts.",
+      "tags": [
+        "git",
+        "worktree",
+        "rebase",
+        "bisect",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "git-worktrees",
+        "interactive-rebase",
+        "git-bisect-run",
+        "sparse-checkouts"
+      ],
+      "triggers": [
+        "git-worktree",
+        "git-rebase",
+        "git-bisect",
+        "sparse-checkout"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "docker-multiarch-builder": {
+      "name": "docker-multiarch-builder",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Docker Buildx & multi-architecture image engineering: cross-platform compilation (amd64/arm64), BuildKit cache mounts, and rootless containers.",
+      "tags": [
+        "docker",
+        "buildx",
+        "multiarch",
+        "containers",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "multiarch-builds",
+        "buildkit-cache-mounts",
+        "distroless-scratch",
+        "rootless-containers"
+      ],
+      "triggers": [
+        "buildx",
+        "multiarch",
+        "docker-build",
+        "buildkit"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "helm-chart-architect": {
+      "name": "helm-chart-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Production Helm v3 chart engineering: template authoring, values.schema.json validation, umbrella chart composition, and lifecycle hooks.",
+      "tags": [
+        "helm",
+        "kubernetes",
+        "k8s",
+        "devops",
+        "layer3"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "values-schema-validation",
+        "helm-template-helpers",
+        "umbrella-charts",
+        "lifecycle-hooks"
+      ],
+      "triggers": [
+        "helm",
+        "helm-chart",
+        "values.yaml",
+        "umbrella-chart"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "cicd-security-hardening": {
+      "name": "cicd-security-hardening",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "CI/CD pipeline security & supply-chain defense: OpenID Connect cloud auth, action commit SHA pinning, SLSA provenance, and secret scanning.",
+      "tags": [
+        "security",
+        "ci-cd",
+        "oidc",
+        "supply-chain",
+        "devops",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "devops",
+      "capabilities": [
+        "oidc-federation",
+        "action-sha-pinning",
+        "slsa-provenance",
+        "secret-scanning-pr"
+      ],
+      "triggers": [
+        "ci-cd-security",
+        "oidc",
+        "supply-chain",
+        "action-pinning"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "prd-author": {
+      "name": "prd-author",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Product Requirements Document (PRD) authoring: problem formulation, user personas, success metrics (KPIs/OKRs), and MoSCoW prioritization.",
+      "tags": [
+        "prd",
+        "product",
+        "planning",
+        "management",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "problem-formulation",
+        "kpi-okr-metrics",
+        "moscow-scoping",
+        "edge-case-mapping"
+      ],
+      "triggers": [
+        "prd",
+        "product-requirements",
+        "user-story",
+        "feature-spec"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "agile-sprint-planner": {
+      "name": "agile-sprint-planner",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Agile sprint planning & task decomposition: user story mapping, acceptance criteria (Definition of Done), story points, and dependency graphs.",
+      "tags": [
+        "agile",
+        "sprint",
+        "planning",
+        "task-breakdown",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "invest-user-stories",
+        "definition-of-done",
+        "critical-path-mapping",
+        "task-sizing"
+      ],
+      "triggers": [
+        "sprint-plan",
+        "task-breakdown",
+        "acceptance-criteria",
+        "user-story"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "tech-debt-strategist": {
+      "name": "tech-debt-strategist",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Technical debt assessment & remediation planning: categorizing debt, interest calculation, risk-vs-reward prioritization, and refactoring roadmaps.",
+      "tags": [
+        "tech-debt",
+        "refactoring",
+        "architecture",
+        "planning",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "leadership",
+      "capabilities": [
+        "debt-categorization",
+        "interest-quantification",
+        "boy-scout-planning",
+        "refactoring-roadmaps"
+      ],
+      "triggers": [
+        "tech-debt",
+        "refactoring-plan",
+        "legacy-code",
+        "debt-audit"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "event-driven-architect": {
+      "name": "event-driven-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Event-Driven Architecture (EDA) & Event Sourcing: broker selection, schema registries, idempotency keys, dead-letter routing, and backpressure.",
+      "tags": [
+        "eda",
+        "event-driven",
+        "architecture",
+        "messaging",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "domain-event-design",
+        "idempotency-ordering",
+        "dead-letter-queues",
+        "consumer-backpressure"
+      ],
+      "triggers": [
+        "eda",
+        "event-driven",
+        "event-sourcing",
+        "kafka",
+        "rabbitmq"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "microservices-decomposition": {
+      "name": "microservices-decomposition",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Microservices decomposition & migration: Strangler Fig pattern, database-per-service isolation, distributed Sagas, and circuit breakers.",
+      "tags": [
+        "microservices",
+        "strangler-fig",
+        "architecture",
+        "migration",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "ddd-service-boundaries",
+        "strangler-fig-pattern",
+        "distributed-sagas",
+        "fault-isolation"
+      ],
+      "triggers": [
+        "microservices",
+        "monolith-decomposition",
+        "strangler-fig",
+        "saga"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "caching-strategy-architect": {
+      "name": "caching-strategy-architect",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Multi-tier caching architecture & invalidation: CDN edge caching, reverse proxy, distributed Redis, in-memory caches, and stampede prevention.",
+      "tags": [
+        "caching",
+        "redis",
+        "cdn",
+        "architecture",
+        "performance",
+        "layer1"
+      ],
+      "dependencies": [],
+      "domain": "architecture",
+      "capabilities": [
+        "multi-tier-topology",
+        "cache-access-patterns",
+        "invalidation-strategies",
+        "cache-stampede-defense"
+      ],
+      "triggers": [
+        "caching",
+        "cache-aside",
+        "write-through",
+        "cache-invalidation"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "ui-ux-pro-max": {
+      "name": "ui-ux-pro-max",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "UI/UX design intelligence for web, mobile, and desktop. This skill should be used when designing, building, reviewing, or fixing interfaces, including pages, components, design systems, accessibility, interaction, responsive layout, typography, color, charts, and stack-specific UI implementation. Searchable local data: 79 searchable styles (50 active), 192 product palettes and reasoning profiles, 74 font pairings, 119 UX guidelines, 105 icons, 17 GSAP presets, 25 chart types, and 22 stacks.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-apply",
+        "rule-categories-by-priority",
+        "running-the-search-tool",
+        "workflow",
+        "query-contract"
+      ],
+      "triggers": [
+        "ui-ux-pro-max",
+        "pro",
+        "max"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/ui-ux-pro-max",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:35Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:35Z"
+      },
+      "content_hash": "sha256:8887030e4e4f52befc3620c67e82c3823c51a771b46a11afb6965a6bfc29cd18"
+    },
+    "banner-design": {
+      "name": "banner-design",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Design banners for social media, ads, website heroes, creative assets, and print. Multiple art direction options with optional generated or supplied visuals. Actions: design, create, generate banner. Platforms: Facebook, Twitter/X, LinkedIn, YouTube, Instagram, Google Display, website hero, print. Styles: minimalist, gradient, bold typography, photo-based, illustrated, geometric, retro, glassmorphism, 3D, neon, duotone, editorial, collage.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-activate",
+        "available-resources",
+        "workflow",
+        "step-1-gather-requirements-askuserquestion-",
+        "step-2-research-art-direction"
+      ],
+      "triggers": [
+        "banner-design",
+        "banner",
+        "design"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/banner-design",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:40Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:40Z"
+      },
+      "content_hash": "sha256:089f94d0ef4c8612c61570eda10d18024799e67508e8df53f78c4aaa51438c4c"
+    },
+    "brand": {
+      "name": "brand",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Brand voice, visual identity, messaging frameworks, asset management, brand consistency. Activate for branded content, tone of voice, marketing assets, brand compliance, style guides.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "script-paths",
+        "quick-start",
+        "brand-sync-workflow",
+        "subcommands"
+      ],
+      "triggers": [
+        "brand"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/brand",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:40Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:40Z"
+      },
+      "content_hash": "sha256:560a3d27ce70ea0eb71902aa42bb5a407ddf517898d526e759140341558fbd2d"
+    },
+    "slides": {
+      "name": "slides",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "subcommands",
+        "script-paths",
+        "references-knowledge-base-",
+        "routing"
+      ],
+      "triggers": [
+        "slides"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/slides",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:41Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:41Z"
+      },
+      "content_hash": "sha256:b203ce667d649874862cdb48f4448fafa437fff227a60c493d3dcfa0d3b50cb7"
+    },
+    "ui-styling": {
+      "name": "ui-styling",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs. Use when building user interfaces, implementing design systems, creating responsive layouts, adding accessible components (dialogs, dropdowns, forms, tables), customizing themes and colors, implementing dark mode, generating visual designs and posters, or establishing consistent styling patterns across applications.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "reference",
+        "when-to-use-this-skill",
+        "core-stack",
+        "component-layer-shadcn-ui",
+        "styling-layer-tailwind-css"
+      ],
+      "triggers": [
+        "ui-styling",
+        "styling"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/ui-styling",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:21:42Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:21:42Z"
+      },
+      "content_hash": "sha256:295709d398b8f3c492625068a6bd540b4122fe034b7ee04fdf55879e57619d92"
+    },
+    "design": {
+      "name": "design",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, or MuAPI AI), corporate identity program (50 deliverables, CIP mockups), HTML presentations (Chart.js), banner design (22 styles, social/ads/web/print), icon design (15 styles, SVG, Gemini 3.1 Pro), social photos (HTML→screenshot, multi-platform). Actions: design logo, create CIP, generate mockups, build slides, design banner, generate icon, create social photos, social media images, brand identity, design system. Platforms: Facebook, Twitter, LinkedIn, YouTube, Instagram, Pinterest, TikTok, Threads, Google Ads.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "sub-skill-routing",
+        "script-paths",
+        "logo-design-built-in-",
+        "logo-generate-design-brief"
+      ],
+      "triggers": [
+        "design"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/design",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:22:10Z"
+        },
+        "semantic_review": {
+          "status": "completed",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [
+            {
+              "existing": "banner-design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "domain-driven-design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "system-design-guardrails",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            }
+          ],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:22:10Z"
+      },
+      "content_hash": "sha256:bbedfa024edfdaaa15943855098f8dd69b022fd4cebee3ae7b8d7a10c2b5b68d"
+    },
+    "design-system": {
+      "name": "design-system",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Token architecture, component specifications, and slide generation. Three-layer tokens (primitive→semantic→component), CSS variables, spacing/typography scales, component specs, strategic slide creation. Use for design tokens, systematic design, brand-compliant presentations.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "when-to-use",
+        "token-architecture",
+        "three-layer-structure",
+        "script-paths",
+        "quick-start"
+      ],
+      "triggers": [
+        "design-system",
+        "design",
+        "system"
+      ],
+      "provenance": {
+        "upstream_url": ".tmp-ui-ux-skill",
+        "upstream_path": ".claude/skills/design-system",
+        "commit": "dcc40ff5133ef78276117db0cc34e7b83cc8aeba",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T02:22:20Z"
+        },
+        "semantic_review": {
+          "status": "completed",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [
+            {
+              "existing": "banner-design",
+              "score": 0.6,
+              "classification": "review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            },
+            {
+              "existing": "design",
+              "score": 0.75,
+              "classification": "strong_review_candidate",
+              "decision": "KEEP_BOTH",
+              "heuristic": "PARTIAL_OVERLAP"
+            }
+          ],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T02:22:20Z"
+      },
+      "content_hash": "sha256:55ca89958995f5980fa73fa7407e9cede527c75f1bb5c989241515866ffb743e"
+    },
+    "detect-stack": {
+      "name": "detect-stack",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "frontend",
+      "description": "Analyze a codebase to detect its language, framework, conventions, and CI gates. Run this on first use in a project to generate stack context that all coding principle skills reference. Use when the user says \"detect stack,\" \"analyze this project,\" or \"what's this codebase using.",
+      "tags": [
+        "imported",
+        "community"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "what-to-detect",
+        "output",
+        "stack",
+        "secondary-languages",
+        "conventions"
+      ],
+      "triggers": [
+        "detect-stack",
+        "detect",
+        "stack"
+      ],
+      "provenance": {
+        "upstream_url": "https://github.com/JordanCoin/codingskills",
+        "upstream_path": "skills/detect-stack",
+        "commit": "d990b56b72f3f4203c13d1ef40e815893d9e7c54",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-23T04:00:28Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-23T04:00:28Z"
+      },
+      "content_hash": "sha256:3e4a1cefde06bba612f66d6face3a9b6db960a43f2e8ebb5566a766fa1be5d0b"
+    },
+    "project-source-quality": {
+      "name": "project-source-quality",
+      "version": "1.0.0",
+      "source": "canonical",
+      "domain": "guardrail",
+      "description": "Internal guardrail: Enforces project-native conventions, dependency choices, and functional correctness before and after production code changes.",
+      "tags": [
+        "guardrail",
+        "source-quality",
+        "conventions",
+        "implementation",
+        "layer0"
+      ],
+      "dependencies": [
+        "project-context",
+        "source-quality",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "capabilities": [
+        "project-convention-adherence",
+        "dependency-choice-discipline",
+        "naming-and-structure-consistency",
+        "functional-contract-preservation",
+        "minimal-diff-verification"
+      ],
+      "triggers": [
+        "project-source-quality",
+        "project-conventions",
+        "code-conformance",
+        "implementation-quality",
+        "wrong-file",
+        "wrong-dependency"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      },
+      "content_hash": "sha256:ed34e3ddc862af967f95c75f6887e648dfd09925de5a4a6c11ccdd787a9827c3"
+    },
+    "repo-first-implementation": {
+      "name": "repo-first-implementation",
+      "version": "1.0.0",
+      "source": "canonical",
+      "description": "Structured repository-first workflow for source changes, covering context, architecture, implementation, verification, and honest handoff.",
+      "tags": [
+        "workflow",
+        "implementation",
+        "architecture",
+        "conventions",
+        "quality"
+      ],
+      "dependencies": [
+        "agent-memory-bootstrap",
+        "project-context",
+        "project-source-quality",
+        "architecture-guardrails",
+        "quality-gate",
+        "codegraph",
+        "codebase-memory"
+      ],
+      "content_hash": "sha256:72ed2276f6495265854ea051d7a85c35dfa194e56af457b8262e93c884ba6972",
+      "domain": "implementation",
+      "capabilities": [
+        "repository-first-discovery",
+        "architecture-reasoning",
+        "convention-preservation",
+        "minimal-diff-implementation",
+        "evidence-based-handoff"
+      ],
+      "triggers": [
+        "repo-first",
+        "structured-implementation",
+        "implementation-workflow",
+        "source-change-workflow",
+        "senior-coding-workflow"
+      ],
+      "provenance": {
+        "upstream_url": null,
+        "commit": null,
+        "license": "MIT",
+        "verified_by": "Aethries/dotfiles"
+      }
+    },
+    "typesafe-ai": {
+      "name": "typesafe-ai",
+      "version": "1.0.0",
+      "source": "external",
+      "domain": "ai-engineering",
+      "description": "Design TypeSafe System One workflows with Jev typed judgments and probabilities; read current docs and cookbooks, then compose and verify AI-backed decisions.",
+      "tags": [
+        "imported",
+        "typesafe",
+        "jev",
+        "system-one"
+      ],
+      "dependencies": [],
+      "capabilities": [
+        "read-the-live-docs",
+        "find-the-useful-shape",
+        "design-the-judgments",
+        "compose-and-verify"
+      ],
+      "triggers": [
+        "typesafe-ai",
+        "typesafe"
+      ],
+      "provenance": {
+        "upstream_url": "https://github.com/typesafe-ai/skills",
+        "upstream_path": "skills/typesafe-ai",
+        "commit": "65a39f393687675ce170e6094757de20370365b9",
+        "catalog_url": null,
+        "license": "MIT",
+        "security_review": {
+          "status": "passed",
+          "checked_by": "curate.sh-security-audit",
+          "timestamp": "2026-09-24T03:20:59Z"
+        },
+        "semantic_review": {
+          "status": "not_required",
+          "decision": "KEEP_BOTH",
+          "recommended_action": "CREATE",
+          "reviewed_against": [],
+          "superseded_candidate": null
+        },
+        "imported_at": "2026-09-24T03:20:59Z"
+      },
+      "content_hash": "sha256:d7a2e910cbd2a2ea2aedd00893c4e371720f5fd0f8234c95ffb9db6ac838baa6"
+    }
+  }
+}

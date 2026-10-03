@@ -299,6 +299,14 @@ function extract() {
 }
 
 # ------------------------------------------------------------------------------
+# RTK Ultra - AI Token Optimization
+# ------------------------------------------------------------------------------
+alias rdiff="rtk git diff"
+alias rstatus="rtk git status -s"
+alias rlog="rtk git log --oneline -n 20"
+alias rtest="rtk"
+
+# ------------------------------------------------------------------------------
 # Local Overrides (untracked machine-specific secrets/configs)
 # ------------------------------------------------------------------------------
 if [[ -f "$HOME/.zshrc.local" ]]; then

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentAdapters",
+  "description": "Configuration schema for multi-agent skill adapters and directories",
+  "type": "object",
+  "required": [
+    "agents"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "global",
+          "project",
+          "rule_file",
+          "supported_install_modes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "binary": {
+            "type": "string"
+          },
+          "env_var": {
+            "type": "string"
+          },
+          "global": {
+            "type": "object",
+            "required": [
+              "primary",
+              "compatibility"
+            ],
+            "properties": {
+              "primary": {
+                "type": "string"
+              },
+              "compatibility": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "project": {
+            "type": "object",
+            "required": [
+              "primary",
+              "compatibility"
+            ],
+            "properties": {
+              "primary": {
+                "type": "string"
+              },
+              "compatibility": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "rule_file": {
+            "type": "string"
+          },
+          "supported_install_modes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "global_symlink",
+                "project_copy"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,114 @@
+model = "gpt-5.6-luna"
+model_reasoning_effort = "max"
+approvals_reviewer = "user"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[projects."/home/loc"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces"]
+trust_level = "trusted"
+
+[tui]
+theme = "noctalia"
+
+[tui.model_availability_nux]
+"gpt-5.6-sol" = 1
+gpt-6-astra = 2
+
+[mcp_servers."9remote"]
+url = "http://127.0.0.1:2208/mcp"
+[mcp_servers."9remote".http_headers]
+Authorization = "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c2b039584"
+[mcp_servers."9remote".env_http_headers]
+"x-9remote-session" = "NINE_REMOTE_SESSION_ID"
+
+[mcp_servers."agent_memory"]
+command = "npx"
+args = ["-y", "@agentmemory/mcp@0.9.29"]
+[mcp_servers."agent_memory".env]
+AGENTMEMORY_URL = "http://127.0.0.1:3111"
+
+[mcp_servers."atlassian"]
+url = "https://mcp.atlassian.com/v2/mcp"
+
+[mcp_servers."codebase_memory"]
+command = "uvx"
+args = ["codebase-memory-mcp"]
+
+[mcp_servers."codegraph"]
+command = "uvx"
+args = ["code-review-graph", "mcp"]
+
+[mcp_servers."context7"]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers."jev_local"]
+command = "bash"
+args = ["-c", "\"/home/loc/Workspaces/dotfiles/scripts/jev-mcp.sh\""]
+startup_timeout_sec = 30.0
+[mcp_servers."jev_local".env]
+JEV_ENDPOINT = "http://localhost:20128/v1/systemone"
+JEV_MODEL = "oc/jev-1.13-free"
+
+[mcp_servers."jira"]
+command = "npx"
+args = ["-y", "jira-mcp"]
+
+[desktop]
+followUpQueueMode = "steer"
+conversationDetailMode = "STEPS_COMMANDS"
+ambient-suggestions-enabled = false
+preventSleepWhileRunning = true
+hotkey-window-projectless-default-enabled = false
+notifications-turn-mode = "always"
+toys-confetti-enabled = false
+external-agent-import-sync-enabled = true
+appearanceTheme = "dark"
+appearanceDarkCodeThemeId = "xcode"
+usePointerCursors = true
+reduced-motion-preference = "on"
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "persistent"]
+browser-show-full-url = false
+
+[desktop.appearanceDarkChromeTheme]
+accent = "#5482ff"
+accentSource = "custom"
+contrast = 55
+ink = "#ffffff"
+opaqueWindows = true
+surface = "#1f1f24"
+
+[desktop.appearanceDarkChromeTheme.fonts]
+code = '"JetBrainsMono Nerd Font"'
+ui = '"JetBrainsMono Nerd Font"'
+
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "#67b7a4"
+diffRemoved = "#fc6a5d"
+skill = "#5482ff"
+
+[features]
+hooks = true
+memories = true
+
+[memories]
+generate_memories = true
+use_memories = true
+
+# 9Remote MCP (9remote)
+[mcp_servers."9remote"]
+url = "http://127.0.0.1:2208/mcp"
+[mcp_servers."9remote".http_headers]
+Authorization = "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c2b039584"
+[mcp_servers."9remote".env_http_headers]
+"x-9remote-session" = "NINE_REMOTE_SESSION_ID"
+# /9Remote MCP
+
+
+
