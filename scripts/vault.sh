@@ -28,6 +28,8 @@ CANDIDATE_PATHS=(
 	".config/gh"
 	".docker/config.json"
 	".gitconfig"
+	".gitconfig.local"
+	".zshrc.local"
 	".config/git"
 	".zsh_history"
 	".gemini"

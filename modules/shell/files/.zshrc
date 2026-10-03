@@ -224,3 +224,10 @@ function extract() {
 		echo "'$1' is not a valid file"
 	fi
 }
+
+# ------------------------------------------------------------------------------
+# Local Overrides (untracked machine-specific secrets/configs)
+# ------------------------------------------------------------------------------
+if [[ -f "$HOME/.zshrc.local" ]]; then
+	source "$HOME/.zshrc.local"
+fi

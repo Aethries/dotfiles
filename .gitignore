@@ -40,3 +40,7 @@ scratch/
 .sandbox/
 result
 result-*
+
+# Machine-specific local overrides
+*.local
+*.local.*
