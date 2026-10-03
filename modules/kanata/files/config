@@ -7,9 +7,9 @@ exit: esc
 hint_exit: esc
 
 # Mouse Click Actions
-# Space: click chuột trái (tiếp tục ở lại warpd)
+# Space: click chuột trái | ,: click chuột giữa | .: click chuột phải (tiếp tục ở lại warpd)
 buttons: space , .
-# 'i': click chuột trái rồi thoát hoàn toàn warpd về desktop
+# i: click chuột trái | -: click chuột giữa | /: click chuột phải (thoát warpd về desktop)
 oneshot_buttons: i - /
 
 # Movement & Speed Tuning
