@@ -48,6 +48,30 @@ else
 	success "zsh-syntax-highlighting already installed"
 fi
 
+# fzf-tab
+if [[ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]]; then
+	log "Installing fzf-tab"
+
+	git clone https://github.com/Aloxaf/fzf-tab.git \
+		"$ZSH_CUSTOM/plugins/fzf-tab"
+
+	success "fzf-tab installed"
+else
+	success "fzf-tab already installed"
+fi
+
+# you-should-use
+if [[ ! -d "$ZSH_CUSTOM/plugins/you-should-use" ]]; then
+	log "Installing you-should-use"
+
+	git clone https://github.com/MichaelAquilina/zsh-you-should-use.git \
+		"$ZSH_CUSTOM/plugins/you-should-use"
+
+	success "you-should-use installed"
+else
+	success "you-should-use already installed"
+fi
+
 
 # Config
 link_file \
@@ -97,5 +121,13 @@ link_file \
 link_dir \
 	"$MODULE_DIR/files/superfile/theme" \
 	"$HOME/.config/superfile/theme"
+
+link_file \
+	"$MODULE_DIR/files/lazydocker/config.yml" \
+	"$HOME/.config/lazydocker/config.yml"
+
+link_file \
+	"$MODULE_DIR/files/bat/config" \
+	"$HOME/.config/bat/config"
 
 success "Shell configured"

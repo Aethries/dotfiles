@@ -1,0 +1,38 @@
+gui:
+  scrollHeight: 2
+  theme:
+    activeBorderColor:
+      - "#b8bb26" # Noctalia primary
+      - bold
+    inactiveBorderColor:
+      - "#665c54"
+    optionsTextColor:
+      - "#83a598"
+    selectedLineBgColor:
+      - "#3c3836"
+stats:
+  graphs:
+    - min: 0
+      max: 100
+      height: 10
+      caption: "CPU (%)"
+      statPath: "DerivedStats.CPUPercentage"
+    - min: 0
+      max: 100
+      height: 10
+      caption: "Memory (%)"
+      statPath: "DerivedStats.MemoryPercentage"
+customCommands:
+  containers:
+    - name: "bash"
+      attach: true
+      command: "docker exec -it {{ .Container.ID }} /bin/bash"
+      serviceNames: []
+    - name: "sh"
+      attach: true
+      command: "docker exec -it {{ .Container.ID }} /bin/sh"
+      serviceNames: []
+    - name: "stats"
+      attach: false
+      command: "docker stats {{ .Container.ID }}"
+      serviceNames: []

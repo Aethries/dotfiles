@@ -4,6 +4,8 @@ ZSH_THEME=""
 
 plugins=(
 	git
+	fzf-tab
+	you-should-use
 	zsh-autosuggestions
 	zsh-syntax-highlighting
 )
@@ -83,10 +85,19 @@ if command -v bat >/dev/null 2>&1; then
 	alias catp='bat'
 fi
 
-# Lazygit, Lazydocker & Superfile
+# Lazygit, Lazydocker & Containers
 alias lg="lazygit"
 alias ld="lazydocker"
 alias spf="superfile"
+if command -v ctop >/dev/null 2>&1; then
+	alias dtop="ctop"
+fi
+if command -v oxker >/dev/null 2>&1; then
+	alias ox="oxker"
+fi
+if command -v dive >/dev/null 2>&1; then
+	alias dlayers="dive"
+fi
 
 # System Monitoring & Resource Usage
 alias bottom="btm"
@@ -94,6 +105,33 @@ alias df="duf"
 alias du="dust"
 alias docs="tldr"
 alias fetch="fastfetch"
+if command -v procs >/dev/null 2>&1; then
+	alias ps="procs"
+fi
+if command -v onefetch >/dev/null 2>&1; then
+	alias repo="onefetch"
+fi
+if command -v curlie >/dev/null 2>&1; then
+	alias http="curlie"
+fi
+if command -v viddy >/dev/null 2>&1; then
+	alias watch="viddy"
+fi
+if command -v difft >/dev/null 2>&1; then
+	alias dft="difft"
+fi
+if command -v visidata >/dev/null 2>&1; then
+	alias vd="visidata"
+fi
+if command -v hyperfine >/dev/null 2>&1; then
+	alias bmark="hyperfine"
+fi
+if command -v trippy >/dev/null 2>&1; then
+	alias trip="trippy"
+fi
+if command -v gh >/dev/null 2>&1; then
+	alias ghd="gh dash"
+fi
 
 # Safe File Removal
 if command -v trash >/dev/null 2>&1; then
@@ -205,6 +243,32 @@ fi
 # Mise (Multi-Runtime Manager)
 if command -v mise >/dev/null 2>&1; then
 	eval "$(mise activate zsh)"
+fi
+
+# FZF-Tab options (Noctalia styled with eza preview)
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:*' switch-group ',' '.'
+
+# Atuin (Magical Shell History)
+if command -v atuin >/dev/null 2>&1; then
+	eval "$(atuin init zsh)"
+fi
+
+# Direnv (Per-directory environment loader)
+if command -v direnv >/dev/null 2>&1; then
+	eval "$(direnv hook zsh)"
+fi
+
+# TheFuck (CLI auto-corrector)
+if command -v thefuck >/dev/null 2>&1; then
+	eval "$(thefuck --alias)"
+fi
+
+# Carapace (Multi-shell contextual completion engine)
+if command -v carapace >/dev/null 2>&1; then
+	export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
+	source <(carapace _carapace zsh)
 fi
 
 # ------------------------------------------------------------------------------

@@ -31,7 +31,11 @@
 	light = false
 	line-numbers = true
 	side-by-side = false
-	syntax-theme = Dracula
+	syntax-theme = gruvbox-dark
+	plus-style = syntax "#1d3b24"
+	minus-style = syntax "#3f1e1e"
+	line-numbers-left-format = "{nm:>4}┊"
+	line-numbers-right-format = "{np:>4}│"
 
 [merge]
 	conflictstyle = diff3
