@@ -1,0 +1,14 @@
+# ~/.config/mise/config.toml
+[tools]
+node = "lts"
+python = "3.12"
+rust = "latest"
+go = "latest"
+bun = "latest"
+pnpm = "latest"
+opentofu = "latest"
+
+[settings]
+legacy_version_file = true
+experimental = true
+jobs = 4

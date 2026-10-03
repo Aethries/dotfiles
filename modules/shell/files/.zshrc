@@ -15,7 +15,7 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 
 # Path additions
-export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$HOME/go/bin:$PATH"
 
 # History
 HISTFILE="$HOME/.zsh_history"
@@ -123,6 +123,9 @@ alias c.='antigravity-ide .'
 alias code.='antigravity-ide .'
 alias c='clear'
 
+# Zellij Multiplexer
+alias zreset="zellij delete-all-sessions --yes --force"
+
 # ------------------------------------------------------------------------------
 # Input Method (Fcitx5 Wayland)
 # ------------------------------------------------------------------------------
@@ -193,9 +196,9 @@ if [[ -f "$HOME/.config/fzf/themes/noctalia.sh" ]]; then
 	source "$HOME/.config/fzf/themes/noctalia.sh"
 fi
 
-# NVM
-if [[ -r /usr/share/nvm/init-nvm.sh ]]; then
-	source /usr/share/nvm/init-nvm.sh
+# Mise (Multi-Runtime Manager)
+if command -v mise >/dev/null 2>&1; then
+	eval "$(mise activate zsh)"
 fi
 
 # ------------------------------------------------------------------------------
