@@ -111,6 +111,7 @@ mode = "dark"
         "antigravity",
         "claude-code",
         "codex",
+        "ungoogled-chromium",
         "telegram",
         "neovim",
         "obsidian",
