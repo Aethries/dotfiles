@@ -75,6 +75,7 @@ gnome-keyring
 libsecret
 seahorse
 wl-clipboard
+cliphist
 libnotify
 xwayland-satellite
 pipewire

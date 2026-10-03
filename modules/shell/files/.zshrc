@@ -106,6 +106,10 @@ if command -v gping >/dev/null 2>&1; then
 	alias ping="gping"
 fi
 
+# Clipboard History
+alias clip="cliphist-picker"
+alias clip-wipe="cliphist wipe"
+
 # ------------------------------------------------------------------------------
 # Editor & IDE Quick Launchers
 # ------------------------------------------------------------------------------

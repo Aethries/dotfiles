@@ -9,7 +9,6 @@ Tài liệu này tổng hợp toàn bộ lộ trình triển khai các kế ho�
 ```mermaid
 flowchart TD
     subgraph G1["Giai đoạn 1: Desktop, Session & Core Input"]
-        P03["03. Clipboard Manager (cliphist)"]
         P04["04. Kanata & Warpd Navigation"]
         P04 --> P13["13. Unified System Keymaps"]
         P14["14. Appearance & Visual Harmony"]
@@ -40,13 +39,12 @@ flowchart TD
 
 ---
 
-## 2. Danh mục 12 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 11 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
 | Thứ tự | File Kế hoạch | Tên Chức năng & Trọng tâm | Trạng thái |
 |:---:|---|---|:---:|
-| **03** | [03-clipboard-manager-cliphist.md](file:///home/loc/Workspaces/dotfiles/plans/03-clipboard-manager-cliphist.md) | Quản lý lịch sử clipboard Wayland qua `cliphist`, systemd user service, tích hợp Noctalia launcher và FZF | ⏳ Sẵn sàng |
 | **04** | [04-kanata-kernel-keyboard-va-warpd-hint-navigation.md](file:///home/loc/Workspaces/dotfiles/plans/04-kanata-kernel-keyboard-va-warpd-hint-navigation.md) | Remapping phím tầng kernel (`kanata` home-row mods, tương thích Telex Fcitx5 Bamboo), tối ưu repeat delay/rate (180ms/50Hz) & điều khiển chuột bàn phím (`warpd` hint mode) | ⏳ Sẵn sàng |
 | **05** | [05-git-identity-ssh-signing-va-security.md](file:///home/loc/Workspaces/dotfiles/plans/05-git-identity-ssh-signing-va-security.md) | Hoàn thiện `modules/git`, SSH `ed25519` commit signing, `git-credential-libsecret`, `includeIf`, `gitleaks` pre-commit | ⏳ Sẵn sàng |
 | **06** | [06-mise-va-uv-runtime-management.md](file:///home/loc/Workspaces/dotfiles/plans/06-mise-va-uv-runtime-management.md) | Thay thế NVM bằng `mise` quản lý Node, Python, Rust, Go, IaC; kết hợp `uv` quản trị môi trường Python siêu tốc | ⏳ Sẵn sàng |
