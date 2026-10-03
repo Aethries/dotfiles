@@ -1,0 +1,36 @@
+# List of desktop applications to hide from Noctalia launcher
+
+# CLI / Terminal tools with redundant desktop entries
+zellij.desktop
+yazi.desktop
+kitty-open.desktop
+
+# System & Development utilities
+cmake-gui.desktop
+avahi-discover.desktop
+bssh.desktop
+bvnc.desktop
+org.gnupg.pinentry-qt.desktop
+org.freedesktop.Xwayland.desktop
+qv4l2.desktop
+qvidcap.desktop
+gcr-prompter.desktop
+gcr-viewer.desktop
+xdg-desktop-portal-gtk.desktop
+
+# Fcitx5 background daemon and sub-wrappers (managed via classicui / shortcut)
+kbd-layout-viewer5.desktop
+kcm_fcitx5.desktop
+fcitx5-configtool.desktop
+org.fcitx.fcitx5-config-qt.desktop
+org.fcitx.fcitx5-migrator.desktop
+org.fcitx.fcitx5-qt5-gui-wrapper.desktop
+org.fcitx.fcitx5-qt6-gui-wrapper.desktop
+fcitx5-wayland-launcher.desktop
+org.fcitx.Fcitx5.desktop
+
+# Internal URL Handlers & Background Tray tasks
+antigravity-ide-url-handler.desktop
+com.microsoft.VSCode.UrlHandler.desktop
+com.cloudflare.warp.desktop
+com.cloudflare.WarpTaskbar.desktop
