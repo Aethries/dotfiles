@@ -76,6 +76,8 @@ libsecret
 seahorse
 wl-clipboard
 cliphist
+copyq
+wtype
 libnotify
 xwayland-satellite
 pipewire

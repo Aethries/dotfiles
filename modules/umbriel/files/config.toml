@@ -30,7 +30,7 @@ extent_presets = [0.333, 0.5, 0.667, 1.0]
 # Window Rules
 # ==============================================================================
 [[window_rule]]
-match.app_id = "^(pavucontrol|org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|imv|mpv)$"
+match.app_id = "^(pavucontrol|org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|imv|mpv|copyq|com.github.hluk.copyq)$"
 default_floating = true
 
 [[window_rule]]

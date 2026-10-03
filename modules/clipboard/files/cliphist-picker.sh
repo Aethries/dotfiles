@@ -20,4 +20,9 @@ fi
 
 if [[ -n "${selected:-}" ]]; then
 	printf '%s\n' "$selected" | cliphist decode | wl-copy
+	# Auto-paste immediately into previously active window
+	if command -v wtype >/dev/null 2>&1; then
+		sleep 0.15
+		wtype -M ctrl -k v -m ctrl
+	fi
 fi

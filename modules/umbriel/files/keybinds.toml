@@ -10,7 +10,7 @@
 "Mod+E" = { action = "spawn:nautilus --new-window", repeat = false }
 "Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
-"Mod+V" = { action = "spawn:~/.local/bin/cliphist-picker", repeat = false }
+"Mod+V" = { action = "spawn:~/.local/bin/copyq-toggle", repeat = false }
 
 # System & Session
 "Mod+BackSpace" = "spawn:noctalia msg session lock"
