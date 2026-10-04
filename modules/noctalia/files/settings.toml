@@ -67,6 +67,10 @@ widget_order = [ "lockscreen-login-box@HDMI-A-1", "lockscreen-login-box@HDMI-A-2
         show_unlock_hint = true
         show_weather = true
 
+[plugin_settings."vn1k/cursor"]
+manager_placement = "floating"
+scale_filter = "point"
+
 [plugins]
 enabled = [
     "noctalia/notes",
@@ -83,7 +87,9 @@ enabled = [
     "yocraft/qrcode",
     "cleboost/ssh-launcher",
     "davemhammer/tailscale",
-    "noctalia/screen_recorder"
+    "noctalia/screen_recorder",
+    "kjvdven/case-convert",
+    "noctalia/bitwarden"
 ]
 
 [shell]
@@ -107,26 +113,33 @@ community_palette = "Tomorrow"
 mode = "dark"
 
     [theme.templates]
+    builtin_ids = [ "kitty", "umbriel", "starship", "gtk3", "gtk4" ]
     community_ids = [
         "antigravity",
+        "bat",
         "claude-code",
         "codex",
-        "ungoogled-chromium",
-        "telegram",
-        "neovim",
-        "obsidian",
-        "vscode",
         "fastfetch",
-        "zellij",
         "fcitx5",
         "fzf",
         "lazygit",
+        "neovim",
+        "obsidian",
         "superfile",
-        "yazi"
+        "telegram",
+        "ungoogled-chromium",
+        "vscode",
+        "yazi",
+        "zellij"
     ]
+    enable_builtin_templates = true
+    enable_community_templates = true
 
 [wallpaper.default]
-path = "/usr/share/noctalia/assets/noctalia-wallpaper.png"
+path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
 
 [wallpaper.last]
-path = "/usr/share/noctalia/assets/noctalia-wallpaper.png"
+path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+
+[wallpaper.monitors.HDMI-A-1]
+path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"

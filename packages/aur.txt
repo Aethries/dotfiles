@@ -30,3 +30,6 @@ carapace-bin
 gh-dash-bin
 oxker-bin
 viddy-bin
+grpcurl-bin
+iredis
+win2xcur

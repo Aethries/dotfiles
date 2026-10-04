@@ -32,6 +32,28 @@ Compositor	Print	Chụp ảnh toàn bộ màn hình (Fullscreen)	Screenshot enti
 Compositor	Mod + R	Bật/Tắt quay video màn hình (Screen Recorder)	Toggle screen recording service	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Shift + R	Tải lại cấu hình Umbriel Compositor	Reload Umbriel compositor config	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	XF86Audio...	Điều chỉnh âm lượng, mic, media OSD	Control audio volume, mic, media playback	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + Return	Mở bảng ghi chú nhanh (Notes Panel)	Toggle quick notes side panel	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + E	Bảng chọn Emoji & Symbol Unicode (Raycast style)	Open Raycast-style emoji & symbol picker	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + F	Tìm kiếm nhanh file & thư mục (Fuzzy Search)	Fuzzy file & directory search panel	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + C	Bắt mã màu từ màn hình (Color Picker)	Pick screen color via Hyprpicker	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + W	Trung tâm điều khiển mạng (Wi-Fi, Bluetooth, DNS)	Unified network toolkit & control center	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + Q	Tạo mã QR từ văn bản hoặc URL	Generate QR code from text or URL	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Shift + U	Bảng điều khiển Layout & Cửa sổ Umbriel	Umbriel companion layout & window panel	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Alt + C	Quản lý & xem trước giao diện con trỏ chuột	Cursor theme & size manager	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Alt + T	Quản lý mạng riêng ảo Tailscale & Exit Nodes	Tailscale VPN connection & peer manager	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Mod + Alt + S	Quét vùng màn hình & sao chép chữ (OCR)	Screen region grab & OCR text copy	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Noctalia	Launcher: /fs <từ khóa>	Tìm kiếm và mở file trực tiếp từ Launcher	Search and open files from launcher	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /nvim	Tìm và mở nhanh các project Neovim gần đây	Search and open recent Neovim projects	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /gd	Tìm và mở nhanh các project Godot gần đây	Search and open recent Godot projects	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /ssh	Kết nối nhanh tới các SSH host (~/.ssh/config)	Quick connect to SSH hosts from config	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /ts	Thao tác nhanh các lệnh mạng Tailscale	Run Tailscale commands from launcher	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /case	Đổi định dạng chuỗi (camelCase, snake_case...) từ clipboard	Convert text case from clipboard	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+Noctalia	Launcher: /bw	Tra cứu và copy mật khẩu / token từ Bitwarden	Search & copy credentials from Bitwarden	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
+DevOps	xh [GET/POST] <url>	Gửi HTTP request nhanh với syntax highlighting (thay curl)	Fast HTTP client with syntax highlight	Level 3 (Shell)	packages/pacman.txt
+DevOps	act	Chạy thử nghiệm GitHub Actions workflow ngay tại máy local	Run GitHub Actions locally in Docker	Level 3 (Shell)	packages/pacman.txt
+DevOps	websocat <ws://url>	Kết nối và debug WebSocket endpoint trực tiếp từ terminal	Connect and debug WebSocket from CLI	Level 3 (Shell)	packages/pacman.txt
+DevOps	grpcurl <host> list	Liệt kê và gọi gRPC methods trực tiếp từ CLI	Interact and test gRPC servers from CLI	Level 3 (Shell)	packages/aur.txt
+DevOps	iredis -h <host>	Client Redis với auto-completion thông minh	Redis CLI with autocomplete and syntax	Level 3 (Shell)	packages/aur.txt
 Zellij	Ctrl + Shift + n	Tạo Pane mới (Chỉ Split dọc bên phải)	New vertical pane (split right)	Level 2 (Zellij)	modules/zellij/files/config.kdl
 Zellij	Ctrl + Shift + w	Đóng Pane hiện tại (Có Shift chống bấm nhầm)	Close focused pane safely	Level 2 (Zellij)	modules/zellij/files/config.kdl
 Zellij	Ctrl + Shift + f	Phóng to / Thu nhỏ Pane (Fullscreen toggle)	Toggle pane fullscreen maximize	Level 2 (Zellij)	modules/zellij/files/config.kdl

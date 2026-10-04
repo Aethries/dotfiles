@@ -28,6 +28,18 @@
 "Mod+Print" = "spawn:noctalia msg screenshot-region"
 "Mod+S" = "spawn:noctalia msg screenshot-annotate"
 "Mod+R" = "spawn:noctalia msg plugin noctalia/screen_recorder:service all toggle"
+"Mod+Alt+S" = "spawn:noctalia msg plugin fel/ocr:grab all onClick"
+
+# Noctalia Plugins & Productivity Panels
+"Mod+Shift+Return" = "spawn:noctalia msg panel-toggle noctalia/notes:panel"
+"Mod+Shift+E" = "spawn:noctalia msg panel-toggle liamwh/emoji-picker:desktop"
+"Mod+Shift+F" = "spawn:noctalia msg panel-toggle nightwatch75/file-search:panel"
+"Mod+Shift+C" = "spawn:noctalia msg panel-toggle oldirtty/color_picker:panel"
+"Mod+Shift+W" = "spawn:noctalia msg panel-toggle autumn/network-toolkit:panel"
+"Mod+Shift+Q" = "spawn:noctalia msg panel-toggle yocraft/qrcode:panel"
+"Mod+Shift+U" = "spawn:noctalia msg panel-toggle noctalia/umbriel-companion:panel"
+"Mod+Alt+C" = "spawn:noctalia msg panel-toggle vn1k/cursor:manager"
+"Mod+Alt+T" = "spawn:noctalia msg panel-toggle davemhammer/tailscale:manager"
 
 # Audio & Media OSD
 "XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"

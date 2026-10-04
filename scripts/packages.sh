@@ -45,9 +45,28 @@ install_aur_packages() {
 		return
 	fi
 
-	yay -Syu --needed --noconfirm --sudoloop "${packages[@]}"
+	# Filter out already installed packages to prevent excessive AUR RPC requests and rate limiting
+	local missing_packages=()
+	for pkg in "${packages[@]}"; do
+		if ! pacman -Q "$pkg" >/dev/null 2>&1; then
+			missing_packages+=("$pkg")
+		fi
+	done
 
-	success "AUR packages installed"
+	if [[ "${#missing_packages[@]}" -eq 0 ]]; then
+		success "All AUR packages are already installed"
+		return
+	fi
+
+	log "Found ${#missing_packages[@]} missing AUR package(s): ${missing_packages[*]}"
+	for pkg in "${missing_packages[@]}"; do
+		log "Installing AUR package: $pkg"
+		if ! yay -S --needed --noconfirm --sudoloop "$pkg"; then
+			warn "Failed to install AUR package '$pkg', continuing with next package"
+		fi
+	done
+
+	success "AUR package installation completed"
 }
 
 # Main

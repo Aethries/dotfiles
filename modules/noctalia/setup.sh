@@ -25,6 +25,13 @@ link_file \
 	"$MODULE_DIR/files/settings.toml" \
 	"$HOME/.local/state/noctalia/settings.toml"
 
+if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
+	mkdir -p "$HOME/Pictures"
+	link_dir \
+		"$DOTFILES/resources/static/wallpapers" \
+		"$HOME/Pictures/Wallpapers"
+fi
+
 # Hide unwanted applications from Noctalia launcher
 if [[ -f "$MODULE_DIR/files/hidden-apps.txt" ]]; then
 	log "Hiding unwanted apps from launcher"
