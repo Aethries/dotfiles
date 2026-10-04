@@ -49,7 +49,7 @@ fi
 if command_exists systemctl; then
 	systemctl --user daemon-reload
 	if command_exists sunshine; then
-		systemctl --user enable --now sunshine.service 2>/dev/null || true
+		systemctl --user enable --now app-dev.lizardbyte.app.Sunshine.service 2>/dev/null || systemctl --user enable --now sunshine.service 2>/dev/null || true
 		success "sunshine.service enabled and started"
 	else
 		warn "sunshine binary not found yet. Install via: yay -S sunshine-bin"
