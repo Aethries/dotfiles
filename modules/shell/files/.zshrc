@@ -88,7 +88,10 @@ fi
 # Lazygit, Lazydocker & Containers
 alias lg="lazygit"
 alias ld="lazydocker"
-alias spf="superfile"
+if command -v spf >/dev/null 2>&1; then
+	alias superfile="spf"
+fi
+
 if command -v ctop >/dev/null 2>&1; then
 	alias dtop="ctop"
 fi
@@ -126,9 +129,10 @@ fi
 if command -v hyperfine >/dev/null 2>&1; then
 	alias bmark="hyperfine"
 fi
-if command -v trippy >/dev/null 2>&1; then
-	alias trip="trippy"
+if command -v trip >/dev/null 2>&1; then
+	alias trippy="trip"
 fi
+
 if command -v gh >/dev/null 2>&1; then
 	alias ghd="gh dash"
 fi

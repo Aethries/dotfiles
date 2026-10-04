@@ -49,6 +49,8 @@ rm -f "$HOME/.config/systemd/user/copyq.service"
 rm -f "$HOME/.config/systemd/user/cliphist.service"
 rm -f "$HOME/.local/bin/copyq-toggle"
 rm -f "$HOME/.local/bin/cliphist-picker"
+rm -rf "$HOME/.config/copyq"
+
 
 if command_exists systemctl; then
 	systemctl --user daemon-reload
