@@ -1,0 +1,14 @@
+[Unit]
+Description=EasyEffects Daemon
+Documentation=man:easyeffects(1)
+After=pipewire.service
+Wants=pipewire.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/easyeffects --gapplication-service
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

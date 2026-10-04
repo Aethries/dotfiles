@@ -84,6 +84,7 @@ bash "$DOTFILES/modules/obsidian/setup.sh"
 bash "$DOTFILES/modules/umbriel/setup.sh"
 bash "$DOTFILES/modules/cheatsheet/setup.sh"
 bash "$DOTFILES/modules/greeter/setup.sh"
+bash "$DOTFILES/modules/audio/setup.sh"
 
 bash "$DOTFILES/modules/vscode/setup.sh"
 bash "$DOTFILES/modules/antigravity/setup.sh"

@@ -138,3 +138,8 @@ tailscale
 sshfs
 mosh
 moonlight-qt
+
+# Audio & DSP
+easyeffects
+lsp-plugins-lv2
+calf

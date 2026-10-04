@@ -1,0 +1,174 @@
+{
+    "output": {
+        "blocklist": [],
+        "plugins_order": [
+            "crossfeed#0",
+            "equalizer#0",
+            "bass_enhancer#0",
+            "reverb#0",
+            "limiter#0"
+        ],
+        "crossfeed#0": {
+            "bypass": false,
+            "fcut": 700,
+            "feed": 4.5,
+            "input-gain": 0.0,
+            "output-gain": 0.0
+        },
+        "equalizer#0": {
+            "balance": 0.0,
+            "bypass": false,
+            "decramp": "Off",
+            "input-gain": 0.0,
+            "mode": "SPM",
+            "num-bands": 4,
+            "output-gain": 0.0,
+            "pitch-left": 0.0,
+            "pitch-right": 0.0,
+            "left": {
+                "band0": {
+                    "frequency": 100.0,
+                    "gain": 3.5,
+                    "mode": "LRX (MT)",
+                    "mute": false,
+                    "q": 0.707,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Lo-shelf",
+                    "width": 4.0
+                },
+                "band1": {
+                    "frequency": 400.0,
+                    "gain": 1.5,
+                    "mode": "RLC (BT)",
+                    "mute": false,
+                    "q": 1.0,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Bell",
+                    "width": 4.0
+                },
+                "band2": {
+                    "frequency": 3000.0,
+                    "gain": -1.5,
+                    "mode": "RLC (BT)",
+                    "mute": false,
+                    "q": 1.2,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Bell",
+                    "width": 4.0
+                },
+                "band3": {
+                    "frequency": 7500.0,
+                    "gain": -4.5,
+                    "mode": "LRX (MT)",
+                    "mute": false,
+                    "q": 0.707,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Hi-shelf",
+                    "width": 4.0
+                }
+            },
+            "right": {
+                "band0": {
+                    "frequency": 100.0,
+                    "gain": 3.5,
+                    "mode": "LRX (MT)",
+                    "mute": false,
+                    "q": 0.707,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Lo-shelf",
+                    "width": 4.0
+                },
+                "band1": {
+                    "frequency": 400.0,
+                    "gain": 1.5,
+                    "mode": "RLC (BT)",
+                    "mute": false,
+                    "q": 1.0,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Bell",
+                    "width": 4.0
+                },
+                "band2": {
+                    "frequency": 3000.0,
+                    "gain": -1.5,
+                    "mode": "RLC (BT)",
+                    "mute": false,
+                    "q": 1.2,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Bell",
+                    "width": 4.0
+                },
+                "band3": {
+                    "frequency": 7500.0,
+                    "gain": -4.5,
+                    "mode": "LRX (MT)",
+                    "mute": false,
+                    "q": 0.707,
+                    "slope": "x1",
+                    "solo": false,
+                    "type": "Hi-shelf",
+                    "width": 4.0
+                }
+            }
+        },
+        "bass_enhancer#0": {
+            "amount": 2.5,
+            "blend": 0.0,
+            "bypass": false,
+            "floor": 30.0,
+            "floor-active": true,
+            "harmonics": 3.0,
+            "input-gain": 0.0,
+            "output-gain": 0.0,
+            "scope": 90.0
+        },
+        "reverb#0": {
+            "amount": -18.0,
+            "bass-cut": 150.0,
+            "bypass": false,
+            "decay-time": 1.2,
+            "diffusion": 0.7,
+            "dry": 0.0,
+            "hf-damp": 4000.0,
+            "input-gain": 0.0,
+            "output-gain": 0.0,
+            "predelay": 15.0,
+            "room-size": "Small",
+            "treble-cut": 6000.0
+        },
+        "limiter#0": {
+            "alr": true,
+            "alr-attack": 5.0,
+            "alr-knee": 2.0,
+            "alr-knee-smooth": -5.0,
+            "alr-release": 80.0,
+            "attack": 5.0,
+            "bypass": false,
+            "dithering": "None",
+            "gain-boost": false,
+            "input-gain": 0.0,
+            "input-to-link": 0.0,
+            "input-to-sidechain": 0.0,
+            "link-to-input": 0.0,
+            "link-to-sidechain": 0.0,
+            "lookahead": 5.0,
+            "mode": "Herm Thin",
+            "output-gain": 0.0,
+            "oversampling": "None",
+            "release": 40.0,
+            "sidechain-preamp": 0.0,
+            "sidechain-to-input": 0.0,
+            "sidechain-to-link": 0.0,
+            "sidechain-type": "Internal",
+            "stereo-link": 100.0,
+            "threshold": -0.5
+        }
+    }
+}

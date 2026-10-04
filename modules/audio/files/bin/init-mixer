@@ -1,0 +1,202 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DOTFILES_DIR="${DOTFILES:-$HOME/Workspaces/dotfiles}"
+PRESETS_SRC="$DOTFILES_DIR/modules/audio/files/presets"
+PRESETS_DST="$HOME/.config/easyeffects/output"
+SERVICE_SRC="$DOTFILES_DIR/modules/audio/files/easyeffects.service"
+SERVICE_DST="$HOME/.config/systemd/user/easyeffects.service"
+STATE_FILE="$HOME/.config/easyeffects/.active_preset"
+
+sync_presets() {
+	echo "==> Syncing EasyEffects presets..."
+	mkdir -p "$PRESETS_DST" "$HOME/.config/systemd/user"
+
+	if [[ -d "$PRESETS_SRC" ]]; then
+		for preset in "$PRESETS_SRC"/*.json; do
+			[[ -f "$preset" ]] || continue
+			filename="$(basename "$preset")"
+			ln -sf "$preset" "$PRESETS_DST/$filename"
+			echo "    Synced preset: ${filename%.json}"
+		done
+	fi
+
+	if [[ -f "$SERVICE_SRC" ]]; then
+		ln -sf "$SERVICE_SRC" "$SERVICE_DST"
+		echo "    Synced systemd unit: easyeffects.service"
+	fi
+
+	if command -v systemctl >/dev/null 2>&1; then
+		systemctl --user daemon-reload
+	fi
+	echo "==> Sync completed successfully."
+}
+
+ensure_daemon() {
+	if ! command -v easyeffects >/dev/null 2>&1; then
+		echo "[!] easyeffects binary not found."
+		echo "    Install packages with: sudo pacman -S --needed easyeffects lsp-plugins-lv2 calf"
+		return 1
+	fi
+
+	if command -v systemctl >/dev/null 2>&1; then
+		if ! systemctl --user is-active --quiet easyeffects.service; then
+			echo "==> Starting EasyEffects user daemon..."
+			systemctl --user enable easyeffects.service 2>/dev/null || true
+			systemctl --user start easyeffects.service || true
+		fi
+	fi
+	return 0
+}
+
+list_presets() {
+	echo "Available EasyEffects presets:"
+	if [[ -d "$PRESETS_DST" ]]; then
+		for p in "$PRESETS_DST"/*.json; do
+			[[ -f "$p" ]] || continue
+			name="$(basename "$p" .json)"
+			if [[ -f "$STATE_FILE" && "$(cat "$STATE_FILE" 2>/dev/null)" == "$name" ]]; then
+				echo "  * $name (active)"
+			else
+				echo "  - $name"
+			fi
+		done
+	fi
+}
+
+load_preset() {
+	local name="${1%.json}"
+
+	if [[ ! -f "$PRESETS_DST/$name.json" ]]; then
+		echo "[ERROR] Preset '$name' not found in $PRESETS_DST"
+		list_presets
+		return 1
+	fi
+
+	if ! ensure_daemon; then
+		return 1
+	fi
+
+	echo "==> Loading preset: $name"
+	if easyeffects -l "$name" >/dev/null 2>&1 || easyeffects -l "$PRESETS_DST/$name.json" >/dev/null 2>&1; then
+		echo "$name" > "$STATE_FILE"
+		echo "✓ Preset '$name' applied successfully."
+	else
+		echo "[!] Failed to apply preset directly. Ensure easyeffects daemon is running."
+	fi
+}
+
+interactive_select() {
+	local presets=()
+	if [[ -d "$PRESETS_DST" ]]; then
+		for p in "$PRESETS_DST"/*.json; do
+			[[ -f "$p" ]] || continue
+			presets+=("$(basename "$p" .json)")
+		done
+	fi
+
+	if [[ ${#presets[@]} -eq 0 ]]; then
+		echo "[!] No presets found. Run: init-mixer sync"
+		return 1
+	fi
+
+	local chosen=""
+	if command -v gum >/dev/null 2>&1; then
+		chosen="$(gum choose "${presets[@]}" --header "Select Audio Preset:")" || true
+	elif command -v fzf >/dev/null 2>&1; then
+		chosen="$(printf '%s\n' "${presets[@]}" | fzf --prompt="Select Preset > ")" || true
+	else
+		select opt in "${presets[@]}"; do
+			chosen="$opt"
+			break
+		done
+	fi
+
+	if [[ -n "$chosen" ]]; then
+		load_preset "$chosen"
+	fi
+}
+
+status() {
+	echo "==> Audio DSP / Mixer Status"
+	if command -v systemctl >/dev/null 2>&1; then
+		local svc_status
+		svc_status="$(systemctl --user is-active easyeffects.service 2>&1 || true)"
+		[[ -z "$svc_status" ]] && svc_status="inactive"
+		echo "EasyEffects daemon: $svc_status"
+	fi
+
+	if [[ -f "$STATE_FILE" ]]; then
+		echo "Current active preset: $(cat "$STATE_FILE")"
+	else
+		echo "Current active preset: (none recorded)"
+	fi
+	list_presets
+}
+
+usage() {
+	cat <<EOF
+Usage: init-mixer [COMMAND] [ARGS]
+
+Commands:
+  sync                 Sync all preset JSONs and systemd unit to ~/.config
+  load, -l <preset>    Load and apply a specific preset (e.g. Lofi-Chill)
+  list, ls             List available presets
+  select, -s           Interactive preset selector (gum / fzf)
+  status               Show mixer daemon and preset status
+  gui                  Launch EasyEffects graphical interface
+  help, -h             Show this help message
+
+Running 'init-mixer' without arguments will sync presets, ensure daemon,
+and open interactive selector (if in a terminal) or apply default 'Lofi-Chill'.
+EOF
+}
+
+# Main routing
+cmd="${1:-}"
+
+case "$cmd" in
+	sync)
+		sync_presets
+		;;
+	list|ls)
+		list_presets
+		;;
+	load|-l)
+		if [[ -z "${2:-}" ]]; then
+			echo "[ERROR] Missing preset name."
+			usage
+			exit 1
+		fi
+		sync_presets
+		load_preset "$2"
+		;;
+	select|-s)
+		sync_presets
+		interactive_select
+		;;
+	gui)
+		exec easyeffects
+		;;
+	status)
+		status
+		;;
+	help|-h|--help)
+		usage
+		;;
+	*)
+		if [[ -n "$cmd" && -f "$PRESETS_DST/${cmd%.json}.json" ]]; then
+			sync_presets
+			load_preset "$cmd"
+		else
+			sync_presets
+			if [[ -t 0 ]]; then
+				interactive_select
+			else
+				ensure_daemon || true
+				load_preset "Lofi-Chill" || true
+			fi
+		fi
+		;;
+esac
