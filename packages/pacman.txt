@@ -132,3 +132,9 @@ qt6ct
 imagemagick
 python-wand
 zenity
+
+# Remote & Networking
+tailscale
+sshfs
+mosh
+moonlight-qt

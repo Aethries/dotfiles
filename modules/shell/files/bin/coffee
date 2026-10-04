@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Coffee - Sleep Inhibitor Bridge (Noctalia Native Caffeine + Fallback)
+# ==============================================================================
+
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/coffee"
+PID_FILE="$STATE_DIR/coffee.pid"
+mkdir -p "$STATE_DIR"
+
+has_noctalia() {
+	command -v noctalia >/dev/null 2>&1 && pgrep -x noctalia >/dev/null 2>&1
+}
+
+notify() {
+	local title="$1"
+	local msg="$2"
+	echo "[$title] $msg"
+	if command -v notify-send >/dev/null 2>&1; then
+		notify-send -a "Coffee" "$title" "$msg" 2>/dev/null || true
+	fi
+}
+
+is_active() {
+	# Check systemd inhibitors for Noctalia Caffeine or coffee process
+	if command -v systemd-inhibit >/dev/null 2>&1; then
+		if systemd-inhibit --list 2>/dev/null | grep -qiE "caffeine|coffee"; then
+			return 0
+		fi
+	fi
+
+	# Fallback check PID file
+	if [[ -f "$PID_FILE" ]]; then
+		local pid
+		pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+		if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+			return 0
+		fi
+		rm -f "$PID_FILE"
+	fi
+
+	return 1
+}
+
+start_coffee() {
+	if is_active; then
+		echo "Coffee is already ACTIVE."
+		return 0
+	fi
+
+	if has_noctalia; then
+		noctalia msg caffeine-enable >/dev/null 2>&1 || true
+		notify "Coffee Activated" "Noctalia native Caffeine enabled (Wayland idle inhibited)."
+	else
+		systemd-inhibit \
+			--what=idle:sleep:shutdown \
+			--who="coffee" \
+			--why="Workstation keep-awake" \
+			--mode=block \
+			sleep infinity >/dev/null 2>&1 &
+
+		local pid=$!
+		echo "$pid" > "$PID_FILE"
+		notify "Coffee Activated" "systemd-inhibit active (PID: $pid)."
+	fi
+}
+
+stop_coffee() {
+	if ! is_active; then
+		echo "Coffee is already INACTIVE."
+		rm -f "$PID_FILE"
+		return 0
+	fi
+
+	if has_noctalia; then
+		noctalia msg caffeine-disable >/dev/null 2>&1 || true
+		notify "Coffee Deactivated" "Noctalia native Caffeine disabled (Normal sleep restored)."
+	fi
+
+	if [[ -f "$PID_FILE" ]]; then
+		local pid
+		pid="$(cat "$PID_FILE" 2>/dev/null || true)"
+		if [[ -n "$pid" ]]; then
+			kill "$pid" 2>/dev/null || true
+		fi
+		rm -f "$PID_FILE"
+		notify "Coffee Deactivated" "systemd-inhibit stopped."
+	fi
+}
+
+toggle_coffee() {
+	if has_noctalia; then
+		noctalia msg caffeine-toggle >/dev/null 2>&1 || true
+		if is_active; then
+			notify "Coffee" "Caffeine ON"
+		else
+			notify "Coffee" "Caffeine OFF"
+		fi
+	else
+		if is_active; then
+			stop_coffee
+		else
+			start_coffee
+		fi
+	fi
+}
+
+status_coffee() {
+	if is_active; then
+		echo "Status: ACTIVE"
+		if command -v systemd-inhibit >/dev/null 2>&1; then
+			systemd-inhibit --list | grep -E "Caffeine|coffee" || true
+		fi
+	else
+		echo "Status: INACTIVE (Normal power profile)"
+	fi
+}
+
+timed_coffee() {
+	local duration="$1"
+	echo "Brewing coffee for $duration..."
+	notify "Coffee Started" "Inhibiting sleep for $duration..."
+
+	if has_noctalia; then
+		noctalia msg caffeine-enable >/dev/null 2>&1 || true
+		sleep "$duration"
+		noctalia msg caffeine-disable >/dev/null 2>&1 || true
+	else
+		systemd-inhibit \
+			--what=idle:sleep:shutdown \
+			--who="coffee" \
+			--why="Workstation keep-awake ($duration)" \
+			--mode=block \
+			sleep "$duration"
+	fi
+
+	notify "Coffee Expired" "Timed keep-awake completed. Sleep restored."
+}
+
+case "${1:-status}" in
+	on|start)
+		start_coffee
+		;;
+	off|stop)
+		stop_coffee
+		;;
+	toggle)
+		toggle_coffee
+		;;
+	status)
+		status_coffee
+		;;
+	run|exec)
+		shift
+		if [[ $# -eq 0 ]]; then
+			echo "Usage: coffee run <command...>"
+			exit 1
+		fi
+		echo "Running under sleep inhibitor: $*"
+		exec systemd-inhibit \
+			--what=idle:sleep:shutdown \
+			--who="coffee" \
+			--why="Running $*" \
+			--mode=block \
+			"$@"
+		;;
+	*)
+		if [[ "$1" =~ ^[0-9]+[smhd]?$ ]]; then
+			timed_coffee "$1"
+		else
+			echo "Usage: coffee [on|off|toggle|status|<duration>|run <command>]"
+			exit 1
+		fi
+		;;
+esac

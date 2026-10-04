@@ -307,8 +307,49 @@ alias rlog="rtk git log --oneline -n 20"
 alias rtest="rtk"
 
 # ------------------------------------------------------------------------------
+# Remote Development & File System Helpers
+# ------------------------------------------------------------------------------
+alias coffe="coffee"
+
+function ssh-mount() {
+	local host="${1:-}"
+	local remote_path="${2:-/}"
+	if [[ -z "$host" ]]; then
+		echo "Cách dùng: ssh-mount <host> [remote_path]"
+		return 1
+	fi
+	local mount_point="$HOME/mnt/remote/$host"
+	mkdir -p "$mount_point"
+	sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 "$host:$remote_path" "$mount_point"
+	echo "✓ Đã mount $host:$remote_path tại $mount_point"
+}
+
+function ssh-umount() {
+	local host="${1:-}"
+	if [[ -z "$host" ]]; then
+		echo "Cách dùng: ssh-umount <host>"
+		return 1
+	fi
+	local mount_point="$HOME/mnt/remote/$host"
+	fusermount3 -u "$mount_point" && rmdir "$mount_point" 2>/dev/null || true
+	echo "✓ Đã ngắt mount $host"
+}
+
+function ssh-sync() {
+	local host="${1:-}"
+	local local_dir="${2:-}"
+	local remote_dir="${3:-}"
+	if [[ -z "$host" || -z "$local_dir" || -z "$remote_dir" ]]; then
+		echo "Cách dùng: ssh-sync <host> <local_dir> <remote_dir>"
+		return 1
+	fi
+	rsync -avz --progress --exclude '.git' --exclude 'node_modules' "$local_dir/" "$host:$remote_dir/"
+}
+
+# ------------------------------------------------------------------------------
 # Local Overrides (untracked machine-specific secrets/configs)
 # ------------------------------------------------------------------------------
 if [[ -f "$HOME/.zshrc.local" ]]; then
 	source "$HOME/.zshrc.local"
 fi
+

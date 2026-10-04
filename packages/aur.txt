@@ -24,6 +24,8 @@ antigravity-cli
 
 # Network
 cloudflare-warp-bin
+sunshine-bin
+
 
 # Terminal & CLI Tools
 carapace-bin
