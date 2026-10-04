@@ -1,16 +1,18 @@
 # ==============================================================================
 # Custom Keybinds (Extends /usr/share/umbriel/config.toml)
+# Level 1: Compositor & Desktop Shell (Umbriel + Noctalia)
 # ==============================================================================
 
 [keybinds]
 # Launchers
-"Mod+T" = { action = "spawn:kitty", repeat = false }
 "Mod+Return" = { action = "spawn:kitty", repeat = false }
 "Mod+B" = { action = "spawn:google-chrome-stable", repeat = false }
 "Mod+E" = { action = "spawn:nautilus --new-window", repeat = false }
 "Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+V" = { action = "spawn:~/.local/bin/clip-picker", repeat = false }
+"Mod+question" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
+"Mod+slash" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
 
 # Mouse Navigation (Warpd)
 "Mod+semicolon" = { action = "spawn:~/.local/bin/warpd-hint", repeat = false }
@@ -40,7 +42,16 @@
 "Mod+J" = "workspace-next"
 "Mod+K" = "workspace-previous"
 
-# Window Sizing
+# Window Movement (Move / Swap) - Unified Shift
+"Mod+Shift+H" = "column-move-left"
+"Mod+Shift+L" = "column-move-right"
+"Mod+Shift+Left" = "column-move-left"
+"Mod+Shift+Right" = "column-move-right"
+"Mod+Shift+Up" = "window-move-up"
+"Mod+Shift+Down" = "window-move-down"
+
+# Window State & Sizing
+"Mod+Shift+Space" = { action = "window-toggle-floating", repeat = false }
 "Mod+Minus" = "window-modify-primary-extent:-0.05"
 "Mod+Equal" = "window-modify-primary-extent:+0.05"
 "Mod+Plus" = "window-modify-primary-extent:+0.05"

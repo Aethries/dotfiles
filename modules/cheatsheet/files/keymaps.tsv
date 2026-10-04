@@ -1,0 +1,163 @@
+Category	Keybind	Action_VI	Action_EN	Layer_App	ConfigFile
+Compositor	Mod + J	Workspace kế tiếp (Next)	Switch to next workspace	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + K	Workspace trước đó (Prev)	Switch to previous workspace	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + 1 .. 9	Chuyển trực tiếp tới Workspace 1 .. 9	Direct switch to workspace 1..9	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + 1 .. 9	Chuyển cửa sổ đang chọn sang Workspace 1 .. 9	Move window to workspace 1..9	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + H / Left	Focus cửa sổ bên trái	Focus window left	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + L / Right	Focus cửa sổ bên phải	Focus window right	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Up	Focus cửa sổ phía trên	Focus window up	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Down	Focus cửa sổ phía dưới	Focus window down	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + H / Left	Hoán đổi / Di chuyển cửa sổ sang trái	Swap/move window left	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + L / Right	Hoán đổi / Di chuyển cửa sổ sang phải	Swap/move window right	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + Up	Hoán đổi / Di chuyển cửa sổ lên trên	Swap/move window up	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + Down	Hoán đổi / Di chuyển cửa sổ xuống dưới	Swap/move window down	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Q	Đóng cửa sổ đang chọn	Close focused window	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + F	Bật/Tắt chế độ toàn màn hình (Fullscreen)	Toggle window fullscreen	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + Space	Bật/Tắt chế độ cửa sổ nổi (Floating)	Toggle floating window mode	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Minus	Giảm kích thước vùng chính (-5%)	Decrease primary window extent	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Equal / Plus	Tăng kích thước vùng chính (+5%)	Increase primary window extent	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Return	Mở Terminal Kitty	Launch Kitty terminal emulator	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Space / Mod + D	Mở Menu ứng dụng Noctalia App Launcher	Launch Noctalia application menu	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + V	Mở lịch sử Clipboard Clipse	Open Clipse clipboard history picker	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + ? / Mod + Shift + /	Mở bảng tra cứu phím tắt toàn hệ thống (Cheatsheet)	Open system-wide interactive cheatsheet	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Semicolon (;)	Kích hoạt chuột phím Warpd Hint Mode	Activate Warpd mouse hint mode	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + B	Mở trình duyệt Google Chrome	Launch Google Chrome browser	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + E	Mở trình quản lý file Nautilus	Launch Nautilus file explorer	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + BackSpace	Khóa màn hình (Lock session)	Lock current desktop session	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + N	Bật/Tắt bảng thông báo Noctalia Notifications	Toggle Noctalia notifications panel	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + N	Bật/Tắt chế độ Không làm phiền (Do Not Disturb)	Toggle Do Not Disturb (DND) mode	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + S	Chụp ảnh màn hình có chú thích (Annotate)	Screenshot with annotation tool	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Print	Chụp ảnh một vùng màn hình (Region)	Screenshot selected screen region	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Print	Chụp ảnh toàn bộ màn hình (Fullscreen)	Screenshot entire display	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + R	Bật/Tắt quay video màn hình (Screen Recorder)	Toggle screen recording service	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + Shift + R	Tải lại cấu hình Umbriel Compositor	Reload Umbriel compositor config	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	XF86Audio...	Điều chỉnh âm lượng, mic, media OSD	Control audio volume, mic, media playback	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
+Zellij	Ctrl + Shift + n	Tạo Pane mới (Chỉ Split dọc bên phải)	New vertical pane (split right)	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + w	Đóng Pane hiện tại (Có Shift chống bấm nhầm)	Close focused pane safely	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + f	Phóng to / Thu nhỏ Pane (Fullscreen toggle)	Toggle pane fullscreen maximize	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + r	Đổi tên Pane đang chọn	Rename focused pane	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + Equal	Tăng kích thước Pane	Increase pane resize extent	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + Minus	Giảm kích thước Pane	Decrease pane resize extent	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + h	Focus sang Pane bên trái (Liền mạch Neovim)	Focus left pane (seamless Neovim)	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + j	Focus sang Pane phía dưới (Liền mạch Neovim)	Focus down pane (seamless Neovim)	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + k	Focus sang Pane phía trên (Liền mạch Neovim)	Focus up pane (seamless Neovim)	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + l	Focus sang Pane bên phải (Liền mạch Neovim)	Focus right pane (seamless Neovim)	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + h / Left	Di chuyển / Hoán đổi Pane sang trái	Move/swap focused pane left	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + l / Right	Di chuyển / Hoán đổi Pane sang phải	Move/swap focused pane right	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + j / Down	Di chuyển / Hoán đổi Pane xuống dưới	Move/swap focused pane down	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + k / Up	Di chuyển / Hoán đổi Pane lên trên	Move/swap focused pane up	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + t	Mở Tab mới trong Zellij	Create new tab in Zellij	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + q	Đóng Tab hiện tại trong Zellij	Close current tab in Zellij	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + 1 .. 9	Chuyển nhanh tới Tab 1 .. 9	Jump directly to tab 1..9	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + [	Chuyển về Tab trước đó	Switch to previous tab	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + ]	Chuyển sang Tab tiếp theo	Switch to next tab	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + s	Tìm kiếm nội dung trong buffer (Search mode)	Search text inside scrollback buffer	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + b	Vào chế độ cuộn trang (Scroll mode)	Enter scrollback mode	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + o	Mở giao diện Quản lý Session (Session Manager)	Open Zellij session manager floating	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + Shift + d	Thoát / Tách session Zellij (Detach)	Detach active Zellij session	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Zellij	Ctrl + g	Khóa / Mở khóa phím tắt Zellij (Locked Mode)	Toggle locked keybind mode	Level 2 (Zellij)	modules/zellij/files/config.kdl
+Kitty	Ctrl + Shift + c	Sao chép vùng chọn vào Clipboard hệ thống	Copy terminal selection to clipboard	Level 2 (Kitty)	modules/kitty/files/kitty.conf
+Kitty	Ctrl + Shift + v	Dán từ Clipboard vào terminal	Paste clipboard text into terminal	Level 2 (Kitty)	modules/kitty/files/kitty.conf
+Kitty	Ctrl + Alt + Equal	Tăng cỡ chữ font terminal (+1.0)	Increase terminal font size	Level 2 (Kitty)	modules/kitty/files/kitty.conf
+Kitty	Ctrl + Alt + Minus	Giảm cỡ chữ font terminal (-1.0)	Decrease terminal font size	Level 2 (Kitty)	modules/kitty/files/kitty.conf
+Kitty	Ctrl + Alt + 0	Đặt lại cỡ chữ font terminal về mặc định (9.0)	Reset terminal font size to default	Level 2 (Kitty)	modules/kitty/files/kitty.conf
+InputMethod	Ctrl + Space	Bật / Tắt chế độ gõ tiếng Việt (Fcitx5 Bamboo)	Toggle Vietnamese input method (Fcitx5)	Level 3 (Fcitx5)	modules/fcitx5/files/config
+IDE	Ctrl + \	Chia đôi Editor (Chỉ Split dọc)	Split editor vertically	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + Shift + Up / Down	Di chuyển dòng code lên / xuống	Move line/block up or down	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + P	Tìm và mở file nhanh trong dự án (Quick Open)	Quick Open file by name	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + Shift + P	Mở Command Palette	Open IDE command palette	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + `	Bật/Tắt Terminal tích hợp trong IDE	Toggle built-in integrated terminal	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + B	Bật/Tắt thanh Sidebar quản lý file	Toggle primary sidebar file tree	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + Shift + F	Tìm kiếm toàn bộ nội dung trong dự án	Search across all files in workspace	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+IDE	Ctrl + Shift + K	Xóa toàn bộ dòng code hiện tại	Delete current line in editor	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
+Neovim	<leader>w	Lưu file hiện tại (:w)	Save current buffer	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>q	Đóng cửa sổ / split Neovim hiện tại (:q)	Close current window/split	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	jk	Thoát nhanh chế độ Insert về Normal mode	Fast escape from insert to normal mode	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<Esc>	Xóa highlight tìm kiếm (:nohlsearch)	Clear search highlight matches	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<S-h>	Chuyển sang Buffer trước đó	Switch to previous open buffer	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<S-l>	Chuyển sang Buffer tiếp theo	Switch to next open buffer	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>bd	Đóng buffer đang mở hiện tại	Close current active buffer	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>bo	Đóng tất cả các buffer khác ngoại trừ file này	Close all other buffers except current	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<C-h> / <C-j> / <C-k> / <C-l>	Điều hướng liền mạch giữa Neovim split & Zellij pane	Seamless split/pane navigation (tmux parity)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>wv	Tách cửa sổ dọc (Vertical Split - vsplit)	Split window vertically	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>wx	Đóng cửa sổ split Neovim hiện tại	Close focused Neovim split window	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>w=	Cân bằng kích thước tất cả các split pane	Equalize dimensions of all split windows	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>wm	Phóng to / Khôi phục kích thước split (Maximize)	Toggle maximize/restore current split	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>wr	Vào chế độ chỉnh kích thước tương tác (gõ h/j/k/l)	Interactive resize submode (tap h/j/k/l)	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>to / <leader>tx	Mở / Đóng tab mới trong Neovim	Create / close tabpage in Neovim	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	<leader>tn / <leader>tp	Chuyển sang Tab tiếp theo / Tab trước đó	Switch to next / previous tabpage	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	Shift + J / K	Di chuyển khối code bôi đen xuống / lên (Visual)	Move selected code block down / up	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
+Neovim	w / e / b / ge	Nhảy theo từ con (camelCase, snake_case, kebab-case)	Subword motion (Spider navigation)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	s	Nhảy 2D trực tiếp tới ký tự bất kỳ trên màn hình (Flash)	Flash 2D label jump anywhere on screen	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	S	Nhảy và chọn khối cú pháp Treesitter (Flash Treesitter)	Flash jump and select Treesitter node	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>e	Bật/Tắt cây thư mục File Explorer (NvimTree)	Toggle file explorer sidebar (NvimTree)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>a	Ghim file hiện tại vào Harpoon	Add/pin current file to Harpoon list	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<C-e> / <leader>H	Mở menu danh sách các file đã ghim (Harpoon)	Toggle Harpoon pinned files menu	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>1 .. 4	Nhảy ngay tới file đã ghim 1, 2, 3 hoặc 4 (Harpoon)	Instantly jump to pinned Harpoon file 1..4	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>ff	Tìm file theo tên trong project (Telescope)	Find files by filename (Telescope)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>fg	Tìm nội dung văn bản toàn project (Live Grep)	Live grep text in project (Telescope)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>fb	Xem danh sách và chuyển đổi buffer (Telescope)	List and switch open buffers	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>fr	Xem danh sách file đã mở gần đây (Oldfiles)	Search recently opened files	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>fs	Xem danh sách file Git thay đổi (Git Status)	Search Git modified files	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>fh	Tra cứu tài liệu hướng dẫn Neovim (Help tags)	Search Neovim help documentation	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>? / <F1>	Mở bảng tra cứu phím tắt Neovim tương tác (Cheatsheet)	Interactive Neovim cheatsheet popup	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	gd	Đi đến định nghĩa của hàm / biến (LSP Definition)	Jump to symbol definition	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	gr	Tìm tất cả nơi tham chiếu của hàm / biến (LSP References)	Find all symbol references in project	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	K	Xem tài liệu / kiểu dữ liệu con trỏ (LSP Hover)	View hover docs and type information	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>ca	Gợi ý sửa lỗi nhanh với xem trước (Code Actions)	Code actions with live diff preview	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>rn	Đổi tên hàm / biến trực tiếp toàn file (IncRename)	Incremental real-time symbol rename	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>cd	Xem chi tiết cảnh báo / lỗi ở dòng hiện tại	Show line diagnostic popup float	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	[d / ]d	Nhảy tới lỗi / cảnh báo trước đó / tiếp theo	Jump to previous / next diagnostic	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>cf	Định dạng mã nguồn buffer hiện tại (Conform)	Format code buffer with auto-formatters	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>th	Bật/Tắt gợi ý kiểu dữ liệu & tham số (Inlay Hints)	Toggle LSP inline type/param hints	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>xx	Xem danh sách lỗi toàn project dạng cây (Trouble)	Toggle project diagnostics list (Trouble)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>xX	Xem danh sách lỗi file hiện tại (Trouble)	Toggle current buffer diagnostics	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>cs	Xem cây cấu trúc hàm / biến (Trouble Symbols)	Toggle symbols outline tree (Trouble)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>xQ	Xem danh sách Quickfix dạng cây (Trouble)	Toggle quickfix list tree (Trouble)	Level 3 (Neovim)	modules/nvim/files/lua/plugins/navigation.lua
+Neovim	<leader>gg	Mở giao diện Git nổi tương tác (LazyGit)	Open LazyGit floating interactive TUI	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>gd	Mở so sánh Git hai cột song song (Diffview)	Open side-by-side git diff view	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>gD	Đóng giao diện xem so sánh Diffview	Close Diffview review window	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>hs	Stage đoạn code git thay đổi hiện tại (Gitsigns)	Stage current git change hunk	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>hr	Hủy bỏ thay đổi của đoạn code hiện tại (Reset hunk)	Discard changes in current git hunk	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>hb	Xem chi tiết người commit dòng này (Git Blame)	Show git blame line details	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>tb	Bật/Tắt hiển thị người sửa cuối dòng (Inline Blame)	Toggle virtual inline git blame text	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	co / ct / cb	Giải quyết Git Merge Conflict (Ours / Theirs / Both)	Resolve git conflict (Ours/Theirs/Both)	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	ys{motion}{c}	Bọc ký tự quanh từ / khối (vd: ysiw")	Add surround delimiters around motion	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	ds{char}	Xóa ký tự bao quanh (vd: ds")	Delete surrounding delimiters	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	cs{from}{to}	Đổi ký tự bao quanh (vd: cs"')	Change surrounding delimiters	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>kd	Mở giao diện quản lý Container nổi (LazyDocker)	Open LazyDocker floating TUI	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>tk	Bật/Tắt che giấu mật khẩu trong .env (Cloak)	Toggle hide/mask secrets in .env	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>db	Bật/Tắt giao diện quản trị Database (Dadbod UI)	Toggle Dadbod database manager UI	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>rr	Thực thi request HTTP REST tại con trỏ (Kulala)	Run HTTP REST request under cursor	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<C-n>	Chọn từ / thêm con trỏ tại từ trùng tiếp theo	Select word / add next multi-cursor	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>ma	Chọn tất cả các vị trí trùng khớp (Đa con trỏ)	Select all word occurrences (Multi-cursor)	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	]t / [t	Nhảy tới ghi chú TODO tiếp theo / trước đó	Jump to next / previous TODO comment	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Neovim	<leader>ft	Tìm tất cả ghi chú TODO / FIXME trong project	Find all TODO/FIXME comments in workspace	Level 3 (Neovim)	modules/nvim/files/lua/config/cheatsheet.lua
+Kanata	Hold CapsLock	Kích hoạt chế độ điều hướng Vim toàn OS (Nav Layer)	Hold CapsLock to activate OS-wide Vim Nav	Level 4 (Kanata)	modules/kanata/files/kanata.kbd
+Kanata	Tap CapsLock	Thoát nhanh (gửi phím Escape) không cần với tay	Tap CapsLock to emit Escape key	Level 4 (Kanata)	modules/kanata/files/kanata.kbd
+Kanata	Shift + CapsLock	Bật / Tắt chế độ viết hoa CapsLock thật	Toggle real CapsLock state	Level 4 (Kanata)	modules/kanata/files/kanata.kbd
+KanataNav	h / j / k / l	Di chuyển con trỏ Trái / Xuống / Lên / Phải toàn OS	Vim cursor motion (Left/Down/Up/Right)	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	d / u	Cuộn trang xuống / lên (PageDown / PageUp)	Scroll page down / up	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	0 / 4	Về đầu dòng (Home) / Cuối dòng (End)	Jump to line beginning / end	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	b / w / e	Nhảy theo từng từ (Word jump Ctrl+Left / Right)	Jump by subword / word boundary	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	g / Shift + g	Về đầu tài liệu (Ctrl+Home) / Cuối tài liệu (Ctrl+End)	Jump to document start / end	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	x / Shift + x	Xóa ký tự tới (Delete) / Xóa lùi (Backspace)	Forward delete / Backward delete	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	z / Shift + z	Hoàn tác (Undo Ctrl+z) / Làm lại (Redo Ctrl+y)	Undo / Redo action	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	y / p / c	Sao chép (Copy) / Dán (Paste) / Cắt (Cut)	Copy / Paste / Cut text	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	q	Đóng tab hiện tại của ứng dụng (Ctrl+w)	Close active tab in any application	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	/	Mở tìm kiếm nhanh trong app (Ctrl+f)	Trigger quick search in any application	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	v	Chuyển sang chế độ bôi đen văn bản (Visual Mode)	Enter visual text selection layer	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+KanataNav	m / Semicolon (;)	Kích hoạt chuột Warpd từ Nav Mode	Trigger Warpd mouse navigation	Level 4 (Kanata Nav)	modules/kanata/files/kanata.kbd
+Warpd	Mod + Semicolon (;)	Bật chế độ chọn điểm chuột trên màn hình (Hint Mode)	Trigger Warpd screen hint mode	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Space	Click chuột trái tại điểm hint (Tiếp tục ở lại Warpd)	Left click at hint position (stay in mode)	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	i	Click chuột trái tại hint và thoát về desktop	Left click at hint and exit to desktop	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Comma (,)	Click chuột giữa tại điểm hint (Tiếp tục ở lại)	Middle click at hint position	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Minus (-)	Click chuột giữa và thoát về desktop	Middle click at hint and exit	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Dot (.)	Click chuột phải tại điểm hint (Tiếp tục ở lại)	Right click at hint position	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Slash (/)	Click chuột phải và thoát về desktop	Right click at hint and exit	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	v	Bật/Tắt chế độ kéo thả chuột (Mouse Drag & Drop)	Toggle mouse visual drag and drop	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	a (Hold)	Tăng tốc độ di chuyển chuột siêu nhanh (Accelerator)	Hold to accelerate mouse movement	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	s (Hold)	Di chuyển chuột siêu chậm để chỉnh điểm ảnh (Decelerator)	Hold to decelerate mouse precision movement	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	d / u	Cuộn trang xuống / lên bằng chuột (Vim scroll)	Mouse wheel scroll down / up	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	f	Hiện lại các nhãn hint khi đang ở trong mouse mode	Regenerate hints inside movement mode	Level 4 (Warpd)	modules/kanata/files/config
+Warpd	Esc	Thoát khỏi chế độ điều khiển chuột Warpd	Exit Warpd mouse control mode	Level 4 (Warpd)	modules/kanata/files/config

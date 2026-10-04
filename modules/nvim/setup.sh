@@ -34,6 +34,17 @@ if ! command_exists neovide; then
 	fi
 fi
 
+if [[ ! -f "$MODULE_DIR/files/lua/lua-utf8.so" ]] && command_exists gcc; then
+	log "Compiling lua-utf8 extension for Unicode/Vietnamese support"
+	mkdir -p /tmp/luautf8_build
+	if curl -sSL https://raw.githubusercontent.com/starwing/luautf8/master/lutf8lib.c -o /tmp/luautf8_build/lutf8lib.c && \
+	   curl -sSL https://raw.githubusercontent.com/starwing/luautf8/master/unidata.h -o /tmp/luautf8_build/unidata.h; then
+		gcc -O2 -fPIC -shared -I/usr/include/luajit-2.1 /tmp/luautf8_build/lutf8lib.c -o "$MODULE_DIR/files/lua/lua-utf8.so" 2>/dev/null || true
+		rm -rf /tmp/luautf8_build
+		success "lua-utf8 compiled"
+	fi
+fi
+
 if command_exists nvim && command_exists git; then
 	log "Syncing Neovim plugins via Lazy.nvim"
 	nvim --headless "+Lazy! sync" +qa 2>/dev/null || warn "Lazy sync encountered warnings (plugins will install on first open)"

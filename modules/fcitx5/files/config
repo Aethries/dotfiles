@@ -14,8 +14,9 @@ EnumerateSkipFirst=False
 ModifierOnlyKeyTimeout=250
 
 [Hotkey/TriggerKeys]
-0=Control+m
-1=Control+M
+0=Control+space
+1=Control+m
+2=Control+M
 
 [Hotkey/EnumerateForwardKeys]
 0=

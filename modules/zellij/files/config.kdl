@@ -5,28 +5,25 @@
 
 keybinds clear-defaults=true {
 	normal {
-		// --- Tab Management ---
-		bind "Ctrl t" "Ctrl Shift t" { NewTab; }
-		bind "Ctrl w" "Ctrl Shift w" { CloseFocus; }
+		// --- Tab Management (Ctrl+Shift to protect shell Ctrl keys) ---
+		bind "Ctrl Shift t" { NewTab; }
+		bind "Ctrl Shift w" { CloseFocus; }
 		bind "Ctrl Shift q" { CloseTab; }
-		bind "Ctrl r" { SwitchToMode "RenameTab"; TabNameInput 0; }
-		bind "Ctrl Shift r" { SwitchToMode "RenamePane"; PaneNameInput 0; }
+		bind "Ctrl Shift r" { SwitchToMode "RenameTab"; TabNameInput 0; }
 		bind "Ctrl Shift [" { GoToPreviousTab; }
 		bind "Ctrl Shift ]" { GoToNextTab; }
-		bind "Ctrl 1" "Ctrl Shift 1" { GoToTab 1; }
-		bind "Ctrl 2" "Ctrl Shift 2" { GoToTab 2; }
-		bind "Ctrl 3" "Ctrl Shift 3" { GoToTab 3; }
-		bind "Ctrl 4" "Ctrl Shift 4" { GoToTab 4; }
-		bind "Ctrl 5" "Ctrl Shift 5" { GoToTab 5; }
-		bind "Ctrl 6" "Ctrl Shift 6" { GoToTab 6; }
-		bind "Ctrl 7" "Ctrl Shift 7" { GoToTab 7; }
-		bind "Ctrl 8" "Ctrl Shift 8" { GoToTab 8; }
-		bind "Ctrl 9" "Ctrl Shift 9" { GoToTab 9; }
+		bind "Ctrl Shift 1" { GoToTab 1; }
+		bind "Ctrl Shift 2" { GoToTab 2; }
+		bind "Ctrl Shift 3" { GoToTab 3; }
+		bind "Ctrl Shift 4" { GoToTab 4; }
+		bind "Ctrl Shift 5" { GoToTab 5; }
+		bind "Ctrl Shift 6" { GoToTab 6; }
+		bind "Ctrl Shift 7" { GoToTab 7; }
+		bind "Ctrl Shift 8" { GoToTab 8; }
+		bind "Ctrl Shift 9" { GoToTab 9; }
 
-		// --- Pane Management ---
-		bind "Ctrl n" "Ctrl Shift n" { NewPane; }
-		bind "Ctrl Shift d" { NewPane "Down"; }
-		bind "Ctrl Shift \\" { NewPane "Right"; }
+		// --- Pane Management (Vertical Split Only, No Horizontal Split) ---
+		bind "Ctrl Shift n" "Ctrl Shift \\" { NewPane "Right"; }
 		bind "Ctrl Shift f" { ToggleFocusFullscreen; }
 		bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
 		bind "Ctrl Shift p" { ToggleFloatingPanes; }
@@ -61,26 +58,26 @@ keybinds clear-defaults=true {
 			};
 		}
 
-		// --- Unconditional Zellij Navigation (bypass editor) ---
-		bind "Ctrl Shift h" "Ctrl Shift Left" { MoveFocusOrTab "Left"; }
-		bind "Ctrl Shift l" "Ctrl Shift Right" { MoveFocusOrTab "Right"; }
-		bind "Ctrl Shift j" "Ctrl Shift Down" { MoveFocus "Down"; }
-		bind "Ctrl Shift k" "Ctrl Shift Up" { MoveFocus "Up"; }
+		// --- Move / Swap Panes (Unified Shift) ---
+		bind "Ctrl Shift h" "Ctrl Shift Left" { MovePane "Left"; }
+		bind "Ctrl Shift l" "Ctrl Shift Right" { MovePane "Right"; }
+		bind "Ctrl Shift j" "Ctrl Shift Down" { MovePane "Down"; }
+		bind "Ctrl Shift k" "Ctrl Shift Up" { MovePane "Up"; }
 
 		// --- Resize Panes ---
-		bind "Ctrl =" "Ctrl +" { Resize "Increase"; }
-		bind "Ctrl -" { Resize "Decrease"; }
+		bind "Ctrl Shift =" "Ctrl Shift +" { Resize "Increase"; }
+		bind "Ctrl Shift -" { Resize "Decrease"; }
 
 		// --- Layout & View ---
 		bind "Ctrl Shift Space" { NextSwapLayout; }
 
 		// --- Search & Scroll ---
-		bind "Ctrl s" { SwitchToMode "EnterSearch"; SearchInput 0; }
-		bind "Ctrl b" { SwitchToMode "Scroll"; }
+		bind "Ctrl Shift s" { SwitchToMode "EnterSearch"; SearchInput 0; }
+		bind "Ctrl Shift b" { SwitchToMode "Scroll"; }
 
 		// --- Session Management ---
-		bind "Ctrl q" { Detach; }
-		bind "Ctrl o" {
+		bind "Ctrl Shift d" { Detach; }
+		bind "Ctrl Shift o" {
 			LaunchOrFocusPlugin "session-manager" {
 				floating true
 				move_to_focused_tab true

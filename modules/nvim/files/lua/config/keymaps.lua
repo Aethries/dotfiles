@@ -39,7 +39,6 @@ map("n", "<leader>wj", "<cmd>resize -4<CR>", { desc = "Giảm chiều cao pane (
 map("n", "<leader>wk", "<cmd>resize +4<CR>", { desc = "Tăng chiều cao pane (+4)" })
 map("n", "<leader>w=", "<cmd>wincmd =<CR>", { desc = "Cân bằng kích thước tất cả pane" })
 map("n", "<leader>wv", "<cmd>vsplit<CR>", { desc = "Tách cửa sổ dọc (Vertical Split)" })
-map("n", "<leader>ws", "<cmd>split<CR>", { desc = "Tách cửa sổ ngang (Horizontal Split)" })
 map("n", "<leader>wx", "<cmd>close<CR>", { desc = "Đóng pane hiện tại" })
 
 -- Maximize / Restore current pane

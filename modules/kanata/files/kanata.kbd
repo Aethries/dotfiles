@@ -8,7 +8,9 @@
 (defalias
   ;; Chuyển đổi giữa các Layer
   to-nav    (layer-switch nav)
-  cap-nav   (fork caps @to-nav (lsft rsft))
+  nav-hold  (layer-while-held nav)
+  cap-th    (tap-hold-press 200 200 esc @nav-hold)
+  cap-nav   (fork caps @cap-th (lsft rsft))
   to-base   (layer-switch base)
   to-vis    (layer-switch visual)
 

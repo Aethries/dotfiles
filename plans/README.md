@@ -9,7 +9,6 @@ Tài liệu này tổng hợp toàn bộ lộ trình triển khai các kế ho�
 ```mermaid
 flowchart TD
     subgraph G1["Giai đoạn 1: Desktop, Session & Core Input"]
-        P13["13. Unified System Keymaps"]
         P14["14. Appearance & Visual Harmony"]
     end
 
@@ -25,7 +24,7 @@ flowchart TD
 
 ---
 
-## 2. Danh mục 5 Kế hoạch Hành động Chi tiết
+## 2. Danh mục 4 Kế hoạch Hành động Chi tiết
 
 Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**, **Mô tả chức năng** (bối cảnh, mục tiêu, cấu trúc file, packages), **Chi tiết cấu hình/triển khai**, **Hướng dẫn sử dụng thực tế** (phím tắt, lệnh CLI, workflow) và **Kiểm thử nghiệm thu**.
 
@@ -34,7 +33,6 @@ Mỗi kế hoạch đều tuân thủ cấu trúc chuẩn: **Tên chức năng**
 | **07** | [07-cloud-aws-gcp-va-database-cli.md](file:///home/loc/Workspaces/dotfiles/plans/07-cloud-aws-gcp-va-database-cli.md) | Bộ công cụ AWS SSO (`granted`), GCP ADC, OpenTofu và Universal Database CLI (`usql`, `pgcli`, `iredis`) | ⏳ Sẵn sàng |
 | **08** | [08-tailscale-mesh-network-va-remote-helpers.md](file:///home/loc/Workspaces/dotfiles/plans/08-tailscale-mesh-network-va-remote-helpers.md) | Mạng riêng ảo Tailscale Mesh, Tailscale SSH, MagicDNS, SSHFS helpers (`ssh-mount`, `ssh-sync`) và Mosh | ⏳ Sẵn sàng |
 | **09** | [09-sunshine-headless-remote-desktop.md](file:///home/loc/Workspaces/dotfiles/plans/09-sunshine-headless-remote-desktop.md) | Remote desktop máy trạm độ trễ thấp với Sunshine (GPU encoder, HDMI Dummy Plug 4K) qua Tailscale IP nội bộ | ⏳ Chờ 08 |
-| **13** | [13-unified-system-keymaps-va-shortcuts.md](file:///home/loc/Workspaces/dotfiles/plans/13-unified-system-keymaps-va-shortcuts.md) | Hệ thống Phím tắt Toàn cục: Umbriel Window Nav, Zellij Split, Modal Editor, Kanata Dual-role & Warpd Mouse | ⏳ Sẵn sàng |
 | **14** | [14-appearance-scaling-fonts-va-visual-harmony.md](file:///home/loc/Workspaces/dotfiles/plans/14-appearance-scaling-fonts-va-visual-harmony.md) | Quản trị Giao diện & Hiển thị: Wayland Display Scale, UI Scale 0.9, Fontconfig JetBrains Mono, Cursor 24px & GTK/Qt Dark Mode | ⏳ Sẵn sàng |
 
 ---

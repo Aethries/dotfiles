@@ -1,1 +1,23 @@
-[]
+[
+	// Disable Toggle Tab Key Moves Focus (VS Code default ctrl+m) to protect Fcitx5 Bamboo
+	{
+		"key": "ctrl+m",
+		"command": "-editor.action.toggleTabFocusMode"
+	},
+	// Move line up / down with Ctrl+Shift (Universal Move Shift rule, eliminating Alt)
+	{
+		"key": "ctrl+shift+up",
+		"command": "editor.action.moveLinesUpAction",
+		"when": "editorTextFocus && !editorReadonly"
+	},
+	{
+		"key": "ctrl+shift+down",
+		"command": "editor.action.moveLinesDownAction",
+		"when": "editorTextFocus && !editorReadonly"
+	},
+	// Split Editor Vertically
+	{
+		"key": "ctrl+\\",
+		"command": "workbench.action.splitEditor"
+	}
+]
