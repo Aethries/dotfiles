@@ -29,7 +29,24 @@ if [[ -f /etc/greetd/config.toml && ! -f /etc/greetd/config.toml.bak ]]; then
 	sudo cp -a /etc/greetd/config.toml /etc/greetd/config.toml.bak
 fi
 
-sudo cp "$MODULE_DIR/files/config.toml" /etc/greetd/config.toml
+if [[ "${AUTOLOGIN:-false}" == "true" || -f "$DOTFILES/.autologin" ]]; then
+	log "Configuring greetd autologin for user ${AUTOLOGIN_USER:-$USER}"
+	cat << EOF | sudo tee /etc/greetd/config.toml > /dev/null
+[terminal]
+vt = 1
+
+[initial_session]
+command = "start-umbriel"
+user = "${AUTOLOGIN_USER:-$USER}"
+
+[default_session]
+command = "/usr/bin/noctalia-greeter-session -- --session Umbriel"
+user = "greeter"
+EOF
+else
+	sudo cp "$MODULE_DIR/files/config.toml" /etc/greetd/config.toml
+fi
+
 
 # Deploy greetd PAM configuration (auto-unlock gnome-keyring)
 if [[ -f /etc/pam.d/greetd && ! -f /etc/pam.d/greetd.bak ]]; then
