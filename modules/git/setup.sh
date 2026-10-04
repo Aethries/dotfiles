@@ -21,7 +21,8 @@ link_file \
 	"$HOME/.gitconfig"
 
 # Clean up deprecated or unused work config if exists
-rm -f "$HOME/.gitconfig-work"
+rm -f "$HOME/.gitconfig-work" "$HOME/.gitconfig-1bitlab" "$HOME/.config/git/ignore"
+
 
 # Initialize ~/.gitconfig.local if it doesn't exist
 GITCONFIG_LOCAL="$HOME/.gitconfig.local"
