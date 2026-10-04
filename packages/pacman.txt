@@ -81,6 +81,10 @@ mise
 uv
 gitleaks
 pinentry
+act
+xh
+websocat
+bitwarden-cli
 
 # Desktop
 noctalia
@@ -118,3 +122,13 @@ fcitx5-bamboo
 fcitx5-gtk
 fcitx5-qt
 fcitx5-configtool
+grim
+slurp
+hyprpicker
+tesseract
+tesseract-data-eng
+tesseract-data-vie
+qt6ct
+imagemagick
+python-wand
+zenity

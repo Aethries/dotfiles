@@ -4,7 +4,7 @@
   "aerial.nvim": { "branch": "master", "commit": "28fe6e822ae344544c379d60fcb13c9519a1f08a" },
   "async.nvim": { "branch": "main", "commit": "15f28ec323a75f34f317336831c00c2d1b0a7192" },
   "auto-save.nvim": { "branch": "main", "commit": "5961d5e041c227e4d99e9e44e3a7ce9c6826c145" },
-  "base16-nvim": { "branch": "master", "commit": "a1ef667bb2988a893ae4bd9d37b589815016700f" },
+  "base16-nvim": { "branch": "master", "commit": "7183774e90841f4bd27a47cb6e75cf532fd1192d" },
   "bufferline.nvim": { "branch": "main", "commit": "655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3" },
   "ccc.nvim": { "branch": "main", "commit": "9d1a256e006decc574789dfc7d628ca11644d4c2" },
   "cloak.nvim": { "branch": "main", "commit": "648aca6d33ec011dc3166e7af3b38820d01a71e4" },
@@ -68,6 +68,6 @@
   "vim-dadbod-ui": { "branch": "master", "commit": "afd07819d8efcefc3317205b855ad4e3513b0011" },
   "vim-visual-multi": { "branch": "master", "commit": "a6975e7c1ee157615bbc80fc25e4392f71c344d4" },
   "which-key.nvim": { "branch": "main", "commit": "3aab2147e74890957785941f0c1ad87d0a44c15a" },
-  "yazi.nvim": { "branch": "main", "commit": "73b94d725984f39d55880760a160467ba51b0f76" },
-  "zellij-nav.nvim": { "branch": "main", "commit": "91cc2a642d8927ebde50ced5bf71ba470a0fc116" }
+  "yazi.nvim": { "branch": "main", "commit": "4bc1d0ad67abe536b7944bf374bbdd806442a4ee" },
+  "zellij-nav.nvim": { "branch": "main", "commit": "1ecba144d67cc3d9b0ee4f7cdfd6f2ea78c1353b" }
 }
