@@ -357,3 +357,10 @@ if [[ -f "$HOME/.zshrc.local" ]]; then
 	source "$HOME/.zshrc.local"
 fi
 
+# ------------------------------------------------------------------------------
+# Fastfetch Autostart
+# ------------------------------------------------------------------------------
+if [[ -o interactive && -t 1 && "$TERM" != "dumb" && ${LINES:-0} -ge 18 ]] && command -v fastfetch >/dev/null 2>&1; then
+	fastfetch
+fi
+
