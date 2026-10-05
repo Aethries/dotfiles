@@ -113,7 +113,7 @@ community_palette = "Tomorrow"
 mode = "dark"
 
     [theme.templates]
-    builtin_ids = [ "kitty", "umbriel", "starship", "gtk3", "gtk4" ]
+    builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
     community_ids = [
         "antigravity",
         "bat",
@@ -123,7 +123,6 @@ mode = "dark"
         "fcitx5",
         "fzf",
         "lazygit",
-        "neovim",
         "obsidian",
         "superfile",
         "telegram",

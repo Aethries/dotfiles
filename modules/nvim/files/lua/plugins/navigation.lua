@@ -3,7 +3,14 @@ return {
   {
     "folke/flash.nvim",
     event = "VeryLazy",
-    opts = {},
+    opts = {
+      label = {
+        -- Flash otherwise uses the current-match style for single-character targets.
+        format = function(opts)
+          return { { opts.match.label, opts.state.opts.highlight.groups.label } }
+        end,
+      },
+    },
     keys = {
       { "s", mode = { "n", "o" }, function() require("flash").jump() end, desc = "Flash Jump" },
       { "S", mode = { "n", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
@@ -29,12 +36,39 @@ return {
       { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "File đã mở gần đây" },
       { "<leader>fs", "<cmd>Telescope git_status<cr>", desc = "Git Status" },
       { "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "Xem tất cả keymap Neovim" },
+      {
+        "<leader>fe",
+        function()
+          require("telescope.builtin").find_files({
+            prompt_title = "Find .env Files",
+            hidden = true,
+            no_ignore = true,
+            search_file = ".env",
+          })
+        end,
+        desc = "Tìm nhanh các file .env",
+      },
+      {
+        "<leader>ge",
+        function()
+          require("telescope.builtin").live_grep({
+            prompt_title = "Grep in .env Files",
+            additional_args = function()
+              return { "--hidden", "--no-ignore", "-g", ".env*" }
+            end,
+          })
+        end,
+        desc = "Tìm nội dung trong file .env",
+      },
       { "<leader>?", function() require("config.cheatsheet").show() end, desc = "Tra cứu phím tắt (Cheatsheet EN / VI)" },
       { "<leader>ch", function() require("config.cheatsheet").show() end, desc = "Tra cứu phím tắt (Cheatsheet EN / VI)" },
       { "<F1>", function() require("config.cheatsheet").show() end, desc = "Tra cứu phím tắt (Cheatsheet EN / VI)" },
     },
     opts = {
       defaults = {
+        winblend = 0,
+        border = true,
+        borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
         prompt_prefix = " ",
         selection_caret = " ",
         mappings = {
@@ -43,6 +77,37 @@ return {
             ["<C-k>"] = "move_selection_previous",
             ["<C-q>"] = "send_to_qflist",
           },
+        },
+      },
+      pickers = {
+        find_files = {
+          hidden = true,
+          find_command = {
+            "rg",
+            "--files",
+            "--hidden",
+            "--no-ignore-vcs",
+            "-g", "!.git/*",
+            "-g", "!node_modules/*",
+            "-g", "!target/*",
+            "-g", "!dist/*",
+            "-g", "!build/*",
+            "-g", "!.next/*",
+          },
+        },
+        live_grep = {
+          additional_args = function()
+            return {
+              "--hidden",
+              "--no-ignore-vcs",
+              "-g", "!.git/*",
+              "-g", "!node_modules/*",
+              "-g", "!target/*",
+              "-g", "!dist/*",
+              "-g", "!build/*",
+              "-g", "!.next/*",
+            }
+          end,
         },
       },
     },
@@ -56,21 +121,49 @@ return {
       { "<leader>e", "<cmd>NvimTreeToggle<cr>", desc = "Bật/Tắt File Explorer" },
     },
     opts = {
-      filters = { dotfiles = false },
+      filters = {
+        dotfiles = false,
+        git_ignored = false,
+      },
       disable_netrw = true,
       hijack_netrw = true,
       view = {
         width = 32,
-        relativenumber = true,
+        number = false,
+        relativenumber = false,
+        cursorline = true,
+        cursorlineopt = "line",
+        preserve_window_proportions = true,
       },
       renderer = {
         group_empty = true,
+        highlight_git = "name",
+        root_folder_label = function(path)
+          return vim.fn.fnamemodify(path, ":t")
+        end,
+        indent_markers = {
+          enable = true,
+          icons = {
+            corner = "╰",
+            edge = "│",
+            item = "│",
+            bottom = "─",
+            none = " ",
+          },
+        },
         icons = {
+          git_placement = "after",
           show = {
             git = true,
             folder = true,
             file = true,
             folder_arrow = true,
+          },
+          glyphs = {
+            folder = {
+              arrow_closed = "›",
+              arrow_open = "⌄",
+            },
           },
         },
       },
@@ -133,8 +226,8 @@ return {
     },
     keys = {
       { "<leader>a", function() require("harpoon"):list():add() end, desc = "Harpoon: Ghim file hiện tại (Add)" },
-      { "<C-e>", function() local h = require("harpoon"); h.ui:toggle_quick_menu(h:list()) end, desc = "Harpoon: Menu file đã ghim" },
-      { "<leader>H", function() local h = require("harpoon"); h.ui:toggle_quick_menu(h:list()) end, desc = "Harpoon: Menu file đã ghim" },
+      { "<C-e>", function() local h = require("harpoon"); h.ui:toggle_quick_menu(h:list(), { border = "rounded" }) end, desc = "Harpoon: Menu file đã ghim" },
+      { "<leader>H", function() local h = require("harpoon"); h.ui:toggle_quick_menu(h:list(), { border = "rounded" }) end, desc = "Harpoon: Menu file đã ghim" },
       { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon: Nhảy tới file 1" },
       { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon: Nhảy tới file 2" },
       { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon: Nhảy tới file 3" },

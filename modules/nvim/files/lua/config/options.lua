@@ -32,7 +32,15 @@ opt.incsearch = true
 opt.termguicolors = true
 opt.cursorline = true
 opt.signcolumn = "yes"
-opt.scrolloff = 8
+opt.laststatus = 0
+-- Keep dialogs readable over the blurred editor background.
+opt.winblend = 0
+opt.pumblend = 0
+if vim.fn.exists("+winborder") == 1 then
+  opt.winborder = "rounded"
+end
+-- Keep the caret vertically centered except near the start or end of a buffer.
+opt.scrolloff = 999
 opt.sidescrolloff = 8
 opt.guifont = "JetBrainsMono Nerd Font:h10.5"
 

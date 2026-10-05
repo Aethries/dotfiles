@@ -37,7 +37,7 @@ duf
 gping
 git-delta
 fastfetch
-kitty
+ghostty
 procs
 yq
 fx
@@ -85,6 +85,9 @@ act
 xh
 websocat
 bitwarden-cli
+aws-cli-v2
+azure-cli
+godot
 
 # Desktop
 noctalia
@@ -119,6 +122,7 @@ xdg-desktop-portal-gtk
 networkmanager
 fcitx5
 fcitx5-bamboo
+fcitx5-unikey
 fcitx5-gtk
 fcitx5-qt
 fcitx5-configtool
@@ -130,6 +134,7 @@ tesseract-data-eng
 tesseract-data-vie
 qt6ct
 imagemagick
+chafa
 python-wand
 zenity
 

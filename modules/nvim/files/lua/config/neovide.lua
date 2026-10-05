@@ -24,26 +24,32 @@ vim.g.neovide_cursor_vfx_particle_lifetime = 1.2
 vim.g.neovide_scroll_animation_length = 0.16
 vim.g.neovide_scroll_animation_far_lines = 1
 
--- 4. Canvas Padding (Spacious modern IDE layout matching Noctalia shell)
-vim.g.neovide_padding_top = 14
-vim.g.neovide_padding_bottom = 12
-vim.g.neovide_padding_left = 18
-vim.g.neovide_padding_right = 18
+-- 4. Canvas Padding (Use the full Neovide window for the editor)
+vim.g.neovide_padding_top = 0
+vim.g.neovide_padding_bottom = 0
+vim.g.neovide_padding_left = 0
+vim.g.neovide_padding_right = 0
 
--- 5. Window Opacity & Floating Shadows (Noctalia Glassmorphism synced with Kitty)
-vim.g.neovide_opacity = 0.86
-vim.g.neovide_window_blurred = true
+-- 5. Blur the editor background without fading floating dialogs.
+local editor_opacity = 0.88
+vim.g.neovide_opacity = 1.0
+vim.g.neovide_normal_opacity = editor_opacity
+vim.g.neovide_window_blurred = true -- macOS; Linux blur is supplied by the compositor.
 vim.g.neovide_floating_blur_amount_x = 4.0
 vim.g.neovide_floating_blur_amount_y = 4.0
 vim.g.neovide_floating_shadow = true
 vim.g.neovide_floating_z_height = 12
 vim.g.neovide_light_angle_degrees = 45
 vim.g.neovide_light_radius = 6
-vim.g.neovide_floating_corner_radius = 8.0
+vim.g.neovide_floating_corner_radius = 0.25
+
+-- Preserve the Noctalia background when the existing Space tt action is used.
+vim.api.nvim_create_user_command("TransparentToggle", function()
+  vim.g.neovide_normal_opacity = vim.g.neovide_normal_opacity == 1.0 and editor_opacity or 1.0
+end, { desc = "Toggle Neovide background opacity", force = true })
 
 -- 6. Environment, Titlebar & UX
-vim.g.neovide_title_background_color = "#282828"
-vim.g.neovide_title_text_color = "#fbf1c7"
+vim.g.neovide_theme = "bg_color"
 vim.g.neovide_hide_mouse_when_typing = true
 vim.g.neovide_input_use_logo = true
 vim.g.neovide_confirm_quit = true

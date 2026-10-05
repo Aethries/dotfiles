@@ -1,0 +1,6 @@
+# Draw continuous, fine guides and borders independently of the font glyphs.
+[box-drawing]
+mode = "native"
+
+[box-drawing.sizes]
+default = [1, 2]

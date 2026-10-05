@@ -125,6 +125,14 @@ return {
         desc = "Trích xuất thành hàm riêng (Extract Function)",
       },
       {
+        "<leader>rff",
+        function()
+          require("refactoring").refactor("Extract Function To File")
+        end,
+        mode = "v",
+        desc = "Trích xuất hàm ra file mới (Extract Function To File)",
+      },
+      {
         "<leader>rv",
         function()
           require("refactoring").refactor("Extract Variable")
@@ -139,6 +147,30 @@ return {
         end,
         mode = { "n", "v" },
         desc = "Gộp biến vào biểu thức (Inline Variable)",
+      },
+      {
+        "<leader>rb",
+        function()
+          require("refactoring").refactor("Extract Block")
+        end,
+        mode = "n",
+        desc = "Trích xuất khối code (Extract Block)",
+      },
+      {
+        "<leader>rbf",
+        function()
+          require("refactoring").refactor("Extract Block To File")
+        end,
+        mode = "n",
+        desc = "Trích xuất khối code ra file mới (Extract Block To File)",
+      },
+      {
+        "<leader>rif",
+        function()
+          require("refactoring").refactor("Inline Function")
+        end,
+        mode = "n",
+        desc = "Gộp hàm vào nơi gọi (Inline Function)",
       },
     },
     opts = {},

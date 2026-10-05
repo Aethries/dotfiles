@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCRIPTS="$DOTFILES/scripts"
 source "$SCRIPTS/common.sh"
@@ -80,6 +80,16 @@ EXCLUDE_PATTERNS=(
 	"*.pre-*"
 	"*.pid"
 	"*.sock"
+	"*/.codex/logs_*.sqlite*"
+	".codex/logs_*.sqlite*"
+	"*/.codex/thread_history_*.sqlite*"
+	".codex/thread_history_*.sqlite*"
+	"*/.codex/cache/*"
+	".codex/cache/*"
+	"*/.codex/.tmp/*"
+	".codex/.tmp/*"
+	"*/.codex/tmp/*"
+	".codex/tmp/*"
 )
 
 APP_PROCESSES=(

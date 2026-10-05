@@ -1,0 +1,6 @@
+# Repository-owned UI templates. Do not enable the community Neovim template:
+# it targets the same output but does not contain our editor styling.
+[theme.templates.user.nvim-base16]
+input_path = "$XDG_CONFIG_HOME/nvim/matugen-template.lua"
+output_path = "$XDG_CONFIG_HOME/nvim/lua/matugen.lua"
+post_hook = "pkill -SIGUSR1 nvim || true"

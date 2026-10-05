@@ -11,11 +11,8 @@ fi
 exit_file="/tmp/clipse_status_$$"
 rm -f "$exit_file"
 
-# Launch Clipse floating in Kitty and capture exit code
-kitty --class clipse -T "Clipboard Manager" \
-	-o initial_window_width=820 \
-	-o initial_window_height=520 \
-	-o remember_window_size=no \
+# Launch Clipse floating in Ghostty and capture exit code
+ghostty --class=clipse --title="Clipboard Manager" \
 	-e sh -c 'clipse "$@"; echo "$?" > "'"$exit_file"'"' -- "$@"
 
 # Auto-paste ONLY when user chose an item with Enter (exit status == 0)

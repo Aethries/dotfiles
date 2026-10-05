@@ -34,3 +34,4 @@ oxker-bin
 viddy-bin
 grpcurl-bin
 win2xcur
+google-cloud-cli

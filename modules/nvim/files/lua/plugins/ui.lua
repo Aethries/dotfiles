@@ -1,3 +1,48 @@
+local function noctalia_lualine_theme()
+  local function color(group, attribute)
+    local highlight = vim.api.nvim_get_hl(0, { name = group, link = false })
+    local value = highlight[attribute]
+    return type(value) == "number" and string.format("#%06x", value) or nil
+  end
+
+  local background = color("Pmenu", "bg")
+  local foreground = color("Pmenu", "fg")
+  local accent = color("PmenuSel", "bg")
+  local muted = color("FloatBorder", "fg")
+
+  if not (background and foreground and accent and muted) then
+    return "base16"
+  end
+
+  local function active_sections()
+    return {
+      a = { fg = accent, bg = background, gui = "bold" },
+      b = { fg = foreground, bg = background },
+      c = { fg = foreground, bg = background },
+      x = { fg = muted, bg = background },
+      y = { fg = muted, bg = background },
+      z = { fg = muted, bg = background },
+    }
+  end
+
+  local theme = {}
+  for _, mode in ipairs({ "normal", "insert", "visual", "replace", "command", "terminal" }) do
+    theme[mode] = active_sections()
+  end
+
+  local inactive = { fg = muted, bg = background }
+  theme.inactive = {
+    a = inactive,
+    b = inactive,
+    c = inactive,
+    x = inactive,
+    y = inactive,
+    z = inactive,
+  }
+
+  return theme
+end
+
 return {
   -- Base16 theme engine (required for Noctalia Matugen dynamic palette)
   {
@@ -11,12 +56,15 @@ return {
     end,
   },
 
-  -- Transparent background & Glassmorphism (Kitty 0.85 opacity + 32px blur)
+  -- Terminal transparency; Neovide uses native opacity over the theme surface.
   {
     "xiyaowong/transparent.nvim",
     lazy = false,
+    init = function()
+      vim.g.transparent_enabled = not vim.g.neovide
+    end,
     keys = {
-      { "<leader>tt", "<cmd>TransparentToggle<cr>", desc = "Bật/Tắt nền trong suốt (Kính mờ)" },
+      { "<leader>tt", "<cmd>TransparentToggle<cr>", desc = "Tạm bật/tắt nền kính mờ" },
     },
     opts = {
       groups = {
@@ -47,12 +95,6 @@ return {
         "NvimTreeNormal",
         "NvimTreeNormalNC",
         "NvimTreeEndOfBuffer",
-        "TelescopeNormal",
-        "TelescopeBorder",
-        "TelescopePromptNormal",
-        "TelescopePromptBorder",
-        "BufferLineFill",
-        "BufferLineBackground",
       },
     },
   },
@@ -73,14 +115,9 @@ return {
       config = {
         header = {
           "",
-          " ███╗   ██╗ ██████╗  ██████╗████████╗ █████╗ ██╗     ██╗ █████╗ ",
-          " ████╗  ██║██╔═══██╗██╔════╝╚══██╔══╝██╔══██╗██║     ██║██╔══██╗",
-          " ██╔██╗ ██║██║   ██║██║        ██║   ███████║██║     ██║███████║",
-          " ██║╚██╗██║██║   ██║██║        ██║   ██╔══██║██║     ██║██╔══██║",
-          " ██║ ╚████║╚██████╔╝╚██████╗   ██║   ██║  ██║███████╗██║██║  ██║",
-          " ╚═╝  ╚═══╝ ╚═════╝  ╚═════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═╝",
+          "             󰏆  Neovim",
           "",
-          "        ✨ Noctalia Dynamic Workspace • Material You ✨        ",
+          "       a quieter space for focused work",
           "",
         },
         center = {
@@ -132,22 +169,23 @@ return {
     },
   },
 
-  -- Statusline: Modern Bubble Pill Style
+  -- Statusline: disabled to keep the bottom edge clear
   {
     "nvim-lualine/lualine.nvim",
+    enabled = false,
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "base16",
+        theme = noctalia_lualine_theme,
         globalstatus = true,
-        component_separators = "",
-        section_separators = { left = "", right = "" },
+        component_separators = { left = "·", right = "·" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = { statusline = { "dashboard", "alpha", "starter" } },
       },
       sections = {
         lualine_a = {
-          { "mode", separator = { left = "", right = "" }, icon = "" },
+          "mode",
         },
         lualine_b = {
           { "branch", icon = "" },
@@ -157,31 +195,15 @@ return {
         lualine_c = {
           { "filename", path = 1, symbols = { modified = " ●", readonly = " " } },
         },
-        lualine_x = {
-          {
-            function()
-              local clients = vim.lsp.get_clients({ bufnr = 0 })
-              if #clients == 0 then return "" end
-              local names = {}
-              for _, client in ipairs(clients) do
-                table.insert(names, client.name)
-              end
-              return " " .. table.concat(names, ", ")
-            end,
-            cond = function() return #vim.lsp.get_clients({ bufnr = 0 }) > 0 end,
-          },
-          "encoding",
-          "filetype",
-        },
-        lualine_y = { "progress" },
+        lualine_y = { "filetype", "progress" },
         lualine_z = {
-          { "location", separator = { left = "", right = "" }, icon = "" },
+          { "location", icon = "" },
         },
       },
     },
   },
 
-  -- Bufferline: Tabs at top with Slanted styling & devicons
+  -- Bufferline: one calm surface with a clear active buffer
   {
     "akinsho/bufferline.nvim",
     event = "VeryLazy",
@@ -189,28 +211,41 @@ return {
     opts = {
       options = {
         mode = "buffers",
-        separator_style = "slant",
-        diagnostics = "nvim_lsp",
-        diagnostics_indicator = function(count, level)
-          local icon = level:match("error") and " " or " "
-          return " " .. icon .. count
-        end,
+        separator_style = "thin",
+        color_icons = false,
+        max_name_length = 26,
+        tab_size = 32,
+        enforce_regular_tabs = true,
         indicator = {
-          style = "icon",
-          icon = "▎",
+          style = "none",
         },
         offsets = {
           {
             filetype = "NvimTree",
             text = "File Explorer",
             text_align = "left",
-            separator = true,
+            highlight = "BufferLineBackground",
+            separator = false,
           },
         },
         show_buffer_close_icons = false,
         show_close_icon = false,
-        always_show_bufferline = true,
+        show_tab_indicators = false,
+        always_show_bufferline = false,
       },
+      -- Icons derive their background from this table, not the rendered groups.
+      highlights = function()
+        local highlights = {}
+        for key, group in pairs({
+          background = "BufferLineBackground",
+          buffer_visible = "BufferLineBufferVisible",
+          buffer_selected = "BufferLineBufferSelected",
+        }) do
+          highlights[key] = vim.api.nvim_get_hl(0, { name = group, link = false })
+          highlights[key].default = false
+        end
+        return highlights
+      end,
     },
   },
 
@@ -243,7 +278,13 @@ return {
             style = "rounded",
             padding = { 0, 1 },
           },
+          win_options = { winblend = 0 },
         },
+        popup = { border = { style = "rounded" }, win_options = { winblend = 0 } },
+        popupmenu = { border = { style = "rounded" }, win_options = { winblend = 0 } },
+        hover = { border = { style = "rounded" }, win_options = { winblend = 0 } },
+        confirm = { border = { style = "rounded" }, win_options = { winblend = 0 } },
+        mini = { border = { style = "rounded" }, win_options = { winblend = 0 } },
       },
     },
   },
@@ -254,8 +295,8 @@ return {
     opts = {
       timeout = 3000,
       render = "compact",
-      stages = "fade",
-      background_colour = "#000000",
+      stages = "static",
+      background_colour = "NormalFloat",
     },
   },
 
@@ -293,6 +334,7 @@ return {
       },
       select = {
         backend = { "telescope", "builtin" },
+        builtin = { border = "rounded", win_options = { winblend = 0 } },
       },
     },
   },
@@ -318,6 +360,7 @@ return {
     event = "VeryLazy",
     opts = {
       preset = "helix",
+      win = { border = "rounded", wo = { winblend = 0 } },
     },
   },
 

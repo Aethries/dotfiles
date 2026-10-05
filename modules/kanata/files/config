@@ -3,8 +3,8 @@
 # ==============================================================================
 
 # Session & Exiting
-exit: esc
-hint_exit: esc
+exit: esc n
+hint_exit: esc n
 
 # Mouse Click Actions
 # Space: click chuột trái | ,: click chuột giữa | .: click chuột phải (tiếp tục ở lại warpd)
@@ -50,13 +50,21 @@ scroll_acceleration: 1600
 screen: unbind
 
 # In-session Jump Transitions (Inside Normal/Movement mode)
-# Gõ 'f' để hiện lại các điểm hint khi đang ở trong mouse mode
+# Gõ 'f' để hiện hint 1-pass; Gõ 'F' để kích hoạt hint 2-pass (lưới phụ siêu chính xác)
 hint: f
+hint2: F
 
-# Hint Density & Generation (Alphanumeric 35 chars excluding 'n' -> 1225 target points)
-hint_chars: abcdefghijklmopqrstuvwxyz0123456789
-hint_size: 11
+# Hint Density & Generation for Large Screens
+# Chữ số đứng đầu + chữ cái + dấu chấm phẩy (35 ký tự hợp lệ -> 1,225 checkpoints 1-pass)
+hint_chars: 1234567890abcdefghjklmopqrstuvwxyz;
+hint_size: 9
 hint_border_radius: 2
+
+# Two-Pass Mode: Lưới phụ 3x3 dùng các phím số 1-9 để định vị pixel tuyệt đối (1,521 x 9 = 13,689 checkpoints)
+hint2_chars: 123456789
+hint2_grid_size: 3
+hint2_size: 14
+hint2_gap_size: 2
 
 # Visual Appearance & Noctalia Gruvbox Palette
 hint_font: JetBrainsMono Nerd Font

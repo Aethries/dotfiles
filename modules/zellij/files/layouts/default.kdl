@@ -2,7 +2,48 @@ layout {
 	default_tab_template {
 		children
 		pane size=1 borderless=true {
-			plugin location="zellij:compact-bar"
+			plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+				format_left   "{tabs}"
+				format_right  "#[fg=$accent,bold]{mode} "
+				format_space  "#[bg=$background]"
+
+				color_background "black"
+				color_foreground "white"
+				color_active "bright_blue"
+				color_accent "blue"
+				color_normal "green"
+				color_attention "yellow"
+				color_search "cyan"
+				color_session "magenta"
+
+				border_enabled  "false"
+				hide_frame_for_single_pane "true"
+
+				mode_normal  "#[fg=$normal,bold] NORMAL "
+				mode_resize  "#[fg=$attention,bold] RESIZE "
+				mode_pane    "#[fg=$accent,bold] PANE "
+				mode_tab     "#[fg=$accent,bold] TAB "
+				mode_scroll  "#[fg=$session,bold] SCROLL "
+				mode_enter_search "#[fg=$search,bold] SEARCH "
+				mode_search  "#[fg=$search,bold] SEARCH "
+				mode_rename_tab  "#[fg=$attention,bold] RENAME TAB "
+				mode_rename_pane "#[fg=$attention,bold] RENAME PANE "
+				mode_session "#[fg=$session,bold] SESSION "
+
+				tab_floating_indicator " 󰹙"
+				tab_fullscreen_indicator " 󰊓"
+				tab_sync_indicator " ⇄"
+
+				// Quiet inactive labels; reserve the rounded accent fill for the active tab.
+				tab_separator "#[bg=$background] "
+				tab_normal "#[fg=$foreground,bg=$background]  {index} {name}{floating_indicator}  "
+				tab_normal_fullscreen "#[fg=$foreground,bg=$background]  {index} {name}{fullscreen_indicator}  "
+				tab_normal_sync "#[fg=$foreground,bg=$background]  {index} {name}{sync_indicator}  "
+
+				tab_active "#[fg=$background,bg=$active,bold] {index} {name}{floating_indicator} #[bg=$background]"
+				tab_active_fullscreen "#[fg=$background,bg=$active,bold] {index} {name}{fullscreen_indicator} #[bg=$background]"
+				tab_active_sync "#[fg=$background,bg=$active,bold] {index} {name}{sync_indicator} #[bg=$background]"
+			}
 		}
 	}
 	tab

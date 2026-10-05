@@ -1,3 +1,5 @@
 9router@latest
 9remote@latest
 @vudovn/ag-kit@latest
+@openai/codex@latest
+wrangler@latest

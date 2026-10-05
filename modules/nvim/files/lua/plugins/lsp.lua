@@ -47,11 +47,12 @@ return {
   -- Autocompletion engine
   {
     "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
+    event = { "InsertEnter", "CmdlineEnter" },
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
+      "hrsh7th/cmp-cmdline",
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "rafamadriz/friendly-snippets",
@@ -131,11 +132,24 @@ return {
               luasnip = "[Snip]",
               buffer = "[Buf]",
               path = "[Path]",
+              cmdline = "[Cmd]",
             })[entry.source.name]
             return item
           end,
         },
       }
+    end,
+    config = function(_, opts)
+      local cmp = require("cmp")
+      cmp.setup(opts)
+      cmp.setup.cmdline(":", {
+        preselect = cmp.PreselectMode.None,
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources({ { name = "path" } }, {
+          { name = "cmdline", option = { ignore_cmds = { "Man", "!" } } },
+        }),
+        window = opts.window,
+      })
     end,
   },
 
@@ -250,6 +264,42 @@ return {
         },
       })
 
+      -- Go LSP settings (Analyses, Inlay Hints, Staticcheck, Placeholders)
+      vim.lsp.config("gopls", {
+        settings = {
+          gopls = {
+            analyses = {
+              unusedparams = true,
+              shadow = true,
+              nilness = true,
+              unusedwrite = true,
+              useany = true,
+            },
+            staticcheck = true,
+            gofumpt = true,
+            usePlaceholders = true,
+            completeUnimported = true,
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+          },
+        },
+      })
+
+      -- Bash / Shell LSP settings
+      vim.lsp.config("bashls", {
+        filetypes = { "sh", "bash", "zsh" },
+      })
+
+      -- TOML LSP settings
+      vim.lsp.config("taplo", {})
+
       -- YAML LSP settings (GitHub Workflows, Compose, K8s schemas)
       vim.lsp.config("yamlls", {
         settings = {
@@ -350,6 +400,7 @@ return {
         bash = { "shfmt" },
         rust = { "rustfmt" },
         go = { "gofumpt", "goimports" },
+        toml = { "taplo" },
       },
       format_on_save = {
         timeout_ms = 1000,

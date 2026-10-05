@@ -16,11 +16,12 @@ link_dir \
 	"$MODULE_DIR/files" \
 	"$HOME/.config/nvim"
 
-if [[ -d "$HOME/.local/state/noctalia/community-templates/neovim" ]]; then
-	link_file \
-		"$MODULE_DIR/files/matugen-template.lua" \
-		"$HOME/.local/state/noctalia/community-templates/neovim/matugen-template.lua"
-fi
+link_file \
+	"$MODULE_DIR/files/neovide.toml" \
+	"$HOME/.config/neovide/config.toml"
+
+# Noctalia setup registers our template from ~/.config/nvim directly.
+# Community cache paths are intentionally not part of the installation contract.
 
 if ! command_exists neovide; then
 	log "Installing Neovide binary"

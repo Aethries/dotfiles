@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
 # Expand systemd %h specifier in NODE_EXTRA_CA_CERTS if present
 if [[ "${NODE_EXTRA_CA_CERTS:-}" == *"%h"* ]]; then

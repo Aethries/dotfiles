@@ -4,8 +4,10 @@
 # ==============================================================================
 
 [keybinds]
-# Launchers
-"Mod+Return" = { action = "spawn:kitty", repeat = false }
+# Launchers & Navigation
+"Mod+Return" = { action = "spawn:ghostty", repeat = false }
+"Alt+Tab" = { action = "spawn:noctalia msg window-switcher", repeat = false }
+"Mod+O" = { action = "overview-toggle", repeat = false }
 "Mod+B" = { action = "spawn:google-chrome-stable", repeat = false }
 "Mod+E" = { action = "spawn:nautilus --new-window", repeat = false }
 "Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
@@ -56,6 +58,8 @@
 # Workspace Navigation
 "Mod+J" = "workspace-next"
 "Mod+K" = "workspace-previous"
+"Mod+Shift+J" = "window-move-to-workspace-next"
+"Mod+Shift+K" = "window-move-to-workspace-previous"
 
 # Window Movement (Move / Swap) - Unified Shift
 "Mod+Shift+H" = "column-move-left"

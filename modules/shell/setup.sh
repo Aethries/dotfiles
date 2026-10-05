@@ -24,6 +24,18 @@ fi
 
 mkdir -p "$ZSH_CUSTOM/plugins"
 
+# Vim editing (zsh-vi-mode owns normal, insert and visual mode bindings)
+if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-vi-mode" ]]; then
+	log "Installing zsh-vi-mode"
+	git clone https://github.com/jeffreytse/zsh-vi-mode.git \
+		"$ZSH_CUSTOM/plugins/zsh-vi-mode"
+	git -C "$ZSH_CUSTOM/plugins/zsh-vi-mode" checkout --detach \
+		91cafe4a09b6670cb8e761aa413e5f7b9e00816f
+	success "zsh-vi-mode installed"
+else
+	success "zsh-vi-mode already installed"
+fi
+
 # autosuggestions
 if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions"  ]]; then
 	log "Installing zsh-autosuggestions"

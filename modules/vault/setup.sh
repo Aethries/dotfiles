@@ -23,4 +23,11 @@ if [[ -d "$theme_dir" ]]; then
 	ln -sfn "$theme_dir" "$HOME/.config/google-chrome/noctalia-theme"
 fi
 
+# Link vault CLI
+mkdir -p "$HOME/.local/bin"
+link_file \
+	"$DOTFILES/scripts/vault.sh" \
+	"$HOME/.local/bin/vault"
+chmod +x "$HOME/.local/bin/vault"
+
 success "Vault integration configured"

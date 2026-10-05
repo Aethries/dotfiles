@@ -12,50 +12,55 @@ keybinds clear-defaults=true {
 		bind "Ctrl Shift r" { SwitchToMode "RenameTab"; TabNameInput 0; }
 		bind "Ctrl Shift [" { GoToPreviousTab; }
 		bind "Ctrl Shift ]" { GoToNextTab; }
-		bind "Ctrl Shift 1" { GoToTab 1; }
-		bind "Ctrl Shift 2" { GoToTab 2; }
-		bind "Ctrl Shift 3" { GoToTab 3; }
-		bind "Ctrl Shift 4" { GoToTab 4; }
-		bind "Ctrl Shift 5" { GoToTab 5; }
-		bind "Ctrl Shift 6" { GoToTab 6; }
-		bind "Ctrl Shift 7" { GoToTab 7; }
-		bind "Ctrl Shift 8" { GoToTab 8; }
-		bind "Ctrl Shift 9" { GoToTab 9; }
+		bind "Ctrl 1" "Ctrl Shift 1" { GoToTab 1; }
+		bind "Ctrl 2" "Ctrl Shift 2" { GoToTab 2; }
+		bind "Ctrl 3" "Ctrl Shift 3" { GoToTab 3; }
+		bind "Ctrl 4" "Ctrl Shift 4" { GoToTab 4; }
+		bind "Ctrl 5" "Ctrl Shift 5" { GoToTab 5; }
+		bind "Ctrl 6" "Ctrl Shift 6" { GoToTab 6; }
+		bind "Ctrl 7" "Ctrl Shift 7" { GoToTab 7; }
+		bind "Ctrl 8" "Ctrl Shift 8" { GoToTab 8; }
+		bind "Ctrl 9" "Ctrl Shift 9" { GoToTab 9; }
 
 		// --- Pane Management (Vertical Split Only, No Horizontal Split) ---
 		bind "Ctrl Shift n" "Ctrl Shift \\" { NewPane "Right"; }
 		bind "Ctrl Shift f" { ToggleFocusFullscreen; }
 		bind "Ctrl Shift e" { TogglePaneEmbedOrFloating; }
 		bind "Ctrl Shift p" { ToggleFloatingPanes; }
+		bind "Alt r" { SwitchToMode "RenamePane"; PaneNameInput 0; }
 
-		// --- Seamless Neovim / Zellij Pane Navigation ---
+		// Forward Ctrl to zellij-nav.nvim inside Neovim; navigate Zellij elsewhere.
 		bind "Ctrl h" {
-			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+			MessagePlugin "file:~/.config/zellij/plugins/vim-zellij-navigator.wasm" {
 				name "move_focus_or_tab";
 				payload "left";
 				move_mod "ctrl";
-			};
+				use_arrow_keys "false";
+			}
 		}
 		bind "Ctrl j" {
-			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+			MessagePlugin "file:~/.config/zellij/plugins/vim-zellij-navigator.wasm" {
 				name "move_focus";
 				payload "down";
 				move_mod "ctrl";
-			};
+				use_arrow_keys "false";
+			}
 		}
 		bind "Ctrl k" {
-			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+			MessagePlugin "file:~/.config/zellij/plugins/vim-zellij-navigator.wasm" {
 				name "move_focus";
 				payload "up";
 				move_mod "ctrl";
-			};
+				use_arrow_keys "false";
+			}
 		}
 		bind "Ctrl l" {
-			MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
+			MessagePlugin "file:~/.config/zellij/plugins/vim-zellij-navigator.wasm" {
 				name "move_focus_or_tab";
 				payload "right";
 				move_mod "ctrl";
-			};
+				use_arrow_keys "false";
+			}
 		}
 
 		// --- Move / Swap Panes (Unified Shift) ---
@@ -84,12 +89,6 @@ keybinds clear-defaults=true {
 			}
 		}
 
-		// --- Safety / Mode Switch ---
-		bind "Ctrl g" { SwitchToMode "Locked"; }
-	}
-
-	locked {
-		bind "Ctrl g" { SwitchToMode "Normal"; }
 	}
 
 	scroll {
@@ -131,19 +130,29 @@ keybinds clear-defaults=true {
 	}
 }
 
+// Preload the bridge with the same configuration as the bindings to avoid a
+// visible plugin pane on first use. No Locked mode or autolock is needed.
+load_plugins {
+	"file:~/.config/zellij/plugins/vim-zellij-navigator.wasm" {
+		move_mod "ctrl"
+		use_arrow_keys "false"
+	}
+}
+
 // -----------------------------------------------------------------------------
 // UI Settings
 // -----------------------------------------------------------------------------
 default_layout "default"
 default_shell "zsh"
+default_mode "normal"
 theme "noctalia"
 
-simplified_ui false
-pane_frames true
+simplified_ui true
+pane_frames false
 ui {
 	pane_frames {
 		rounded_corners true
-		hide_session_name false
+		hide_session_name true
 	}
 }
 

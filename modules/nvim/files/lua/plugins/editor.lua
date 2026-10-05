@@ -5,9 +5,15 @@ return {
     version = "*",
     event = { "BufReadPost", "BufNewFile" },
     init = function()
-      -- Map 's' and 'S' in visual mode to surround selection
-      vim.keymap.set("x", "s", "<Plug>(nvim-surround-visual)", { desc = "Surround visual selection" })
-      vim.keymap.set("x", "S", "<Plug>(nvim-surround-visual-line)", { desc = "Surround visual selection (line)" })
+      -- Map 'sa' in visual mode to surround selection (e.g. sa(, sa<, sa", sa', sa[, sat)
+      vim.keymap.set("x", "sa", "<Plug>(nvim-surround-visual)", {
+        desc = "Surround visual selection (sa)",
+        silent = true,
+      })
+      vim.keymap.set("x", "sA", "<Plug>(nvim-surround-visual-line)", {
+        desc = "Surround visual selection line (sA)",
+        silent = true,
+      })
     end,
     opts = {
       surrounds = {
@@ -75,7 +81,20 @@ return {
     },
     config = function(_, opts)
       local npairs = require("nvim-autopairs")
+      local Rule = require("nvim-autopairs.rule")
+      local cond = require("nvim-autopairs.conds")
+
       npairs.setup(opts)
+
+      -- Auto-close < > for generics/tags when not preceded by space
+      npairs.add_rule(
+        Rule("<", ">")
+          :with_pair(cond.not_before_regex("%s"))
+          :with_pair(cond.not_after_regex("[%w]"))
+          :with_move(function(o)
+            return o.char == ">"
+          end)
+      )
 
       -- Integrate with nvim-cmp
       local ok, cmp = pcall(require, "cmp")
@@ -203,6 +222,10 @@ return {
       },
       debounce_delay = 1000,
       condition = function(buf)
+        -- Writing Diffview's index buffers changes staging; require an explicit save.
+        if vim.api.nvim_buf_get_name(buf):match("^diffview://") then
+          return false
+        end
         local fn = vim.fn
         local utils = require("auto-save.utils.data")
         if fn.getbufvar(buf, "&modifiable") == 1 and

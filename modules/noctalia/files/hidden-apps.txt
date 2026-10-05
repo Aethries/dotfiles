@@ -3,7 +3,6 @@
 # CLI / Terminal tools with redundant desktop entries
 zellij.desktop
 yazi.desktop
-kitty-open.desktop
 
 # System & Development utilities
 cmake-gui.desktop

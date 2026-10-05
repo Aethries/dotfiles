@@ -29,15 +29,16 @@ if [[ -f /etc/greetd/config.toml && ! -f /etc/greetd/config.toml.bak ]]; then
 	sudo cp -a /etc/greetd/config.toml /etc/greetd/config.toml.bak
 fi
 
+TARGET_USER="${AUTOLOGIN_USER:-${SUDO_USER:-$USER}}"
 if [[ "${AUTOLOGIN:-false}" == "true" || -f "$DOTFILES/.autologin" ]]; then
-	log "Configuring greetd autologin for user ${AUTOLOGIN_USER:-$USER}"
+	log "Configuring greetd autologin for user $TARGET_USER"
 	cat << EOF | sudo tee /etc/greetd/config.toml > /dev/null
 [terminal]
 vt = 1
 
 [initial_session]
 command = "start-umbriel"
-user = "${AUTOLOGIN_USER:-$USER}"
+user = "$TARGET_USER"
 
 [default_session]
 command = "/usr/bin/noctalia-greeter-session -- --session Umbriel"

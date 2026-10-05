@@ -18,6 +18,10 @@ link_file \
 	"$HOME/.config/noctalia/config.toml"
 
 link_file \
+	"$MODULE_DIR/files/templates.toml" \
+	"$HOME/.config/noctalia/templates.toml"
+
+link_file \
 	"$MODULE_DIR/files/plugins" \
 	"$HOME/.config/noctalia/plugins"
 

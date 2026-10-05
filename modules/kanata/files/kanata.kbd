@@ -9,9 +9,10 @@
   ;; Chuyển đổi giữa các Layer
   to-nav    (layer-switch nav)
   nav-hold  (layer-while-held nav)
-  cap-th    (tap-hold-press 200 200 esc @nav-hold)
-  cap-nav   (fork caps @cap-th (lsft rsft))
   to-base   (layer-switch base)
+  cap-th    (tap-hold-press 200 200 esc @nav-hold)
+  cap-base  (fork @cap-th @to-nav (lsft rsft))
+  cap-nav   (fork @to-base @to-base (lsft rsft))
   to-vis    (layer-switch visual)
 
   ;; Kích hoạt chuột Warpd (Super + ;) và chuyển Kanata sang mouse layer
@@ -65,7 +66,7 @@
 ;; 1. Base Layer (Normal Typing)
 ;; -------------------------------------------------------------
 (deflayermap (base)
-  caps @cap-nav
+  caps @cap-base
   scln @scln-base
 )
 
@@ -73,8 +74,8 @@
 ;; 2. Navigation Layer (Vim-like Modal Navigation)
 ;; -------------------------------------------------------------
 (deflayermap (nav)
-  ;; Thoát về normal mode
-  caps @to-base
+  ;; Thoát về normal mode (Caps hoặc Shift+Caps đều về base)
+  caps @cap-nav
   esc  @to-base
   i    @to-base
 
@@ -174,7 +175,7 @@
 ;; -------------------------------------------------------------
 (deflayermap (mouse)
   ;; Phím n: Tắt Warpd và chuyển sang nav mode
-  n    @m-to-nav
+  n    @to-nav
 
   ;; Phím thoát Warpd về base typing mode
   esc  @m-exit

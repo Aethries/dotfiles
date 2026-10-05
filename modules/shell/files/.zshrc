@@ -2,8 +2,15 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME=""
 
+# Initialize Vim bindings before FZF/Atuin register their own widgets.
+ZVM_INIT_MODE=sourcing
+ZVM_LAZY_KEYBINDINGS=false
+# Keep the stable ZLE input engine; plugin defaults use non-blinking cursors.
+ZVM_READKEY_ENGINE=zle
+
 plugins=(
 	git
+	zsh-vi-mode
 	fzf-tab
 	you-should-use
 	zsh-autosuggestions
@@ -275,6 +282,10 @@ if command -v carapace >/dev/null 2>&1; then
 	source <(carapace _carapace zsh)
 fi
 
+# FZF uses Ctrl+r in every keymap; reserve it for Vim redo in command mode.
+# Insert mode keeps the existing Atuin/FZF history search.
+bindkey -M vicmd '^R' vi-redo
+
 # ------------------------------------------------------------------------------
 # Universal Smart Archive Extractor
 # ------------------------------------------------------------------------------
@@ -363,4 +374,3 @@ fi
 if [[ -o interactive && -t 1 && "$TERM" != "dumb" && ${LINES:-0} -ge 18 ]] && command -v fastfetch >/dev/null 2>&1; then
 	fastfetch
 fi
-

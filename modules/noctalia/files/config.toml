@@ -32,7 +32,7 @@ mode = "dark"
 wallpaper_scheme = "m3-content"
 
 [theme.templates]
-builtin_ids = [ "kitty", "umbriel", "starship", "gtk3", "gtk4" ]
+builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
 enable_builtin_templates = true
 enable_community_templates = true
 

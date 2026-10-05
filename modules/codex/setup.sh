@@ -24,4 +24,15 @@ if [[ -f "$MODULE_DIR/files/themes/noctalia.tmTheme" ]]; then
 		"$HOME/.codex/themes/noctalia.tmTheme"
 fi
 
+# Ensure codex CLI is installed
+if ! command_exists codex; then
+	log "Installing @openai/codex CLI via mise / npm"
+	if command_exists mise; then
+		mise exec -- npm install -g @openai/codex || warn "Failed to install @openai/codex via mise"
+		mise reshim 2>/dev/null || true
+	elif command_exists npm; then
+		npm install -g @openai/codex || warn "Failed to install @openai/codex via npm"
+	fi
+fi
+
 success "Codex configured"

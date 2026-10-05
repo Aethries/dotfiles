@@ -16,10 +16,10 @@ require("config.lazy")
 
 -- 5. Noctalia Matugen Dynamic Theme Integration
 pcall(function()
-  require("matugen").setup()
+    require("matugen").setup()
 end)
 
 -- 6. Neovide GUI Integration (VSCode / WebStorm Modern IDE Aesthetics)
 if vim.g.neovide then
-  pcall(require, "config.neovide")
+    pcall(require, "config.neovide")
 end

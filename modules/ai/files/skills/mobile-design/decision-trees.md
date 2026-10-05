@@ -486,11 +486,11 @@ If project details are vague, ASK:
 ### Framework Quick Pick
 
 ```
-OTA needed?           → React Native + Expo
+OTA needed?           → React Native + Expo 
 Identical UI?         → Flutter
 Maximum performance?  → Native
 Web team?            → React Native
-Quick prototype?     → Expo
+Quick prototype?     → Expo 
 ```
 
 ### State Quick Pick

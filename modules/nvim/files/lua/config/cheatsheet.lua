@@ -46,6 +46,8 @@ M.items = {
   { key = "s", cat = "Motion", en = "Flash 2D jump anywhere on screen", vi = "Nhảy 2D nhanh tới ký tự bất kỳ trên màn hình (Flash)" },
   { key = "S", cat = "Motion", en = "Flash Treesitter syntax node select", vi = "Nhảy và chọn khối cú pháp Treesitter (Flash)" },
   { key = "<leader>e", cat = "Explorer", en = "Toggle file explorer tree", vi = "Bật/Tắt cây thư mục (NvimTree)", action = "NvimTreeToggle" },
+  { key = "<leader>ip", cat = "Explorer", en = "Preview image in Explorer or current image / SVG buffer", vi = "Xem ảnh trong Explorer hoặc file ảnh / SVG hiện tại" },
+  { key = "<leader>iP", cat = "Explorer", en = "Hide image preview and pause automatic previews", vi = "Ẩn preview ảnh và tạm dừng tự động", action = "FocalDisable" },
 
   -- Harpoon (Fast Project File Switching)
   { key = "<leader>a", cat = "Harpoon", en = "Add / pin current file to Harpoon", vi = "Ghim file hiện tại vào Harpoon" },
@@ -107,10 +109,16 @@ M.items = {
   { key = "<leader>xQ", cat = "Trouble", en = "Toggle quickfix list (Trouble)", vi = "Xem danh sách Quickfix dạng cây (Trouble)", action = "Trouble qflist toggle" },
 
   -- Git: LazyGit, Diffview, Conflicts & Hunks
-  { key = "<leader>gg", cat = "Git", en = "Open LazyGit interactive TUI", vi = "Mở giao diện LazyGit nổi tương tác", action = "LazyGit" },
+  { key = "<leader>gg", cat = "Git", en = "Source Control: Changes / Staged, editable side-by-side diff", vi = "Source Control: tách chưa stage / đã stage, sửa trực tiếp diff hai cột", action = "DiffviewOpen" },
+  { key = "<leader>gl", cat = "Git", en = "Open LazyGit interactive TUI", vi = "Mở giao diện LazyGit nổi tương tác", action = "LazyGit" },
   { key = "<leader>gf", cat = "Git", en = "Open LazyGit for current file", vi = "Mở LazyGit cho file hiện tại", action = "LazyGitCurrentFile" },
   { key = "<leader>gd", cat = "Git", en = "Open Diffview side-by-side review", vi = "Mở xem so sánh Diffview hai cột", action = "DiffviewOpen" },
   { key = "<leader>gD", cat = "Git", en = "Close Diffview review", vi = "Đóng xem so sánh Diffview", action = "DiffviewClose" },
+  { key = "<leader>gF (Diffview)", cat = "Git", en = "Focus source control file panel", vi = "Chuyển focus về cây file Source Control", action = "DiffviewFocusFiles" },
+  { key = "s / - / <leader>hs (Diffview panel)", cat = "Git", en = "Stage / unstage selected file or folder", vi = "Stage / unstage file hoặc thư mục được chọn" },
+  { key = "S / U (Diffview panel)", cat = "Git", en = "Stage all / unstage all", vi = "Stage tất cả / unstage tất cả" },
+  { key = "R / g? (Diffview panel)", cat = "Git", en = "Refresh changes / show all diff actions", vi = "Làm mới thay đổi / xem toàn bộ thao tác diff" },
+  { key = "do / dp (Diffview index)", cat = "Git", en = "Copy a diff hunk between buffers; write INDEX to stage / unstage partial changes", vi = "Chép hunk giữa hai cột; lưu INDEX để stage / unstage từng phần" },
   { key = "<leader>gh", cat = "Git", en = "View current file git commit history", vi = "Xem lịch sử commit của file hiện tại", action = "DiffviewFileHistory %" },
   { key = "<leader>gH", cat = "Git", en = "View branch git commit history", vi = "Xem lịch sử commit toàn nhánh", action = "DiffviewFileHistory" },
   { key = "<leader>gc", cat = "Git", en = "Search git commits (Telescope)", vi = "Tìm kiếm danh sách commit (Telescope)", action = "Telescope git_commits" },
@@ -129,6 +137,7 @@ M.items = {
   { key = "<leader>hb", cat = "Git", en = "Show git blame line details", vi = "Xem chi tiết người sửa dòng này (Blame)", action = "Gitsigns blame_line" },
   { key = "<leader>tb", cat = "Git", en = "Toggle virtual line blame text", vi = "Bật/Tắt hiển thị git blame cuối dòng", action = "Gitsigns toggle_current_line_blame" },
   { key = "<leader>hS", cat = "Git", en = "Stage entire buffer", vi = "Stage toàn bộ thay đổi của file", action = "Gitsigns stage_buffer" },
+  { key = "<leader>hU", cat = "Git", en = "Unstage entire buffer, keep source changes", vi = "Unstage toàn bộ file, giữ thay đổi mã nguồn", action = "Gitsigns reset_buffer_index" },
   { key = "<leader>hR", cat = "Git", en = "Reset entire buffer", vi = "Hủy bỏ toàn bộ thay đổi của file", action = "Gitsigns reset_buffer" },
   { key = "<leader>hd", cat = "Git", en = "Diff current file against index", vi = "So sánh file hiện tại với git index", action = "Gitsigns diffthis" },
 

@@ -28,14 +28,10 @@ if [[ -z "$DATA_FILE" ]]; then
 	exit 1
 fi
 
-# Chạy trong Kitty nổi nếu được gọi từ desktop/compositor (không có TTY)
+# Chạy trong Ghostty nổi nếu được gọi từ desktop/compositor (không có TTY)
 if [[ "${1:-}" != "--tui" ]] && [[ ! -t 0 || ! -t 1 ]]; then
-	exec kitty --class sys-cheatsheet \
-		-T "Bảng Tra Cứu Phím Tắt Hệ Thống (System Cheatsheet)" \
-		-o initial_window_width=1150 \
-		-o initial_window_height=650 \
-		-o remember_window_size=no \
-		-o confirm_os_window_close=0 \
+	exec ghostty --class=sys-cheatsheet \
+		--title="Bảng Tra Cứu Phím Tắt Hệ Thống (System Cheatsheet)" \
 		-e "$0" --tui "$@"
 fi
 

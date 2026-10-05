@@ -7,6 +7,8 @@ go = "latest"
 bun = "latest"
 pnpm = "latest"
 opentofu = "latest"
+gcloud = "latest"
+awscli = { version = "latest", symlink_bins = "true" }
 
 [settings]
 legacy_version_file = true
