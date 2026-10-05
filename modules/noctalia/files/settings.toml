@@ -111,6 +111,7 @@ font_family = "JetBrainsMono Nerd Font"
 builtin = "Gruvbox"
 community_palette = "Tomorrow"
 mode = "dark"
+shell_mode = "dark"
 
     [theme.templates]
     builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
