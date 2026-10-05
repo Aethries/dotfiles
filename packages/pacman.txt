@@ -121,8 +121,6 @@ xdg-desktop-portal
 xdg-desktop-portal-gtk
 networkmanager
 fcitx5
-fcitx5-bamboo
-fcitx5-unikey
 fcitx5-gtk
 fcitx5-qt
 fcitx5-configtool
@@ -135,6 +133,9 @@ tesseract-data-vie
 qt6ct
 imagemagick
 chafa
+mediainfo
+perl-image-exiftool
+poppler
 python-wand
 zenity
 

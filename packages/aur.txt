@@ -16,6 +16,7 @@ noctalia-greeter
 clipse
 kanata-bin
 warpd-git
+fcitx5-lotus-bin
 
 # AI
 antigravity
