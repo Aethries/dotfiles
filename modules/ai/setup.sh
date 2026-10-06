@@ -66,4 +66,9 @@ if [[ -f "$DOTFILES/scripts/jev-mcp.sh" ]]; then
 	link_file "$DOTFILES/scripts/jev-mcp.sh" "$HOME/.local/bin/jev-mcp"
 fi
 
+if [[ -f "$DOTFILES/scripts/jev-preflight-hook.sh" ]]; then
+	chmod +x "$DOTFILES/scripts/jev-preflight-hook.sh"
+	link_file "$DOTFILES/scripts/jev-preflight-hook.sh" "$HOME/.local/bin/jev-preflight-hook"
+fi
+
 success "AI skills module configured"

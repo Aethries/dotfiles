@@ -45,3 +45,5 @@ result-*
 # Machine-specific local overrides
 *.local
 *.local.*
+.autologin
+.autologin.*

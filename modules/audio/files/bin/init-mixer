@@ -2,7 +2,13 @@
 
 set -euo pipefail
 
-DOTFILES_DIR="${DOTFILES:-$HOME/Workspaces/dotfiles}"
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+RESOLVED_DOTFILES="$(cd "$(dirname "$SCRIPT_PATH")/../../../.." 2>/dev/null && pwd)"
+if [[ -n "$RESOLVED_DOTFILES" && -d "$RESOLVED_DOTFILES/modules/audio/files/presets" ]]; then
+	DOTFILES_DIR="${DOTFILES:-$RESOLVED_DOTFILES}"
+else
+	DOTFILES_DIR="${DOTFILES:-$HOME/.dotfiles}"
+fi
 PRESETS_SRC="$DOTFILES_DIR/modules/audio/files/presets"
 PRESETS_DST="$HOME/.config/easyeffects/output"
 SERVICE_SRC="$DOTFILES_DIR/modules/audio/files/easyeffects.service"

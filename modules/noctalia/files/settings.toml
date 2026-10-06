@@ -142,10 +142,10 @@ shell_mode = "dark"
     enable_community_templates = true
 
 [wallpaper.default]
-path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
 
 [wallpaper.last]
-path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "/home/loc/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"

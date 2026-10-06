@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jev-preflight-hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
