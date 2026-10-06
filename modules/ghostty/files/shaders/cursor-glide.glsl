@@ -1,8 +1,9 @@
 // Ghostty 1.3+: cursor-opacity = 0, cursor-text = cell-foreground,
 // alpha-blending = linear-corrected, custom-shader-animation = true.
-// Draw the caret itself, rather than adding a trail behind a native cursor.
+// Draw the caret itself, with adaptive duration for rapid typing & IME smoothness.
 
-const float MOVE_SECONDS = 0.080;
+const float JUMP_MOVE_SECONDS = 0.080;
+const float TYPE_MOVE_SECONDS = 0.040;
 const float IDLE_DELAY = 0.45;
 const float PULSE_SECONDS = 1.6;
 const float MIN_IDLE_OPACITY = 0.25;
@@ -33,21 +34,34 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         return;
     }
 
-    float age = max(0.0, iTime - iTimeCursorChange);
-    float progress = clamp(age / MOVE_SECONDS, 0.0, 1.0);
-    float eased = 1.0 - pow(1.0 - progress, 3.0);
-
     vec2 current = cursorCenter(iCurrentCursor);
     vec2 previous = cursorCenter(iPreviousCursor);
     vec2 size = iCurrentCursor.zw;
     vec2 center = current;
 
-    // Animate single-character typing too. Avoid flying across the entire
+    float cellW = max(1.0, iCurrentCursor.z);
+    float dist = distance(current, previous);
+
+    // Lock baseline on horizontal movements to eliminate sub-pixel vertical wobble
+    if (abs(current.y - previous.y) < 2.0) {
+        previous.y = current.y;
+    }
+
+    // Adaptive duration: 40ms for typing steps (prevents IME/rapid key stutter)
+    // scaling up to 80ms for navigation jumps (word hops, arrows, mouse).
+    float moveDuration = mix(TYPE_MOVE_SECONDS, JUMP_MOVE_SECONDS,
+        clamp((dist - cellW * 1.5) / (cellW * 4.0), 0.0, 1.0));
+
+    float age = max(0.0, iTime - iTimeCursorChange);
+    float progress = clamp(age / moveDuration, 0.0, 1.0);
+    float eased = 1.0 - pow(1.0 - progress, 3.0);
+
+    // Animate single-character typing & word jumps. Avoid flying across the entire
     // window when entering a different pane, or using uninitialized history.
     bool hasPrevious = iPreviousCursor.z > 0.0 && iPreviousCursor.w > 0.0;
     float jumpLimit = 12.0 * max(iCurrentCursor.w, iPreviousCursor.w);
-    if (hasPrevious && distance(current, previous) < jumpLimit &&
-        iTime - iTimeFocus > MOVE_SECONDS) {
+    if (hasPrevious && dist > 0.5 && dist < jumpLimit &&
+        iTime - iTimeFocus > moveDuration) {
         center = mix(previous, current, eased);
         size = mix(iPreviousCursor.zw, size, eased);
     }
