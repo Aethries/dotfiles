@@ -92,7 +92,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float phase = max(0.0, age - IDLE_DELAY) / PULSE_SECONDS;
     float pulse = 0.5 + 0.5 * cos(6.2831853 * phase);
     float opacity = mix(MIN_IDLE_OPACITY, 1.0, pulse);
-    float focusFade = smoothstep(0.0, MOVE_SECONDS, max(0.0, iTime - iTimeFocus));
+    float focusFade = smoothstep(0.0, JUMP_MOVE_SECONDS, max(0.0, iTime - iTimeFocus));
     float alpha = coverage * opacity * focusFade;
 
     // Ghostty's terminal texture uses premultiplied alpha. Preserve its
