@@ -285,6 +285,12 @@ fi
 # Insert mode keeps the existing Atuin/FZF history search.
 bindkey -M vicmd '^R' vi-redo
 
+# Shift+Tab: accept autosuggestion (like Right Arrow)
+# ponytail: direct binding to autosuggest-accept widget
+bindkey '^[[Z' autosuggest-accept
+bindkey -M viins '^[[Z' autosuggest-accept
+[[ -n "${terminfo[kcbt]}" ]] && bindkey -M viins "${terminfo[kcbt]}" autosuggest-accept
+
 # ------------------------------------------------------------------------------
 # Universal Smart Archive Extractor
 # ------------------------------------------------------------------------------
