@@ -13,7 +13,6 @@ visual-studio-code-bin
 umbriel-git
 xdg-desktop-portal-umbriel-git
 noctalia-greeter
-clipse
 kanata-bin
 warpd-git
 fcitx5-lotus-bin

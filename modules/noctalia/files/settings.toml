@@ -97,6 +97,12 @@ app_icon_color = "on_error"
 card_borders = false
 corner_radius_scale = 1.0500000156462193
 font_family = "JetBrainsMono Nerd Font"
+clipboard_enabled = true
+clipboard_history_max_entries = 10000
+clipboard_confirm_clear_history = false
+clipboard_keep_from_closed_apps = true
+clipboard_auto_paste = "ctrl_v"
+open_near_click_clipboard = true
 
     [shell.animation]
     speed = 0.65000000968575478

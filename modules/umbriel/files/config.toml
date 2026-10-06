@@ -15,7 +15,7 @@ files = [
 ]
 
 [general]
-autostart = ["noctalia", "fcitx5 -d", "clipse -listen", "coffee on"]
+autostart = ["noctalia", "fcitx5 -d", "coffee on"]
 mod_key = "super"
 xwayland = true
 show_cheatsheet = false
@@ -38,7 +38,7 @@ default_scrolling_extent = 1.0
 
 # Floating exceptions
 [[window_rule]]
-match.app_id = "^(pavucontrol|org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|imv|mpv|clipse)$"
+match.app_id = "^(pavucontrol|org.pulseaudio.pavucontrol|blueman-manager|nm-connection-editor|imv|mpv)$"
 default_floating = true
 
 [[window_rule]]

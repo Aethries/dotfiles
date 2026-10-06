@@ -155,10 +155,9 @@ if command -v gping >/dev/null 2>&1; then
 	alias ping="gping"
 fi
 
-# Clipboard Manager (Clipse)
-alias clip="clip-picker"
-alias clip-tui="clipse"
-alias clip-clear="clipse -clear"
+# Clipboard Manager (Noctalia)
+alias clip="noctalia msg panel-toggle clipboard"
+alias clip-clear="noctalia msg clipboard-clear"
 
 # ------------------------------------------------------------------------------
 # Editor & IDE Quick Launchers

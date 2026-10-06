@@ -110,7 +110,6 @@ gnome-keyring
 libsecret
 seahorse
 wl-clipboard
-wtype
 libnotify
 xwayland-satellite
 pipewire

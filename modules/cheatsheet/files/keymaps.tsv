@@ -29,7 +29,7 @@ Compositor	Mod + O	Mở/Đóng màn hình tổng quan Workspaces Overview	Toggle
 Compositor	Mod + Shift + J	Chuyển cửa sổ đang chọn xuống Workspace kế tiếp	Move window to next workspace	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Shift + K	Chuyển cửa sổ đang chọn lên Workspace trước đó	Move window to previous workspace	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Space / Mod + D	Mở Menu ứng dụng Noctalia App Launcher	Launch Noctalia application menu	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
-Compositor	Mod + V	Mở lịch sử Clipboard Clipse	Open Clipse clipboard history picker	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + V	Mở lịch sử Clipboard Noctalia	Open Noctalia clipboard history panel	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + ? / Mod + Shift + /	Mở bảng tra cứu phím tắt toàn hệ thống (Cheatsheet)	Open system-wide interactive cheatsheet	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Semicolon (;)	Kích hoạt chuột phím Warpd Hint Mode	Activate Warpd mouse hint mode	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + B	Mở trình duyệt Google Chrome	Launch Google Chrome browser	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml

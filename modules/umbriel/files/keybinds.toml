@@ -12,7 +12,7 @@
 "Mod+E" = { action = "spawn:nautilus --new-window", repeat = false }
 "Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
 "Mod+D" = "spawn:noctalia msg panel-toggle launcher"
-"Mod+V" = { action = "spawn:~/.local/bin/clip-picker", repeat = false }
+"Mod+V" = "spawn:noctalia msg panel-toggle clipboard"
 "Mod+question" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
 "Mod+slash" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
 
