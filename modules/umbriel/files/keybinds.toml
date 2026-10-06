@@ -20,6 +20,8 @@
 "Mod+semicolon" = { action = "spawn:~/.local/bin/warpd-hint", repeat = false }
 
 # System & Session
+# Override the inherited quit shortcut to prevent accidental exits while remote.
+"Mod+Escape" = { action = "spawn:true", repeat = false }
 "Mod+BackSpace" = "spawn:noctalia msg session lock"
 "Mod+N" = "spawn:noctalia msg panel-toggle notifications"
 "Mod+Shift+N" = "spawn:noctalia msg notification-dnd-toggle"
