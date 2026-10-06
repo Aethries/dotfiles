@@ -42,9 +42,12 @@ if [[ -f "$NODE_PACKAGES_FILE" ]]; then
 	)
 
 	if [[ "${#packages[@]}" -gt 0 ]]; then
-		mise exec -- npm install -g "${packages[@]}" 2>/dev/null || warn "Failed to install some npm packages via mise"
-		mise reshim 2>/dev/null || true
-		success "Global npm packages installed: ${packages[*]}"
+		if mise exec -- npm install -g "${packages[@]}" 2>/dev/null; then
+			mise reshim 2>/dev/null || true
+			success "Global npm packages installed: ${packages[*]}"
+		else
+			warn "Failed to install some npm packages via mise"
+		fi
 	else
 		success "packages/node.txt is empty"
 	fi

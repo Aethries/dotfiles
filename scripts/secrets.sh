@@ -30,11 +30,18 @@ encrypt_secrets() {
 	log "Encrypting secrets to $ENC_FILE"
 	mkdir -p "$(dirname "$ENC_FILE")"
 
-	tar -C "$SECRETS_DIR" --exclude=".gitkeep" -cf - . \
-		| zstd -T0 -9 \
-		| age --passphrase --output "$ENC_FILE"
+	local tmp_file
+	tmp_file="$(mktemp "${ENC_FILE}.tmp.XXXXXX")"
 
-	chmod 600 "$ENC_FILE"
+	if ! (tar -C "$SECRETS_DIR" --exclude=".gitkeep" -cf - . \
+		| zstd -T0 -9 \
+		| age --passphrase --output "$tmp_file"); then
+		rm -f "$tmp_file"
+		error "Failed to encrypt secrets"
+	fi
+
+	chmod 600 "$tmp_file"
+	mv -f "$tmp_file" "$ENC_FILE"
 	success "Secrets encrypted successfully -> $ENC_FILE"
 }
 
@@ -46,12 +53,21 @@ decrypt_secrets() {
 		error "Encrypted secrets file not found: $ENC_FILE"
 	fi
 
-	log "Decrypting secrets to $SECRETS_DIR"
-	mkdir -p "$SECRETS_DIR"
+	log "Verifying and decrypting secrets from $ENC_FILE"
 
-	age --decrypt "$ENC_FILE" \
+	local stage_dir
+	stage_dir="$(mktemp -d "/tmp/secrets_stage_XXXXXX")"
+
+	if ! (age --decrypt "$ENC_FILE" \
 		| zstd -d \
-		| tar -C "$SECRETS_DIR" -xf -
+		| tar -C "$stage_dir" -xf -); then
+		rm -rf "$stage_dir"
+		error "Failed to decrypt secrets: invalid passphrase or corrupt archive"
+	fi
+
+	mkdir -p "$SECRETS_DIR"
+	cp -a "$stage_dir"/. "$SECRETS_DIR"/
+	rm -rf "$stage_dir"
 
 	chmod 700 "$SECRETS_DIR"
 	find "$SECRETS_DIR" -type d -exec chmod 700 {} +

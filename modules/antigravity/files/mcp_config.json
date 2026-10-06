@@ -42,11 +42,7 @@
       ]
     },
     "jev-local": {
-      "command": "bash",
-      "args": [
-        "-c",
-        "\"/home/loc/Workspaces/dotfiles/scripts/jev-mcp.sh\""
-      ],
+      "command": "jev-mcp",
       "env": {
         "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
         "JEV_MODEL": "oc/jev-1.13-free"

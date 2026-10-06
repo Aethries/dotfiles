@@ -16,9 +16,9 @@ find_vaults() {
 }
 
 vault_count=0
-while read -r obsidian_dir; do
+while IFS= read -r obsidian_dir; do
 	[[ -z "$obsidian_dir" ]] && continue
-	((vault_count++))
+	vault_count=$((vault_count + 1))
 	snippets_dir="$obsidian_dir/snippets"
 	mkdir -p "$snippets_dir"
 
@@ -30,18 +30,23 @@ while read -r obsidian_dir; do
 	if [[ ! -f "$appearance_file" ]]; then
 		printf '{\n  "enabledCssSnippets": ["noctalia"]\n}\n' > "$appearance_file"
 	else
-		python3 -c "
-import json
-with open('$appearance_file', 'r') as f:
-    try: data = json.load(f)
-    except Exception: data = {}
-snippets = data.get('enabledCssSnippets', [])
-if 'noctalia' not in snippets:
-    snippets.append('noctalia')
-    data['enabledCssSnippets'] = snippets
-    with open('$appearance_file', 'w') as f:
+		python3 -c '
+import sys, json
+path = sys.argv[1]
+try:
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+except Exception:
+    data = {}
+snippets = data.get("enabledCssSnippets", [])
+if not isinstance(snippets, list):
+    snippets = []
+if "noctalia" not in snippets:
+    snippets.append("noctalia")
+    data["enabledCssSnippets"] = snippets
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
-" 2>/dev/null || true
+' "$appearance_file" 2>/dev/null || true
 	fi
 done < <(find_vaults)
 

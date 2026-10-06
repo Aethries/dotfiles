@@ -136,7 +136,7 @@ return {
         preserve_window_proportions = true,
       },
       renderer = {
-        group_empty = true,
+        group_empty = false,
         highlight_git = "name",
         root_folder_label = function(path)
           return vim.fn.fnamemodify(path, ":t")

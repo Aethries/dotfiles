@@ -144,6 +144,8 @@ backup_vault() {
 		error "No candidate profiles or secrets found to backup"
 	fi
 
+	stop_running_apps
+
 	local exclude_args=()
 	for pat in "${EXCLUDE_PATTERNS[@]}"; do
 		exclude_args+=("--exclude=$pat")
@@ -151,11 +153,18 @@ backup_vault() {
 
 	mkdir -p "$(dirname "$target_file")"
 
-	tar -C "$HOME" "${exclude_args[@]}" -cf - "${existing_paths[@]}" 2>/dev/null \
-		| zstd -T0 -12 \
-		| age --passphrase --output "$target_file"
+	local tmp_target
+	tmp_target="$(mktemp "${target_file}.tmp.XXXXXX")"
 
-	chmod 600 "$target_file"
+	if ! (tar -C "$HOME" "${exclude_args[@]}" -cf - "${existing_paths[@]}" 2>/dev/null \
+		| zstd -T0 -12 \
+		| age --passphrase --output "$tmp_target"); then
+		rm -f "$tmp_target"
+		error "Vault backup failed during compression or encryption"
+	fi
+
+	chmod 600 "$tmp_target"
+	mv -f "$tmp_target" "$target_file"
 	success "Vault created -> $target_file"
 }
 
@@ -169,8 +178,19 @@ restore_vault() {
 		error "Vault file not found: $source_file"
 	fi
 
-	log "Restoring vault from $source_file"
+	log "Verifying and decrypting vault archive"
 
+	local stage_dir
+	stage_dir="$(mktemp -d "/tmp/vault_stage_XXXXXX")"
+
+	if ! (age --decrypt "$source_file" \
+		| zstd -d \
+		| tar --no-same-owner -C "$stage_dir" -xf -); then
+		rm -rf "$stage_dir"
+		error "Failed to decrypt vault archive: invalid passphrase or corrupt archive"
+	fi
+
+	log "Restoring files from verified staging area"
 	stop_running_apps
 
 	if command_exists gnome-keyring-daemon && pgrep -u "$UID" -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
@@ -188,9 +208,8 @@ restore_vault() {
 		saved_gitconfig="$(cat "$HOME/.gitconfig")"
 	fi
 
-	age --decrypt "$source_file" \
-		| zstd -d \
-		| tar --no-same-owner -C "$HOME" -xf -
+	cp -a "$stage_dir"/. "$HOME"/
+	rm -rf "$stage_dir"
 
 	# Restore preserved standalone configs if archive contained legacy broken symlinks
 	if [[ -n "$saved_ssh_config" ]]; then
@@ -202,7 +221,6 @@ restore_vault() {
 		rm -f "$HOME/.gitconfig"
 		echo "$saved_gitconfig" > "$HOME/.gitconfig"
 	fi
-
 
 	# Permissions
 	if [[ -d "$HOME/.ssh" ]]; then
@@ -256,26 +274,38 @@ list_vault() {
 
 # Clean
 clean_sessions() {
-	log "Wiping local session data"
-
-	stop_running_apps
+	local dry_run=false
+	if [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]]; then
+		dry_run=true
+		log "Previewing local session data to be removed (dry-run):"
+	else
+		log "Wiping local session data"
+		stop_running_apps
+	fi
 
 	for rel_path in "${CANDIDATE_PATHS[@]}"; do
 		if [[ -e "$HOME/$rel_path" ]]; then
-			rm -rf "${HOME:?}/${rel_path:?}"
-			echo "  - Removed: ~/$rel_path"
+			if [[ "$dry_run" == "true" ]]; then
+				echo "  [dry-run] Would remove: ~/$rel_path"
+			else
+				rm -rf "${HOME:?}/${rel_path:?}"
+				echo "  - Removed: ~/$rel_path"
+			fi
 		fi
 	done
 
-	mkdir -p "$HOME/.local/share/keyrings"
-	chmod 700 "$HOME/.local/share/keyrings"
-
-	success "Local session data cleaned"
+	if [[ "$dry_run" != "true" ]]; then
+		mkdir -p "$HOME/.local/share/keyrings"
+		chmod 700 "$HOME/.local/share/keyrings"
+		success "Local session data cleaned"
+	else
+		success "Dry-run complete, no files were removed"
+	fi
 }
 
 # Usage
 usage() {
-	echo "Usage: $(basename "$0") {backup|restore|list|clean} [file]"
+	echo "Usage: $(basename "$0") {backup|restore|list|clean [--dry-run]} [file]"
 	exit 1
 }
 
@@ -291,7 +321,7 @@ case "${1:-}" in
 		list_vault "${2:-}"
 		;;
 	clean)
-		clean_sessions
+		clean_sessions "${2:-}"
 		;;
 	*)
 		usage

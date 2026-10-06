@@ -21,13 +21,22 @@ link_file \
 	"$MODULE_DIR/files/templates.toml" \
 	"$HOME/.config/noctalia/templates.toml"
 
-link_file \
-	"$MODULE_DIR/files/plugins" \
-	"$HOME/.config/noctalia/plugins"
+if [[ -d "$MODULE_DIR/files/plugins" ]] && [[ -n "$(ls -A "$MODULE_DIR/files/plugins" 2>/dev/null | grep -v '^\.gitkeep$' || true)" ]]; then
+	link_dir \
+		"$MODULE_DIR/files/plugins" \
+		"$HOME/.config/noctalia/plugins"
+else
+	mkdir -p "$HOME/.config/noctalia/plugins"
+fi
 
-link_file \
-	"$MODULE_DIR/files/settings.toml" \
-	"$HOME/.local/state/noctalia/settings.toml"
+local_settings="$HOME/.local/state/noctalia/settings.toml"
+if [[ -L "$local_settings" ]]; then
+	rm -f "$local_settings"
+fi
+if [[ ! -f "$local_settings" ]]; then
+	sed "s|@HOME@|$HOME|g" "$MODULE_DIR/files/settings.toml" > "$local_settings"
+	echo " $local_settings (rendered from template)"
+fi
 
 if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
 	mkdir -p "$HOME/Pictures"

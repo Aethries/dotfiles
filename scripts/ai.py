@@ -9,6 +9,7 @@ import argparse
 import curses
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -122,16 +123,14 @@ MCP_CATALOG = {
     "jev-local": {
         "name": "JEV Local Advisory Preflight",
         "anti": {
-            "command": "bash",
-            "args": ["-c", f'"{DOTFILES_DIR}/scripts/jev-mcp.sh"'],
+            "command": "jev-mcp",
             "env": {
                 "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
                 "JEV_MODEL": "oc/jev-1.13-free",
             },
         },
         "codex": {
-            "command": "bash",
-            "args": ["-c", f'"{DOTFILES_DIR}/scripts/jev-mcp.sh"'],
+            "command": "jev-mcp",
             "startup_timeout_sec": 30.0,
             "env": {
                 "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
@@ -369,17 +368,39 @@ def build_grouped_mcps_data() -> list[dict]:
     return groups
 
 
-def safe_symlink(source: Path, target: Path):
+def safe_symlink(source: Path, target: Path) -> bool:
+    if not source.exists() and not source.is_symlink():
+        err(f"Source does not exist: {source}")
+        return False
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.is_symlink():
-        if target.resolve() == source.resolve():
-            return
+        try:
+            if target.resolve() == source.resolve():
+                return True
+        except Exception:
+            pass
         target.unlink()
     elif target.exists():
         backup = target.with_name(f"{target.name}.backup")
+        if backup.exists() or backup.is_symlink():
+            import time
+            ts = time.strftime("%Y%m%d%H%M%S")
+            backup = target.with_name(f"{target.name}.backup.{ts}")
+            counter = 1
+            while backup.exists() or backup.is_symlink():
+                backup = target.with_name(f"{target.name}.backup.{ts}_{counter}")
+                counter += 1
         target.rename(backup)
         warn(f"Moved existing {target} to {backup}")
-    target.symlink_to(source)
+
+    try:
+        target.symlink_to(source)
+        return True
+    except Exception as e:
+        err(f"Failed to symlink {source} -> {target}: {e}")
+        if 'backup' in locals() and backup.exists():
+            backup.rename(target)
+        return False
 
 
 def prompt_menu(title: str, options: list[tuple[str, str]], default_idx: int = 0) -> str:
@@ -698,6 +719,68 @@ def deploy_skills(scope: str, agent: str, skills: list[str], project_dir: Path):
     success(f"Linked {len(skills)} skills into {len(destinations)} destination(s)")
 
 
+def merge_codex_toml(existing_toml: str, new_mcp_content: str, managed_keys: set[str]) -> str:
+    """
+    Merge new managed MCP server configurations into existing Codex config.toml.
+    Preserves:
+    - Top-level settings (model, approval policies, etc.)
+    - Non-MCP sections ([tui], [desktop], [features], [projects], etc.)
+    - Custom / non-managed [mcp_servers."..."] sections
+    """
+    if not existing_toml.strip():
+        return f"# Codex Configuration\n{new_mcp_content}\n"
+
+    lines = existing_toml.splitlines(keepends=True)
+    sections: list[tuple[str | None, str]] = []
+    current_header: str | None = None
+    current_chunk: list[str] = []
+
+    for line in lines:
+        m = re.match(r"^\s*\[([a-zA-Z0-9_.\"-]+)\]", line)
+        if m:
+            sections.append((current_header, "".join(current_chunk)))
+            current_header = m.group(1)
+            current_chunk = [line]
+        else:
+            current_chunk.append(line)
+    sections.append((current_header, "".join(current_chunk)))
+
+    re_mcp = re.compile(r'^mcp_servers\."([^"]+)"')
+    kept_sections: list[tuple[str | None, str]] = []
+    first_mcp_index = -1
+
+    for header, content in sections:
+        if header is None:
+            kept_sections.append((header, content))
+            continue
+        m_mcp = re_mcp.match(header)
+        if m_mcp:
+            server_key = m_mcp.group(1)
+            if server_key in managed_keys:
+                if first_mcp_index == -1:
+                    first_mcp_index = len(kept_sections)
+                continue
+            else:
+                if first_mcp_index == -1:
+                    first_mcp_index = len(kept_sections)
+                kept_sections.append((header, content))
+        else:
+            kept_sections.append((header, content))
+
+    clean_new_mcp = ("\n" + new_mcp_content.strip() + "\n\n") if new_mcp_content.strip() else ""
+    insert_at = first_mcp_index if first_mcp_index != -1 else min(1, len(kept_sections))
+
+    result_parts: list[str] = []
+    for i, (_, content) in enumerate(kept_sections):
+        if i == insert_at and clean_new_mcp:
+            result_parts.append(clean_new_mcp)
+        result_parts.append(content)
+    if insert_at >= len(kept_sections) and clean_new_mcp:
+        result_parts.append(clean_new_mcp)
+
+    return "".join(result_parts).rstrip() + "\n"
+
+
 def deploy_mcps(scope: str, agent: str, mcps: list[str], project_dir: Path):
     if not mcps:
         warn("No MCP servers selected.")
@@ -711,8 +794,8 @@ def deploy_mcps(scope: str, agent: str, mcps: list[str], project_dir: Path):
             if cfg:
                 anti_servers[m] = cfg
 
-        anti_payload = {"mcpServers": anti_servers}
         if scope == "global":
+            anti_payload = {"mcpServers": anti_servers}
             anti_paths = [
                 HOME / ".gemini" / "antigravity" / "mcp_config.json",
                 HOME / ".gemini" / "antigravity-cli" / "mcp_config.json",
@@ -729,8 +812,18 @@ def deploy_mcps(scope: str, agent: str, mcps: list[str], project_dir: Path):
         else:
             proj_gemini = project_dir / ".gemini" / "mcp_config.json"
             proj_gemini.parent.mkdir(parents=True, exist_ok=True)
+            existing_anti = {}
+            if proj_gemini.exists():
+                try:
+                    with open(proj_gemini, "r") as f:
+                        existing_anti = json.load(f)
+                except Exception:
+                    existing_anti = {}
+            if "mcpServers" not in existing_anti or not isinstance(existing_anti.get("mcpServers"), dict):
+                existing_anti["mcpServers"] = {}
+            existing_anti["mcpServers"].update(anti_servers)
             with open(proj_gemini, "w") as f:
-                json.dump(anti_payload, f, indent=2)
+                json.dump(existing_anti, f, indent=2)
             success(f"Configured project Antigravity MCP: {proj_gemini}")
 
     # 2. Codex MCP Config
@@ -765,28 +858,22 @@ def deploy_mcps(scope: str, agent: str, mcps: list[str], project_dir: Path):
                     codex_lines.append(f'"{ehk}" = "{ehv}"')
 
         mcp_toml_content = "\n".join(codex_lines)
+        managed_toml_keys = {m.replace("-", "_") for m in mcps}
 
         if scope == "global":
             codex_config_file = DOTFILES_DIR / "modules" / "codex" / "files" / "config.toml"
             if codex_config_file.exists():
                 existing = codex_config_file.read_text()
-                parts = existing.split("[mcp_servers.")
-                base_header = parts[0].rstrip()
-                trailing = ""
-                for section in ("[desktop]", "[features]", "[memories]"):
-                    if section in existing:
-                        pos = existing.find(section)
-                        trailing = "\n\n" + existing[pos:]
-                        break
-
-                new_config = base_header + "\n" + mcp_toml_content + trailing + "\n"
+                new_config = merge_codex_toml(existing, mcp_toml_content, managed_toml_keys)
                 codex_config_file.write_text(new_config)
                 safe_symlink(codex_config_file, HOME / ".codex" / "config.toml")
                 success(f"Updated Codex config with {len(mcps)} MCP servers")
         else:
             proj_codex = project_dir / ".codex" / "config.toml"
             proj_codex.parent.mkdir(parents=True, exist_ok=True)
-            proj_codex.write_text(f"# Project Codex Configuration\n{mcp_toml_content}\n")
+            existing = proj_codex.read_text() if proj_codex.exists() else ""
+            new_config = merge_codex_toml(existing, mcp_toml_content, managed_toml_keys)
+            proj_codex.write_text(new_config)
             success(f"Configured project Codex MCP: {proj_codex}")
 
 

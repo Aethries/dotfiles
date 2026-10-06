@@ -59,12 +59,18 @@ install_aur_packages() {
 	fi
 
 	log "Found ${#missing_packages[@]} missing AUR package(s): ${missing_packages[*]}"
+	local failed_packages=()
 	for pkg in "${missing_packages[@]}"; do
 		log "Installing AUR package: $pkg"
 		if ! yay -S --needed --noconfirm --sudoloop "$pkg"; then
 			warn "Failed to install AUR package '$pkg', continuing with next package"
+			failed_packages+=("$pkg")
 		fi
 	done
+
+	if [[ "${#failed_packages[@]}" -gt 0 ]]; then
+		error "Failed to install AUR package(s): ${failed_packages[*]}"
+	fi
 
 	success "AUR package installation completed"
 }

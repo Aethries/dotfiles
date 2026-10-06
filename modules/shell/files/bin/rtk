@@ -58,12 +58,34 @@ def filter_stream(lines: list[str], max_lines: int = 400) -> str:
     if len(cleaned) > max_lines:
         keep_head = max_lines // 2
         keep_tail = max_lines // 4
-        truncated_count = len(cleaned) - keep_head - keep_tail
-        summary = (
-            cleaned[:keep_head]
-            + [f"\n--- [rtk: collapsed {truncated_count} lines of verbose output] ---\n"]
-            + cleaned[-keep_tail:]
+        middle = cleaned[keep_head:-keep_tail]
+
+        error_regex = re.compile(
+            r"\b(error|fail|failed|failure|fatal|exception|panic|denied|timed out|traceback)\b",
+            re.IGNORECASE,
         )
+
+        middle_indices_kept = set()
+        for idx, m_line in enumerate(middle):
+            if error_regex.search(m_line) or SUMMARY_REGEX.search(m_line):
+                for ctx_i in range(max(0, idx - 1), min(len(middle), idx + 2)):
+                    middle_indices_kept.add(ctx_i)
+
+        middle_preserved = [middle[i] for i in sorted(middle_indices_kept)]
+        truncated_count = len(middle) - len(middle_preserved)
+
+        summary = cleaned[:keep_head]
+        if middle_preserved:
+            summary.append(
+                f"\n--- [rtk: collapsed {truncated_count} verbose lines, preserved {len(middle_preserved)} error/context lines] ---"
+            )
+            summary.extend(middle_preserved)
+            summary.append("--- [rtk: resuming tail output] ---\n")
+        else:
+            summary.append(
+                f"\n--- [rtk: collapsed {truncated_count} lines of verbose output] ---\n"
+            )
+        summary.extend(cleaned[-keep_tail:])
         return "\n".join(summary)
 
     return "\n".join(cleaned)
