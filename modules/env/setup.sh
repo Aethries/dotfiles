@@ -20,9 +20,14 @@ link_file \
 	"$MODULE_DIR/files/mimeapps.list" \
 	"$HOME/.config/mimeapps.list"
 
-link_file \
-	"$MODULE_DIR/files/electron-flags.conf" \
-	"$HOME/.config/electron-flags.conf"
+for flag_target in \
+	"$HOME/.config/electron-flags.conf" \
+	"$HOME/.config/code-flags.conf" \
+	"$HOME/.config/antigravity-ide-flags.conf" \
+	"$HOME/.config/obsidian/user-flags.conf" \
+	"$HOME/.config/bks-flags.conf"; do
+	link_file "$MODULE_DIR/files/electron-flags.conf" "$flag_target"
+done
 
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
 

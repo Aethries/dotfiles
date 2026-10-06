@@ -15,6 +15,9 @@ mkdir -p "$HOME/.config"
 link_file \
 	"$MODULE_DIR/files/chrome-flags.conf" \
 	"$HOME/.config/chrome-flags.conf"
+link_file \
+	"$MODULE_DIR/files/chrome-flags.conf" \
+	"$HOME/.config/chromium-flags.conf"
 
 # Link Noctalia theme for Chromium / Google Chrome
 theme_dir="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia/ungoogled-chromium/theme"
