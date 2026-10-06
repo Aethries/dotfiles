@@ -24,8 +24,8 @@ if [[ ! -f "$UDEV_RULE" ]]; then
 		sudo tee "$UDEV_RULE" > /dev/null << 'EOF'
 KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
 EOF
-		sudo usermod -aG input "$USER" 2>/dev/null || true
-		sudo udevadm control --reload-rules && sudo udevadm trigger 2>/dev/null || true
+		sudo udevadm control --reload-rules
+		sudo udevadm trigger --subsystem-match=misc
 		success "Sunshine uinput udev rule configured"
 	else
 		warn "sudo requires password to install $UDEV_RULE"
@@ -33,14 +33,28 @@ EOF
 	fi
 fi
 
-# Set capabilities for KMS capture if sunshine binary exists
-if command_exists sunshine; then
-	local sunshine_bin
+# Device groups also apply when the udev rule was installed previously.
+for device_group in input video render; do
+	if ! id -nG "$USER" | tr ' ' '\n' | grep -qx "$device_group"; then
+		if command_exists sudo && sudo -n true 2>/dev/null; then
+			sudo usermod -aG "$device_group" "$USER"
+			warn "Added $USER to $device_group; existing processes keep their old groups until a new session/reboot"
+		else
+			warn "Run: sudo usermod -aG $device_group $USER"
+		fi
+	fi
+done
+
+# Umbriel uses wlr screencopy, which does not need KMS capabilities.
+# Remove the file capabilities granted by the previous setup script.
+if command_exists sunshine && command_exists getcap; then
 	sunshine_bin="$(command -v sunshine)"
-	if [[ -n "$sunshine_bin" && -x "$sunshine_bin" ]]; then
-		if sudo -n true 2>/dev/null; then
-			sudo setcap cap_sys_admin+p "$sunshine_bin" 2>/dev/null || true
-			success "Granted cap_sys_admin capability to sunshine"
+	if [[ "$(getcap "$sunshine_bin")" == *cap_sys_admin* ]]; then
+		if command_exists sudo && sudo -n true 2>/dev/null; then
+			sudo setcap -r "$sunshine_bin"
+			success "Removed legacy Sunshine KMS file capabilities"
+		else
+			warn "Run: sudo setcap -r $sunshine_bin"
 		fi
 	fi
 fi
@@ -49,8 +63,26 @@ fi
 if command_exists systemctl; then
 	systemctl --user daemon-reload
 	if command_exists sunshine; then
-		systemctl --user enable --now app-dev.lizardbyte.app.Sunshine.service 2>/dev/null || systemctl --user enable --now sunshine.service 2>/dev/null || true
-		success "sunshine.service enabled and started"
+		sunshine_service=app-dev.lizardbyte.app.Sunshine.service
+		if [[ "$(systemctl --user show -p LoadState --value "$sunshine_service")" == not-found ]]; then
+			sunshine_service=sunshine.service
+		fi
+		systemctl --user enable "$sunshine_service"
+		systemctl --user reset-failed "$sunshine_service"
+		success "$sunshine_service enabled for graphical sessions"
+		# SSH environment variables cannot create a graphical session. Use the
+		# environment published by the managed Umbriel session instead.
+		wayland_display="$(systemctl --user show-environment | sed -n 's/^WAYLAND_DISPLAY=//p')"
+		runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+		if systemctl --user is-active --quiet umbriel.service &&
+			systemctl --user is-active --quiet graphical-session.target &&
+			[[ -n "$wayland_display" && -S "$runtime_dir/$wayland_display" ]]; then
+			systemctl --user restart "$sunshine_service"
+			success "$sunshine_service restarted; verify capture/encoder in its journal and connect with Moonlight"
+		else
+			warn "No active Umbriel Wayland session; Sunshine will start with the graphical session"
+			warn "For SSH provisioning/recovery, run ./remote.sh"
+		fi
 	else
 		warn "sunshine binary not found yet. Install via: yay -S sunshine-bin"
 	fi

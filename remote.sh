@@ -101,6 +101,7 @@ configure_coffee() {
 # ------------------------------------------------------------------------------
 configure_autologin() {
 	log "Configuring Greetd Autologin (No Password on Boot)"
+	command_exists start-umbriel || error "Install the Umbriel desktop with ./install.sh before running remote.sh"
 
 	local greetd_conf="/etc/greetd/config.toml"
 	if [[ -f "$greetd_conf" && ! -f "$greetd_conf.pre-autologin.bak" ]]; then
@@ -122,6 +123,41 @@ EOF
 
 	touch "$DOTFILES/.autologin"
 	success "Greetd autologin configured for user '$USER' -> start-umbriel"
+}
+
+# An SSH login has no DRM seat. Let greetd establish the native login session.
+graphical_session_ready() {
+	local umbriel_socket
+	systemctl --user is-active --quiet umbriel.service || return 1
+	systemctl --user is-active --quiet graphical-session.target || return 1
+	umbriel_socket="$(systemctl --user show-environment | sed -n 's/^UMBRIEL_SOCKET=//p')"
+	[[ -n "$umbriel_socket" && -S "$umbriel_socket" ]] || return 1
+	env UMBRIEL_SOCKET="$umbriel_socket" umbriel outputs >/dev/null 2>&1
+}
+
+ensure_graphical_session() {
+	if ! graphical_session_ready; then
+		if ! systemctl --user is-active --quiet umbriel.service; then
+			log "Starting a native Umbriel session through greetd"
+			# greetd only runs initial_session once per boot. A previous compositor
+			# exit leaves this marker behind, even if greetd itself is restarted.
+			sudo rm -f /run/greetd.run
+			sudo systemctl enable greetd.service
+			sudo systemctl restart greetd.service
+		fi
+		local attempt
+		for attempt in {1..30}; do
+			if graphical_session_ready; then
+				break
+			fi
+			sleep 1
+		done
+		if ! graphical_session_ready; then
+			journalctl --user -u umbriel.service -n 30 --no-pager
+			error "Umbriel did not become ready. Check sudo journalctl -u greetd.service; Sunshine cannot stream without a display"
+		fi
+	fi
+	success "Native Umbriel session responds to IPC"
 }
 
 # ------------------------------------------------------------------------------
@@ -156,7 +192,8 @@ print_summary() {
 	echo "  Tailscale IP:      $ts_ip"
 	echo "  Sunshine Web UI:   https://localhost:47990 (or https://$ts_ip:47990)"
 	echo "  Keep-Awake:        $("$DOTFILES/modules/shell/files/bin/coffee" status | tr '\n' ' ')"
-	echo "  Sunshine Status:   $(systemctl --user is-active sunshine.service 2>/dev/null || echo "inactive")"
+	echo "  Sunshine Process:  $(systemctl --user is-active sunshine.service 2>/dev/null || true)"
+	echo "  Umbriel Session:   $(systemctl --user is-active umbriel.service 2>/dev/null || true)"
 	echo "  Autologin:         Configured (User: $USER)"
 	echo "======================================================================"
 	echo ""
@@ -172,6 +209,8 @@ print_summary() {
 	echo "   - Đăng nhập cùng tài khoản Tailscale."
 	echo "   - Mở Moonlight -> Add Host -> Nhập IP Tailscale của máy trạm ($ts_ip)."
 	echo "   - Nhập PIN 4 số trên giao diện web Sunshine (tab PIN) để ghép đôi."
+	echo "   - Mở Desktop để xác nhận hình và âm thanh; process active chưa chứng minh stream hoạt động."
+	echo "   - Nếu lỗi 503: journalctl --user -u app-dev.lizardbyte.app.Sunshine.service -n 80 --no-pager"
 	echo ""
 	echo "4. Quản lý Keep-Awake (Chống ngủ):"
 	echo "   - Phím tắt:     Mod+Shift+I (bật/tắt nhanh qua Noctalia OSD)"
@@ -184,9 +223,11 @@ print_summary() {
 # Execution Flow
 install_remote_packages
 configure_tailscale
-configure_sunshine
-configure_coffee
 configure_autologin
+configure_sunshine
+ensure_graphical_session
+systemctl --user start sunshine.service
+configure_coffee
 configure_firewall
 print_summary
 

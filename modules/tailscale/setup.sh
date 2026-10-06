@@ -62,7 +62,6 @@ fi
 # 4. Check Tailscale connection status
 if command_exists tailscale; then
 	if tailscale status >/dev/null 2>&1; then
-		local ts_ip
 		ts_ip="$(tailscale ip -4 2>/dev/null || echo "unknown")"
 		success "Tailscale is connected (IP: $ts_ip)"
 	else
