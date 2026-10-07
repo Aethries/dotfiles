@@ -1,4 +1,13 @@
 # Base
+base
+linux
+linux-firmware
+sof-firmware
+intel-ucode
+efibootmgr
+mkinitcpio
+sudo
+zram-generator
 git
 curl
 wget
@@ -79,6 +88,7 @@ cmake
 pkgconf
 mise
 uv
+github-cli
 gitleaks
 pinentry
 act
@@ -143,6 +153,10 @@ tailscale
 sshfs
 mosh
 moonlight-qt
+bluez
+bluez-utils
+iwd
+proton-vpn-gtk-app
 
 # Audio & DSP
 easyeffects

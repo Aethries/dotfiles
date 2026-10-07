@@ -28,6 +28,7 @@ sunshine-bin
 
 
 # Terminal & CLI Tools
+yay
 carapace-bin
 gh-dash-bin
 oxker-bin

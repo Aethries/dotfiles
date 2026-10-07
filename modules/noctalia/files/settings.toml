@@ -95,13 +95,13 @@ enabled = [
 [shell]
 app_icon_color = "on_error"
 card_borders = false
-corner_radius_scale = 1.0500000156462193
-font_family = "JetBrainsMono Nerd Font"
+clipboard_auto_paste = "ctrl_v"
+clipboard_confirm_clear_history = false
 clipboard_enabled = true
 clipboard_history_max_entries = 10000
-clipboard_confirm_clear_history = false
 clipboard_keep_from_closed_apps = true
-clipboard_auto_paste = "ctrl_v"
+corner_radius_scale = 1.0500000156462193
+font_family = "JetBrainsMono Nerd Font"
 open_near_click_clipboard = true
 
     [shell.animation]
@@ -118,6 +118,8 @@ builtin = "Gruvbox"
 community_palette = "Tomorrow"
 mode = "dark"
 shell_mode = "dark"
+source = "builtin"
+wallpaper_scheme = "m3-content"
 
     [theme.templates]
     builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
@@ -142,10 +144,10 @@ shell_mode = "dark"
     enable_community_templates = true
 
 [wallpaper.default]
-path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
 
 [wallpaper.last]
-path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "@HOME@/Pictures/Wallpapers/wallhaven-yqvj5g.jpg"
+path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
