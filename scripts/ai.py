@@ -76,19 +76,7 @@ MCP_CATALOG = {
             "args": ["codebase-memory-mcp"],
         },
     },
-    "agent-memory": {
-        "name": "Agent Memory (Persistent cross-session memory)",
-        "anti": {
-            "command": "npx",
-            "args": ["-y", "@agentmemory/mcp@0.9.29"],
-            "env": {"AGENTMEMORY_URL": "http://127.0.0.1:3111"},
-        },
-        "codex": {
-            "command": "npx",
-            "args": ["-y", "@agentmemory/mcp@0.9.29"],
-            "env": {"AGENTMEMORY_URL": "http://127.0.0.1:3111"},
-        },
-    },
+
     "context7": {
         "name": "Context7 (Upstash documentation lookup)",
         "anti": {
@@ -165,7 +153,7 @@ MCP_CATEGORIES = [
     ),
     (
         "🧠 Context & Persistent Memory",
-        ["agent-memory", "context7"],
+        ["context7"],
     ),
     (
         "🌐 Gateways & Integrations",
@@ -179,7 +167,7 @@ SKILL_CATEGORIES = [
         [
             "ponytail", "caveman", "senior-implementer", "clean-code",
             "systematic-debugging", "verify-changes", "rtk", "plan-writing",
-            "tdd-workflow", "lint-and-validate", "agent-memory-bootstrap",
+            "tdd-workflow", "lint-and-validate",
             "behavioral-modes", "brainstorming", "simplify-code", "skillify",
             "release-notes", "documentation-templates", "agent-squad-orchestrator",
             "parallel-agents", "coordinator-mode", "junior-coding-agent",

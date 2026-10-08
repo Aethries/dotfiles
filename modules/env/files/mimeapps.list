@@ -15,6 +15,7 @@ application/zip=org.gnome.FileRoller.desktop
 application/x-tar=org.gnome.FileRoller.desktop
 application/x-7z-compressed=org.gnome.FileRoller.desktop
 application/x-rar=org.gnome.FileRoller.desktop
+x-scheme-handler/jetbrains=jetbrainsd.desktop
 
 [Added Associations]
 inode/directory=org.gnome.Nautilus.desktop;

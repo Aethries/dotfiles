@@ -141,11 +141,6 @@ else
 	report_warn "JEV local gateway not responding on port 20128 (start 9router / JEV if needed)"
 fi
 
-if curl -s --connect-timeout 1 "http://127.0.0.1:3111/health" >/dev/null 2>&1; then
-	report_pass "Agent Memory backend responding on port 3111"
-else
-	report_warn "Agent Memory backend not active on port 3111 (optional background service)"
-fi
 
 # Summary
 echo -e "\n${BLUE}${BOLD}==> Diagnostic Summary <==${RESET}"

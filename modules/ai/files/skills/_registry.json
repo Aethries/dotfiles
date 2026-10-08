@@ -42,46 +42,6 @@
         "verified_by": "Aethries/dotfiles"
       }
     },
-    "agent-memory-bootstrap": {
-      "name": "agent-memory-bootstrap",
-      "version": "1.0.0",
-      "source": "canonical",
-      "description": "Load and maintain durable project context, decisions, conventions, and handoff state for coding-agent sessions.",
-      "tags": [
-        "memory",
-        "mcp",
-        "handoff",
-        "project-context",
-        "cross-agent"
-      ],
-      "dependencies": [
-        "project-context",
-        "codegraph",
-        "codebase-memory"
-      ],
-      "content_hash": "sha256:c84ebf5af80d9d35622454642fa42089d47dffbad54e7c310ef9406c68c1c21a",
-      "domain": "memory",
-      "capabilities": [
-        "durable-project-memory",
-        "decision-recall",
-        "handoff-state",
-        "memory-hygiene",
-        "mcp-agnostic-memory"
-      ],
-      "triggers": [
-        "agent-memory",
-        "memory-bootstrap",
-        "project-memory",
-        "session-handoff",
-        "recall-decisions"
-      ],
-      "provenance": {
-        "upstream_url": null,
-        "commit": null,
-        "license": "MIT",
-        "verified_by": "Aethries/dotfiles"
-      }
-    },
     "caveman": {
       "name": "caveman",
       "version": "1.0.0",
@@ -3428,7 +3388,6 @@
         "quality"
       ],
       "dependencies": [
-        "agent-memory-bootstrap",
         "project-context",
         "project-source-quality",
         "architecture-guardrails",
