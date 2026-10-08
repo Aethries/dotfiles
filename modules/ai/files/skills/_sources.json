@@ -50,6 +50,62 @@
       "description": "General discovery endpoint for open source agent skills",
       "trust_level": "unverified",
       "curation_policy": "manual-review-required"
+    },
+    "mattpocock-skills": {
+      "name": "Matt Pocock Skills",
+      "type": "git",
+      "url": "https://github.com/mattpocock/skills",
+      "description": "Engineering and productivity skills by Matt Pocock",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "addyosmani-skills": {
+      "name": "Addy Osmani Agent Skills",
+      "type": "git",
+      "url": "https://github.com/addyosmani/agent-skills",
+      "description": "Production engineering workflow skills by Addy Osmani",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "impeccable": {
+      "name": "Impeccable UI Design",
+      "type": "git",
+      "url": "https://github.com/pbakaus/impeccable",
+      "description": "Frontend and UI design craft skills by Paul Bakaus",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "archify": {
+      "name": "Archify Architecture Diagrams",
+      "type": "git",
+      "url": "https://github.com/tt-a1i/archify",
+      "description": "Interactive HTML/SVG architecture and workflow diagrams",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "graphify": {
+      "name": "Graphify Codebase Knowledge Graph",
+      "type": "git",
+      "url": "https://github.com/Graphify-Labs/graphify",
+      "description": "Deterministic AST codebase knowledge graph generator",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "understand-anything": {
+      "name": "Understand Anything",
+      "type": "git",
+      "url": "https://github.com/egonex-ai/understand-anything",
+      "description": "Comprehensive codebase onboarding, explain, and tour skills",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
+    },
+    "superpowers": {
+      "name": "Superpowers Software Engineering",
+      "type": "git",
+      "url": "https://github.com/obra/superpowers",
+      "description": "Structured engineering methodology by Jesse Vincent",
+      "trust_level": "community",
+      "curation_policy": "vendor-verified"
     }
   }
 }

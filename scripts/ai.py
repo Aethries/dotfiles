@@ -178,7 +178,7 @@ SKILL_CATEGORIES = [
         "🏛️ Architecture & System Design",
         [
             "architecture-designer", "architecture-guardrails", "architecture",
-            "domain-driven-design", "microservices-decomposition",
+            "archify", "domain-driven-design", "microservices-decomposition",
             "system-design-guardrails", "diagram-author", "migration-strategist",
             "tech-debt-strategist", "technical-planner", "technical-researcher",
             "feature-spec-writer", "prd-author", "agile-sprint-planner",
@@ -189,14 +189,14 @@ SKILL_CATEGORIES = [
     (
         "🔍 AST Knowledge Graph & Memory",
         [
-            "codegraph", "codebase-memory", "code-review-graph",
-            "context-compression", "memory-system", "rag-pipeline-architect"
+            "codegraph", "codebase-memory", "code-review-graph", "graphify",
+            "understand", "context-compression", "memory-system", "rag-pipeline-architect"
         ],
     ),
     (
         "🎨 Frontend, UI & Design",
         [
-            "ui-ux-pro-max", "frontend-design", "frontend-architecture",
+            "ui-ux-pro-max", "impeccable", "frontend-design", "frontend-architecture",
             "design-spec", "design-system", "design", "pixel-perfect-ui",
             "tailwind-shadcn", "tailwind-patterns", "tanstack-query-state",
             "nextjs-app-router", "nextjs-react-expert", "web-design-guidelines",
