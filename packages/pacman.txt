@@ -99,6 +99,12 @@ aws-cli-v2
 azure-cli
 godot
 
+# Mobile Development
+android-tools
+android-udev
+scrcpy
+jdk17-openjdk
+
 # Desktop
 noctalia
 gpu-screen-recorder

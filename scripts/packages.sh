@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Ensure system binaries (/usr/bin) take precedence over user shims (mise, asdf) during package builds
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 PACKAGES="$DOTFILES/packages"

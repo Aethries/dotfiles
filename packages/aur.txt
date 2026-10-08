@@ -10,6 +10,7 @@ docker
 visual-studio-code-bin
 webstorm
 webstorm-jre
+android-studio
 
 # System & Compositor
 umbriel-git
@@ -38,3 +39,4 @@ viddy-bin
 grpcurl-bin
 win2xcur
 google-cloud-cli
+watchman-bin

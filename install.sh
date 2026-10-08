@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Ensure system binaries (/usr/bin) take precedence over user shims (mise, asdf) during installation
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS="$DOTFILES/scripts"
 source "$SCRIPTS/common.sh"

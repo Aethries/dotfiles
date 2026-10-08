@@ -26,6 +26,23 @@ export VISUAL="nvim"
 # Path additions
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$HOME/go/bin:$PATH"
 
+# Android & Mobile Development
+export ANDROID_HOME="$HOME/Android/Sdk"
+export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH"
+
+# Java / JDK
+if [[ -z "${JAVA_HOME:-}" ]]; then
+	if [[ -d "/usr/lib/jvm/default" ]]; then
+		export JAVA_HOME="/usr/lib/jvm/default"
+	elif [[ -d "/usr/lib/jvm/java-17-openjdk" ]]; then
+		export JAVA_HOME="/usr/lib/jvm/java-17-openjdk"
+	fi
+fi
+if [[ -n "${JAVA_HOME:-}" && -d "$JAVA_HOME/bin" ]]; then
+	export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
 # History
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
@@ -212,6 +229,14 @@ function 1111() {
 	fi
 	warp-cli "$@"
 }
+
+# ------------------------------------------------------------------------------
+# Mobile Development Helpers
+# ------------------------------------------------------------------------------
+alias rn="npx react-native"
+alias expo="npx expo"
+alias adbr="adb reverse tcp:8081 tcp:8081"
+alias adbl="adb devices -l"
 
 # ------------------------------------------------------------------------------
 # Integrations (Yazi, FZF, NVM)

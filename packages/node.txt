@@ -3,3 +3,4 @@
 @vudovn/ag-kit@latest
 @openai/codex@latest
 wrangler@latest
+eas-cli@latest

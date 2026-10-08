@@ -9,6 +9,8 @@ pnpm = "latest"
 opentofu = "latest"
 gcloud = "latest"
 awscli = { version = "latest", symlink_bins = "true" }
+java = "temurin-17"
+yarn = "latest"
 
 [settings]
 legacy_version_file = true
