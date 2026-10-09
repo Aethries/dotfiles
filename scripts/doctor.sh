@@ -63,6 +63,20 @@ else
 	report_warn "'mise' runtime manager not found in PATH"
 fi
 
+if command -v docker >/dev/null 2>&1; then
+	report_pass "Container runtime 'docker' available"
+	if id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
+		report_pass "User '$USER' is member of 'docker' group"
+	else
+		report_warn "User '$USER' is not in 'docker' group (run: sudo usermod -aG docker \$USER)"
+	fi
+	if systemctl is-active --quiet docker.service 2>/dev/null || systemctl is-active --quiet docker.socket 2>/dev/null; then
+		report_pass "Docker service/socket is active"
+	else
+		report_warn "Docker service/socket is not active (run: sudo systemctl enable --now docker.socket docker.service)"
+	fi
+fi
+
 # 2. Essential Symlinks & Utilities
 echo -e "\n${BOLD}[2/5] Symlinks & Local Binaries${RESET}"
 AI_UTILS=(rtk jev-mcp jev-preflight-hook)

@@ -97,6 +97,9 @@ websocat
 bitwarden-cli
 aws-cli-v2
 azure-cli
+docker
+docker-compose
+docker-buildx
 godot
 
 # Mobile Development

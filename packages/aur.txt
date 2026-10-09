@@ -6,7 +6,6 @@ larksuite-bin
 obsidian
 postman-bin
 beekeeper-studio-bin
-docker
 visual-studio-code-bin
 webstorm
 webstorm-jre
