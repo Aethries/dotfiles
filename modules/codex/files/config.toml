@@ -109,5 +109,8 @@ trusted_hash = "sha256:765b6b2861d6eb81d162ac68ebbc5708eb760b6eda06ec72533150411
 [projects."/home/loc/Workspaces/dotfiles"]
 trust_level = "trusted"
 
+[projects."/home/loc/Workspaces/you-image"]
+trust_level = "trusted"
+
 
 

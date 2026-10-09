@@ -62,6 +62,9 @@ Noctalia	Launcher: /case	Đổi định dạng chuỗi (camelCase, snake_case...
 Noctalia	Launcher: /bw	Tra cứu và copy mật khẩu / token từ Bitwarden	Search & copy credentials from Bitwarden	Level 1 (Noctalia)	modules/noctalia/files/settings.toml
 DevOps	xh [GET/POST] <url>	Gửi HTTP request nhanh với syntax highlighting (thay curl)	Fast HTTP client with syntax highlight	Level 3 (Shell)	packages/pacman.txt
 DevOps	act	Chạy thử nghiệm GitHub Actions workflow ngay tại máy local	Run GitHub Actions locally in Docker	Level 3 (Shell)	packages/pacman.txt
+DevOps	dc / dco	Quản lý Docker Compose đa container	Docker Compose multi-container CLI	Level 3 (Shell)	modules/shell/files/.zshrc
+DevOps	dcup / dcdown	Khởi động (detached) hoặc dừng toàn bộ compose stack	Start or stop compose container stack	Level 3 (Shell)	modules/shell/files/.zshrc
+DevOps	dcl / dclogs	Xem real-time logs của các service container (-f)	Follow Compose service logs in real-time	Level 3 (Shell)	modules/shell/files/.zshrc
 DevOps	websocat <ws://url>	Kết nối và debug WebSocket endpoint trực tiếp từ terminal	Connect and debug WebSocket from CLI	Level 3 (Shell)	packages/pacman.txt
 DevOps	grpcurl <host> list	Liệt kê và gọi gRPC methods trực tiếp từ CLI	Interact and test gRPC servers from CLI	Level 3 (Shell)	packages/aur.txt
 DevOps	iredis -h <host>	Client Redis với auto-completion thông minh	Redis CLI with autocomplete and syntax	Level 3 (Shell)	packages/aur.txt
