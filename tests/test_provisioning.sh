@@ -226,8 +226,25 @@ assert_eq "scripts/vault.sh syntax valid" "$?" "0"
 bash -n "$DOTFILES/scripts/secrets.sh"
 assert_eq "scripts/secrets.sh syntax valid" "$?" "0"
 
+bash -n "$DOTFILES/modules/docker/setup.sh"
+assert_eq "modules/docker/setup.sh syntax valid" "$?" "0"
+
 python3 -m py_compile "$DOTFILES/modules/shell/files/bin/rtk"
 assert_eq "rtk python syntax valid" "$?" "0"
+
+
+echo -e "\n${BLUE}${BOLD}=== TEST 13: Docker & Docker Compose Integration ===${RESET}"
+assert_eq "modules/docker/setup.sh is executable" "$([[ -x "$DOTFILES/modules/docker/setup.sh" ]] && echo yes)" "yes"
+assert_eq "modules/docker/files/daemon.json exists" "$([[ -f "$DOTFILES/modules/docker/files/daemon.json" ]] && echo yes)" "yes"
+
+grep -q 'docker-compose' "$DOTFILES/modules/shell/files/.zshrc"
+assert_eq ".zshrc activates docker-compose plugin" "$?" "0"
+
+grep -q 'alias dc="docker compose"' "$DOTFILES/modules/shell/files/.zshrc"
+assert_eq ".zshrc defines dc alias" "$?" "0"
+
+grep -q 'docker compose' "$DOTFILES/scripts/doctor.sh"
+assert_eq "scripts/doctor.sh verifies docker compose" "$?" "0"
 
 
 echo -e "\n${BLUE}${BOLD}=== SUMMARY ===${RESET}"

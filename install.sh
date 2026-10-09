@@ -52,8 +52,8 @@ done
 
 # Define module lists
 CLI_MODULES=(fonts git env shell zellij nvim mise docker vault)
-DESKTOP_MODULES=(fonts fcitx5 kanata git env shell zellij ghostty nvim mise vault noctalia obsidian umbriel cheatsheet greeter audio ideavim)
-AI_MODULES=(fonts git env shell zellij nvim mise vault vscode antigravity codex ai 9router)
+DESKTOP_MODULES=(fonts fcitx5 kanata git env shell zellij ghostty nvim mise docker vault noctalia obsidian umbriel cheatsheet greeter audio ideavim)
+AI_MODULES=(fonts git env shell zellij nvim mise docker vault vscode antigravity codex ai 9router)
 ALL_MODULES=(fonts fcitx5 kanata git env shell zellij ghostty nvim mise docker vault noctalia obsidian umbriel cheatsheet greeter audio vscode antigravity codex ai 9router ideavim)
 
 SELECTED_MODULES=()

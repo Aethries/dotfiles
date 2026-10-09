@@ -15,6 +15,7 @@ plugins=(
 	you-should-use
 	zsh-autosuggestions
 	zsh-syntax-highlighting
+	docker-compose
 )
 
 source "$ZSH/oh-my-zsh.sh"
@@ -125,6 +126,29 @@ fi
 if command -v dive >/dev/null 2>&1; then
 	alias dlayers="dive"
 fi
+
+# Docker & Docker Compose shortcuts
+alias d="docker"
+alias dps="docker ps"
+alias dpsa="docker ps -a"
+alias dimg="docker images"
+alias dprune="docker system prune -f"
+alias dprunea="docker system prune -af --volumes"
+
+alias dc="docker compose"
+alias dco="docker compose"
+alias dcup="docker compose up -d"
+alias dcupb="docker compose up -d --build"
+alias dcdown="docker compose down"
+alias dcdownv="docker compose down -v"
+alias dcstop="docker compose stop"
+alias dcrestart="docker compose restart"
+alias dcl="docker compose logs -f"
+alias dclogs="docker compose logs -f"
+alias dcps="docker compose ps"
+alias dcbuild="docker compose build"
+alias dcpull="docker compose pull"
+alias dcexec="docker compose exec"
 
 # System Monitoring & Resource Usage
 alias bottom="btm"

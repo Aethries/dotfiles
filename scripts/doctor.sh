@@ -75,6 +75,14 @@ if command -v docker >/dev/null 2>&1; then
 	else
 		report_warn "Docker service/socket is not active (run: sudo systemctl enable --now docker.socket docker.service)"
 	fi
+	if docker compose version >/dev/null 2>&1; then
+		compose_ver="$(docker compose version --short 2>/dev/null || docker compose version 2>/dev/null | head -n1)"
+		report_pass "Docker Compose CLI plugin available ($compose_ver)"
+	elif command -v docker-compose >/dev/null 2>&1; then
+		report_pass "Standalone 'docker-compose' available ($(docker-compose --version 2>/dev/null | head -n1))"
+	else
+		report_warn "Docker Compose is not installed (run: sudo pacman -S docker-compose)"
+	fi
 fi
 
 # 2. Essential Symlinks & Utilities

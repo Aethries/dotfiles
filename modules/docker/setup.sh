@@ -57,4 +57,24 @@ if command_exists systemctl; then
 	fi
 fi
 
+# 5. Verify & Setup Docker Compose and CLI plugins
+mkdir -p "$HOME/.docker/cli-plugins"
+
+if command_exists docker; then
+	if docker compose version >/dev/null 2>&1; then
+		compose_ver="$(docker compose version --short 2>/dev/null || docker compose version 2>/dev/null | head -n1)"
+		success "Docker Compose CLI plugin is active ($compose_ver)"
+	elif command_exists docker-compose; then
+		success "Docker Compose standalone is active ($(docker-compose --version 2>/dev/null | head -n1))"
+	else
+		warn "Docker Compose is not installed yet. Install with: sudo pacman -S --needed docker-compose"
+	fi
+
+	if docker buildx version >/dev/null 2>&1; then
+		success "Docker Buildx is active ($(docker buildx version 2>/dev/null | head -n1))"
+	else
+		warn "Docker Buildx is not installed yet. Install with: sudo pacman -S --needed docker-buildx"
+	fi
+fi
+
 success "Docker module configured"
