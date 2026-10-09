@@ -65,8 +65,10 @@ fi
 
 if command -v docker >/dev/null 2>&1; then
 	report_pass "Container runtime 'docker' available"
-	if id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
-		report_pass "User '$USER' is member of 'docker' group"
+	if id -nG | tr ' ' '\n' | grep -qx docker; then
+		report_pass "Active session has 'docker' group permissions"
+	elif id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
+		report_warn "User '$USER' is in 'docker' group, but current session lacks active GID (run: newgrp docker or re-login)"
 	else
 		report_warn "User '$USER' is not in 'docker' group (run: sudo usermod -aG docker \$USER)"
 	fi
