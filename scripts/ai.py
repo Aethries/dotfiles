@@ -163,122 +163,36 @@ MCP_CATEGORIES = [
 
 SKILL_CATEGORIES = [
     (
-        "🎯 Core & Agent Workflow",
+        "🎯 Core Workflow & Token Optimization",
         [
-            "ponytail", "caveman", "senior-implementer", "clean-code",
-            "systematic-debugging", "verify-changes", "rtk", "plan-writing",
-            "tdd-workflow", "lint-and-validate",
-            "behavioral-modes", "brainstorming", "simplify-code", "skillify",
-            "release-notes", "documentation-templates", "agent-squad-orchestrator",
-            "parallel-agents", "coordinator-mode", "junior-coding-agent",
-            "flow-learning-codebase", "app-builder"
+            "ponytail", "caveman", "rtk", "senior-implementer",
+            "verification-before-completion", "clean-code",
+            "systematic-debugging", "intelligent-routing", "app-builder"
         ],
     ),
     (
-        "🏛️ Architecture & System Design",
+        "📊 Product Management, Specs & Docs",
         [
-            "architecture-designer", "architecture-guardrails", "architecture",
-            "archify", "domain-driven-design", "microservices-decomposition",
-            "system-design-guardrails", "diagram-author", "migration-strategist",
-            "tech-debt-strategist", "technical-planner", "technical-researcher",
-            "feature-spec-writer", "prd-author", "agile-sprint-planner",
-            "event-driven-architect", "transactional-outbox-pattern",
-            "caching-strategy-architect"
+            "prd-author", "feature-spec-writer", "agile-sprint-planner",
+            "technical-planner", "documentation-and-adrs", "design-doc-mermaid"
         ],
     ),
     (
-        "🔍 AST Knowledge Graph & Memory",
+        "🔍 AST Knowledge Graph & Review",
         [
-            "codegraph", "codebase-memory", "code-review-graph", "graphify",
-            "understand", "context-compression", "memory-system", "rag-pipeline-architect"
+            "codegraph", "codebase-memory", "code-review-graph"
         ],
     ),
     (
-        "🎨 Frontend, UI & Design",
+        "🎨 UI & Design Intelligence",
         [
-            "ui-ux-pro-max", "impeccable", "frontend-design", "frontend-architecture",
-            "design-spec", "design-system", "design", "pixel-perfect-ui",
-            "tailwind-shadcn", "tailwind-patterns", "tanstack-query-state",
-            "nextjs-app-router", "nextjs-react-expert", "web-design-guidelines",
-            "slides", "banner-design", "brand", "mobile-design", "ui-styling"
+            "ui-ux-pro-max"
         ],
     ),
     (
-        "⚡ Backend, APIs & Distributed",
+        "🛠️ Infrastructure, Containers & Git Safety",
         [
-            "nestjs", "nestjs-cqrs-microservices", "fastapi", "golang",
-            "rust", "rust-pro", "python-patterns", "nodejs-best-practices",
-            "trpc-fullstack", "grpc-protobuf-engineer", "api-contract-designer",
-            "api-patterns", "centrifugo", "bullmq", "redis",
-            "redis-distributed-patterns", "typesafe-ai"
-        ],
-    ),
-    (
-        "💾 Database & Data Modeling",
-        [
-            "database-design", "data-model-architect", "database-query-optimizer",
-            "postgresql", "prisma"
-        ],
-    ),
-    (
-        "☁️ Cloud, DevOps & Infrastructure",
-        [
-            "docker", "docker-multiarch-builder", "kubernetes",
-            "helm-chart-architect", "gitops-terraform", "cloud-infra",
-            "aws-cloud-architect", "gcp-cloud-architect", "azure-cloud-architect",
-            "github-actions", "cicd-security-hardening", "linux-server-admin",
-            "vps-hardening", "nixos", "opentelemetry-tracing",
-            "reliability-engineer", "incident-investigator"
-        ],
-    ),
-    (
-        "🛡️ Security & Auditing",
-        [
-            "security-guardrails", "api-security-auditor",
-            "prompt-injection-defense", "vulnerability-scanner", "red-team-tactics"
-        ],
-    ),
-    (
-        "🧪 Testing & Verification",
-        [
-            "qa-test-flow-engineer", "unit-test-craftsman", "playwright",
-            "webapp-testing", "testing-patterns", "eval-harness-designer",
-            "engineering-review", "quality-gate", "source-quality",
-            "project-source-quality"
-        ],
-    ),
-    (
-        "🛠️ System, Shell & Tooling",
-        [
-            "shell-scripting", "bash-linux", "powershell-windows",
-            "neovim-lua", "git-advanced-workflow", "chrome-extension",
-            "chrome-extension-advanced", "godot-gdscript", "game-development",
-            "mcp-server-author", "mcp-builder", "skill-author",
-            "detect-stack", "project-context", "batch-operations",
-            "geo-fundamentals", "seo-fundamentals", "server-management",
-            "i18n-localization", "performance-profiling", "intelligent-routing"
-        ],
-    ),
-    (
-        "🧬 Life Sciences & GCP Data",
-        [
-            "uniprot-database", "pdb-database", "pubchem-database", "pubmed-database",
-            "reactome-database", "quickgo-database", "string-database",
-            "jaspar-database", "unibind-database", "dbsnp-database",
-            "clinvar-database", "ensembl-database", "gtex-database",
-            "human-protein-atlas-database", "interpro-database", "openfda-database",
-            "opentargets-database", "chembl-database", "clinical-trials-database",
-            "encode-ccres-database", "literature-search-arxiv",
-            "literature-search-biorxiv", "literature-search-europepmc",
-            "alphafold-database-fetch-and-analyze",
-            "alphagenome-variant-impact-score", "foldseek-structural-search",
-            "ncbi-sequence-fetch", "predictingthepast", "pymol",
-            "ucsc-conservation-and-tfbs", "uv", "credentials", "bigquery-ai-ml",
-            "bigquery-bigframes", "bigquery-graph", "bigquery-sql", "dbt-bigquery",
-            "data-autocleaning", "enforcing-resource-attribution",
-            "gcp-composer-troubleshooting", "gcp-data-pipelines",
-            "gcp-managed-airflow-migrations", "gcp-managed-airflow-recommendations",
-            "google-cloud-auth-verification"
+            "docker", "github-actions", "playwright", "git-guardrails-claude-code"
         ],
     ),
 ]
@@ -406,6 +320,17 @@ def prompt_menu(title: str, options: list[tuple[str, str]], default_idx: int = 0
             if 1 <= c <= len(options):
                 return options[c - 1][0]
         print(f"{RED}Invalid selection. Please choose 1-{len(options)}.{RESET}")
+
+
+def prompt_yes_no(question: str, default: bool = False) -> bool:
+    hint = "[Y/n]" if default else "[y/N]"
+    try:
+        ans = input(f"\n{CYAN}{BOLD}{question} {hint}: {RESET}").strip().lower()
+        if not ans:
+            return default
+        return ans in ("y", "yes")
+    except (EOFError, KeyboardInterrupt):
+        return default
 
 
 # ------------------------------------------------------------------------------
@@ -694,10 +619,19 @@ def deploy_skills(scope: str, agent: str, skills: list[str], project_dir: Path):
 
     for dest in destinations:
         dest.mkdir(parents=True, exist_ok=True)
-        # Prune dangling symlinks
-        for item in dest.iterdir():
-            if item.is_symlink() and not item.exists():
-                item.unlink()
+        # Prune dangling symlinks and unselected skills managed by dotfiles
+        for item in list(dest.iterdir()):
+            if item.is_symlink():
+                if not item.exists():
+                    item.unlink()
+                else:
+                    try:
+                        resolved = item.resolve()
+                        if SKILLS_SRC_DIR.resolve() in resolved.parents:
+                            if item.name not in skills:
+                                item.unlink()
+                    except Exception:
+                        pass
 
         for skill in skills:
             src = SKILLS_SRC_DIR / skill
@@ -882,6 +816,43 @@ def deploy_utilities():
     success("Linked RTK Ultra & JEV MCP utilities to ~/.local/bin")
 
 
+def sync_upstream_mattpocock(agent: str = "both"):
+    """Dynamically fetch/update latest Matt Pocock skills from upstream."""
+    log("Syncing latest Matt Pocock skills from upstream...")
+    synced = False
+    if shutil.which("npx"):
+        try:
+            cmd = ["npx", "-y", "skills@latest", "add", "mattpocock/skills", "-y"]
+            log(f"Running: {' '.join(cmd)}")
+            res = subprocess.run(cmd, check=False)
+            if res.returncode == 0:
+                success("Matt Pocock skills synced via npx skills")
+                synced = True
+        except Exception as e:
+            warn(f"npx skills invocation failed: {e}")
+
+    if not synced and shutil.which("gemini") and agent in ("both", "anti"):
+        try:
+            subprocess.run(["gemini", "skills", "install", "https://github.com/mattpocock/skills.git", "--path", "skills/engineering"], check=False)
+            subprocess.run(["gemini", "skills", "install", "https://github.com/mattpocock/skills.git", "--path", "skills/productivity"], check=False)
+            success("Matt Pocock skills synced via Gemini CLI")
+            synced = True
+        except Exception as e:
+            warn(f"gemini skills install failed: {e}")
+
+    if shutil.which("codex") and agent in ("both", "codex"):
+        try:
+            subprocess.run(["codex", "plugin", "marketplace", "add", "mattpocock/skills"], check=False)
+            subprocess.run(["codex", "plugin", "add", "mattpocock-skills@mattpocock"], check=False)
+            success("Matt Pocock skills synced via Codex plugin marketplace")
+            synced = True
+        except Exception as e:
+            warn(f"codex plugin add failed: {e}")
+
+    if not synced:
+        warn("Could not sync Matt Pocock skills automatically (no supported CLI found).")
+
+
 # ------------------------------------------------------------------------------
 # Main Entry Point
 # ------------------------------------------------------------------------------
@@ -909,6 +880,11 @@ def main():
         help="MCP servers to install: 'all', 'none', or comma-separated list",
     )
     parser.add_argument(
+        "--sync-matt",
+        action="store_true",
+        help="Fetch/update latest Matt Pocock skills dynamically from upstream",
+    )
+    parser.add_argument(
         "--project-dir",
         default=str(Path.cwd()),
         help="Target project directory for project scope",
@@ -929,6 +905,8 @@ def main():
 
     all_skill_ids = [it["id"] for g in grouped_skills for it in g["items"]]
     all_mcp_ids = [it["id"] for g in grouped_mcps for it in g["items"]]
+
+    sync_matt = args.sync_matt
 
     # Parameter Resolution
     if args.yes:
@@ -991,6 +969,9 @@ def main():
             default_all=True,
         )
 
+        # Step 5: Ask about Matt Pocock upstream skills
+        sync_matt = prompt_yes_no("Sync latest Matt Pocock skills dynamically from upstream?", default=False)
+
     log(f"Executing AI Provisioning [Scope: {scope.upper()} | Agent: {agent.upper()}]")
     print(f"  • Selected Skills: {len(selected_skills)} skills")
     print(f"  • Selected MCPs:   {', '.join(selected_mcps) if selected_mcps else 'none'}")
@@ -1005,7 +986,11 @@ def main():
     log("2. Configuring MCP Servers")
     deploy_mcps(scope, agent, selected_mcps, project_dir)
 
-    # 3. Setup utilities & settings
+    # 3. Dynamic Upstream Skills Sync
+    if sync_matt:
+        sync_upstream_mattpocock(agent)
+
+    # 4. Setup utilities & settings
     if scope == "global":
         log("3. Linking AI Utilities & Theme Synchronization")
         deploy_utilities()

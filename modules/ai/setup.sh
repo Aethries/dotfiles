@@ -22,11 +22,19 @@ TARGET_SKILL_DIRS=(
 	"$HOME/.codex/skills"
 )
 
-# 1. Clean up dangling symlinks in target skill directories
-log "Pruning dangling skill symlinks"
+# 1. Clean up dangling and obsolete skill symlinks in target skill directories
+log "Pruning dangling and unmanaged skill symlinks"
 for target_dir in "${TARGET_SKILL_DIRS[@]}"; do
 	mkdir -p "$target_dir"
 	find "$target_dir" -maxdepth 1 -xtype l -delete 2>/dev/null || true
+	for existing in "$target_dir"/*; do
+		if [[ -L "$existing" ]]; then
+			skill_name="$(basename "$existing")"
+			if [[ ! -d "$SKILLS_DIR/$skill_name" ]]; then
+				rm -f "$existing"
+			fi
+		fi
+	done
 done
 
 # 2. Link all skills from modules/ai/files/skills/
