@@ -6,7 +6,6 @@
 	"editor.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
 	"terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font', monospace",
 	"editor.fontLigatures": true,
-	"editor.letterSpacing": -0.95,
 
 	// Smooth animations & rendering
 	"editor.cursorSmoothCaretAnimation": "on",
@@ -14,7 +13,7 @@
 	"workbench.list.smoothScrolling": true,
 	"editor.cursorBlinking": "expand",
 	"editor.cursorWidth": 3,
-	"editor.cursorStyle": "line",
+	"editor.cursorStyle": "block",
 	"editor.minimap.enabled": false,
 	"editor.stickyScroll.enabled": false,
 
