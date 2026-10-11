@@ -1,5 +1,5 @@
-model = "gpt-6-luna"
-model_reasoning_effort = "max"
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
 approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
@@ -17,10 +17,12 @@ gpt-6-astra = 2
 
 [mcp_servers."9remote"]
 url = "http://127.0.0.1:2208/mcp"
+
 [mcp_servers."9remote".http_headers]
 Authorization = "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c2b039584"
+
 [mcp_servers."9remote".env_http_headers]
-"x-9remote-session" = "NINE_REMOTE_SESSION_ID"
+x-9remote-session = "NINE_REMOTE_SESSION_ID"
 
 [mcp_servers."atlassian"]
 url = "https://mcp.atlassian.com/v2/mcp"
@@ -40,13 +42,13 @@ args = ["-y", "@upstash/context7-mcp"]
 [mcp_servers."jev_local"]
 command = "jev-mcp"
 startup_timeout_sec = 30.0
+
 [mcp_servers."jev_local".env]
 JEV_ENDPOINT = "http://localhost:20128/v1/systemone"
 JEV_MODEL = "oc/jev-1.13-free"
 
 [mcp_servers."jira"]
-command = "npx"
-args = ["-y", "jira-mcp"]
+url = "https://mcp.atlassian.com/v2/mcp"
 
 [desktop]
 followUpQueueMode = "steer"
