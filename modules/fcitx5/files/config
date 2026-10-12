@@ -17,9 +17,7 @@ EnumerateGroupBackwardKeys=
 # ModifierOnlyKeyTimeout=250
 
 [Hotkey/TriggerKeys]
-0=Control+space
-1=Control+m
-2=Control+M
+0=Control+m
 
 # [Hotkey/ActivateKeys]
 # 0=Hangul_Hanja
