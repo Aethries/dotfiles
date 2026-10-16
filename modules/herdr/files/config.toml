@@ -1,0 +1,39 @@
+# ==============================================================================
+# Herdr Configuration (Noctalia Ecosystem Sync)
+# ==============================================================================
+
+onboarding = false
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+status_indicators = "symbols"
+
+[ui.sound]
+enabled = true
+
+# ------------------------------------------------------------------------------
+# Theme (Synced with Noctalia Palette & Transparent Ghostty Glass)
+# ------------------------------------------------------------------------------
+[theme]
+name = "terminal"
+
+[theme.custom]
+accent = "#78c4ce"
+sidebar_bg = "none"
+panel_bg = "none"
+active_row_bg = "#282c34"
+selection_bg = "#393e47"
+surface0 = "#282c34"
+surface1 = "#393e47"
+text = "#e6e6e6"
+subtext0 = "#c9ccd3"
+red = "#e27881"
+green = "#98c379"
+yellow = "#eac786"
+blue = "#71b9f4"
+teal = "#62bac6"
+mauve = "#c88bda"
+peach = "#e2a478"
+

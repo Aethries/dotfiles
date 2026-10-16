@@ -21,6 +21,24 @@ link_file \
 	"$MODULE_DIR/files/matugen-template.json" \
 	"$HOME/.config/opencode/matugen-template.json"
 
+CLI_JSON="$HOME/.config/opencode/cli.json"
+TEMPLATE_CLI="$MODULE_DIR/files/cli.json"
+
+if [[ ! -f "$CLI_JSON" ]]; then
+	cp "$TEMPLATE_CLI" "$CLI_JSON"
+	success "Created ~/.config/opencode/cli.json from template"
+else
+	if command_exists jq; then
+		tmp_file="$(mktemp "${CLI_JSON}.tmp.XXXXXX")"
+		jq '.theme = {name: "matugen"}' "$CLI_JSON" > "$tmp_file"
+		if ! cmp -s "$CLI_JSON" "$tmp_file"; then
+			cat "$tmp_file" > "$CLI_JSON"
+			success "Updated ~/.config/opencode/cli.json with matugen theme"
+		fi
+		rm -f "$tmp_file"
+	fi
+fi
+
 if ! command_exists opencode; then
 	if command_exists pacman; then
 		log "Installing opencode via pacman"

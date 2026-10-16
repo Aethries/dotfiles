@@ -27,7 +27,7 @@ quit-after-last-window-closed = true
 # ------------------------------------------------------------------------------
 # Transparency & Compositor Blur
 # ------------------------------------------------------------------------------
-background-opacity = 0.88
+background-opacity = 0.78
 background-blur = true
 unfocused-split-opacity = 0.85
 

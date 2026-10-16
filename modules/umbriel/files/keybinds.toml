@@ -6,6 +6,7 @@
 [keybinds]
 # Launchers & Navigation
 "Mod+Return" = { action = "spawn:ghostty", repeat = false }
+"Mod+A" = { action = "spawn:ghostty -e herdr", repeat = false }
 "Alt+Tab" = { action = "spawn:noctalia msg window-switcher", repeat = false }
 "Mod+O" = { action = "overview-toggle", repeat = false }
 "Mod+B" = { action = "spawn:google-chrome-stable", repeat = false }

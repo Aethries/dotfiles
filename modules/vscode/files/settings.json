@@ -97,4 +97,5 @@
 	"workbench.layoutControl.enabled": false,
 	"chat.titleBar.openInAgentsWindow.enabled": false,
 	"workbench.browser.showInTitleBar": false,
+	"diffEditor.renderSideBySide": false,
 }

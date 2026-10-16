@@ -28,6 +28,7 @@ antigravity-cli
 codex-desktop-linux
 claude-code
 claude-desktop
+herdr-bin
 
 
 # Network

@@ -24,6 +24,7 @@ Compositor	Mod + Shift + Space	Bật/Tắt chế độ cửa sổ nổi (Floatin
 Compositor	Mod + Minus	Giảm kích thước vùng chính (-5%)	Decrease primary window extent	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Equal / Plus	Tăng kích thước vùng chính (+5%)	Increase primary window extent	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Return	Mở Terminal Ghostty	Launch Ghostty terminal emulator	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
+Compositor	Mod + A	Mở Herdr Agent Multiplexer (Ghostty)	Launch Herdr Agent Multiplexer in Ghostty	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Alt + Tab	Mở bảng chuyển cửa sổ (Window Switcher kiểu Windows)	Open Windows-style window switcher overlay	Level 1 (Noctalia)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + O	Mở/Đóng màn hình tổng quan Workspaces Overview	Toggle workspaces overview	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
 Compositor	Mod + Shift + J	Chuyển cửa sổ đang chọn xuống Workspace kế tiếp	Move window to next workspace	Level 1 (Umbriel)	modules/umbriel/files/keybinds.toml
