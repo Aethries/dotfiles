@@ -32,16 +32,54 @@ mode = "dark"
 wallpaper_scheme = "m3-content"
 
 [theme.templates]
-builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
+builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4", "qt", "kcolorscheme", "btop" ]
+community_ids = [
+	"antigravity",
+	"bat",
+	"claude-code",
+	"codex",
+	"fastfetch",
+	"fcitx5",
+	"fzf",
+	"lazygit",
+	"obsidian",
+	"superfile",
+	"telegram",
+	"ungoogled-chromium",
+	"vscode",
+	"yazi",
+	"zellij",
+	"zen-browser"
+]
 enable_builtin_templates = true
 enable_community_templates = true
+
 
 # ==============================================================================
 # Plugins Management & Synchronization
 # ==============================================================================
 [plugins]
 auto_update = "all"
-enabled = []
+enabled = [
+	"noctalia/notes",
+	"noctalia/umbriel-companion",
+	"noctalia/screen_recorder",
+	"noctalia/bitwarden",
+	"noctalia/timer",
+	"fel/ocr",
+	"yocraft/qrcode",
+	"nightwatch75/file-search",
+	"oldirtty/color_picker",
+	"autumn/network-toolkit",
+	"davemhammer/tailscale",
+	"liamwh/emoji-picker",
+	"ashur-d/nvim-projects",
+	"vn1k/cursor",
+	"hy4ri/github-notifications",
+	"tordex/processes",
+	"wy3z/opencodex-bar",
+	"bardiz12/9router-monitor"
+]
 
 [[plugins.source]]
 enabled = true

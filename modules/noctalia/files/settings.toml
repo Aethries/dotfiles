@@ -89,7 +89,10 @@ enabled = [
     "davemhammer/tailscale",
     "noctalia/screen_recorder",
     "kjvdven/case-convert",
-    "noctalia/bitwarden"
+    "noctalia/bitwarden",
+    "noctalia/timer",
+    "hy4ri/github-notifications",
+    "tordex/processes"
 ]
 
 [shell]
@@ -114,15 +117,15 @@ open_near_click_clipboard = true
     alpha = 0.13999999687075615
 
 [theme]
-builtin = "Gruvbox"
-community_palette = "Tomorrow"
+builtin = "Noctalia"
+custom_palette = "wallhaven-yqg6r7-mc"
 mode = "dark"
 shell_mode = "dark"
-source = "builtin"
-wallpaper_scheme = "m3-content"
+source = "wallpaper"
+wallpaper_scheme = "soft"
 
     [theme.templates]
-    builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4" ]
+    builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4", "qt", "kcolorscheme", "btop" ]
     community_ids = [
         "antigravity",
         "bat",
@@ -138,16 +141,17 @@ wallpaper_scheme = "m3-content"
         "ungoogled-chromium",
         "vscode",
         "yazi",
-        "zellij"
+        "zellij",
+        "zen-browser"
     ]
     enable_builtin_templates = true
     enable_community_templates = true
 
 [wallpaper.default]
-path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"
 
 [wallpaper.last]
-path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "/home/loc/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"

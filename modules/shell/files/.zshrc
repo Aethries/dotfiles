@@ -113,6 +113,7 @@ fi
 # Lazygit, Lazydocker & Containers
 alias lg="lazygit"
 alias ld="lazydocker"
+alias lsql="lazysql"
 if command -v spf >/dev/null 2>&1; then
 	alias superfile="spf"
 fi

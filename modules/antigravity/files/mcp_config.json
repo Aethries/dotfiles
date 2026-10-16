@@ -39,7 +39,7 @@
       }
     },
     "jira": {
-      "command": "npx",
+      "command": "/home/loc/.local/share/mise/shims/npx",
       "args": [
         "-y",
         "mcp-remote",

@@ -1,5 +1,5 @@
-model = "gpt-6.1-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-6-luna"
+model_reasoning_effort = "max"
 approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
@@ -50,6 +50,25 @@ JEV_MODEL = "oc/jev-1.13-free"
 [mcp_servers."jira"]
 url = "https://mcp.atlassian.com/v2/mcp"
 
+[mcp_servers.node_repl]
+args = []
+command = "/home/loc/.local/share/codex-app-linux/resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = "/home/loc/.local/share/codex-app-linux/resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
+CODEX_HOME = "/home/loc/.codex"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "028a14b6eaa6d98dac2aae00764345ab9f244801ed8493d42b9af3be5575006e,f204d340535055781952b10ed396de20b842f00a19e430852f7e121ad1ce91f6"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.727.51351"
+CODEX_CLI_PATH = "/home/loc/.local/share/codex-app-linux/resources/codex"
+
 [desktop]
 followUpQueueMode = "steer"
 conversationDetailMode = "STEPS_COMMANDS"
@@ -67,12 +86,12 @@ enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "persistent"]
 browser-show-full-url = false
 
 [desktop.appearanceDarkChromeTheme]
-accent = "#5482ff"
+accent = "#75a0d7"
 accentSource = "custom"
 contrast = 55
-ink = "#ffffff"
+ink = "#f2f2f3"
 opaqueWindows = true
-surface = "#1f1f24"
+surface = "#1a1e23"
 
 [desktop.appearanceDarkChromeTheme.fonts]
 code = '"JetBrainsMono Nerd Font"'
@@ -81,11 +100,12 @@ ui = '"JetBrainsMono Nerd Font"'
 [desktop.appearanceDarkChromeTheme.semanticColors]
 diffAdded = "#67b7a4"
 diffRemoved = "#fc6a5d"
-skill = "#5482ff"
+skill = "#75a0d7"
 
 [features]
 hooks = true
 memories = true
+js_repl = false
 
 [memories]
 generate_memories = true
@@ -113,6 +133,48 @@ trust_level = "trusted"
 
 [projects."/home/loc/Workspaces/you-image"]
 trust_level = "trusted"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-10-16T08:09:42Z"
+source_type = "local"
+source = "/home/loc/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-10-16T08:10:25Z"
+source_type = "local"
+source = "/home/loc/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[shell_environment_policy.set]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "028a14b6eaa6d98dac2aae00764345ab9f244801ed8493d42b9af3be5575006e,f204d340535055781952b10ed396de20b842f00a19e430852f7e121ad1ce91f6"
+NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
 
 
 

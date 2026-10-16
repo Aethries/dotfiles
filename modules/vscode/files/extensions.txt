@@ -20,3 +20,7 @@ simkimsia.custom-local-formatters
 styled-components.vscode-styled-components
 sumneko.lua
 tamasfe.even-better-toml
+usernamehw.errorlens
+yoavbls.pretty-ts-errors
+streetsidesoftware.code-spell-checker
+christian-kohler.path-intellisense

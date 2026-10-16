@@ -34,6 +34,33 @@ for user_dir in "${TARGET_DIRS[@]}"; do
 		"$user_dir/snippets/main.code-snippets"
 done
 
+# Initialize Noctalia Theme extension folder for Antigravity IDE if not exists
+NOCTALIA_IDE_EXT_DIR="$HOME/.antigravity-ide/extensions/noctalia.noctaliatheme-0.0.5-universal"
+if [[ ! -d "$NOCTALIA_IDE_EXT_DIR" ]]; then
+	mkdir -p "$NOCTALIA_IDE_EXT_DIR/themes"
+	cat << 'EOF' > "$NOCTALIA_IDE_EXT_DIR/package.json"
+{
+  "name": "noctaliatheme",
+  "displayName": "NoctaliaTheme",
+  "description": "Noctalia Matugen theme for VS Code",
+  "version": "0.0.5",
+  "publisher": "Noctalia",
+  "engines": { "vscode": "^1.106.1" },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      {
+        "label": "NoctaliaTheme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/NoctaliaTheme-color-theme.json",
+        "_watch": true
+      }
+    ]
+  }
+}
+EOF
+fi
+
 # Link MCP config for Antigravity, Antigravity CLI, and Gemini config
 link_file \
 	"$MODULE_DIR/files/mcp_config.json" \

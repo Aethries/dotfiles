@@ -9,77 +9,77 @@ function M.setup()
   end
 
   base16.setup({
-    base00 = '#1a2123',
-    base01 = '#2b373b',
-    base02 = '#263236',
-    base03 = '#5f6c6f',
-    base04 = '#afb5b6',
-    base05 = '#f2f3f3',
-    base06 = '#f2f3f3',
-    base07 = '#f2f3f3',
+    base00 = '#1a1e23',
+    base01 = '#2b323b',
+    base02 = '#262d36',
+    base03 = '#616971',
+    base04 = '#afb2b6',
+    base05 = '#f2f2f3',
+    base06 = '#f2f2f3',
+    base07 = '#f2f2f3',
     base08 = '#fd4663',
-    base09 = '#d8d2eb',
-    base0A = '#d0d7ed',
-    base0B = '#cde8f0',
-    base0C = '#b3a7d8',
-    base0D = '#a1d0de',
-    base0E = '#a3b1dc',
-    base0F = '#c8d0ea',
+    base09 = '#9e70c2',
+    base0A = '#706bc7',
+    base0B = '#75a0d7',
+    base0C = '#c2a6d9',
+    base0D = '#a1bcde',
+    base0E = '#a6a3dc',
+    base0F = '#c9c8ea',
   })
 
   local hi = function(group, opts)
     vim.api.nvim_set_hl(0, group, opts)
   end
 
-  local editor_background = vim.g.neovide and '#1a2123' or 'NONE'
+  local editor_background = vim.g.neovide and '#1a1e23' or 'NONE'
   if vim.g.neovide then
     -- GUI cells need an explicit theme background, including empty/gutter areas.
-    hi('Normal', { fg = '#f2f3f3', bg = editor_background })
+    hi('Normal', { fg = '#f2f2f3', bg = editor_background })
     hi('NormalNC', { link = 'Normal' })
-    hi('EndOfBuffer', { fg = '#5f6c6f', bg = editor_background })
-    vim.g.neovide_title_background_color = '#1a2123'
-    vim.g.neovide_title_text_color = '#f2f3f3'
+    hi('EndOfBuffer', { fg = '#616971', bg = editor_background })
+    vim.g.neovide_title_background_color = '#1a1e23'
+    vim.g.neovide_title_text_color = '#f2f2f3'
   end
 
   -- Window & Split chrome
-  hi('WinSeparator',            { fg = '#263236', bg = 'NONE' })
-  hi('VertSplit',               { fg = '#263236', bg = 'NONE' })
-  hi('CursorLine',              { bg = '#2b373b' })
-  hi('CursorLineNr',            { fg = '#d0d7ed',             bold = true })
-  hi('LineNr',                  { fg = '#5f6c6f' })
+  hi('WinSeparator',            { fg = '#262d36', bg = 'NONE' })
+  hi('VertSplit',               { fg = '#262d36', bg = 'NONE' })
+  hi('CursorLine',              { bg = '#2b323b' })
+  hi('CursorLineNr',            { fg = '#706bc7',             bold = true })
+  hi('LineNr',                  { fg = '#616971' })
   hi('SignColumn',              { bg = editor_background })
 
   -- NvimTree: retain the GUI theme surface; terminals inherit their background.
-  hi('NvimTreeNormal',          { fg = '#f2f3f3',            bg = editor_background })
-  hi('NvimTreeNormalNC',        { fg = '#f2f3f3',            bg = editor_background })
-  hi('NvimTreeEndOfBuffer',     { fg = '#5f6c6f',               bg = editor_background })
-  hi('NvimTreeWinSeparator',    { fg = '#5a6d73',       bg = 'NONE' })
-  hi('NvimTreeCursorLine',      { bg = '#2b373b' })
-  hi('NvimTreeRootFolder',      { fg = '#cde8f0',               bold = true })
-  hi('NvimTreeFolderName',      { fg = '#afb5b6' })
-  hi('NvimTreeOpenedFolderName',{ fg = '#f2f3f3',            bold = true })
-  hi('NvimTreeFolderIcon',      { fg = '#d8d2eb' })
-  hi('NvimTreeOpenedFolderIcon',{ fg = '#d0d7ed' })
-  hi('NvimTreeIndentMarker',    { fg = '#5f6c6f' })
+  hi('NvimTreeNormal',          { fg = '#f2f2f3',            bg = editor_background })
+  hi('NvimTreeNormalNC',        { fg = '#f2f2f3',            bg = editor_background })
+  hi('NvimTreeEndOfBuffer',     { fg = '#616971',               bg = editor_background })
+  hi('NvimTreeWinSeparator',    { fg = '#5e6977',       bg = 'NONE' })
+  hi('NvimTreeCursorLine',      { bg = '#2b323b' })
+  hi('NvimTreeRootFolder',      { fg = '#75a0d7',               bold = true })
+  hi('NvimTreeFolderName',      { fg = '#afb2b6' })
+  hi('NvimTreeOpenedFolderName',{ fg = '#f2f2f3',            bold = true })
+  hi('NvimTreeFolderIcon',      { fg = '#9e70c2' })
+  hi('NvimTreeOpenedFolderIcon',{ fg = '#706bc7' })
+  hi('NvimTreeIndentMarker',    { fg = '#616971' })
   hi('NvimTreeGitDeletedIcon',  { fg = '#fd4663' })
-  hi('NvimTreeGitDirtyIcon',    { fg = '#d0d7ed' })
-  hi('NvimTreeGitIgnoredIcon',  { fg = '#5f6c6f' })
-  hi('NvimTreeGitMergeIcon',    { fg = '#d8d2eb' })
-  hi('NvimTreeGitNewIcon',      { fg = '#cde8f0' })
-  hi('NvimTreeGitRenamedIcon',  { fg = '#b3a7d8' })
-  hi('NvimTreeGitStagedIcon',   { fg = '#cde8f0' })
+  hi('NvimTreeGitDirtyIcon',    { fg = '#706bc7' })
+  hi('NvimTreeGitIgnoredIcon',  { fg = '#616971' })
+  hi('NvimTreeGitMergeIcon',    { fg = '#9e70c2' })
+  hi('NvimTreeGitNewIcon',      { fg = '#75a0d7' })
+  hi('NvimTreeGitRenamedIcon',  { fg = '#c2a6d9' })
+  hi('NvimTreeGitStagedIcon',   { fg = '#75a0d7' })
   hi('NvimTreeGitFileDeletedHL',{ fg = '#fd4663' })
-  hi('NvimTreeGitFileDirtyHL',  { fg = '#d0d7ed' })
-  hi('NvimTreeGitFileIgnoredHL',{ fg = '#5f6c6f' })
-  hi('NvimTreeGitFileMergeHL',  { fg = '#d8d2eb' })
-  hi('NvimTreeGitFileNewHL',    { fg = '#cde8f0' })
-  hi('NvimTreeGitFileRenamedHL',{ fg = '#b3a7d8' })
-  hi('NvimTreeGitFileStagedHL', { fg = '#cde8f0' })
+  hi('NvimTreeGitFileDirtyHL',  { fg = '#706bc7' })
+  hi('NvimTreeGitFileIgnoredHL',{ fg = '#616971' })
+  hi('NvimTreeGitFileMergeHL',  { fg = '#9e70c2' })
+  hi('NvimTreeGitFileNewHL',    { fg = '#75a0d7' })
+  hi('NvimTreeGitFileRenamedHL',{ fg = '#c2a6d9' })
+  hi('NvimTreeGitFileStagedHL', { fg = '#75a0d7' })
 
   -- Floating Windows
-  hi('NormalFloat',             { fg = '#f2f3f3',             bg = '#2b373b' })
-  hi('FloatBorder',             { fg = '#5f6c6f',                bg = '#2b373b' })
-  hi('FloatTitle',              { fg = '#1b2122',                bg = '#cde8f0', bold = true })
+  hi('NormalFloat',             { fg = '#f2f2f3',             bg = '#2b323b' })
+  hi('FloatBorder',             { fg = '#616971',                bg = '#2b323b' })
+  hi('FloatTitle',              { fg = '#1b1e22',                bg = '#75a0d7', bold = true })
 
   -- Dialogs must not inherit the transparent Normal background.
   for _, group in ipairs({ 'NoiceCmdlinePopup', 'NoiceConfirm', 'NoiceMini', 'WhichKeyNormal' }) do
@@ -89,40 +89,40 @@ function M.setup()
     hi(group, { link = 'FloatBorder' })
   end
   for level, color in pairs({
-    ERROR = '#fd4663', WARN = '#d0d7ed',
-    INFO = '#d8d2eb', DEBUG = '#5f6c6f',
-    TRACE = '#cde8f0',
+    ERROR = '#fd4663', WARN = '#706bc7',
+    INFO = '#9e70c2', DEBUG = '#616971',
+    TRACE = '#75a0d7',
   }) do
     hi('Notify' .. level .. 'Body', { link = 'NormalFloat' })
-    hi('Notify' .. level .. 'Border', { fg = color, bg = '#2b373b' })
+    hi('Notify' .. level .. 'Border', { fg = color, bg = '#2b323b' })
     hi('Notify' .. level .. 'Icon', { link = 'Notify' .. level .. 'Border' })
     hi('Notify' .. level .. 'Title', { link = 'Notify' .. level .. 'Border' })
   end
 
   -- Popup & Autocompletion Menu (Pmenu)
-  hi('Pmenu',                   { fg = '#f2f3f3',             bg = '#2b373b' })
-  hi('PmenuSel',                { fg = '#1b2122',                bg = '#cde8f0', bold = true })
-  hi('PmenuSbar',               { bg = '#263236' })
-  hi('PmenuThumb',              { bg = '#5f6c6f' })
+  hi('Pmenu',                   { fg = '#f2f2f3',             bg = '#2b323b' })
+  hi('PmenuSel',                { fg = '#1b1e22',                bg = '#75a0d7', bold = true })
+  hi('PmenuSbar',               { bg = '#262d36' })
+  hi('PmenuThumb',              { bg = '#616971' })
 
   -- Diagnostics
   hi('DiagnosticError',         { fg = '#fd4663' })
-  hi('DiagnosticWarn',          { fg = '#d0d7ed' })
-  hi('DiagnosticInfo',          { fg = '#d8d2eb' })
-  hi('DiagnosticHint',          { fg = '#b3a7d8' })
+  hi('DiagnosticWarn',          { fg = '#706bc7' })
+  hi('DiagnosticInfo',          { fg = '#9e70c2' })
+  hi('DiagnosticHint',          { fg = '#c2a6d9' })
   hi('DiagnosticUnderlineError',{ sp = '#fd4663',                 undercurl = true })
-  hi('DiagnosticUnderlineWarn', { sp = '#d0d7ed',             undercurl = true })
-  hi('DiagnosticUnderlineInfo', { sp = '#d8d2eb',              undercurl = true })
-  hi('DiagnosticUnderlineHint', { sp = '#b3a7d8',    undercurl = true })
+  hi('DiagnosticUnderlineWarn', { sp = '#706bc7',             undercurl = true })
+  hi('DiagnosticUnderlineInfo', { sp = '#9e70c2',              undercurl = true })
+  hi('DiagnosticUnderlineHint', { sp = '#c2a6d9',    undercurl = true })
 
   -- Git Signs & Diffs
-  hi('GitSignsAdd',             { fg = '#cde8f0' })
-  hi('GitSignsChange',          { fg = '#d8d2eb' })
+  hi('GitSignsAdd',             { fg = '#75a0d7' })
+  hi('GitSignsChange',          { fg = '#9e70c2' })
   hi('GitSignsDelete',          { fg = '#fd4663' })
-  hi('DiffAdd',                 { fg = '#cde8f0',                bg = '#2b373b' })
-  hi('DiffChange',              { fg = '#d8d2eb',               bg = '#2b373b' })
-  hi('DiffDelete',              { fg = '#fd4663',                  bg = '#2b373b' })
-  hi('DiffText',                { fg = '#d0d7ed',              bg = '#263236', bold = true })
+  hi('DiffAdd',                 { fg = '#75a0d7',                bg = '#2b323b' })
+  hi('DiffChange',              { fg = '#9e70c2',               bg = '#2b323b' })
+  hi('DiffDelete',              { fg = '#fd4663',                  bg = '#2b323b' })
+  hi('DiffText',                { fg = '#706bc7',              bg = '#262d36', bold = true })
 
   -- Source Control uses the Noctalia surfaces and semantic diff colors.
   hi('DiffviewNormal',           { link = 'NvimTreeNormal' })
@@ -138,55 +138,55 @@ function M.setup()
   hi('DiffviewFilePanelDeletions',  { link = 'GitSignsDelete' })
 
   -- Indent Blankline
-  hi('IblIndent',               { fg = '#2b373b' })
-  hi('IblScope',                { fg = '#5f6c6f' })
+  hi('IblIndent',               { fg = '#2b323b' })
+  hi('IblScope',                { fg = '#616971' })
 
   -- Bufferline: one opaque surface, quiet inactive names, an accented selection.
-  hi('BufferLineFill',          { bg = '#1a2123' })
-  hi('BufferLineBackground',    { fg = '#5f6c6f', bg = '#1a2123' })
-  hi('BufferLineBufferVisible', { fg = '#f2f3f3', bg = '#1a2123' })
-  hi('BufferLineBufferSelected',{ fg = '#f2f3f3', bg = '#2b373b', bold = true })
+  hi('BufferLineFill',          { bg = '#1a1e23' })
+  hi('BufferLineBackground',    { fg = '#616971', bg = '#1a1e23' })
+  hi('BufferLineBufferVisible', { fg = '#f2f2f3', bg = '#1a1e23' })
+  hi('BufferLineBufferSelected',{ fg = '#f2f2f3', bg = '#2b323b', bold = true })
   for _, group in ipairs({ 'BufferLineSeparator', 'BufferLineSeparatorVisible', 'BufferLineSeparatorSelected' }) do
-    hi(group, { fg = '#1a2123', bg = '#1a2123' })
+    hi(group, { fg = '#1a1e23', bg = '#1a1e23' })
   end
   for _, part in ipairs({ 'Duplicate', 'CloseButton', 'Modified', 'Indicator' }) do
-    hi('BufferLine' .. part, { fg = '#5f6c6f', bg = '#1a2123' })
-    hi('BufferLine' .. part .. 'Visible', { fg = '#5f6c6f', bg = '#1a2123' })
-    hi('BufferLine' .. part .. 'Selected', { fg = '#cde8f0', bg = '#2b373b' })
+    hi('BufferLine' .. part, { fg = '#616971', bg = '#1a1e23' })
+    hi('BufferLine' .. part .. 'Visible', { fg = '#616971', bg = '#1a1e23' })
+    hi('BufferLine' .. part .. 'Selected', { fg = '#75a0d7', bg = '#2b323b' })
   end
 
   -- telescope.nvim
-  hi('TelescopeNormal',         { fg = '#f2f3f3',             bg = '#2b373b' })
-  hi('TelescopeBorder',         { fg = '#5f6c6f',                bg = '#2b373b' })
+  hi('TelescopeNormal',         { fg = '#f2f2f3',             bg = '#2b323b' })
+  hi('TelescopeBorder',         { fg = '#616971',                bg = '#2b323b' })
   hi('TelescopeResultsNormal',  { link = 'TelescopeNormal' })
   hi('TelescopeResultsBorder',  { link = 'TelescopeBorder' })
   hi('TelescopePreviewNormal',  { link = 'TelescopeNormal' })
   hi('TelescopePreviewBorder',  { link = 'TelescopeBorder' })
-  hi('TelescopePromptNormal',   { fg = '#f2f3f3',             bg = '#2b373b' })
-  hi('TelescopePromptBorder',   { fg = '#5f6c6f',                bg = '#2b373b' })
-  hi('TelescopePromptPrefix',   { fg = '#cde8f0',                bg = '#2b373b' })
-  hi('TelescopePromptCounter',  { fg = '#afb5b6',     bg = '#2b373b' })
-  hi('TelescopePromptTitle',    { fg = '#1b2122',                bg = '#cde8f0', bold = true })
-  hi('TelescopePreviewTitle',   { fg = '#1b2122',                bg = '#d0d7ed', bold = true })
-  hi('TelescopeResultsTitle',   { fg = '#1b2122',                bg = '#d8d2eb', bold = true })
-  hi('TelescopeSelection',      { fg = '#f2f3f3',             bg = '#263236' })
-  hi('TelescopeSelectionCaret', { fg = '#cde8f0',                bg = '#263236' })
-  hi('TelescopeMatching',       { fg = '#d0d7ed',              bold = true })
+  hi('TelescopePromptNormal',   { fg = '#f2f2f3',             bg = '#2b323b' })
+  hi('TelescopePromptBorder',   { fg = '#616971',                bg = '#2b323b' })
+  hi('TelescopePromptPrefix',   { fg = '#75a0d7',                bg = '#2b323b' })
+  hi('TelescopePromptCounter',  { fg = '#afb2b6',     bg = '#2b323b' })
+  hi('TelescopePromptTitle',    { fg = '#1b1e22',                bg = '#75a0d7', bold = true })
+  hi('TelescopePreviewTitle',   { fg = '#030407',                bg = '#706bc7', bold = true })
+  hi('TelescopeResultsTitle',   { fg = '#1a1c20',                bg = '#9e70c2', bold = true })
+  hi('TelescopeSelection',      { fg = '#f2f2f3',             bg = '#262d36' })
+  hi('TelescopeSelectionCaret', { fg = '#75a0d7',                bg = '#262d36' })
+  hi('TelescopeMatching',       { fg = '#706bc7',              bold = true })
 
   -- Flash.nvim: underline the current match; reserve filled primary for jump keys.
   hi('FlashMatch',   { link = 'TelescopeSelection' })
-  hi('FlashCurrent', { fg = '#d0d7ed', bg = '#263236', bold = true, underline = true })
-  hi('FlashLabel',   { fg = '#1b2122', bg = '#cde8f0', bold = true, nocombine = true })
+  hi('FlashCurrent', { fg = '#706bc7', bg = '#262d36', bold = true, underline = true })
+  hi('FlashLabel',   { fg = '#1b1e22', bg = '#75a0d7', bold = true, nocombine = true })
 
   -- mini.pick
-  hi('MiniPickNormal',          { fg = '#f2f3f3',             bg = '#1a2123' })
-  hi('MiniPickBorder',          { fg = '#5f6c6f',                bg = '#1a2123' })
-  hi('MiniPickPrompt',          { fg = '#f2f3f3',             bg = '#1a2123' })
-  hi('MiniPickPromptPrefix',    { fg = '#cde8f0',                bg = '#1a2123' })
-  hi('MiniPickBorderText',      { fg = '#1b2122',                bg = '#cde8f0' })
-  hi('MiniPickMatchCurrent',    { fg = '#f2f3f3',             bg = '#263236' })
-  hi('MiniPickPromptCaret',     { fg = '#cde8f0',                bg = '#263236' })
-  hi('MiniPickMatchRanges',     { fg = '#cde8f0',                bold = true })
+  hi('MiniPickNormal',          { fg = '#f2f2f3',             bg = '#1a1e23' })
+  hi('MiniPickBorder',          { fg = '#616971',                bg = '#1a1e23' })
+  hi('MiniPickPrompt',          { fg = '#f2f2f3',             bg = '#1a1e23' })
+  hi('MiniPickPromptPrefix',    { fg = '#75a0d7',                bg = '#1a1e23' })
+  hi('MiniPickBorderText',      { fg = '#1b1e22',                bg = '#75a0d7' })
+  hi('MiniPickMatchCurrent',    { fg = '#f2f2f3',             bg = '#262d36' })
+  hi('MiniPickPromptCaret',     { fg = '#75a0d7',                bg = '#262d36' })
+  hi('MiniPickMatchRanges',     { fg = '#75a0d7',                bold = true })
 
   -- Rebuild generated icon colors after all Noctalia highlights are applied.
   if package.loaded['bufferline'] then

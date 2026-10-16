@@ -23,6 +23,7 @@
 # Override the inherited quit shortcut to prevent accidental exits while remote.
 "Mod+Escape" = { action = "spawn:true", repeat = false }
 "Mod+BackSpace" = "spawn:noctalia msg session lock"
+"Mod+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
 "Mod+N" = "spawn:noctalia msg panel-toggle notifications"
 "Mod+Shift+N" = "spawn:noctalia msg notification-dnd-toggle"
 "Mod+Shift+I" = "spawn:noctalia msg caffeine-toggle"

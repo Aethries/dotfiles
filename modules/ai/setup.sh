@@ -20,6 +20,7 @@ TARGET_SKILL_DIRS=(
 	"$HOME/.gemini/antigravity-cli/skills"
 	"$HOME/.gemini/antigravity/skills"
 	"$HOME/.codex/skills"
+	"$HOME/.claude/skills"
 )
 
 # 1. Clean up dangling and obsolete skill symlinks in target skill directories

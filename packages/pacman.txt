@@ -37,12 +37,14 @@ zoxide
 eza
 bat
 bottom
+btop
 lazygit
 lazydocker
 trash-cli
 tealdeer
 dust
 duf
+gdu
 gping
 git-delta
 fastfetch
@@ -72,6 +74,7 @@ entr
 thefuck
 jnv
 doggo
+ast-grep
 
 # Fonts
 ttf-jetbrains-mono-nerd
