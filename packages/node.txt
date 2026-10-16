@@ -2,5 +2,8 @@
 9remote@latest
 @vudovn/ag-kit@latest
 @openai/codex@latest
+@anthropic-ai/claude-code@latest
+@ast-grep/cli@latest
+repomix@latest
 wrangler@latest
 eas-cli@latest

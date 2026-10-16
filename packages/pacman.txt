@@ -104,6 +104,7 @@ docker
 docker-compose
 docker-buildx
 godot
+opencode
 
 # Mobile Development
 android-tools
@@ -132,6 +133,7 @@ gnome-keyring
 libsecret
 seahorse
 wl-clipboard
+wtype
 libnotify
 xwayland-satellite
 pipewire
@@ -145,6 +147,7 @@ fcitx5
 fcitx5-gtk
 fcitx5-qt
 fcitx5-configtool
+fcitx5-bamboo
 grim
 slurp
 hyprpicker

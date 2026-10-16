@@ -1,0 +1,75 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=working&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=working&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=working&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=done&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=blocked&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "csid=$(cat 2>/dev/null | sed -n 's/.*\"session_id\" *: *\"\\([^\"]*\\)\".*/\\1/p'); command -v curl >/dev/null 2>&1 && curl -s --connect-timeout 1 --max-time 2 \"http://localhost:2208/api/notify?type=blocked&sessionId=$NINE_REMOTE_SESSION_ID&csid=$csid&tool=claude\" > /dev/null 2>&1 & true",
+            "timeout": 5000
+          }
+        ],
+        "matcher": "permission_prompt"
+      }
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN": "1"
+  },
+  "theme": "noctalia"
+}

@@ -32,14 +32,14 @@
       ]
     },
     "jev-local": {
-      "command": "/home/loc/.local/bin/jev-mcp",
+      "command": "jev-mcp",
       "env": {
         "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
         "JEV_MODEL": "oc/jev-1.13-free"
       }
     },
     "jira": {
-      "command": "/home/loc/.local/share/mise/shims/npx",
+      "command": "npx",
       "args": [
         "-y",
         "mcp-remote",

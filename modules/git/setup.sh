@@ -70,8 +70,7 @@ if [[ -f "$SSH_PUB_KEY" ]]; then
 	fi
 	success "SSH signing key detected: $SSH_PUB_KEY"
 else
-	warn "No SSH signing key found at $SSH_PUB_KEY."
-	warn "Generate one using: ssh-keygen -t ed25519 -C \"your.email@example.com\""
+	log "No SSH signing key found at $SSH_PUB_KEY (commit signing disabled)"
 fi
 
 # Configure GPG agent pinentry for GUI Wayland prompt

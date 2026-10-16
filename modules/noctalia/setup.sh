@@ -29,20 +29,33 @@ else
 	mkdir -p "$HOME/.config/noctalia/plugins"
 fi
 
-local_settings="$HOME/.local/state/noctalia/settings.toml"
-if [[ -L "$local_settings" ]]; then
-	rm -f "$local_settings"
+if [[ -d "$MODULE_DIR/files/palettes" ]]; then
+	link_dir \
+		"$MODULE_DIR/files/palettes" \
+		"$HOME/.config/noctalia/palettes"
 fi
-if [[ ! -f "$local_settings" ]]; then
-	sed "s|@HOME@|$HOME|g" "$MODULE_DIR/files/settings.toml" > "$local_settings"
-	echo " $local_settings (rendered from template)"
+
+if [[ -f "$MODULE_DIR/files/settings.toml" ]]; then
+	sed -i -E "s|@HOME@|$HOME|g" "$MODULE_DIR/files/settings.toml"
+	sed -i -E "s|/home/[a-zA-Z0-9._-]+/Pictures/|$HOME/Pictures/|g" "$MODULE_DIR/files/settings.toml"
 fi
+
+link_file \
+	"$MODULE_DIR/files/settings.toml" \
+	"$HOME/.local/state/noctalia/settings.toml"
 
 if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
 	mkdir -p "$HOME/Pictures"
 	link_dir \
 		"$DOTFILES/resources/static/wallpapers" \
 		"$HOME/Pictures/Wallpapers"
+
+	for wp in "$DOTFILES/resources/static/wallpapers"/*; do
+		if [[ -f "$wp" ]]; then
+			wp_name="$(basename "$wp")"
+			link_file "$wp" "$HOME/Pictures/$wp_name"
+		fi
+	done
 fi
 
 # Hide unwanted applications from Noctalia launcher

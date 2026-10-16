@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "matugen",
+  "mcp": {
+    "9remote": {
+      "type": "remote",
+      "url": "http://127.0.0.1:2208/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer 2020242f19df505c177f091dcb24365c707ba5332470e3ce8e50c04665408933",
+        "x-9remote-session": "{env:NINE_REMOTE_SESSION_ID}"
+      }
+    }
+  }
+}

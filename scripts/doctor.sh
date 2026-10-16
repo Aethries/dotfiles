@@ -118,7 +118,7 @@ fi
 
 # 3. Portability Integrity
 echo -e "\n${BOLD}[3/5] Portability & Hardcode Check${RESET}"
-tracked_home_loc=$(cd "$DOTFILES" && git grep -n "/home/loc" 2>/dev/null || true)
+tracked_home_loc=$(cd "$DOTFILES" && git grep -n "/home/""loc" -- ':!scripts/doctor.sh' ':!tests/test_provisioning.sh' 2>/dev/null || true)
 if [[ -z "$tracked_home_loc" ]]; then
 	report_pass "Zero hardcoded '/home/loc' literals in git-tracked source"
 else

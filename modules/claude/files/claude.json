@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "9remote": {
+      "type": "http",
+      "url": "http://127.0.0.1:2208/mcp",
+      "headers": {
+        "Authorization": "Bearer 2020242f19df505c177f091dcb24365c707ba5332470e3ce8e50c04665408933",
+        "x-9remote-session": "${NINE_REMOTE_SESSION_ID}"
+      }
+    }
+  }
+}

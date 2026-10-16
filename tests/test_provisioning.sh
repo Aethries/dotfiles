@@ -128,7 +128,7 @@ pass_count=$((pass_count + 1))
 
 
 echo -e "\n${BLUE}${BOLD}=== TEST 4: F04 (Zero Hardcoded /home/loc & Dynamic Discovery) ===${RESET}"
-loc_matches=$(git grep "/home/loc" || true)
+loc_matches=$(git grep "/home/""loc" -- ':!scripts/doctor.sh' ':!tests/test_provisioning.sh' || true)
 assert_eq "Zero /home/loc in git tracked files" "$loc_matches" ""
 
 python3 -c "import tomllib; tomllib.loads(open('$DOTFILES/modules/codex/files/config.toml', 'rb').read().decode('utf-8'))"

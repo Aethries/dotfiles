@@ -128,30 +128,30 @@ wallpaper_scheme = "soft"
     builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4", "qt", "kcolorscheme", "btop" ]
     community_ids = [
         "antigravity",
-        "bat",
         "claude-code",
         "codex",
+        "ungoogled-chromium",
+        "zen-browser",
+        "telegram",
+        "obsidian",
+        "vscode",
         "fastfetch",
+        "zellij",
         "fcitx5",
+        "bat",
         "fzf",
         "lazygit",
-        "obsidian",
         "superfile",
-        "telegram",
-        "ungoogled-chromium",
-        "vscode",
-        "yazi",
-        "zellij",
-        "zen-browser"
+        "yazi"
     ]
     enable_builtin_templates = true
     enable_community_templates = true
 
 [wallpaper.default]
-path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-6lw5ll.jpg"
 
 [wallpaper.last]
-path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-6lw5ll.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "@HOME@/Pictures/wallhaven-7j2mo3.jpg"
+path = "@HOME@/Pictures/wallhaven-6lw5ll.jpg"

@@ -4,3 +4,8 @@
 input_path = "$XDG_CONFIG_HOME/nvim/matugen-template.lua"
 output_path = "$XDG_CONFIG_HOME/nvim/lua/matugen.lua"
 post_hook = "pkill -SIGUSR1 nvim || true"
+
+[theme.templates.user.opencode]
+input_path = "$XDG_CONFIG_HOME/opencode/matugen-template.json"
+output_path = "$XDG_CONFIG_HOME/opencode/themes/matugen.json"
+post_hook = "pkill -SIGUSR2 -f opencode || true"
