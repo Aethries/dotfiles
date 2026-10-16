@@ -207,10 +207,10 @@ alias clip-clear="noctalia msg clipboard-clear"
 alias n='nvim'
 alias v='nvim'
 alias n.='nvim .'
-alias code='antigravity-ide'
-alias ide='antigravity-ide'
+alias code='code'
+alias ide='code'
 alias c.='antigravity-ide .'
-alias code.='antigravity-ide .'
+alias code.='code .'
 alias c='clear'
 
 # Neovide GUI launcher (fully detached from terminal, immune to terminal closing)

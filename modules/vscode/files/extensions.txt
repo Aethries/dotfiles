@@ -12,6 +12,7 @@ foxundermoon.shell-format
 geequlim.godot-tools
 github.vscode-github-actions
 golang.go
+google.google-antigravity
 jnoortheen.nix-ide
 ms-azuretools.vscode-containers
 ms-azuretools.vscode-docker
