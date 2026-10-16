@@ -4,6 +4,16 @@
 
 onboarding = false
 
+# ------------------------------------------------------------------------------
+# Session Persistence & Layout Auto-Restore
+# ------------------------------------------------------------------------------
+[session]
+resume_agents_on_restore = true
+startup_per_agent_delay_ms = 100
+
+[experimental]
+pane_history = true
+
 [ui.toast]
 delivery = "system"
 
@@ -37,3 +47,63 @@ teal = "#62bac6"
 mauve = "#c88bda"
 peach = "#e2a478"
 
+# ------------------------------------------------------------------------------
+# Keybindings (Neovim-Centric & Direct Navigation)
+# ------------------------------------------------------------------------------
+[keys]
+prefix = "ctrl+space"
+
+# 1. Điều hướng & Quản lý Pane
+focus_pane_left = "alt+h"
+focus_pane_down = "alt+j"
+focus_pane_up = "alt+k"
+focus_pane_right = "alt+l"
+
+split_vertical = "alt+v"
+split_horizontal = "alt+s"
+close_pane = "alt+w"
+zoom = "alt+z"
+resize_mode = "alt+r"
+
+swap_pane_left = "alt+shift+left"
+swap_pane_right = "alt+shift+right"
+swap_pane_up = "alt+shift+up"
+swap_pane_down = "alt+shift+down"
+
+# 2. Quản lý Tab
+previous_tab = "alt+shift+h"
+next_tab = "alt+shift+l"
+move_tab_previous = "alt+ctrl+h"
+move_tab_next = "alt+ctrl+l"
+new_tab = "alt+t"
+close_tab = "alt+q"
+switch_tab = "alt+1..9"
+
+# 3. Quản lý Workspace
+previous_workspace = "alt+["
+next_workspace = "alt+]"
+new_workspace = "alt+shift+n"
+close_workspace = "alt+shift+d"
+workspace_picker = "alt+shift+s"
+switch_workspace = "alt+shift+1..9"
+
+# 4. Agent & Điều hướng nhanh
+goto = "alt+g"
+toggle_sidebar = "alt+b"
+previous_agent = "alt+p"
+next_agent = "alt+n"
+
+# 5. Đổi tên (Rename)
+rename_tab = "alt+shift+t"
+rename_pane = "alt+shift+p"
+rename_workspace = "alt+shift+w"
+
+# 6. Tiện ích
+copy_mode = "alt+c"
+
+[[keys.command]]
+key = "alt+ctrl+g"
+type = "popup"
+command = "lazygit"
+width = "85%"
+height = "85%"
