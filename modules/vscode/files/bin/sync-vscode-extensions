@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Determine DOTFILES directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+EXT_FILE="$DOTFILES/modules/vscode/files/extensions.txt"
+
+# Fallback if script is run directly from symlink in ~/.local/bin
+if [[ ! -f "$EXT_FILE" ]]; then
+	REAL_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+	REAL_DIR="$(dirname "$REAL_PATH")"
+	DOTFILES="$(cd "$REAL_DIR/../../../.." && pwd)"
+	EXT_FILE="$DOTFILES/modules/vscode/files/extensions.txt"
+fi
+
+if ! command -v code >/dev/null 2>&1; then
+	echo "Error: 'code' CLI is not installed or not in PATH." >&2
+	exit 1
+fi
+
+function get_installed_extensions() {
+	code --list-extensions 2>/dev/null | grep -E -v '^(noctalia\.noctaliatheme|Warning:|$)' | sort -u
+}
+
+function export_extensions() {
+	echo "Syncing installed VS Code extensions -> $EXT_FILE..."
+	local current_exts
+	current_exts="$(get_installed_extensions)"
+
+	if [[ -z "$current_exts" ]]; then
+		echo "Warning: No extensions found from 'code --list-extensions'." >&2
+		exit 1
+	fi
+
+	local count
+	count="$(echo "$current_exts" | wc -l)"
+
+	echo "$current_exts" > "$EXT_FILE"
+	echo "✓ Updated $EXT_FILE ($count extensions saved)."
+}
+
+function install_extensions() {
+	if [[ ! -f "$EXT_FILE" ]]; then
+		echo "Error: $EXT_FILE does not exist." >&2
+		exit 1
+	fi
+
+	echo "Installing extensions from $EXT_FILE -> VS Code..."
+	local installed
+	installed="$(get_installed_extensions || true)"
+
+	while read -r ext; do
+		[[ -z "$ext" || "$ext" =~ ^# ]] && continue
+		if ! echo "$installed" | grep -Fqi "$ext"; then
+			echo "Installing: $ext"
+			code --install-extension "$ext" || true
+		else
+			echo "Already installed: $ext"
+		fi
+	done < "$EXT_FILE"
+	echo "✓ Installation complete."
+}
+
+case "${1:-dump}" in
+	dump|save|export)
+		export_extensions
+		;;
+	install|load|apply|-i|--install)
+		install_extensions
+		;;
+	-h|--help|help)
+		echo "Usage: $(basename "$0") [dump|install]"
+		echo ""
+		echo "Commands:"
+		echo "  dump, save, export    (Default) Save installed VS Code extensions to dotfiles"
+		echo "  install, load, apply  Install all extensions listed in dotfiles to VS Code"
+		;;
+	*)
+		export_extensions
+		;;
+esac

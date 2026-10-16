@@ -32,7 +32,7 @@
       ]
     },
     "jev-local": {
-      "command": "jev-mcp",
+      "command": "/home/loc/.gemini/antigravity-cli/bin/jev-mcp",
       "env": {
         "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
         "JEV_MODEL": "oc/jev-1.13-free"

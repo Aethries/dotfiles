@@ -41,4 +41,15 @@ if ! command_exists codex; then
 	fi
 fi
 
+# Ensure ~/.local/bin/codex symlink exists so desktop GUI apps (e.g. Codex Desktop) can find it
+mkdir -p "$HOME/.local/bin"
+if [[ -f "$HOME/.local/share/mise/shims/codex" ]]; then
+	link_file "$HOME/.local/share/mise/shims/codex" "$HOME/.local/bin/codex"
+elif command_exists codex; then
+	codex_bin="$(command -v codex)"
+	if [[ "$codex_bin" != "$HOME/.local/bin/codex" ]]; then
+		link_file "$codex_bin" "$HOME/.local/bin/codex"
+	fi
+fi
+
 success "Codex configured"

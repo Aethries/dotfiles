@@ -1,5 +1,6 @@
 bradlc.vscode-tailwindcss
 chakrounanas.turbo-console-log
+christian-kohler.path-intellisense
 davidanson.vscode-markdownlint
 dbaeumer.vscode-eslint
 eamodio.gitlens
@@ -14,13 +15,13 @@ golang.go
 jnoortheen.nix-ide
 ms-azuretools.vscode-containers
 ms-azuretools.vscode-docker
+openai.chatgpt
+openai.codex-audio
 pkief.material-icon-theme
 prisma.prisma
-simkimsia.custom-local-formatters
+streetsidesoftware.code-spell-checker
 styled-components.vscode-styled-components
 sumneko.lua
 tamasfe.even-better-toml
 usernamehw.errorlens
 yoavbls.pretty-ts-errors
-streetsidesoftware.code-spell-checker
-christian-kohler.path-intellisense

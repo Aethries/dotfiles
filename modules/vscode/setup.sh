@@ -74,4 +74,16 @@ if command_exists code && [[ -f "$MODULE_DIR/files/extensions.txt" ]]; then
 	done < "$MODULE_DIR/files/extensions.txt"
 fi
 
+# Link extension sync utility
+mkdir -p "$HOME/.local/bin"
+if [[ -f "$MODULE_DIR/files/bin/sync-vscode-extensions" ]]; then
+	chmod +x "$MODULE_DIR/files/bin/sync-vscode-extensions"
+	link_file \
+		"$MODULE_DIR/files/bin/sync-vscode-extensions" \
+		"$HOME/.local/bin/sync-vscode-extensions"
+	link_file \
+		"$MODULE_DIR/files/bin/sync-vscode-extensions" \
+		"$HOME/.local/bin/sync-vscode"
+fi
+
 success "VS Code configured"
