@@ -75,7 +75,7 @@ BROWSER_USE_CODEX_APP_VERSION = "26.707.31428"
 approval_mode = "approve"
 
 [desktop]
-followUpQueueMode = "steer"
+followUpQueueMode = "queue"
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = false
 preventSleepWhileRunning = true
@@ -87,8 +87,11 @@ appearanceTheme = "dark"
 appearanceDarkCodeThemeId = "xcode"
 usePointerCursors = true
 reduced-motion-preference = "on"
-enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "persistent"]
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "max"]
 browser-show-full-url = false
+defaultTerminalLocation = "bottom"
+show-context-window-usage = true
+composerEnterBehavior = "enter"
 
 [desktop.appearanceDarkChromeTheme]
 accent = "#75a0d7"
