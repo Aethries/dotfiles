@@ -20,6 +20,7 @@ openai.chatgpt
 openai.codex-audio
 pkief.material-icon-theme
 prisma.prisma
+sst-dev.opencode
 streetsidesoftware.code-spell-checker
 styled-components.vscode-styled-components
 sumneko.lua
