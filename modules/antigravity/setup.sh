@@ -74,4 +74,22 @@ link_file \
 	"$MODULE_DIR/files/mcp_config.json" \
 	"$HOME/.gemini/config/mcp_config.json"
 
+# Install and synchronize Antigravity IDE extensions
+if [[ -f "$MODULE_DIR/files/bin/sync-antigravity-extensions" ]]; then
+	log "Synchronizing Antigravity IDE extensions"
+	bash "$MODULE_DIR/files/bin/sync-antigravity-extensions" install || warn "Extension sync encountered issues"
+fi
+
+# Link extension sync utility
+mkdir -p "$HOME/.local/bin"
+if [[ -f "$MODULE_DIR/files/bin/sync-antigravity-extensions" ]]; then
+	chmod +x "$MODULE_DIR/files/bin/sync-antigravity-extensions"
+	link_file \
+		"$MODULE_DIR/files/bin/sync-antigravity-extensions" \
+		"$HOME/.local/bin/sync-antigravity-extensions"
+	link_file \
+		"$MODULE_DIR/files/bin/sync-antigravity-extensions" \
+		"$HOME/.local/bin/sync-antigravity"
+fi
+
 success "Antigravity IDE configured"

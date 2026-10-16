@@ -24,6 +24,15 @@ link_file \
 	"$MODULE_DIR/files/20-9router.conf" \
 	"$HOME/.config/environment.d/20-9router.conf"
 
+# Link 9router MITM CLI utility
+mkdir -p "$HOME/.local/bin"
+link_file \
+	"$DOTFILES/scripts/9router-mitm.sh" \
+	"$HOME/.local/bin/9router-mitm"
+link_file \
+	"$DOTFILES/scripts/9router-mitm.sh" \
+	"$HOME/.local/bin/9r-mitm"
+
 # Sync Root CA certificate if present
 CERT_SRC="$MODULE_DIR/files/certs/9router-rootCA.crt"
 CERT_DEST="$HOME/.9router/mitm/rootCA.crt"
@@ -33,39 +42,55 @@ if [[ -f "$CERT_SRC" && ! -f "$CERT_DEST" ]]; then
 	success "Synchronized 9router Root CA to $CERT_DEST"
 fi
 
-# Install Root CA into system trust store (Arch Linux)
-if [[ -f "$CERT_SRC" ]] && command_exists update-ca-trust; then
-	log "Updating system trust store with 9router Root CA"
-	sudo cp "$CERT_SRC" /etc/ca-certificates/trust-source/anchors/9router-rootCA.crt
-	sudo update-ca-trust
-	success "System trust store updated"
-fi
-
-# Configure capability on Node.js binary for MITM port 443 binding without root
-NODE_BIN="$(command -v node 2>/dev/null || true)"
-if [[ -n "$NODE_BIN" ]] && command_exists setcap; then
-	RESOLVED_NODE="$(readlink -f "$NODE_BIN")"
-	log "Configuring network capabilities for Node.js: $RESOLVED_NODE"
-	sudo setcap 'cap_net_bind_service=+ep' "$RESOLVED_NODE" 2>/dev/null || warn "Failed to set cap_net_bind_service on node binary"
-	success "cap_net_bind_service capability configured"
-fi
-
-# Configure loopback DNS entries in /etc/hosts for MITM endpoints
-log "Checking 9router MITM DNS entries in /etc/hosts"
-REQUIRED_HOSTS=(
-	"127.0.0.1 daily-cloudcode-pa.googleapis.com"
-	"127.0.0.1 cloudcode-pa.googleapis.com"
-)
-for entry in "${REQUIRED_HOSTS[@]}"; do
-	domain="$(echo "$entry" | awk '{print $2}')"
-	if grep -qE "(^|\s)$domain(\s|$)" /etc/hosts; then
-		success "DNS entry already present: $domain"
-	else
-		log "Adding $domain to /etc/hosts"
-		echo "$entry" | sudo tee -a /etc/hosts >/dev/null
-		success "Added $domain to /etc/hosts"
+# Manage Root CA and loopback DNS entries only if MITM is not explicitly disabled
+DISABLED_MARKER="$HOME/.9router/mitm/.disabled"
+if [[ -f "$DISABLED_MARKER" ]]; then
+	log "9router MITM is disabled ($DISABLED_MARKER exists). Skipping system CA trust and /etc/hosts injection."
+else
+	# Install Root CA into system trust store (Arch Linux)
+	if [[ -f "$CERT_SRC" ]] && command_exists update-ca-trust; then
+		if sudo -n true 2>/dev/null; then
+			log "Updating system trust store with 9router Root CA"
+			sudo -n cp "$CERT_SRC" /etc/ca-certificates/trust-source/anchors/9router-rootCA.crt 2>/dev/null || true
+			sudo -n update-ca-trust 2>/dev/null || true
+			success "System trust store updated"
+		else
+			warn "Sudo session not active; run 'sudo 9router-mitm start' if system CA trust is needed"
+		fi
 	fi
-done
+
+	# Configure capability on Node.js binary for MITM port 443 binding without root
+	NODE_BIN="$(command -v node 2>/dev/null || true)"
+	if [[ -n "$NODE_BIN" ]] && command_exists setcap; then
+		RESOLVED_NODE="$(readlink -f "$NODE_BIN")"
+		if sudo -n true 2>/dev/null; then
+			log "Configuring network capabilities for Node.js: $RESOLVED_NODE"
+			sudo -n setcap 'cap_net_bind_service=+ep' "$RESOLVED_NODE" 2>/dev/null || warn "Failed to set cap_net_bind_service on node binary"
+			success "cap_net_bind_service capability configured"
+		fi
+	fi
+
+	# Configure loopback DNS entries in /etc/hosts for MITM endpoints
+	log "Checking 9router MITM DNS entries in /etc/hosts"
+	REQUIRED_HOSTS=(
+		"127.0.0.1 daily-cloudcode-pa.googleapis.com"
+		"127.0.0.1 cloudcode-pa.googleapis.com"
+	)
+	for entry in "${REQUIRED_HOSTS[@]}"; do
+		domain="$(echo "$entry" | awk '{print $2}')"
+		if grep -qE "(^|\s)$domain(\s|$)" /etc/hosts 2>/dev/null; then
+			success "DNS entry already present: $domain"
+		else
+			if sudo -n true 2>/dev/null; then
+				log "Adding $domain to /etc/hosts"
+				echo "$entry" | sudo -n tee -a /etc/hosts >/dev/null 2>&1 || true
+				success "Added $domain to /etc/hosts"
+			else
+				warn "Sudo session not active; run 'sudo 9router-mitm start' to add $domain to /etc/hosts"
+			fi
+		fi
+	done
+fi
 
 # Enable systemd user service
 if command_exists systemctl; then

@@ -28,14 +28,15 @@ if [[ -f "$HOME/.npmrc" ]]; then
 	sed -i -E '/^\s*(prefix|globalconfig)\s*=/d' "$HOME/.npmrc"
 fi
 
-# Install default tools defined in ~/.config/mise/config.toml
-log "Installing default runtimes configured in ~/.config/mise/config.toml"
+# Install & update default tools defined in ~/.config/mise/config.toml
+log "Installing and updating runtimes configured in ~/.config/mise/config.toml to latest"
 mise install --yes || warn "mise install encountered warnings or incomplete downloads"
+mise upgrade --yes || warn "mise upgrade encountered warnings"
 
 # Global npm packages
 NODE_PACKAGES_FILE="$DOTFILES/packages/node.txt"
 if [[ -f "$NODE_PACKAGES_FILE" ]]; then
-	log "Installing npm packages from packages/node.txt via mise"
+	log "Installing and updating npm packages from packages/node.txt via mise"
 
 	mapfile -t packages < <(
 		grep -vE '^\s*(#|$)' "$NODE_PACKAGES_FILE"

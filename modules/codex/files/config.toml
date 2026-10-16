@@ -60,8 +60,8 @@ startup_timeout_sec = 120
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
 NODE_REPL_NODE_MODULE_DIRS = ""
 NODE_REPL_NODE_PATH = "/opt/codex-desktop/resources/node-runtime/bin/node"
-NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
-CODEX_HOME = "/home/loc/.codex"
+NODE_REPL_TRUSTED_CODE_PATHS = "~/.codex"
+CODEX_HOME = "~/.codex"
 NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,c8b7e809d7cf9e20a57123b2530d476ccec9a01a6230a7b2b924fea7d94d7f4a,505eba02c6eed6bcc3f2883e6c705c3377eef8c172bb2d99c909134b0da6e57d,0c77a3b75646e46fa857011b4cde14be2f580b5655461b7c0aabf54f86fc6781"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
@@ -154,12 +154,15 @@ enabled = true
 
 [marketplaces.openai-bundled]
 source_type = "local"
-source = "/home/loc/.codex/.tmp/bundled-marketplaces/openai-bundled"
+source = "~/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [shell_environment_policy.set]
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "028a14b6eaa6d98dac2aae00764345ab9f244801ed8493d42b9af3be5575006e,f204d340535055781952b10ed396de20b842f00a19e430852f7e121ad1ce91f6"
-NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
+NODE_REPL_TRUSTED_CODE_PATHS = "~/.codex"
+
+[projects."~/Workspaces/dotfiles"]
+trust_level = "trusted"
 
 
 

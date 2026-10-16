@@ -36,7 +36,7 @@ install_pacman_packages() {
 
 # AUR 
 install_aur_packages() {
-	log "Installing AUR packages"
+	log "Installing and updating AUR packages"
 
 	if ! command_exists yay; then
 		error "yay is not installed"
@@ -48,7 +48,7 @@ install_aur_packages() {
 		return
 	fi
 
-	# Filter out already installed packages to prevent excessive AUR RPC requests and rate limiting
+	# Filter out already installed packages to install any missing ones first
 	local missing_packages=()
 	for pkg in "${packages[@]}"; do
 		if ! pacman -Q "$pkg" >/dev/null 2>&1; then
@@ -56,26 +56,26 @@ install_aur_packages() {
 		fi
 	done
 
-	if [[ "${#missing_packages[@]}" -eq 0 ]]; then
-		success "All AUR packages are already installed"
-		return
-	fi
-
-	log "Found ${#missing_packages[@]} missing AUR package(s): ${missing_packages[*]}"
 	local failed_packages=()
-	for pkg in "${missing_packages[@]}"; do
-		log "Installing AUR package: $pkg"
-		if ! yay -S --needed --noconfirm --sudoloop "$pkg"; then
-			warn "Failed to install AUR package '$pkg', continuing with next package"
-			failed_packages+=("$pkg")
-		fi
-	done
+	if [[ "${#missing_packages[@]}" -gt 0 ]]; then
+		log "Found ${#missing_packages[@]} missing AUR package(s): ${missing_packages[*]}"
+		for pkg in "${missing_packages[@]}"; do
+			log "Installing AUR package: $pkg"
+			if ! yay -S --needed --noconfirm --sudoloop "$pkg"; then
+				warn "Failed to install AUR package '$pkg', continuing with next package"
+				failed_packages+=("$pkg")
+			fi
+		done
+	fi
 
 	if [[ "${#failed_packages[@]}" -gt 0 ]]; then
 		error "Failed to install AUR package(s): ${failed_packages[*]}"
 	fi
 
-	success "AUR package installation completed"
+	log "Upgrading AUR packages to latest"
+	yay -Sua --noconfirm --sudoloop || warn "AUR upgrade encountered warnings"
+
+	success "AUR package installation and upgrade completed"
 }
 
 # Main

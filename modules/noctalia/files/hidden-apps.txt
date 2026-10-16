@@ -28,8 +28,6 @@ org.fcitx.fcitx5-qt6-gui-wrapper.desktop
 fcitx5-wayland-launcher.desktop
 org.fcitx.Fcitx5.desktop
 
-# Internal URL Handlers & Background Tray tasks
-antigravity-ide-url-handler.desktop
-com.microsoft.VSCode.UrlHandler.desktop
+# Background Tray tasks
 com.cloudflare.warp.desktop
 com.cloudflare.WarpTaskbar.desktop

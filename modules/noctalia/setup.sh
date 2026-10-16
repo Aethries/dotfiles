@@ -36,8 +36,7 @@ if [[ -d "$MODULE_DIR/files/palettes" ]]; then
 fi
 
 if [[ -f "$MODULE_DIR/files/settings.toml" ]]; then
-	sed -i -E "s|@HOME@|$HOME|g" "$MODULE_DIR/files/settings.toml"
-	sed -i -E "s|/home/[a-zA-Z0-9._-]+/Pictures/|$HOME/Pictures/|g" "$MODULE_DIR/files/settings.toml"
+	sed -i -E "s|/home/[a-zA-Z0-9._-]+/Pictures/|@HOME@/Pictures/|g" "$MODULE_DIR/files/settings.toml"
 fi
 
 link_file \

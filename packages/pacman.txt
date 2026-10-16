@@ -75,6 +75,7 @@ thefuck
 jnv
 doggo
 ast-grep
+serpl
 
 # Fonts
 ttf-jetbrains-mono-nerd

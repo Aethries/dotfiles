@@ -89,7 +89,7 @@ fi
 
 # 2. Essential Symlinks & Utilities
 echo -e "\n${BOLD}[2/5] Symlinks & Local Binaries${RESET}"
-AI_UTILS=(rtk jev-mcp jev-preflight-hook)
+AI_UTILS=(rtk jev-mcp jev-preflight-hook 9router-mitm sync-antigravity-extensions)
 for u in "${AI_UTILS[@]}"; do
 	target="$HOME/.local/bin/$u"
 	if [[ -e "$target" ]]; then

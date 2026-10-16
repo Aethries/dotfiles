@@ -45,7 +45,5 @@ grpcurl-bin
 win2xcur
 google-cloud-cli
 watchman-bin
-serpl-bin
 lazysql-bin
-repomix-bin
 
