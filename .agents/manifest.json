@@ -763,6 +763,17 @@
       ],
       "version": "1.0.0"
     },
+    "herdr-pm": {
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash"
+      ],
+      "path": "skills/herdr-pm/SKILL.md",
+      "scripts": [],
+      "version": "1.0.0"
+    },
     "i18n-localization": {
       "allowedTools": [
         "Read",

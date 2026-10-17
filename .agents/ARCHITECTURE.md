@@ -9,7 +9,7 @@
 AG Kit is a modular Antigravity workspace system consisting of:
 
 - **20 Specialist Agents** — role-based AI personas and orchestration roles;
-- **47 Skills** — domain knowledge modules with progressive conditional loading;
+- **48 Skills** — domain knowledge modules with progressive conditional loading;
 - **13 Workflows** — slash-command procedures;
 - **6 Rules** — workspace routing, coding, design, safety, and quick-reference constraints;
 - **Antigravity runtime layer** — contract, native hook, MCP helper, plugin builder, Doctor, schemas, and tests.
@@ -52,7 +52,7 @@ Any managed change without registry regeneration fails validation and CI. Google
 ├── manifest.lock.json        # Generated integrity lock
 ├── DEPENDENCY_GRAPH.md       # Generated workflow → agent → skill graph
 ├── agent/                    # 20 specialist role definitions
-├── skills/                   # 47 progressive skills
+├── skills/                   # 48 progressive skills
 ├── workflows/                # 13 slash-command procedures
 ├── rules/                    # 6 workspace constraints
 ├── memory/                   # Persistent project context
@@ -122,7 +122,7 @@ Specialist AI personas for different domains.
 
 ---
 
-## 🧩 Skills (47)
+## 🧩 Skills (48)
 
 Modular knowledge domains that agents can load on-demand based on task context. Each skill has a `when_to_use` frontmatter field for conditional/intelligent loading.
 
@@ -223,6 +223,7 @@ Modular knowledge domains that agents can load on-demand based on task context. 
 | `simplify-code`           | Reduce over-engineered complexity                           |
 | `skillify`                | Auto-create skills from repetitive workflows                |
 | `code-review-graph`       | Token-efficient code review via Tree-sitter AST + MCP       |
+| `herdr-pm`                | SOP for PM Orchestrator in Herdr                            |
 
 ### Other
 
@@ -367,7 +368,7 @@ For command details and prerequisites, see [scripts/README.md](scripts/README.md
 | Metric              | Value                             |
 | ------------------- | --------------------------------- |
 | **Total Agents**    | 20 (1 major upgrade in 2026.5.13) |
-| **Total Skills**    | 47                                |
+| **Total Skills**    | 48                                |
 | **Total Workflows** | 13 (+2 new in 2026.5.13)          |
 | **Toolkit Utilities** | 7 user-facing + 2 internal modules |
 | **Antigravity Utilities** | 4 runtime utilities              |

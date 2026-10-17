@@ -1,7 +1,7 @@
 {
   "$schema": "schemas/manifest-lock.schema.json",
   "components": {
-    "ARCHITECTURE.md": "d76626492126b02b5562ec8a88bc9fcc5401932c252ede64415c98a1805fa392",
+    "ARCHITECTURE.md": "b23c9bc8ad8d3301a9d7dcb850050346280aa1588e70be6c356514012709729c",
     "CHANGELOG.md": "c29cb325d278be44ad662d91c86c180cf01c05d008f77cf4b3f0bd42de8c46f8",
     "README.md": "d6a29fbc3367f5ab5739f84bad71710879119d1b697b6a18943dcdad5e2ec654",
     "VERSION": "94bc11e2a5617c66e6d2f849e14be6579c44c90d0f985d80ce4dc96dff46fa94",
@@ -38,11 +38,11 @@
     "hooks/tests/antigravity.test.mjs": "5e40131265749f54347470a6462dbfdf51ccef0a69165baf008b0b87443dbd5a",
     "hooks/validate-tool-call.mjs": "c8f0be06e8697efbfe3a2e614a3bed1a6e12c714e3faef72ca31c5fbe168e857",
     "mcp_config.json": "cb41a099a03068860be9da7cc94c8eb9914f84d487cd8f8c1fffd7d021ff7688",
-    "memory/MEMORY.md": "b553a654b8a59d7dcc102d4e38e77474e060c6a718cfed1ffe09528caa7abcfa",
+    "memory/MEMORY.md": "dbccce232b07aef93f27fff86ff104d3c427bd6d624bf3a0b4dae0102b2df0c4",
     "memory/feedback-history.md": "06abb008293a359ebf30eafaacc0212c4a21e659170f251edd354f5433bfb1a5",
     "memory/project-conventions.md": "a121234b78e7d0c33908796e71eabde58c12e6becc36a4d3175f1b5b3a03c803",
     "memory/tech-decisions.md": "001f735f5fbc665c2bfedf3f637336cf3a25b4af7dcccd11739c8aff232e872c",
-    "memory/user-preferences.md": "251ac5dea279b0bb18a5107ef599ef718837f5f60317c7728c370e83d74d5d37",
+    "memory/user-preferences.md": "9247fcef61cfbbc228922e8c2e29acadf011c71d0745c2f06523af9650ea424e",
     "rules/code-rules.md": "3e602c516f195ddeb6fb986aa8cead49a0ebae8a48720f738d4642146dd510a5",
     "rules/core-protocol.md": "647becf363128a82e65ed9628f9ab82b0142692825b7f94f0e264ad6d1cacba2",
     "rules/design-rules.md": "73ee8f120e85939d04a7153bd7d2336cfb7d3025c9c6fc4b9003eca97e3f228b",
@@ -144,6 +144,7 @@
     "skills/game-development/web-games/SKILL.md": "1431bf2f5a70b9e0b4a794edd0861bc6534074433d6f6025455e8b27384b65c3",
     "skills/geo-fundamentals/SKILL.md": "d4ca6f9c889408bf5e35ae3f39377dbf60502bc754053623b6ea7f42190e4125",
     "skills/geo-fundamentals/scripts/geo_checker.py": "8731bf8ac07209f68fe2f5d2d61df7bb7dfb6cf6a7bb98d061424c0bfed8f78b",
+    "skills/herdr-pm/SKILL.md": "e140921883d8d909ad883ba182a9a3ba0cda27796a4069e5bcba4b172988810b",
     "skills/i18n-localization/SKILL.md": "356847a4d612633c2531b0c49367cc82ac6d88546b97a3fe4aea05dc515a017f",
     "skills/i18n-localization/scripts/i18n_checker.py": "f01da31b02cfdc45d899efb351867f36be6812f4466406b7cf5a3f3f14c4e1b2",
     "skills/intelligent-routing/SKILL.md": "d0ad66b14912955ed6c74f25db17c440b839d9ea1be058f0f698fc111d27f0ea",
@@ -221,6 +222,6 @@
     "workflows/verify.md": "2dc26bcbe24c7e71571953da75629521ea3d7a0a444a7101e3601b39864971fc"
   },
   "kitVersion": "2026.8.31",
-  "manifestSha256": "2f662eae86d5fe5842cb3daf8558395f50c541d43c692710e067386224531035",
+  "manifestSha256": "48d72408badf95aa7bb9fc0ddbaf2adc32248465496ed72c9b726fa8178b48ff",
   "schemaVersion": "1.0.0"
 }

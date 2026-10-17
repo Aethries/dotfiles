@@ -174,7 +174,8 @@ SKILL_CATEGORIES = [
         "📊 Product Management, Specs & Docs",
         [
             "prd-author", "feature-spec-writer", "agile-sprint-planner",
-            "technical-planner", "documentation-and-adrs", "design-doc-mermaid"
+            "technical-planner", "documentation-and-adrs", "design-doc-mermaid",
+            "herdr-pm"
         ],
     ),
     (
@@ -853,6 +854,25 @@ def sync_upstream_mattpocock(agent: str = "both"):
         warn("Could not sync Matt Pocock skills automatically (no supported CLI found).")
 
 
+def sync_upstream_herdr(agent: str = "both"):
+    """Dynamically fetch/update latest Herdr skill from upstream via npx skills."""
+    log("Syncing Herdr skill from upstream (herdrdev/herdr)...")
+    synced = False
+    if shutil.which("npx"):
+        try:
+            cmd = ["npx", "-y", "skills@latest", "add", "herdrdev/herdr", "--skill", "herdr", "-y"]
+            log(f"Running: {' '.join(cmd)}")
+            res = subprocess.run(cmd, check=False)
+            if res.returncode == 0:
+                success("Herdr skill synced via npx skills")
+                synced = True
+        except Exception as e:
+            warn(f"npx skills invocation failed: {e}")
+
+    if not synced:
+        warn("Could not sync Herdr skill automatically via npx skills.")
+
+
 # ------------------------------------------------------------------------------
 # Main Entry Point
 # ------------------------------------------------------------------------------
@@ -885,6 +905,11 @@ def main():
         help="Fetch/update latest Matt Pocock skills dynamically from upstream",
     )
     parser.add_argument(
+        "--sync-herdr",
+        action="store_true",
+        help="Fetch/update latest Herdr skill dynamically from upstream",
+    )
+    parser.add_argument(
         "--project-dir",
         default=str(Path.cwd()),
         help="Target project directory for project scope",
@@ -907,6 +932,7 @@ def main():
     all_mcp_ids = [it["id"] for g in grouped_mcps for it in g["items"]]
 
     sync_matt = args.sync_matt
+    sync_herdr = args.sync_herdr
 
     # Parameter Resolution
     if args.yes:
@@ -969,8 +995,9 @@ def main():
             default_all=True,
         )
 
-        # Step 5: Ask about Matt Pocock upstream skills
+        # Step 5: Ask about upstream skills
         sync_matt = prompt_yes_no("Sync latest Matt Pocock skills dynamically from upstream?", default=False)
+        sync_herdr = prompt_yes_no("Sync latest Herdr skill dynamically from upstream (herdrdev/herdr)?", default=True)
 
     log(f"Executing AI Provisioning [Scope: {scope.upper()} | Agent: {agent.upper()}]")
     print(f"  • Selected Skills: {len(selected_skills)} skills")
@@ -989,6 +1016,8 @@ def main():
     # 3. Dynamic Upstream Skills Sync
     if sync_matt:
         sync_upstream_mattpocock(agent)
+    if sync_herdr:
+        sync_upstream_herdr(agent)
 
     # 4. Setup utilities & settings
     if scope == "global":
