@@ -89,7 +89,7 @@ fi
 
 # 2. Essential Symlinks & Utilities
 echo -e "\n${BOLD}[2/5] Symlinks & Local Binaries${RESET}"
-AI_UTILS=(rtk jev-mcp jev-preflight-hook 9router-mitm sync-antigravity-extensions)
+AI_UTILS=(rtk 9router-mitm sync-antigravity-extensions)
 for u in "${AI_UTILS[@]}"; do
 	target="$HOME/.local/bin/$u"
 	if [[ -e "$target" ]]; then
@@ -159,10 +159,10 @@ fi
 
 # 5. AI Services & Endpoints (Advisory)
 echo -e "\n${BOLD}[5/5] AI Endpoints & Integrations (Advisory)${RESET}"
-if curl -s --connect-timeout 1 "http://localhost:20128/v1/systemone" >/dev/null 2>&1; then
-	report_pass "JEV local gateway responding on port 20128"
+if curl -s --connect-timeout 1 "http://127.0.0.1:2208/mcp" >/dev/null 2>&1; then
+	report_pass "9Router gateway responding on port 2208"
 else
-	report_warn "JEV local gateway not responding on port 20128 (start 9router / JEV if needed)"
+	report_warn "9Router gateway not responding on port 2208 (start 9router service if needed)"
 fi
 
 

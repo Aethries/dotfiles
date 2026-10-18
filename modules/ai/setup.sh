@@ -61,23 +61,13 @@ for skill_path in "$SKILLS_DIR"/*; do
 done
 success "Linked $skill_count skills to Antigravity and Codex"
 
-# 3. Link AI CLI utilities (rtk & jev-mcp)
+# 3. Link AI CLI utilities (rtk)
 log "Linking AI CLI utilities to ~/.local/bin"
 mkdir -p "$HOME/.local/bin"
 
 if [[ -f "$DOTFILES/modules/shell/files/bin/rtk" ]]; then
 	chmod +x "$DOTFILES/modules/shell/files/bin/rtk"
 	link_file "$DOTFILES/modules/shell/files/bin/rtk" "$HOME/.local/bin/rtk"
-fi
-
-if [[ -f "$DOTFILES/scripts/jev-mcp.sh" ]]; then
-	chmod +x "$DOTFILES/scripts/jev-mcp.sh"
-	link_file "$DOTFILES/scripts/jev-mcp.sh" "$HOME/.local/bin/jev-mcp"
-fi
-
-if [[ -f "$DOTFILES/scripts/jev-preflight-hook.sh" ]]; then
-	chmod +x "$DOTFILES/scripts/jev-preflight-hook.sh"
-	link_file "$DOTFILES/scripts/jev-preflight-hook.sh" "$HOME/.local/bin/jev-preflight-hook"
 fi
 
 success "AI skills module configured"

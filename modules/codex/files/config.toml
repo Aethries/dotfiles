@@ -25,9 +25,6 @@ Authorization = "Bearer a1a25b899f3364b59d26d16d9d5622f5c22af0e357563e377865723c
 [mcp_servers."9remote".env_http_headers]
 x-9remote-session = "NINE_REMOTE_SESSION_ID"
 
-[mcp_servers."atlassian"]
-url = "https://mcp.atlassian.com/v2/mcp"
-
 [mcp_servers."codebase_memory"]
 command = "uvx"
 args = ["codebase-memory-mcp"]
@@ -40,39 +37,28 @@ args = ["code-review-graph", "mcp"]
 command = "npx"
 args = ["-y", "@upstash/context7-mcp"]
 
-[mcp_servers."jev_local"]
-command = "jev-mcp"
-startup_timeout_sec = 30.0
-
-[mcp_servers."jev_local".env]
-JEV_ENDPOINT = "http://localhost:20128/v1/systemone"
-JEV_MODEL = "oc/jev-1.13-free"
-
-[mcp_servers."jira"]
-url = "https://mcp.atlassian.com/v2/mcp"
-
 [mcp_servers.node_repl]
-args = []
 command = "/opt/codex-desktop/resources/node_repl"
-startup_timeout_sec = 120
+startup_timeout_sec = 120.0
 
 [mcp_servers.node_repl.env]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.707.31428"
+CODEX_HOME = "/home/loc/.codex"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
 NODE_REPL_NODE_MODULE_DIRS = ""
 NODE_REPL_NODE_PATH = "/opt/codex-desktop/resources/node-runtime/bin/node"
-NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
-CODEX_HOME = "/home/loc/.codex"
 NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,c8b7e809d7cf9e20a57123b2530d476ccec9a01a6230a7b2b924fea7d94d7f4a,505eba02c6eed6bcc3f2883e6c705c3377eef8c172bb2d99c909134b0da6e57d,0c77a3b75646e46fa857011b4cde14be2f580b5655461b7c0aabf54f86fc6781"
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
-BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.707.31428"
-
-[mcp_servers.node_repl.tools]
+NODE_REPL_TRUSTED_CODE_PATHS = "/home/loc/.codex"
 
 [mcp_servers.node_repl.tools.js]
 approval_mode = "approve"
+
+[mcp_servers.jira]
+url = "https://mcp.atlassian.com/v2/mcp"
 
 [desktop]
 followUpQueueMode = "queue"
@@ -172,6 +158,9 @@ NODE_REPL_TRUSTED_CODE_PATHS = "~/.codex"
 trust_level = "trusted"
 
 [projects."/home/loc/Workspaces/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/loc/Workspaces/line"]
 trust_level = "trusted"
 
 [hooks.state]

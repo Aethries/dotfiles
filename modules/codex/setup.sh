@@ -27,7 +27,7 @@ fi
 # Deploy default hooks if not already present
 if [[ ! -f "$HOME/.codex/hooks.json" && -f "$MODULE_DIR/files/hooks.json" ]]; then
 	cp "$MODULE_DIR/files/hooks.json" "$HOME/.codex/hooks.json"
-	success "Installed default Codex hooks (JEV preflight)"
+	success "Installed default Codex hooks"
 fi
 
 # Ensure codex CLI is installed

@@ -196,12 +196,9 @@ grep -q 'mkdir -p "$HOME/.config/noctalia/plugins"' "$DOTFILES/modules/noctalia/
 assert_eq "Noctalia setup safely initializes plugins directory" "$?" "0"
 
 
-echo -e "\n${BLUE}${BOLD}=== TEST 10: F10 (JEV Preflight Hook & Codex Hooks) ===${RESET}"
-assert_eq "scripts/jev-preflight-hook.sh is executable" "$([[ -x "$DOTFILES/scripts/jev-preflight-hook.sh" ]] && echo yes)" "yes"
+echo -e "\n${BLUE}${BOLD}=== TEST 10: F10 (Codex Configuration & Hooks) ===${RESET}"
 assert_eq "modules/codex/files/hooks.json exists" "$([[ -f "$DOTFILES/modules/codex/files/hooks.json" ]] && echo yes)" "yes"
-
-grep -q 'jev-preflight-hook' "$DOTFILES/modules/codex/files/hooks.json"
-assert_eq "codex hooks.json registers jev-preflight-hook" "$?" "0"
+assert_eq "modules/codex/files/config.toml exists" "$([[ -f "$DOTFILES/modules/codex/files/config.toml" ]] && echo yes)" "yes"
 
 
 echo -e "\n${BLUE}${BOLD}=== TEST 11: Installation Profiles & Dry Run ===${RESET}"

@@ -108,24 +108,6 @@ MCP_CATALOG = {
             "url": "https://mcp.atlassian.com/v2/mcp",
         },
     },
-    "jev-local": {
-        "name": "JEV Local Advisory Preflight",
-        "anti": {
-            "command": "jev-mcp",
-            "env": {
-                "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
-                "JEV_MODEL": "oc/jev-1.13-free",
-            },
-        },
-        "codex": {
-            "command": "jev-mcp",
-            "startup_timeout_sec": 30.0,
-            "env": {
-                "JEV_ENDPOINT": "http://localhost:20128/v1/systemone",
-                "JEV_MODEL": "oc/jev-1.13-free",
-            },
-        },
-    },
     "9remote": {
         "name": "9Remote Gateway Proxy",
         "anti": {
@@ -157,7 +139,7 @@ MCP_CATEGORIES = [
     ),
     (
         "🌐 Gateways & Integrations",
-        ["jira", "atlassian", "jev-local", "9remote"],
+        ["jira", "atlassian", "9remote"],
     ),
 ]
 
@@ -809,12 +791,7 @@ def deploy_utilities():
         rtk_src.chmod(0o755)
         safe_symlink(rtk_src, local_bin / "rtk")
 
-    jev_src = DOTFILES_DIR / "scripts" / "jev-mcp.sh"
-    if jev_src.exists():
-        jev_src.chmod(0o755)
-        safe_symlink(jev_src, local_bin / "jev-mcp")
-
-    success("Linked RTK Ultra & JEV MCP utilities to ~/.local/bin")
+    success("Linked RTK Ultra utility to ~/.local/bin")
 
 
 def sync_upstream_mattpocock(agent: str = "both"):
