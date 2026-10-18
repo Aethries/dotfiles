@@ -29,6 +29,7 @@ codex-desktop-linux
 claude-code
 claude-desktop
 herdr-bin
+herdr-gpui
 
 
 # Network
