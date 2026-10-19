@@ -149,10 +149,10 @@ wallpaper_scheme = "soft"
     enable_community_templates = true
 
 [wallpaper.default]
-path = "/home/loc/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
 
 [wallpaper.last]
-path = "/home/loc/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "/home/loc/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
