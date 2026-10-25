@@ -35,14 +35,6 @@ if [[ -d "$MODULE_DIR/files/palettes" ]]; then
 		"$HOME/.config/noctalia/palettes"
 fi
 
-if [[ -f "$MODULE_DIR/files/settings.toml" ]]; then
-	sed -i -E "s|/home/[a-zA-Z0-9._-]+/Pictures/|@HOME@/Pictures/|g" "$MODULE_DIR/files/settings.toml"
-fi
-
-link_file \
-	"$MODULE_DIR/files/settings.toml" \
-	"$HOME/.local/state/noctalia/settings.toml"
-
 if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
 	mkdir -p "$HOME/Pictures"
 	link_dir \
@@ -55,6 +47,20 @@ if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
 			link_file "$wp" "$HOME/Pictures/$wp_name"
 		fi
 	done
+fi
+
+# ponytail: state settings is copied with expanded $HOME, not symlinked (prevents git diff on runtime settings change)
+if [[ -f "$MODULE_DIR/files/settings.toml" ]]; then
+	mkdir -p "$HOME/.local/state/noctalia"
+	# Remove direct symlink to avoid dirtying git tracked source
+	if [[ -L "$HOME/.local/state/noctalia/settings.toml" ]]; then
+		rm -f "$HOME/.local/state/noctalia/settings.toml"
+	fi
+	if [[ ! -f "$HOME/.local/state/noctalia/settings.toml" ]] || ! grep -q '\[wallpaper' "$HOME/.local/state/noctalia/settings.toml"; then
+		sed "s|@HOME@|$HOME|g" "$MODULE_DIR/files/settings.toml" > "$HOME/.local/state/noctalia/settings.toml"
+	else
+		sed -i "s|@HOME@|$HOME|g" "$HOME/.local/state/noctalia/settings.toml"
+	fi
 fi
 
 # Hide unwanted applications from Noctalia launcher

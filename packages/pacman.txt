@@ -31,50 +31,35 @@ ripgrep
 fd
 jq
 yazi
-superfile
 starship
 zoxide
 eza
 bat
-bottom
 btop
 lazygit
 lazydocker
 trash-cli
 tealdeer
-dust
-duf
 gdu
-gping
 git-delta
 fastfetch
 ghostty
 procs
 yq
 fx
-onefetch
-curlie
 atuin
 visidata
-difftastic
 trippy
-bandwhich
 hyperfine
 direnv
 git-absorb
 gum
 dive
 skopeo
-ctop
 sd
-choose
 grex
 watchexec
-entr
-thefuck
-jnv
 doggo
-ast-grep
 serpl
 
 # Fonts
@@ -99,27 +84,16 @@ act
 xh
 websocat
 bitwarden-cli
-aws-cli-v2
-azure-cli
 docker
 docker-compose
 docker-buildx
-godot
 opencode
-
-# Mobile Development
-android-tools
-android-udev
-scrcpy
-jdk17-openjdk
 
 # Desktop
 noctalia
 gpu-screen-recorder
 intel-media-driver
 libva-utils
-libreoffice-fresh
-libreoffice-fresh-vi
 nautilus
 gvfs
 gvfs-mtp
@@ -132,7 +106,6 @@ loupe
 greetd
 gnome-keyring
 libsecret
-seahorse
 wl-clipboard
 wtype
 libnotify
@@ -148,7 +121,6 @@ fcitx5
 fcitx5-gtk
 fcitx5-qt
 fcitx5-configtool
-fcitx5-bamboo
 grim
 slurp
 hyprpicker
@@ -166,15 +138,7 @@ zenity
 
 # Remote & Networking
 tailscale
-sshfs
 mosh
-moonlight-qt
 bluez
 bluez-utils
 iwd
-proton-vpn-gtk-app
-
-# Audio & DSP
-easyeffects
-lsp-plugins-lv2
-calf

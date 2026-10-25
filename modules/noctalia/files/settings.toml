@@ -80,7 +80,6 @@ enabled = [
     "vn1k/cursor",
     "liamwh/emoji-picker",
     "nightwatch75/file-search",
-    "ramosdetrigo/godot-provider",
     "ashur-d/nvim-projects",
     "autumn/network-toolkit",
     "fel/ocr",
@@ -128,13 +127,9 @@ wallpaper_scheme = "soft"
     builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4", "qt", "kcolorscheme", "btop" ]
     community_ids = [
         "antigravity",
-        "claude-code",
-        "codex",
         "ungoogled-chromium",
-        "zen-browser",
         "telegram",
         "obsidian",
-        "vscode",
         "zed",
         "fastfetch",
         "zellij",
@@ -142,17 +137,16 @@ wallpaper_scheme = "soft"
         "bat",
         "fzf",
         "lazygit",
-        "superfile",
         "yazi"
     ]
     enable_builtin_templates = true
     enable_community_templates = true
 
 [wallpaper.default]
-path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-7jro3y.jpg"
 
 [wallpaper.last]
-path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-7jro3y.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "@HOME@/Pictures/wallhaven-6lpdjl_3840x2160.png"
+path = "@HOME@/Pictures/Wallpapers/wallhaven-7jro3y.jpg"

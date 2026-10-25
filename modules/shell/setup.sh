@@ -126,18 +126,6 @@ link_dir \
 	"$MODULE_DIR/files/fzf/themes" \
 	"$HOME/.config/fzf/themes"
 
-link_file \
-	"$MODULE_DIR/files/superfile/config.toml" \
-	"$HOME/.config/superfile/config.toml"
-
-link_file \
-	"$MODULE_DIR/files/superfile/hotkeys.toml" \
-	"$HOME/.config/superfile/hotkeys.toml"
-
-link_dir \
-	"$MODULE_DIR/files/superfile/theme" \
-	"$HOME/.config/superfile/theme"
-
 mkdir -p "$HOME/.config/btop"
 link_file \
 	"$MODULE_DIR/files/btop/btop.conf" \

@@ -67,7 +67,6 @@ DevOps	dc / dco	Quản lý Docker Compose đa container	Docker Compose multi-con
 DevOps	dcup / dcdown	Khởi động (detached) hoặc dừng toàn bộ compose stack	Start or stop compose container stack	Level 3 (Shell)	modules/shell/files/.zshrc
 DevOps	dcl / dclogs	Xem real-time logs của các service container (-f)	Follow Compose service logs in real-time	Level 3 (Shell)	modules/shell/files/.zshrc
 DevOps	websocat <ws://url>	Kết nối và debug WebSocket endpoint trực tiếp từ terminal	Connect and debug WebSocket from CLI	Level 3 (Shell)	packages/pacman.txt
-DevOps	grpcurl <host> list	Liệt kê và gọi gRPC methods trực tiếp từ CLI	Interact and test gRPC servers from CLI	Level 3 (Shell)	packages/aur.txt
 DevOps	iredis -h <host>	Client Redis với auto-completion thông minh	Redis CLI with autocomplete and syntax	Level 3 (Shell)	packages/aur.txt
 Zellij	Ctrl + Shift + n	Tạo Pane mới (Chỉ Split dọc bên phải)	New vertical pane (split right)	Level 2 (Zellij)	modules/zellij/files/config.kdl
 Zellij	Ctrl + Shift + w	Đóng Pane hiện tại (Có Shift chống bấm nhầm)	Close focused pane safely	Level 2 (Zellij)	modules/zellij/files/config.kdl
@@ -99,14 +98,6 @@ Ghostty	Ctrl + Alt + Equal	Tăng cỡ chữ font terminal (+1.0)	Increase termin
 Ghostty	Ctrl + Alt + Minus	Giảm cỡ chữ font terminal (-1.0)	Decrease terminal font size	Level 2 (Ghostty)	modules/ghostty/files/config
 Ghostty	Ctrl + Alt + 0	Đặt lại cỡ chữ font terminal về mặc định (9.5)	Reset terminal font size to default	Level 2 (Ghostty)	modules/ghostty/files/config
 InputMethod	Ctrl + Space	Bật / Tắt chế độ gõ tiếng Việt (Fcitx5 Bamboo)	Toggle Vietnamese input method (Fcitx5)	Level 3 (Fcitx5)	modules/fcitx5/files/config
-IDE	Ctrl + \	Chia đôi Editor (Chỉ Split dọc)	Split editor vertically	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + Shift + Up / Down	Di chuyển dòng code lên / xuống	Move line/block up or down	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + P	Tìm và mở file nhanh trong dự án (Quick Open)	Quick Open file by name	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + Shift + P	Mở Command Palette	Open IDE command palette	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + `	Bật/Tắt Terminal tích hợp trong IDE	Toggle built-in integrated terminal	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + B	Bật/Tắt thanh Sidebar quản lý file	Toggle primary sidebar file tree	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + Shift + F	Tìm kiếm toàn bộ nội dung trong dự án	Search across all files in workspace	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
-IDE	Ctrl + Shift + K	Xóa toàn bộ dòng code hiện tại	Delete current line in editor	Level 3 (VS Code/Antigravity)	modules/vscode/files/keybindings.json
 Neovim	<leader>w	Lưu file hiện tại (:w)	Save current buffer	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
 Neovim	<leader>q	Đóng cửa sổ / split Neovim hiện tại (:q)	Close current window/split	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua
 Neovim	jk	Thoát nhanh chế độ Insert về Normal mode	Fast escape from insert to normal mode	Level 3 (Neovim)	modules/nvim/files/lua/config/keymaps.lua

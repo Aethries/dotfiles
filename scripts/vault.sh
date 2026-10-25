@@ -33,11 +33,6 @@ CANDIDATE_PATHS=(
 	".config/git"
 	".zsh_history"
 	".gemini"
-	".antigravity-ide"
-	".antigravity"
-	".config/Antigravity IDE"
-	".9router"
-	".codex"
 	".config/ChatGPT"
 )
 
@@ -70,26 +65,10 @@ EXCLUDE_PATTERNS=(
 	"*/presence/*"
 	"*/crashes/*"
 	"*/webm_encoder"
-	"*/.9router/logs"
-	".9router/logs"
-	"*/.9router/runtime"
-	".9router/runtime"
-	"*/.9router/model-catalog-raw.json"
-	".9router/model-catalog-raw.json"
 	"*.bak*"
 	"*.pre-*"
 	"*.pid"
 	"*.sock"
-	"*/.codex/logs_*.sqlite*"
-	".codex/logs_*.sqlite*"
-	"*/.codex/thread_history_*.sqlite*"
-	".codex/thread_history_*.sqlite*"
-	"*/.codex/cache/*"
-	".codex/cache/*"
-	"*/.codex/.tmp/*"
-	".codex/.tmp/*"
-	"*/.codex/tmp/*"
-	".codex/tmp/*"
 )
 
 APP_PROCESSES=(
@@ -100,10 +79,7 @@ APP_PROCESSES=(
 	"lark"
 	"beekeeper-studio"
 	"postman"
-	"antigravity"
 	"chatgpt"
-	"codex"
-	"9router"
 )
 
 # Helpers
@@ -240,10 +216,6 @@ restore_vault() {
 	if [[ -d "$HOME/.local/share/keyrings" ]]; then
 		chmod 700 "$HOME/.local/share/keyrings"
 		chmod 600 "$HOME/.local/share/keyrings"/* 2>/dev/null || true
-	fi
-
-	if [[ -d "$HOME/.9router" ]]; then
-		chmod 700 "$HOME/.9router"
 	fi
 
 	find "$HOME/.config" -maxdepth 3 -name "Singleton*" -delete 2>/dev/null || true

@@ -43,13 +43,8 @@ if ! command_exists opencode; then
 	if command_exists pacman; then
 		log "Installing opencode via pacman"
 		sudo pacman -S --noconfirm --needed opencode || warn "Failed to install opencode via pacman"
-	elif command_exists mise; then
-		log "Installing @opencode/cli via mise / npm"
-		mise exec -- npm install -g @opencode/cli || warn "Failed to install @opencode/cli via mise"
-		mise reshim 2>/dev/null || true
-	elif command_exists npm; then
-		log "Installing @opencode/cli via npm"
-		npm install -g @opencode/cli || warn "Failed to install @opencode/cli via npm"
+	else
+		warn "opencode binary not found. Please install via: sudo pacman -S opencode"
 	fi
 fi
 

@@ -10,9 +10,15 @@ source "$DOTFILES/scripts/links.sh"
 
 log "Setting up Obsidian theme sync"
 
-# Discover Obsidian vaults up to 4 levels deep in $HOME
+# Discover vaults via Obsidian config or standard documents directories
 find_vaults() {
-	find "$HOME" -maxdepth 4 -name ".obsidian" -type d 2>/dev/null | sort -u
+	local cfg="$HOME/.config/obsidian/obsidian.json"
+	if [[ -f "$cfg" ]] && command_exists jq; then
+		jq -r '.vaults[]?.path // empty' "$cfg" 2>/dev/null | while IFS= read -r vpath; do
+			[[ -n "$vpath" && -d "$vpath/.obsidian" ]] && echo "$vpath/.obsidian"
+		done
+	fi
+	find "${XDG_DOCUMENTS_DIR:-$HOME/Documents}" "$HOME/Notes" "$HOME/Vault" -maxdepth 3 -name ".obsidian" -type d 2>/dev/null || true
 }
 
 vault_count=0
@@ -29,26 +35,11 @@ while IFS= read -r obsidian_dir; do
 	appearance_file="$obsidian_dir/appearance.json"
 	if [[ ! -f "$appearance_file" ]]; then
 		printf '{\n  "enabledCssSnippets": ["noctalia"]\n}\n' > "$appearance_file"
-	else
-		python3 -c '
-import sys, json
-path = sys.argv[1]
-try:
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-except Exception:
-    data = {}
-snippets = data.get("enabledCssSnippets", [])
-if not isinstance(snippets, list):
-    snippets = []
-if "noctalia" not in snippets:
-    snippets.append("noctalia")
-    data["enabledCssSnippets"] = snippets
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-' "$appearance_file" 2>/dev/null || true
+	elif command_exists jq; then
+		tmp_file="$(mktemp "${appearance_file}.tmp.XXXXXX")"
+		jq '.enabledCssSnippets = ((.enabledCssSnippets // []) + ["noctalia"] | unique)' "$appearance_file" > "$tmp_file" && mv "$tmp_file" "$appearance_file"
 	fi
-done < <(find_vaults)
+done < <(find_vaults | sort -u)
 
 if (( vault_count > 0 )); then
 	success "Obsidian vaults synced ($vault_count vaults configured)"

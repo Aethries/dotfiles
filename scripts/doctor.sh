@@ -89,7 +89,7 @@ fi
 
 # 2. Essential Symlinks & Utilities
 echo -e "\n${BOLD}[2/5] Symlinks & Local Binaries${RESET}"
-AI_UTILS=(rtk 9router-mitm sync-antigravity-extensions)
+AI_UTILS=(rtk)
 for u in "${AI_UTILS[@]}"; do
 	target="$HOME/.local/bin/$u"
 	if [[ -e "$target" ]]; then
@@ -118,7 +118,7 @@ fi
 
 # 3. Portability Integrity
 echo -e "\n${BOLD}[3/5] Portability & Hardcode Check${RESET}"
-tracked_home_loc=$(cd "$DOTFILES" && git grep -n "/home/""loc" -- ':!scripts/doctor.sh' ':!tests/test_provisioning.sh' 2>/dev/null || true)
+tracked_home_loc=$(cd "$DOTFILES" && git grep -n "/home/""loc" -- ':!scripts/doctor.sh' 2>/dev/null || true)
 if [[ -z "$tracked_home_loc" ]]; then
 	report_pass "Zero hardcoded '/home/loc' literals in git-tracked source"
 else
@@ -133,14 +133,6 @@ fi
 
 # 4. Configuration Formats
 echo -e "\n${BOLD}[4/5] Configuration Syntax & Parsers${RESET}"
-if [[ -f "$DOTFILES/modules/codex/files/config.toml" ]]; then
-	if python3 -c "import tomllib; tomllib.loads(open('$DOTFILES/modules/codex/files/config.toml', 'rb').read().decode('utf-8'))" 2>/dev/null; then
-		report_pass "Codex base config.toml parses valid TOML"
-	else
-		report_fail "Codex base config.toml has invalid TOML syntax"
-	fi
-fi
-
 if [[ -f "$DOTFILES/modules/antigravity/files/mcp_config.json" ]]; then
 	if python3 -m json.tool "$DOTFILES/modules/antigravity/files/mcp_config.json" >/dev/null 2>&1; then
 		report_pass "Antigravity base mcp_config.json parses valid JSON"
@@ -157,13 +149,16 @@ if [[ -f "$DOTFILES/modules/noctalia/files/settings.toml" ]]; then
 	fi
 fi
 
-# 5. AI Services & Endpoints (Advisory)
-echo -e "\n${BOLD}[5/5] AI Endpoints & Integrations (Advisory)${RESET}"
-if curl -s --connect-timeout 1 "http://127.0.0.1:2208/mcp" >/dev/null 2>&1; then
-	report_pass "9Router gateway responding on port 2208"
-else
-	report_warn "9Router gateway not responding on port 2208 (start 9router service if needed)"
-fi
+# 5. AI Tooling Availability (Advisory)
+echo -e "\n${BOLD}[5/5] AI Tooling Availability (Advisory)${RESET}"
+AI_CLIS=(antigravity opencode herdr)
+for cli in "${AI_CLIS[@]}"; do
+	if command -v "$cli" >/dev/null 2>&1; then
+		report_pass "AI CLI '$cli' available ($(command -v "$cli"))"
+	else
+		report_warn "AI CLI '$cli' not found in PATH"
+	fi
+done
 
 
 # Summary

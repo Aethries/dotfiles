@@ -36,20 +36,15 @@ builtin_ids = [ "ghostty", "umbriel", "starship", "gtk3", "gtk4", "qt", "kcolors
 community_ids = [
 	"antigravity",
 	"bat",
-	"claude-code",
-	"codex",
 	"fastfetch",
 	"fcitx5",
 	"fzf",
 	"lazygit",
 	"obsidian",
-	"superfile",
 	"telegram",
 	"ungoogled-chromium",
-	"vscode",
 	"yazi",
-	"zellij",
-	"zen-browser"
+	"zellij"
 ]
 enable_builtin_templates = true
 enable_community_templates = true
@@ -76,9 +71,7 @@ enabled = [
 	"ashur-d/nvim-projects",
 	"vn1k/cursor",
 	"hy4ri/github-notifications",
-	"tordex/processes",
-	"wy3z/opencodex-bar",
-	"bardiz12/9router-monitor"
+	"tordex/processes"
 ]
 
 [[plugins.source]]

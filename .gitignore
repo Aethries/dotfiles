@@ -1,5 +1,6 @@
 # Machine-specific generated hardware and configuration
 .machine/
+.idea/
 
 # Editor temporary, backup, and swap files
 *.swp

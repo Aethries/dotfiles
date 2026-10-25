@@ -27,23 +27,6 @@ export VISUAL="nvim"
 # Path additions
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$HOME/go/bin:$PATH"
 
-# Android & Mobile Development
-export ANDROID_HOME="$HOME/Android/Sdk"
-export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
-export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH"
-
-# Java / JDK
-if [[ -z "${JAVA_HOME:-}" ]]; then
-	if [[ -d "/usr/lib/jvm/default" ]]; then
-		export JAVA_HOME="/usr/lib/jvm/default"
-	elif [[ -d "/usr/lib/jvm/java-17-openjdk" ]]; then
-		export JAVA_HOME="/usr/lib/jvm/java-17-openjdk"
-	fi
-fi
-if [[ -n "${JAVA_HOME:-}" && -d "$JAVA_HOME/bin" ]]; then
-	export PATH="$JAVA_HOME/bin:$PATH"
-fi
-
 # History
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
@@ -114,13 +97,6 @@ fi
 alias lg="lazygit"
 alias ld="lazydocker"
 alias lsql="lazysql"
-if command -v spf >/dev/null 2>&1; then
-	alias superfile="spf"
-fi
-
-if command -v ctop >/dev/null 2>&1; then
-	alias dtop="ctop"
-fi
 if command -v oxker >/dev/null 2>&1; then
 	alias ox="oxker"
 fi
@@ -152,9 +128,6 @@ alias dcpull="docker compose pull"
 alias dcexec="docker compose exec"
 
 # System Monitoring & Resource Usage
-alias bottom="btm"
-alias df="duf"
-alias du="dust"
 alias docs="tldr"
 alias fetch="fastfetch"
 if command -v procs >/dev/null 2>&1; then
@@ -162,9 +135,6 @@ if command -v procs >/dev/null 2>&1; then
 fi
 if command -v onefetch >/dev/null 2>&1; then
 	alias repo="onefetch"
-fi
-if command -v curlie >/dev/null 2>&1; then
-	alias http="curlie"
 fi
 if command -v viddy >/dev/null 2>&1; then
 	alias watch="viddy"
@@ -180,10 +150,6 @@ if command -v hyperfine >/dev/null 2>&1; then
 fi
 if command -v trip >/dev/null 2>&1; then
 	alias trippy="trip"
-fi
-
-if command -v gh >/dev/null 2>&1; then
-	alias ghd="gh dash"
 fi
 
 # Safe File Removal
@@ -207,10 +173,6 @@ alias clip-clear="noctalia msg clipboard-clear"
 alias n='nvim'
 alias v='nvim'
 alias n.='nvim .'
-alias code='code'
-alias ide='code'
-alias c.='antigravity-ide .'
-alias code.='code .'
 alias c='clear'
 
 # Neovide GUI launcher (fully detached from terminal, immune to terminal closing)
@@ -228,7 +190,6 @@ alias zreset="zellij delete-all-sessions --yes --force"
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"
 export ELECTRON_OZONE_PLATFORM_HINT="auto"
-export NODE_EXTRA_CA_CERTS="$HOME/.9router/mitm/rootCA.crt"
 
 # ------------------------------------------------------------------------------
 # Clipboard, Network & System
@@ -256,12 +217,9 @@ function 1111() {
 }
 
 # ------------------------------------------------------------------------------
-# Mobile Development Helpers
+# Quick Shortcuts & Cheatsheet
 # ------------------------------------------------------------------------------
-alias rn="npx react-native"
-alias expo="npx expo"
-alias adbr="adb reverse tcp:8081 tcp:8081"
-alias adbl="adb devices -l"
+alias cheatsheet="sys-cheatsheet"
 
 # ------------------------------------------------------------------------------
 # Integrations (Yazi, FZF, NVM)
@@ -318,11 +276,6 @@ fi
 # Direnv (Per-directory environment loader)
 if command -v direnv >/dev/null 2>&1; then
 	eval "$(direnv hook zsh)"
-fi
-
-# TheFuck (CLI auto-corrector)
-if command -v thefuck >/dev/null 2>&1; then
-	eval "$(thefuck --alias)"
 fi
 
 # Carapace (Multi-shell contextual completion engine)

@@ -6,7 +6,6 @@ x-scheme-handler/https=google-chrome.desktop
 x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
 x-scheme-handler/slack=slack.desktop
-x-scheme-handler/antigravity=antigravity.desktop
 image/png=org.gnome.Loupe.desktop
 image/jpeg=org.gnome.Loupe.desktop
 image/webp=org.gnome.Loupe.desktop
@@ -20,7 +19,6 @@ x-scheme-handler/jetbrains=jetbrainsd.desktop
 [Added Associations]
 inode/directory=org.gnome.Nautilus.desktop;
 x-scheme-handler/slack=slack.desktop;
-x-scheme-handler/antigravity=antigravity.desktop;
 image/png=org.gnome.Loupe.desktop;
 image/jpeg=org.gnome.Loupe.desktop;
 image/webp=org.gnome.Loupe.desktop;
