@@ -35,19 +35,8 @@ if [[ -d "$MODULE_DIR/files/palettes" ]]; then
 		"$HOME/.config/noctalia/palettes"
 fi
 
-if [[ -d "$DOTFILES/resources/static/wallpapers" ]]; then
-	mkdir -p "$HOME/Pictures"
-	link_dir \
-		"$DOTFILES/resources/static/wallpapers" \
-		"$HOME/Pictures/Wallpapers"
-
-	for wp in "$DOTFILES/resources/static/wallpapers"/*; do
-		if [[ -f "$wp" ]]; then
-			wp_name="$(basename "$wp")"
-			link_file "$wp" "$HOME/Pictures/$wp_name"
-		fi
-	done
-fi
+# Ensure Pictures and Wallpapers directory exist for downloads (e.g. wallhaven)
+mkdir -p "$HOME/Pictures/Wallpapers"
 
 # ponytail: state settings is copied with expanded $HOME, not symlinked (prevents git diff on runtime settings change)
 if [[ -f "$MODULE_DIR/files/settings.toml" ]]; then

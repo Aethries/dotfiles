@@ -158,6 +158,7 @@ restore_vault() {
 
 	local stage_dir
 	stage_dir="$(mktemp -d "/tmp/vault_stage_XXXXXX")"
+	trap "rm -rf '$stage_dir'" EXIT
 
 	if ! (age --decrypt "$source_file" \
 		| zstd -d \
@@ -184,8 +185,11 @@ restore_vault() {
 		saved_gitconfig="$(cat "$HOME/.gitconfig")"
 	fi
 
-	cp -a "$stage_dir"/. "$HOME"/
+	# --remove-destination: unlink existing targets first so read-only files
+	# (e.g. 444/555 assets restored by a previous run) can be replaced.
+	cp -a --remove-destination "$stage_dir"/. "$HOME"/
 	rm -rf "$stage_dir"
+	trap - EXIT
 
 	# Restore preserved standalone configs if archive contained legacy broken symlinks
 	if [[ -n "$saved_ssh_config" ]]; then

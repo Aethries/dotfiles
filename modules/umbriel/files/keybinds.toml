@@ -5,58 +5,54 @@
 
 [keybinds]
 # Launchers & Navigation
-"Mod+Return" = { action = "spawn:ghostty", repeat = false }
-"Mod+A" = { action = "spawn:ghostty -e herdr", repeat = false }
-"Alt+Tab" = { action = "spawn:noctalia msg window-switcher", repeat = false }
+"Mod+Return" = { action = "spawn ghostty", repeat = false }
+"Mod+A" = { action = "spawn ghostty -e herdr", repeat = false }
+"Alt+Tab" = { action = "spawn noctalia msg window-switcher hold", repeat = false }
+"Alt+Shift+Tab" = { action = "spawn noctalia msg window-switcher hold", repeat = false }
 "Mod+O" = { action = "overview-toggle", repeat = false }
-"Mod+B" = { action = "spawn:google-chrome-stable", repeat = false }
-"Mod+E" = { action = "spawn:nautilus --new-window", repeat = false }
-"Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
-"Mod+D" = "spawn:noctalia msg panel-toggle launcher"
-"Mod+V" = "spawn:noctalia msg panel-toggle clipboard"
-"Mod+question" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
-"Mod+slash" = { action = "spawn:~/.local/bin/sys-cheatsheet", repeat = false }
-
-# Mouse Navigation (Warpd)
-"Mod+semicolon" = { action = "spawn:~/.local/bin/warpd-hint", repeat = false }
+"Mod+B" = { action = "spawn google-chrome-stable", repeat = false }
+"Mod+E" = { action = "spawn nautilus --new-window", repeat = false }
+"Mod+Space" = "spawn noctalia msg panel-toggle launcher"
+"Mod+D" = "spawn noctalia msg panel-toggle launcher"
+"Mod+V" = "spawn noctalia msg panel-toggle clipboard"
 
 # System & Session
 # Override the inherited quit shortcut to prevent accidental exits while remote.
-"Mod+Escape" = { action = "spawn:true", repeat = false }
-"Mod+BackSpace" = "spawn:noctalia msg session lock"
-"Mod+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
-"Mod+N" = "spawn:noctalia msg panel-toggle notifications"
-"Mod+Shift+N" = "spawn:noctalia msg notification-dnd-toggle"
-"Mod+Shift+I" = "spawn:noctalia msg caffeine-toggle"
+"Mod+Escape" = { action = "spawn true", repeat = false }
+"Mod+BackSpace" = "spawn noctalia msg session lock"
+"Mod+Comma" = { action = "spawn noctalia msg settings-toggle", repeat = false }
+"Mod+N" = "spawn noctalia msg panel-toggle notifications"
+"Mod+Shift+N" = "spawn noctalia msg notification-dnd-toggle"
+"Mod+Shift+I" = "spawn noctalia msg caffeine-toggle"
 "Mod+Shift+R" = "config-reload"
 
 
 # Screenshot & Screen Recording
-"Print" = "spawn:noctalia msg screenshot-fullscreen"
-"Mod+Print" = "spawn:noctalia msg screenshot-region"
-"Mod+S" = "spawn:noctalia msg screenshot-annotate"
-"Mod+R" = "spawn:noctalia msg plugin noctalia/screen_recorder:service all toggle"
-"Mod+Alt+S" = "spawn:noctalia msg plugin fel/ocr:grab all onClick"
+"Print" = "spawn noctalia msg screenshot-fullscreen"
+"Mod+Print" = "spawn noctalia msg screenshot-region"
+"Mod+S" = "spawn noctalia msg screenshot-annotate"
+"Mod+R" = "spawn noctalia msg plugin noctalia/screen_recorder:service all toggle"
+"Mod+Alt+S" = "spawn noctalia msg plugin fel/ocr:grab all onClick"
 
 # Noctalia Plugins & Productivity Panels
-"Mod+Shift+Return" = "spawn:noctalia msg panel-toggle noctalia/notes:panel"
-"Mod+Shift+E" = "spawn:noctalia msg panel-toggle liamwh/emoji-picker:desktop"
-"Mod+Shift+F" = "spawn:noctalia msg panel-toggle nightwatch75/file-search:panel"
-"Mod+Shift+C" = "spawn:noctalia msg panel-toggle oldirtty/color_picker:panel"
-"Mod+Shift+W" = "spawn:noctalia msg panel-toggle autumn/network-toolkit:panel"
-"Mod+Shift+Q" = "spawn:noctalia msg panel-toggle yocraft/qrcode:panel"
-"Mod+Shift+U" = "spawn:noctalia msg panel-toggle noctalia/umbriel-companion:panel"
-"Mod+Alt+C" = "spawn:noctalia msg panel-toggle vn1k/cursor:manager"
-"Mod+Alt+T" = "spawn:noctalia msg panel-toggle davemhammer/tailscale:manager"
+"Mod+Shift+Return" = "spawn noctalia msg panel-toggle noctalia/notes:panel"
+"Mod+Shift+E" = "spawn noctalia msg panel-toggle liamwh/emoji-picker:desktop"
+"Mod+Shift+F" = "spawn noctalia msg panel-toggle nightwatch75/file-search:panel"
+"Mod+Shift+C" = "spawn noctalia msg panel-toggle oldirtty/color_picker:panel"
+"Mod+Shift+W" = "spawn noctalia msg panel-toggle autumn/network-toolkit:panel"
+"Mod+Shift+Q" = "spawn noctalia msg panel-toggle yocraft/qrcode:panel"
+"Mod+Shift+U" = "spawn noctalia msg panel-toggle noctalia/umbriel-companion:panel"
+"Mod+Alt+C" = "spawn noctalia msg panel-toggle vn1k/cursor:manager"
+"Mod+Alt+T" = "spawn noctalia msg panel-toggle davemhammer/tailscale:manager"
 
 # Audio & Media OSD
-"XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"
-"XF86AudioLowerVolume" = "spawn:noctalia msg volume-down"
-"XF86AudioMute" = "spawn:noctalia msg volume-mute"
-"XF86AudioMicMute" = "spawn:noctalia msg mic-mute"
-"XF86AudioPlay" = "spawn:noctalia msg media play-pause"
-"XF86AudioNext" = "spawn:noctalia msg media next"
-"XF86AudioPrev" = "spawn:noctalia msg media previous"
+"XF86AudioRaiseVolume" = "spawn noctalia msg volume-up"
+"XF86AudioLowerVolume" = "spawn noctalia msg volume-down"
+"XF86AudioMute" = "spawn noctalia msg volume-mute"
+"XF86AudioMicMute" = "spawn noctalia msg mic-mute"
+"XF86AudioPlay" = "spawn noctalia msg media play-pause"
+"XF86AudioNext" = "spawn noctalia msg media next"
+"XF86AudioPrev" = "spawn noctalia msg media previous"
 
 # Workspace Navigation
 "Mod+J" = "workspace-next"
@@ -74,6 +70,6 @@
 
 # Window State & Sizing
 "Mod+Shift+Space" = { action = "window-toggle-floating", repeat = false }
-"Mod+Minus" = "window-modify-primary-extent:-0.05"
-"Mod+Equal" = "window-modify-primary-extent:+0.05"
-"Mod+Plus" = "window-modify-primary-extent:+0.05"
+"Mod+Minus" = "window-modify-primary-extent -0.05"
+"Mod+Equal" = "window-modify-primary-extent +0.05"
+"Mod+Plus" = "window-modify-primary-extent +0.05"

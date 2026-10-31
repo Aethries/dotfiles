@@ -3,7 +3,6 @@ google-chrome
 telegram-desktop
 slack-desktop
 larksuite-bin
-obsidian
 postman-bin
 beekeeper-studio-bin
 webstorm
@@ -13,8 +12,6 @@ webstorm-jre
 umbriel-git
 xdg-desktop-portal-umbriel-git
 noctalia-greeter
-kanata-bin
-warpd-git
 fcitx5-lotus-bin
 
 # AI
@@ -31,4 +28,5 @@ yay
 carapace-bin
 viddy-bin
 win2xcur
+wallhaven-cli
 

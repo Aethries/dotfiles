@@ -22,7 +22,6 @@ link_file \
 
 for flag_target in \
 	"$HOME/.config/electron-flags.conf" \
-	"$HOME/.config/obsidian/user-flags.conf" \
 	"$HOME/.config/bks-flags.conf"; do
 	link_file "$MODULE_DIR/files/electron-flags.conf" "$flag_target"
 done

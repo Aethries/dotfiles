@@ -152,6 +152,10 @@ if command -v trip >/dev/null 2>&1; then
 	alias trippy="trip"
 fi
 
+# Wallhaven Wallpapers
+alias wallhaven-random="wallhaven-fetch --set"
+alias wallhaven-top="wallhaven-fetch -t --set"
+
 # Safe File Removal
 if command -v trash >/dev/null 2>&1; then
 	alias rm="trash"
@@ -215,11 +219,6 @@ function 1111() {
 	fi
 	warp-cli "$@"
 }
-
-# ------------------------------------------------------------------------------
-# Quick Shortcuts & Cheatsheet
-# ------------------------------------------------------------------------------
-alias cheatsheet="sys-cheatsheet"
 
 # ------------------------------------------------------------------------------
 # Integrations (Yazi, FZF, NVM)

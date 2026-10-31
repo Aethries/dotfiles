@@ -52,9 +52,9 @@ done
 
 # Define module lists
 CLI_MODULES=(fonts git env shell zellij nvim mise docker vault)
-DESKTOP_MODULES=(fonts fcitx5 kanata git env shell zellij ghostty nvim mise docker vault noctalia obsidian umbriel cheatsheet greeter ideavim sunshine tailscale)
+DESKTOP_MODULES=(fonts fcitx5 git env shell zellij ghostty nvim mise docker vault noctalia umbriel greeter ideavim sunshine tailscale)
 AI_MODULES=(fonts git env shell zellij nvim mise docker vault antigravity opencode herdr)
-ALL_MODULES=(fonts fcitx5 kanata git env shell zellij ghostty nvim mise docker vault noctalia obsidian umbriel cheatsheet greeter antigravity ideavim opencode herdr sunshine tailscale)
+ALL_MODULES=(fonts fcitx5 git env shell zellij ghostty nvim mise docker vault noctalia umbriel greeter antigravity ideavim opencode herdr sunshine tailscale)
 
 SELECTED_MODULES=()
 if [[ -n "$SINGLE_MODULE" ]]; then

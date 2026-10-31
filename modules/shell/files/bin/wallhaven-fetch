@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Wallhaven Wallpaper Fetcher & Noctalia Integrator
+# ==============================================================================
+
+set -euo pipefail
+
+DEST_DIR="${WALLPAPERS_DIR:-$HOME/Pictures/Wallpapers}"
+mkdir -p "$DEST_DIR"
+
+API_BASE="https://wallhaven.cc/api/v1/search"
+QUERY=""
+SORTING="random"
+APPLY=false
+CATEGORY="110" # 100: General, 010: Anime, 001: People (Default: General + Anime)
+PURITY="100"   # 100: SFW only
+RESOLUTIONS="1920x1080,2560x1440,3840x2160"
+
+usage() {
+	cat <<EOF
+Usage: wallhaven-fetch [OPTIONS]
+
+Download high-resolution wallpapers directly from wallhaven.cc into $DEST_DIR.
+
+Options:
+  -r, --random           Fetch a random wallpaper (Default)
+  -t, --top              Fetch from Wallhaven Toplist
+  -s, --search <query>   Search wallpapers matching <query>
+  --set                  Immediately set downloaded wallpaper via Noctalia
+  -d, --dir <path>       Specify custom download directory (Default: ~/Pictures/Wallpapers)
+  -h, --help             Show this help message
+
+Examples:
+  wallhaven-fetch --set                # Download random wallpaper and set it immediately
+  wallhaven-fetch -s "cyberpunk" --set # Search cyberpunk, download top match, and set
+  wallhaven-fetch -t                   # Download a top-ranked wallpaper
+EOF
+	exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		-r|--random)
+			SORTING="random"
+			shift
+			;;
+		-t|--top)
+			SORTING="toplist"
+			shift
+			;;
+		-s|--search)
+			QUERY="$2"
+			SORTING="relevance"
+			shift 2
+			;;
+		--set)
+			APPLY=true
+			shift
+			;;
+		-d|--dir)
+			DEST_DIR="$2"
+			mkdir -p "$DEST_DIR"
+			shift 2
+			;;
+		-h|--help)
+			usage
+			;;
+		*)
+			echo "Unknown option: $1" >&2
+			usage
+			;;
+	esac
+done
+
+# Build API request URL
+URL="$API_BASE?sorting=$SORTING&categories=$CATEGORY&purity=$PURITY&resolutions=$RESOLUTIONS"
+if [[ -n "$QUERY" ]]; then
+	ENCODED_QUERY="$(printf '%s' "$QUERY" | jq -sRr @uri)"
+	URL="$URL&q=$ENCODED_QUERY"
+fi
+
+echo "Fetching wallpaper metadata from Wallhaven..."
+RESPONSE="$(curl -s -f -m 10 "$URL" 2>/dev/null || true)"
+
+if [[ -z "$RESPONSE" ]]; then
+	echo "Error: Failed to fetch data from Wallhaven API (network error or rate limit)." >&2
+	exit 1
+fi
+
+COUNT="$(echo "$RESPONSE" | jq -r '.data | length' 2>/dev/null || echo 0)"
+if [[ "$COUNT" -eq 0 ]]; then
+	echo "No wallpapers found matching the criteria." >&2
+	exit 0
+fi
+
+# Pick the first result from the returned list
+IMG_URL="$(echo "$RESPONSE" | jq -r '.data[0].path')"
+IMG_ID="$(echo "$RESPONSE" | jq -r '.data[0].id')"
+IMG_RES="$(echo "$RESPONSE" | jq -r '.data[0].resolution')"
+FILE_NAME="$(basename "$IMG_URL")"
+DEST_PATH="$DEST_DIR/$FILE_NAME"
+
+echo "Downloading wallpaper: $IMG_ID ($IMG_RES) -> $DEST_PATH"
+curl -s -f -o "$DEST_PATH" "$IMG_URL"
+
+echo "Saved wallpaper to: $DEST_PATH"
+
+if [[ "$APPLY" == true ]]; then
+	if command -v noctalia >/dev/null 2>&1; then
+		echo "Applying wallpaper via Noctalia..."
+		noctalia msg wallpaper-set "$DEST_PATH" 2>/dev/null || echo "Note: Noctalia compositor socket not connected; wallpaper saved to disk."
+	else
+		echo "Noctalia not available. Wallpaper saved to $DEST_PATH."
+	fi
+fi
