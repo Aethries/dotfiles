@@ -1,0 +1,61 @@
+# =============================================================================
+# Matugen - Material 3 color synchronization
+# The Quickshell settings UI treats config.toml.orig as the source of truth and
+# regenerates config.toml when templates are toggled, so the repo file is
+# installed as config.toml.orig (see setup.sh).
+# =============================================================================
+
+[config]
+version_check = false
+
+[templates.m3colors]
+input_path = '~/.config/matugen/templates/colors.json'
+output_path = '~/.local/state/quickshell/user/generated/colors.json'
+
+[templates.hyprland]
+input_path = '~/.config/matugen/templates/hyprland/colors.lua'
+output_path = '~/.config/hypr/hyprland/colors.lua'
+post_hook = 'hyprctl reload >/dev/null 2>&1 || true'
+
+[templates.hyprlock]
+input_path = '~/.config/matugen/templates/hyprland/hyprlock-colors.conf'
+output_path = '~/.config/hypr/hyprlock/colors.conf'
+
+[templates.ghostty]
+input_path = '~/.config/matugen/templates/ghostty/theme'
+output_path = '~/.config/ghostty/themes/matugen'
+post_hook = 'pkill -SIGUSR2 -x ghostty >/dev/null 2>&1 || true'
+
+[templates.zellij]
+input_path = '~/.config/matugen/templates/zellij/matugen.kdl'
+output_path = '~/.config/zellij/themes/matugen.kdl'
+
+[templates.fcitx5]
+input_path = '~/.config/matugen/templates/fcitx5/theme.conf'
+output_path = '~/.local/share/fcitx5/themes/matugen/theme.conf'
+post_hook = 'fcitx5-remote -r >/dev/null 2>&1 || true'
+
+[templates.nvim]
+input_path = '~/.config/nvim/matugen-template.lua'
+output_path = '~/.config/nvim/lua/matugen.lua'
+post_hook = 'pkill -SIGUSR1 nvim >/dev/null 2>&1 || true'
+
+[templates.fuzzel]
+input_path = '~/.config/matugen/templates/fuzzel/fuzzel_theme.ini'
+output_path = '~/.config/fuzzel/fuzzel_theme.ini'
+
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk-3.0/gtk.css'
+output_path = '~/.config/gtk-3.0/gtk.css'
+
+[templates.gtk4]
+input_path = '~/.config/matugen/templates/gtk-4.0/gtk.css'
+output_path = '~/.config/gtk-4.0/gtk.css'
+
+[templates.kde_colors]
+input_path = '~/.config/matugen/templates/kde/color.txt'
+output_path = '~/.local/state/quickshell/user/generated/color.txt'
+
+[templates.wallpaper]
+input_path = '~/.config/matugen/templates/wallpaper.txt'
+output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'

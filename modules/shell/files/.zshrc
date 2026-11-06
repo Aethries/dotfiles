@@ -167,9 +167,9 @@ if command -v gping >/dev/null 2>&1; then
 	alias ping="gping"
 fi
 
-# Clipboard Manager (Noctalia)
-alias clip="noctalia msg panel-toggle clipboard"
-alias clip-clear="noctalia msg clipboard-clear"
+# Clipboard Manager (Quickshell / cliphist)
+alias clip="qs -c end4-pC ipc call search clipboardToggle 2>/dev/null || (command -v cliphist >/dev/null && cliphist list | fzf | cliphist decode | wl-copy)"
+alias clip-clear="command -v cliphist >/dev/null && cliphist wipe"
 
 # ------------------------------------------------------------------------------
 # Editor & IDE Quick Launchers
@@ -252,9 +252,9 @@ if [[ -f /usr/share/fzf/completion.zsh ]]; then
 	source /usr/share/fzf/completion.zsh
 fi
 
-# FZF Theme (Synced with Noctalia)
-if [[ -f "$HOME/.config/fzf/themes/noctalia.sh" ]]; then
-	source "$HOME/.config/fzf/themes/noctalia.sh"
+# FZF Theme (Synced with Material 3)
+if [[ -f "$HOME/.config/fzf/themes/matugen.sh" ]]; then
+	source "$HOME/.config/fzf/themes/matugen.sh"
 fi
 
 # Mise (Multi-Runtime Manager)
@@ -262,7 +262,7 @@ if command -v mise >/dev/null 2>&1; then
 	eval "$(mise activate zsh)"
 fi
 
-# FZF-Tab options (Noctalia styled with eza preview)
+# FZF-Tab options (eza preview)
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:*' switch-group ',' '.'

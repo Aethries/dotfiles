@@ -61,7 +61,7 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
-      -- Load friendly-snippets (WebStorm/VSCode snippet catalog)
+      -- Load friendly-snippets (VSCode snippet catalog)
       require("luasnip.loaders.from_vscode").lazy_load()
 
       return {
@@ -236,7 +236,7 @@ return {
         },
       })
 
-      -- TypeScript / JavaScript Inlay Hints (WebStorm parity)
+      -- TypeScript / JavaScript Inlay Hints
       vim.lsp.config("ts_ls", {
         settings = {
           typescript = {

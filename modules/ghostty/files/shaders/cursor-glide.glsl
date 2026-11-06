@@ -96,7 +96,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float alpha = coverage * opacity * focusFade;
 
     // Ghostty's terminal texture uses premultiplied alpha. Preserve its
-    // transparency outside the caret and use the runtime Noctalia color.
+    // transparency outside the caret and use the runtime terminal caret color.
     vec3 color = toLinear(iCurrentCursorColor.rgb);
     fragColor = vec4(color * alpha + terminal.rgb * (1.0 - alpha),
         alpha + terminal.a * (1.0 - alpha));

@@ -3,4 +3,4 @@
 --paging=auto
 --map-syntax "*.kdl:C++"
 --map-syntax "*.rasi:CSS"
---theme=noctalia
+--theme="base16"

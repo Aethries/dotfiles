@@ -30,7 +30,21 @@ install_pacman_packages() {
 		return
 	fi
 
-	sudo pacman -Syu --needed --noconfirm "${packages[@]}"
+	# Only install packages whose dependencies/provides are not already satisfied
+	local missing_packages=()
+	for pkg in "${packages[@]}"; do
+		if ! pacman -T "$pkg" >/dev/null 2>&1; then
+			missing_packages+=("$pkg")
+		fi
+	done
+
+	if [[ "${#missing_packages[@]}" -eq 0 ]]; then
+		success "All pacman packages are already satisfied"
+		return
+	fi
+
+	log "Installing ${#missing_packages[@]} missing pacman package(s)..."
+	sudo pacman -Syu --needed --noconfirm "${missing_packages[@]}"
 	success "Pacman packages installed"
 }
 
@@ -48,10 +62,19 @@ install_aur_packages() {
 		return
 	fi
 
-	# Filter out already installed packages to install any missing ones first
+	# Filter out already installed packages (or satisfied provides / bin variants / custom prefixes)
 	local missing_packages=()
 	for pkg in "${packages[@]}"; do
-		if ! pacman -Q "$pkg" >/dev/null 2>&1; then
+		local alt_bin="${pkg%-bin}"
+		local alt_src="${pkg}-bin"
+		# Skip if bibata cursor is already installed (including local illogical-impulse variants)
+		if [[ "$pkg" == "bibata-cursor-theme" ]] && (pacman -Q 2>/dev/null | grep -qi "bibata" || [[ -d "/usr/share/icons/Bibata-Modern-Classic" ]]); then
+			continue
+		fi
+		if ! pacman -T "$pkg" >/dev/null 2>&1 && \
+		   ! pacman -Q "$pkg" >/dev/null 2>&1 && \
+		   ! pacman -Q "$alt_bin" >/dev/null 2>&1 && \
+		   ! pacman -Q "$alt_src" >/dev/null 2>&1; then
 			missing_packages+=("$pkg")
 		fi
 	done

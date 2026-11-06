@@ -1,5 +1,5 @@
 # ==============================================================================
-# Herdr Configuration (Noctalia Ecosystem Sync)
+# Herdr Configuration (Material 3 Ecosystem Sync)
 # ==============================================================================
 
 onboarding = false
@@ -24,7 +24,7 @@ status_indicators = "symbols"
 enabled = true
 
 # ------------------------------------------------------------------------------
-# Theme (Synced with Noctalia Palette & Transparent Ghostty Glass)
+# Theme (Synced with Terminal Palette & Transparent Ghostty Glass)
 # ------------------------------------------------------------------------------
 [theme]
 name = "terminal"

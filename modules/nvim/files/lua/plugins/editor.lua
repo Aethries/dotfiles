@@ -51,7 +51,7 @@ return {
         ["Add Cursor Up"] = "<leader>mk",
         ["Add Cursor Down"] = "<leader>mj",
       }
-      -- Styling matching Noctalia Material You palette
+      -- Styling matching Material You palette
       vim.g.VM_theme = "purplegray"
       vim.g.VM_set_statusline = 0
     end,
@@ -204,7 +204,7 @@ return {
     },
   },
 
-  -- Auto-Save: Automatic buffer saving on focus loss / idle (VSCode/WebStorm parity)
+  -- Auto-Save: Automatic buffer saving on focus loss / idle (VSCode parity)
   {
     "okuuva/auto-save.nvim",
     cmd = "ASToggle",

@@ -45,7 +45,7 @@ git-delta
 fastfetch
 ghostty
 procs
-yq
+go-yq
 fx
 atuin
 visidata
@@ -89,8 +89,48 @@ docker-compose
 docker-buildx
 opencode
 
+# Wayland & Hyprland Core
+hyprland
+hypridle
+hyprlock
+hyprsunset
+hyprpicker
+xdg-desktop-portal-hyprland
+qt6-wayland
+qt6-declarative
+qt6-svg
+brightnessctl
+libnotify
+
+# Material 3 Desktop Shell
+quickshell
+matugen
+hyprshot
+cliphist
+wl-clip-persist
+cava
+ddcutil
+translate-shell
+pavucontrol
+
+# Python runtime for Quickshell/material color generation
+python-pillow
+python-numpy
+python-opencv
+python-gobject
+python-cairo
+python-psutil
+python-loguru
+python-click
+python-tqdm
+python-requests
+python-google-auth
+python-cryptography
+python-dbus
+python-pywayland
+python-setproctitle
+
 # Desktop
-noctalia
 gpu-screen-recorder
 intel-media-driver
 libva-utils
@@ -108,7 +148,6 @@ gnome-keyring
 libsecret
 wl-clipboard
 wtype
-libnotify
 xwayland-satellite
 pipewire
 pipewire-audio
@@ -123,7 +162,6 @@ fcitx5-qt
 fcitx5-configtool
 grim
 slurp
-hyprpicker
 tesseract
 tesseract-data-eng
 tesseract-data-vie

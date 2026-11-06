@@ -70,7 +70,7 @@ return {
     },
   },
 
-  -- Yazi: Embedded visual file manager in floating popup with Noctalia theme
+  -- Yazi: Embedded visual file manager in floating popup with Matugen theme
   {
     "mikavilpas/yazi.nvim",
     cmd = { "Yazi" },

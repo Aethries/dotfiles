@@ -1,4 +1,4 @@
-# Sunshine trên Arch / Umbriel
+# Sunshine trên Arch / Hyprland
 
 ## Thiết lập máy mới qua SSH
 
@@ -10,9 +10,9 @@ bash remote.sh
 ```
 
 Script cần mật khẩu sudo tại terminal. Nó thiết lập Tailscale, autologin
-greetd vào Umbriel, quyền thiết bị và Sunshine. Nếu Umbriel chưa chạy,
+greetd vào Hyprland, quyền thiết bị và Sunshine. Nếu Hyprland chưa chạy,
 script xóa `/run/greetd.run` rồi restart greetd để chạy lại initial_session.
-Phiên Umbriel đang hoạt động được giữ lại; Sunshine được restart để áp dụng
+Phiên Hyprland đang hoạt động được giữ lại; Sunshine được restart để áp dụng
 cấu hình, nên kết nối Moonlight hiện tại sẽ ngắt.
 
 Cần có màn hình/output đang hoạt động và driver encoder phù hợp với GPU.
@@ -28,28 +28,27 @@ Ghép đôi Moonlight với IP từ `tailscale ip -4`, nhập PIN ở Web UI Sun
 Kiểm tra từ SSH:
 
 ```bash
-systemctl --user status umbriel.service sunshine.service --no-pager
+systemctl --user status sunshine.service --no-pager
 journalctl --user -u app-dev.lizardbyte.app.Sunshine.service -n 80 --no-pager
 ```
 
-Nếu Umbriel không hoạt động và greetd đã có initial_session autologin:
+Nếu Hyprland không hoạt động và greetd đã có initial_session autologin:
 
 ```bash
 sudo rm -f /run/greetd.run
 sudo systemctl restart greetd.service
 ```
 
-Đợi `systemctl --user is-active umbriel.service` trả về `active`, rồi:
+Đợi graphical session sẵn sàng, rồi:
 
 ```bash
 systemctl --user reset-failed sunshine.service
 systemctl --user restart sunshine.service
 ```
 
-Nếu Umbriel chưa lên, đọc `journalctl --user -u umbriel.service` và
-`sudo journalctl -u greetd.service`; không tiếp tục restart Sunshine.
+Nếu Hyprland chưa lên, đọc `sudo journalctl -b -u greetd.service`; không tiếp tục restart Sunshine.
 Không lấy tên socket Wayland bằng `ls`: socket cũ có thể tồn tại khi
-compositor đã chết. `start-umbriel` chạy qua greetd cung cấp phiên logind
+compositor đã chết. Hyprland chạy qua greetd cung cấp phiên logind
 và nạp môi trường Wayland cho systemd user.
 
 `active (running)` chỉ xác nhận tiến trình Sunshine còn chạy. Log phải
@@ -58,7 +57,7 @@ mở được Desktop để xác nhận stream.
 
 ## Cấu hình được quản lý
 
-- `capture = wlr`: capture trực tiếp qua wlr screencopy của Umbriel.
+- `capture = wlr`: capture trực tiếp qua wlr screencopy của Hyprland.
 - `system_tray = disabled`: không cần khay Qt; không đặt Qt toàn cục thành offscreen.
 - Không cố định encoder, IP Tailscale, độ phân giải hoặc FPS của máy cũ.
 - Không đặt `audio_sink = auto`: bỏ trống để dùng thiết bị âm thanh mặc định.
@@ -71,10 +70,10 @@ Tham khảo: [cấu hình Sunshine](https://docs.lizardbyte.dev/projects/sunshin
 
 `modules/sunshine/setup.sh` nhận tài khoản/môi trường user hiện tại, liên kết
 cấu hình, thiết lập quyền thiết bị và enable service. Nó chỉ restart Sunshine
-khi managed Umbriel và graphical-session.target đang active cùng socket Wayland.
+khi managed graphical session và graphical-session.target đang active cùng socket Wayland.
 Lỗi systemd hoặc thao tác sudo đã thực hiện trả về nonzero; thiếu sudo được
 báo kèm lệnh thủ công. `remote.sh` thiết lập các thành phần còn lại và đợi
-Umbriel trả lời IPC tối đa 30 giây; nó không khởi chạy compositor trực tiếp từ SSH.
+Hyprland trả lời IPC tối đa 30 giây; nó không khởi chạy compositor trực tiếp từ SSH.
 
 Autologin do remote.sh bật phù hợp với workstation truy cập từ xa. Để quay
 lại cấu hình greetd trước đó, phục hồi `/etc/greetd/config.toml.pre-autologin.bak`

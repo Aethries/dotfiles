@@ -141,11 +141,11 @@ if [[ -f "$DOTFILES/modules/antigravity/files/mcp_config.json" ]]; then
 	fi
 fi
 
-if [[ -f "$DOTFILES/modules/noctalia/files/settings.toml" ]]; then
-	if python3 -c "import tomllib; tomllib.loads(open('$DOTFILES/modules/noctalia/files/settings.toml', 'rb').read().decode('utf-8'))" 2>/dev/null; then
-		report_pass "Noctalia base settings.toml parses valid TOML"
+if [[ -f "$DOTFILES/modules/matugen/files/config.toml" ]]; then
+	if python3 -c "import tomllib; tomllib.loads(open('$DOTFILES/modules/matugen/files/config.toml', 'rb').read().decode('utf-8'))" 2>/dev/null; then
+		report_pass "Matugen base config.toml parses valid TOML"
 	else
-		report_fail "Noctalia base settings.toml has invalid TOML syntax"
+		report_fail "Matugen base config.toml has invalid TOML syntax"
 	fi
 fi
 

@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Neovim Modern Configuration (Lazy.nvim + Mason LSP + Noctalia Theme Sync)
+-- Neovim Modern Configuration (Lazy.nvim + Mason LSP + Matugen Theme Sync)
 -- ==============================================================================
 
 -- 1. Core Options & Leader Key
@@ -14,12 +14,12 @@ pcall(require, "config.cheatsheet")
 -- 4. Plugin Manager (Lazy.nvim)
 require("config.lazy")
 
--- 5. Noctalia Matugen Dynamic Theme Integration
+-- 5. Matugen Material 3 Dynamic Theme Integration
 pcall(function()
     require("matugen").setup()
 end)
 
--- 6. Neovide GUI Integration (VSCode / WebStorm Modern IDE Aesthetics)
+-- 6. Neovide GUI Integration (Modern IDE Aesthetics)
 if vim.g.neovide then
     pcall(require, "config.neovide")
 end

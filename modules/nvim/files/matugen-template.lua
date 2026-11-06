@@ -1,4 +1,4 @@
--- Style policy lives in this repository; Noctalia replaces only color tokens.
+-- Style policy lives in this repository; matugen replaces only color tokens.
 -- Edit this template, not the generated lua/matugen.lua.
 local M = {}
 
@@ -124,7 +124,7 @@ function M.setup()
   hi('DiffDelete',              { fg = '{{colors.error.default.hex}}',                  bg = '{{colors.surface_container.default.hex}}' })
   hi('DiffText',                { fg = '{{colors.secondary.default.hex}}',              bg = '{{colors.surface_container_high.default.hex}}', bold = true })
 
-  -- Source Control uses the Noctalia surfaces and semantic diff colors.
+  -- Source Control uses the Material surfaces and semantic diff colors.
   hi('DiffviewNormal',           { link = 'NvimTreeNormal' })
   hi('DiffviewWinSeparator',     { link = 'NvimTreeWinSeparator' })
   hi('DiffviewFilePanelTitle',   { link = 'NvimTreeRootFolder' })
@@ -188,7 +188,7 @@ function M.setup()
   hi('MiniPickPromptCaret',     { fg = '{{colors.primary.default.hex}}',                bg = '{{colors.surface_container_high.default.hex}}' })
   hi('MiniPickMatchRanges',     { fg = '{{colors.primary.default.hex}}',                bold = true })
 
-  -- Rebuild generated icon colors after all Noctalia highlights are applied.
+  -- Rebuild generated icon colors after all Material highlights are applied.
   if package.loaded['bufferline'] then
     local highlights = require('bufferline.highlights')
     highlights.set_all(require('bufferline.config').update_highlights())

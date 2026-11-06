@@ -2,7 +2,7 @@ gui:
   scrollHeight: 2
   theme:
     activeBorderColor:
-      - "#b8bb26" # Noctalia primary
+      - "#b8bb26" # Material primary
       - bold
     inactiveBorderColor:
       - "#665c54"

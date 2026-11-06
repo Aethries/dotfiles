@@ -1,1 +1,3 @@
-# Gitleaks rule ignore list
+# Upstream/public API keys from third-party projects
+# OpenWeatherMap demo key from end4-pC upstream project
+modules/quickshell/files/end4-pC/services/Weather.qml:generic-api-key:96

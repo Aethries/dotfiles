@@ -1,16 +1,32 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Coffee - Sleep Inhibitor Bridge (Noctalia Native Caffeine + Fallback)
+# Coffee - Sleep Inhibitor Bridge (end4-pC Idle + systemd-inhibit fallback)
 # ==============================================================================
 
 set -euo pipefail
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/coffee"
 PID_FILE="$STATE_DIR/coffee.pid"
+QS_CONFIG="${QS_CONFIG:-end4-pC}"
+QS_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/states.json"
 mkdir -p "$STATE_DIR"
 
-has_noctalia() {
-	command -v noctalia >/dev/null 2>&1 && pgrep -x noctalia >/dev/null 2>&1
+has_quickshell() {
+	command -v qs >/dev/null 2>&1 && pgrep -x quickshell >/dev/null 2>&1
+}
+
+end4_idle() {
+	local action="$1"
+	qs -c "$QS_CONFIG" ipc call idle "$action" >/dev/null 2>&1
+}
+
+quickshell_inhibited() {
+	[[ -f "$QS_STATE" ]] || return 1
+	if command -v jq >/dev/null 2>&1; then
+		[[ "$(jq -r '.idle.inhibit // false' "$QS_STATE" 2>/dev/null)" == "true" ]]
+	else
+		grep -q '"inhibit": true' "$QS_STATE" 2>/dev/null
+	fi
 }
 
 notify() {
@@ -23,14 +39,18 @@ notify() {
 }
 
 is_active() {
-	# Check systemd inhibitors for Noctalia Caffeine or coffee process
+	# Prefer the end4-pC idle inhibitor state.
+	if has_quickshell && quickshell_inhibited; then
+		return 0
+	fi
+
+	# Fallback: our own systemd-inhibit process.
 	if command -v systemd-inhibit >/dev/null 2>&1; then
-		if systemd-inhibit --list 2>/dev/null | grep -qiE "caffeine|coffee"; then
+		if systemd-inhibit --list 2>/dev/null | grep -qi "coffee"; then
 			return 0
 		fi
 	fi
 
-	# Fallback check PID file
 	if [[ -f "$PID_FILE" ]]; then
 		local pid
 		pid="$(cat "$PID_FILE" 2>/dev/null || true)"
@@ -49,33 +69,31 @@ start_coffee() {
 		return 0
 	fi
 
-	if has_noctalia; then
-		noctalia msg caffeine-enable >/dev/null 2>&1 || true
-		notify "Coffee Activated" "Noctalia native Caffeine enabled (Wayland idle inhibited)."
-	else
-		systemd-inhibit \
-			--what=idle:sleep:shutdown \
-			--who="coffee" \
-			--why="Workstation keep-awake" \
-			--mode=block \
-			sleep infinity >/dev/null 2>&1 &
-
-		local pid=$!
-		echo "$pid" > "$PID_FILE"
-		notify "Coffee Activated" "systemd-inhibit active (PID: $pid)."
-	fi
-}
-
-stop_coffee() {
-	if ! is_active; then
-		echo "Coffee is already INACTIVE."
-		rm -f "$PID_FILE"
+	if has_quickshell && end4_idle inhibit; then
+		notify "Coffee Activated" "end4-pC idle inhibitor enabled (Wayland idle inhibited)."
 		return 0
 	fi
 
-	if has_noctalia; then
-		noctalia msg caffeine-disable >/dev/null 2>&1 || true
-		notify "Coffee Deactivated" "Noctalia native Caffeine disabled (Normal sleep restored)."
+	systemd-inhibit \
+		--what=idle:sleep:shutdown \
+		--who="coffee" \
+		--why="Workstation keep-awake" \
+		--mode=block \
+		sleep infinity >/dev/null 2>&1 &
+
+	local pid=$!
+	echo "$pid" > "$PID_FILE"
+	notify "Coffee Activated" "systemd-inhibit active (PID: $pid)."
+}
+
+stop_coffee() {
+	local was_active=false
+	if is_active; then
+		was_active=true
+	fi
+
+	if has_quickshell; then
+		end4_idle uninhibit || true
 	fi
 
 	if [[ -f "$PID_FILE" ]]; then
@@ -85,32 +103,40 @@ stop_coffee() {
 			kill "$pid" 2>/dev/null || true
 		fi
 		rm -f "$PID_FILE"
-		notify "Coffee Deactivated" "systemd-inhibit stopped."
+	fi
+
+	if [[ "$was_active" == "true" ]]; then
+		notify "Coffee Deactivated" "Sleep inhibition disabled (normal sleep restored)."
+	else
+		echo "Coffee is already INACTIVE."
 	fi
 }
 
 toggle_coffee() {
-	if has_noctalia; then
-		noctalia msg caffeine-toggle >/dev/null 2>&1 || true
-		if is_active; then
-			notify "Coffee" "Caffeine ON"
+	if has_quickshell && end4_idle toggle; then
+		if quickshell_inhibited; then
+			notify "Coffee" "Idle inhibition ON"
 		else
-			notify "Coffee" "Caffeine OFF"
+			notify "Coffee" "Idle inhibition OFF"
 		fi
+		return 0
+	fi
+
+	if is_active; then
+		stop_coffee
 	else
-		if is_active; then
-			stop_coffee
-		else
-			start_coffee
-		fi
+		start_coffee
 	fi
 }
 
 status_coffee() {
 	if is_active; then
 		echo "Status: ACTIVE"
+		if has_quickshell && quickshell_inhibited; then
+			echo "Source: end4-pC idle inhibitor"
+		fi
 		if command -v systemd-inhibit >/dev/null 2>&1; then
-			systemd-inhibit --list | grep -E "Caffeine|coffee" || true
+			systemd-inhibit --list | grep -i "coffee" || true
 		fi
 	else
 		echo "Status: INACTIVE (Normal power profile)"
@@ -122,10 +148,9 @@ timed_coffee() {
 	echo "Brewing coffee for $duration..."
 	notify "Coffee Started" "Inhibiting sleep for $duration..."
 
-	if has_noctalia; then
-		noctalia msg caffeine-enable >/dev/null 2>&1 || true
+	if has_quickshell && end4_idle inhibit; then
 		sleep "$duration"
-		noctalia msg caffeine-disable >/dev/null 2>&1 || true
+		end4_idle uninhibit || true
 	else
 		systemd-inhibit \
 			--what=idle:sleep:shutdown \

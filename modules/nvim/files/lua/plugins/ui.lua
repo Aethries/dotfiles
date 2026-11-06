@@ -1,4 +1,4 @@
-local function noctalia_lualine_theme()
+local function matugen_lualine_theme()
   local function color(group, attribute)
     local highlight = vim.api.nvim_get_hl(0, { name = group, link = false })
     local value = highlight[attribute]
@@ -44,7 +44,7 @@ local function noctalia_lualine_theme()
 end
 
 return {
-  -- Base16 theme engine (required for Noctalia Matugen dynamic palette)
+  -- Base16 theme engine (required for Matugen dynamic palette)
   {
     "RRethy/base16-nvim",
     lazy = false,
@@ -177,7 +177,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = noctalia_lualine_theme,
+        theme = matugen_lualine_theme,
         globalstatus = true,
         component_separators = { left = "·", right = "·" },
         section_separators = { left = "", right = "" },

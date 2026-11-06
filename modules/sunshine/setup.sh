@@ -45,7 +45,7 @@ for device_group in input video render; do
 	fi
 done
 
-# Umbriel uses wlr screencopy, which does not need KMS capabilities.
+# Hyprland uses wlr screencopy, which does not need KMS capabilities.
 # Remove the file capabilities granted by the previous setup script.
 if command_exists sunshine && command_exists getcap; then
 	sunshine_bin="$(command -v sunshine)"
@@ -71,16 +71,16 @@ if command_exists systemctl; then
 		systemctl --user reset-failed "$sunshine_service"
 		success "$sunshine_service enabled for graphical sessions"
 		# SSH environment variables cannot create a graphical session. Use the
-		# environment published by the managed Umbriel session instead.
+		# environment published by the managed graphical session instead.
 		wayland_display="$(systemctl --user show-environment | sed -n 's/^WAYLAND_DISPLAY=//p')"
 		runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-		if systemctl --user is-active --quiet umbriel.service &&
+		if (pgrep -x Hyprland >/dev/null 2>&1 || systemctl --user is-active --quiet hyprland.service) &&
 			systemctl --user is-active --quiet graphical-session.target &&
 			[[ -n "$wayland_display" && -S "$runtime_dir/$wayland_display" ]]; then
 			systemctl --user restart "$sunshine_service"
 			success "$sunshine_service restarted; verify capture/encoder in its journal and connect with Moonlight"
 		else
-			warn "No active Umbriel Wayland session; Sunshine will start with the graphical session"
+			warn "No active Hyprland Wayland session; Sunshine will start with the graphical session"
 			warn "For SSH provisioning/recovery, run ./remote.sh"
 		fi
 	else

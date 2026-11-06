@@ -48,3 +48,5 @@ result-*
 *.local.*
 .autologin
 .autologin.*
+
+.openidea/

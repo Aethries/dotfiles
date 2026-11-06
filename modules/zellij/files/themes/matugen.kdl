@@ -1,0 +1,18 @@
+// Baseline Material 3 palette. Matugen overwrites this file whenever the
+// wallpaper changes; it exists so Zellij has a valid theme before the first
+// color generation run.
+themes {
+  matugen {
+    fg "#e6e0e9"
+    bg "#141218"
+    black "#141218"
+    red "#f2b8b5"
+    green "#b5ccb8"
+    yellow "#e8c48f"
+    blue "#d0bcff"
+    magenta "#efb8c8"
+    cyan "#cbc4bc"
+    white "#e6e0e9"
+    orange "#ffb4ab"
+  }
+}

@@ -20,7 +20,7 @@ link_file \
 	"$MODULE_DIR/files/neovide.toml" \
 	"$HOME/.config/neovide/config.toml"
 
-# Noctalia setup registers our template from ~/.config/nvim directly.
+# Matugen template available at ~/.config/nvim/matugen-template.lua.
 # Community cache paths are intentionally not part of the installation contract.
 
 if ! command_exists neovide; then

@@ -4,7 +4,7 @@ Generated: 2026-10-06
 
 ## Stack
 - Language: Bash for workstation installation and module setup.
-- Runtime: Arch Linux, pacman/yay, systemd, greetd, Umbriel/Wayland.
+- Runtime: Arch Linux, pacman/yay, systemd, greetd, Hyprland/Wayland.
 - Build: no application build for the shell provisioning scripts.
 - Checks: bash -n and git diff --check.
 - Lint/format: shellcheck and shfmt when installed; no root CI workflow found.

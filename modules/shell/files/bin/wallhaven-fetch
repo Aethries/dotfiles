@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Wallhaven Wallpaper Fetcher & Noctalia Integrator
+# Wallhaven Wallpaper Fetcher & Quickshell / Material 3 Integrator
 # ==============================================================================
 
 set -euo pipefail
@@ -26,7 +26,7 @@ Options:
   -r, --random           Fetch a random wallpaper (Default)
   -t, --top              Fetch from Wallhaven Toplist
   -s, --search <query>   Search wallpapers matching <query>
-  --set                  Immediately set downloaded wallpaper via Noctalia
+  --set                  Immediately set downloaded wallpaper and regenerate colors
   -d, --dir <path>       Specify custom download directory (Default: ~/Pictures/Wallpapers)
   -h, --help             Show this help message
 
@@ -106,10 +106,14 @@ curl -s -f -o "$DEST_PATH" "$IMG_URL"
 echo "Saved wallpaper to: $DEST_PATH"
 
 if [[ "$APPLY" == true ]]; then
-	if command -v noctalia >/dev/null 2>&1; then
-		echo "Applying wallpaper via Noctalia..."
-		noctalia msg wallpaper-set "$DEST_PATH" 2>/dev/null || echo "Note: Noctalia compositor socket not connected; wallpaper saved to disk."
+	SWITCHWALL="$HOME/.config/quickshell/end4-pC/scripts/colors/switchwall.sh"
+	if [[ -x "$SWITCHWALL" ]]; then
+		echo "Applying wallpaper and Material 3 theme via switchwall.sh..."
+		"$SWITCHWALL" --image "$DEST_PATH"
+	elif command -v swww >/dev/null 2>&1; then
+		echo "Applying wallpaper via swww..."
+		swww img "$DEST_PATH"
 	else
-		echo "Noctalia not available. Wallpaper saved to $DEST_PATH."
+		echo "Wallpaper saved to $DEST_PATH."
 	fi
 fi

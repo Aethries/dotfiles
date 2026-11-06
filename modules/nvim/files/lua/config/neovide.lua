@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Neovide GUI Integration: Modern Noctalia Glassmorphic Aesthetics & Ergonomics
+-- Neovide GUI Integration: Modern Material 3 Glassmorphic Aesthetics & Ergonomics
 -- ==============================================================================
 
 local M = {}
@@ -43,7 +43,7 @@ vim.g.neovide_light_angle_degrees = 45
 vim.g.neovide_light_radius = 6
 vim.g.neovide_floating_corner_radius = 0.25
 
--- Preserve the Noctalia background when the existing Space tt action is used.
+-- Preserve the Material background when the existing Space tt action is used.
 vim.api.nvim_create_user_command("TransparentToggle", function()
   vim.g.neovide_normal_opacity = vim.g.neovide_normal_opacity == 1.0 and editor_opacity or 1.0
 end, { desc = "Toggle Neovide background opacity", force = true })
@@ -56,7 +56,7 @@ vim.g.neovide_confirm_quit = true
 vim.g.neovide_refresh_rate = 144
 vim.g.neovide_remember_window_size = true
 
--- 7. Rounded Floating Windows & Borders (Modern Noctalia Look)
+-- 7. Rounded Floating Windows & Borders (Modern Material 3 Look)
 vim.diagnostic.config({
   float = {
     border = "rounded",
@@ -102,7 +102,7 @@ map("v", "<C-c>", '"+y', { desc = "Copy to system clipboard" })
 map("i", "<C-v>", "<C-r>+", { desc = "Paste from system clipboard" })
 map("c", "<C-v>", "<C-r>+", { desc = "Paste from system clipboard" })
 
--- Toggle Sidebar Explorer (Ctrl+B like VSCode/WebStorm)
+-- Toggle Sidebar Explorer (Ctrl+B like VSCode)
 map({ "n", "i" }, "<C-b>", "<cmd>NvimTreeToggle<cr>", { desc = "Bật/Tắt Sidebar Explorer (VSCode Ctrl+B)" })
 
 -- Quick Open File (Ctrl+P like VSCode)

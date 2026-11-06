@@ -81,7 +81,7 @@ configure_sunshine() {
 # 4. Coffee Keep-Awake / Sleep Inhibitor Setup
 # ------------------------------------------------------------------------------
 configure_coffee() {
-	log "Configuring Coffee Sleep Inhibitor (Noctalia Native Caffeine)"
+	log "Configuring Coffee Sleep Inhibitor (end4-pC idle inhibition)"
 
 	mkdir -p "$HOME/.local/bin"
 
@@ -92,7 +92,7 @@ configure_coffee() {
 
 	# Enable caffeine keep-awake
 	"$HOME/.local/bin/coffee" on
-	success "Coffee keep-awake configured (reusing Noctalia native caffeine)"
+	success "Coffee keep-awake configured (using the end4-pC idle inhibitor)"
 }
 
 
@@ -101,7 +101,7 @@ configure_coffee() {
 # ------------------------------------------------------------------------------
 configure_autologin() {
 	log "Configuring Greetd Autologin (No Password on Boot)"
-	command_exists start-umbriel || error "Install the Umbriel desktop with ./install.sh before running remote.sh"
+	command_exists Hyprland || error "Install the Hyprland desktop with ./install.sh before running remote.sh"
 
 	local greetd_conf="/etc/greetd/config.toml"
 	if [[ -f "$greetd_conf" && ! -f "$greetd_conf.pre-autologin.bak" ]]; then
@@ -113,38 +113,33 @@ configure_autologin() {
 vt = 1
 
 [initial_session]
-command = "start-umbriel"
+command = "Hyprland"
 user = "$USER"
 
 [default_session]
-command = "/usr/bin/noctalia-greeter-session -- --session Umbriel"
-user = "greeter"
+command = "Hyprland"
+user = "$USER"
 EOF
 
 	touch "$DOTFILES/.autologin"
-	success "Greetd autologin configured for user '$USER' -> start-umbriel"
+	success "Greetd autologin configured for user '$USER' -> Hyprland"
 }
 
 # An SSH login has no DRM seat. Let greetd establish the native login session.
 graphical_session_ready() {
-	local umbriel_socket
-	systemctl --user is-active --quiet umbriel.service || return 1
+	pgrep -x Hyprland >/dev/null 2>&1 || return 1
 	systemctl --user is-active --quiet graphical-session.target || return 1
-	umbriel_socket="$(systemctl --user show-environment | sed -n 's/^UMBRIEL_SOCKET=//p')"
-	[[ -n "$umbriel_socket" && -S "$umbriel_socket" ]] || return 1
-	env UMBRIEL_SOCKET="$umbriel_socket" umbriel outputs >/dev/null 2>&1
+	hyprctl version >/dev/null 2>&1
 }
 
 ensure_graphical_session() {
 	if ! graphical_session_ready; then
-		if ! systemctl --user is-active --quiet umbriel.service; then
-			log "Starting a native Umbriel session through greetd"
-			# greetd only runs initial_session once per boot. A previous compositor
-			# exit leaves this marker behind, even if greetd itself is restarted.
-			sudo rm -f /run/greetd.run
-			sudo systemctl enable greetd.service
-			sudo systemctl restart greetd.service
-		fi
+		log "Starting a native Hyprland session through greetd"
+		# greetd only runs initial_session once per boot. A previous compositor
+		# exit leaves this marker behind, even if greetd itself is restarted.
+		sudo rm -f /run/greetd.run
+		sudo systemctl enable greetd.service
+		sudo systemctl restart greetd.service
 		local attempt
 		for attempt in {1..30}; do
 			if graphical_session_ready; then
@@ -153,11 +148,11 @@ ensure_graphical_session() {
 			sleep 1
 		done
 		if ! graphical_session_ready; then
-			journalctl --user -u umbriel.service -n 30 --no-pager
-			error "Umbriel did not become ready. Check sudo journalctl -u greetd.service; Sunshine cannot stream without a display"
+			sudo journalctl -b -u greetd.service -n 30 --no-pager
+			error "Hyprland did not become ready. Check sudo journalctl -b -u greetd.service; Sunshine cannot stream without a display"
 		fi
 	fi
-	success "Native Umbriel session responds to IPC"
+	success "Native Hyprland session responds to hyprctl"
 }
 
 # ------------------------------------------------------------------------------
@@ -193,7 +188,7 @@ print_summary() {
 	echo "  Sunshine Web UI:   https://localhost:47990 (or https://$ts_ip:47990)"
 	echo "  Keep-Awake:        $("$DOTFILES/modules/shell/files/bin/coffee" status | tr '\n' ' ')"
 	echo "  Sunshine Process:  $(systemctl --user is-active sunshine.service 2>/dev/null || true)"
-	echo "  Umbriel Session:   $(systemctl --user is-active umbriel.service 2>/dev/null || true)"
+	echo "  Hyprland Session:  $(graphical_session_ready && echo active || echo inactive)"
 	echo "  Autologin:         Configured (User: $USER)"
 	echo "======================================================================"
 	echo ""
@@ -213,7 +208,7 @@ print_summary() {
 	echo "   - Nếu lỗi 503: journalctl --user -u app-dev.lizardbyte.app.Sunshine.service -n 80 --no-pager"
 	echo ""
 	echo "4. Quản lý Keep-Awake (Chống ngủ):"
-	echo "   - Phím tắt:     Mod+Shift+I (bật/tắt nhanh qua Noctalia OSD)"
+	echo "   - Phím tắt:     Mod+Shift+I (bật/tắt nhanh qua Material 3 OSD)"
 	echo "   - coffee status : Xem trạng thái chống ngủ"
 	echo "   - coffee on/off : Bật / tắt chống ngủ"
 	echo "======================================================================"

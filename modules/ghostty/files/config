@@ -1,6 +1,6 @@
 # ==============================================================================
 # Ghostty Terminal Configuration
-# Wayland & Umbriel Compositor + Noctalia Ecosystem
+# Wayland + Hyprland with Material 3 (matugen) theming
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -89,11 +89,11 @@ keybind = super+shift+w=unbind
 keybind = super+shift+enter=unbind
 
 # ------------------------------------------------------------------------------
-# Palette & Colors (Noctalia Dynamic Theme)
+# Palette & Colors (Material 3 / matugen dynamic theme)
 # ------------------------------------------------------------------------------
-theme = noctalia
-# Cursor color comes from the Noctalia theme. Keep glyphs readable when a TUI
-# requests a block cursor, even though its native background is transparent.
+theme = matugen
+# Keep glyphs readable when a TUI requests a block cursor, even though its
+# native background is transparent.
 cursor-text = cell-foreground
 
 # ------------------------------------------------------------------------------

@@ -19,13 +19,6 @@ link_file \
 	"$MODULE_DIR/files/chrome-flags.conf" \
 	"$HOME/.config/chromium-flags.conf"
 
-# Link Noctalia theme for Chromium / Google Chrome
-theme_dir="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia/ungoogled-chromium/theme"
-if [[ -d "$theme_dir" ]]; then
-	mkdir -p "$HOME/.config/google-chrome"
-	ln -sfn "$theme_dir" "$HOME/.config/google-chrome/noctalia-theme"
-fi
-
 # Link vault CLI
 mkdir -p "$HOME/.local/bin"
 link_file \

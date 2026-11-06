@@ -5,13 +5,9 @@ slack-desktop
 larksuite-bin
 postman-bin
 beekeeper-studio-bin
-webstorm
-webstorm-jre
 
 # System & Compositor
-umbriel-git
-xdg-desktop-portal-umbriel-git
-noctalia-greeter
+bibata-cursor-theme
 fcitx5-lotus-bin
 
 # AI

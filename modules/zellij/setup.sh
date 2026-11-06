@@ -26,9 +26,17 @@ link_dir \
 	"$MODULE_DIR/files/scripts" \
 	"$HOME/.config/zellij/scripts"
 
-link_dir \
-	"$MODULE_DIR/files/themes" \
-	"$HOME/.config/zellij/themes"
+# Matugen writes the generated palette here, so keep this a real directory and
+# seed the baseline once instead of symlinking the repository.
+ZELLIJ_THEMES="$HOME/.config/zellij/themes"
+if [[ -L "$ZELLIJ_THEMES" ]]; then
+	rm -f "$ZELLIJ_THEMES"
+fi
+mkdir -p "$ZELLIJ_THEMES"
+if [[ ! -e "$ZELLIJ_THEMES/matugen.kdl" ]]; then
+	cp "$MODULE_DIR/files/themes/matugen.kdl" "$ZELLIJ_THEMES/matugen.kdl"
+	echo " $ZELLIJ_THEMES/matugen.kdl (seeded)"
+fi
 
 link_dir \
 	"$MODULE_DIR/files/plugins" \

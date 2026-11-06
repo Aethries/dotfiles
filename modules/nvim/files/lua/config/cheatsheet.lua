@@ -181,7 +181,7 @@ M.items = {
   { key = "<leader>ql", cat = "Session", en = "Restore last session", vi = "Khôi phục phiên làm việc gần nhất" },
   { key = "<M-e>", cat = "AutoPair", en = "Fast wrap expression in brackets/quotes", vi = "Bọc nhanh biểu thức vào ngoặc/nháy kép" },
 
-  -- Neovide / GUI (VSCode & WebStorm Shortcuts)
+  -- Neovide / GUI (VSCode & GUI Shortcuts)
   { key = "Ctrl+S", cat = "GUI", en = "Save file (VSCode style)", vi = "Lưu file nhanh (kiểu VSCode)", action = "w" },
   { key = "Ctrl+P", cat = "GUI", en = "Quick open file (VSCode style)", vi = "Mở file nhanh (kiểu VSCode)", action = "Telescope find_files" },
   { key = "Ctrl+B", cat = "GUI", en = "Toggle sidebar explorer (VSCode style)", vi = "Bật/Tắt sidebar file explorer (kiểu VSCode)", action = "NvimTreeToggle" },
